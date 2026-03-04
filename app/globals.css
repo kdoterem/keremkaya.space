@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-lime: #aaff00;
+  --color-ink: #0a0a0a;
+  --font-sans: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: #aaff00;
+  color: #0a0a0a;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  overscroll-behavior: none;        /* prevent pull-to-refresh / overscroll bounce */
+  -webkit-text-size-adjust: 100%;   /* prevent iOS auto font-size bump on rotate */
+  touch-action: manipulation;       /* faster tap response, no double-tap zoom */
+}
+
+/* Prevent any system dark mode from interfering */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html,
+  body {
+    background-color: #aaff00;
+    color: #0a0a0a;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Selection color */
+::selection {
+  background: #0a0a0a;
+  color: #aaff00;
+}
+
+/* Prev/next post navigation titles */
+.post-nav-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #0a0a0a;
+  letter-spacing: -0.01em;
+  transition: opacity 0.15s;
+}
+a:hover .post-nav-title {
+  opacity: 0.5;
+}
+
+/* Tag links on the reader page */
+.tag-link {
+  color: rgba(10,10,10,0.45);
+  transition: color 0.15s;
+}
+.tag-link:hover {
+  color: #0a0a0a;
+}
+
+/* Prose content (post reading view) */
+.prose-content p {
+  margin-bottom: 1.4em;
+}
+.prose-content p:last-child {
+  margin-bottom: 0;
 }
