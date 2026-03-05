@@ -23,14 +23,18 @@ export default function WritingPage() {
   const [firing,         setFiring]         = useState(false);
 
   const [scrolled, setScrolled] = useState(false);
-  const rafRef  = useRef<number | null>(null);
-  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const rafRef    = useRef<number | null>(null);
+  const firingRef = useRef(false);
+  const rowRefs   = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     fetch("/api/posts").then(r => r.json()).then(setPosts);
   }, []);
 
-  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+  useEffect(() => () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    firingRef.current = false;
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 200);
@@ -39,7 +43,8 @@ export default function WritingPage() {
   }, []);
 
   const handleTakeMe = useCallback(() => {
-    if (firing || posts.length === 0) return;
+    if (firingRef.current || posts.length === 0) return;
+    firingRef.current = true;
     setFiring(true);
     setHighlightedSlug(null);
 
@@ -63,6 +68,7 @@ export default function WritingPage() {
         rafRef.current = requestAnimationFrame(run);
       } else {
         setBtnLabel(LABEL);
+        firingRef.current = false;
         setFiring(false);
 
         // Highlight the chosen post and scroll it into view
@@ -77,7 +83,7 @@ export default function WritingPage() {
     };
 
     rafRef.current = requestAnimationFrame(run);
-  }, [firing, posts]);
+  }, [posts]);
 
   return (
     <main
