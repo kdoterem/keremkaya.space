@@ -141,7 +141,7 @@ export default function WritingPage() {
               }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 + i * 0.04 }}
+              transition={{ duration: 0.4, delay: 0.15 + Math.min(i * 0.04, 1.2) }}
             >
               <Link
                 href={`/writing/${post.slug}`}
@@ -207,12 +207,12 @@ export default function WritingPage() {
         }}
       />
 
-      {/* Take me somewhere — fixed bottom centre */}
+      {/* Take me somewhere — fixed bottom centre, only shown once posts are loaded */}
       <motion.button
         onClick={handleTakeMe}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.35 }}
+        animate={{ opacity: posts.length > 0 ? 1 : 0, pointerEvents: posts.length > 0 ? "auto" : "none" }}
+        transition={{ duration: 0.3 }}
         whileHover={firing ? {} : { backgroundColor: "#0a0a0a", color: "#aaff00", opacity: 1, transition: { duration: 0.15 } }}
         style={{
           position:        "fixed",

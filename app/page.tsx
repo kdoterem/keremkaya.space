@@ -299,6 +299,7 @@ export default function Home() {
   const [posts,       setPosts]       = useState<PostMeta[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [matching,    setMatching]    = useState<PostMeta[]>([]);
+  const [viewH,       setViewH]       = useState("100vh");
 
   const positions = useRef<Map<string, PosEntry>>(new Map());
 
@@ -342,6 +343,7 @@ export default function Home() {
 
   useEffect(() => {
     const onResize = () => {
+      setViewH(`${window.innerHeight}px`);
       setLayout(prev => {
         if (!prev.length) return prev;
         const vw = window.innerWidth, vh = window.innerHeight;
@@ -351,6 +353,7 @@ export default function Home() {
         return newLayout;
       });
     };
+    setViewH(`${window.innerHeight}px`);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -370,7 +373,7 @@ export default function Home() {
       onClick={clearTag}
       style={{
         width:             "100vw",
-        height:            "100vh",
+        height:            viewH,
         position:          "relative",
         overflow:          "hidden",
         userSelect:        "none",
