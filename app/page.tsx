@@ -41,24 +41,29 @@ function buildLayout(tags: string[], vw: number, vh: number): TagLayout[] {
   const n = tags.length;
   if (n === 0) return [];
 
-  const shuffled = [...tags].sort(() => Math.random() - 0.5);
+  const isMobile = vw < 500;
+  const isTablet = vw < 900;
+  const maxTags  = isMobile ? 45 : isTablet ? 70 : n;
+
+  const shuffled = [...tags].sort(() => Math.random() - 0.5).slice(0, maxTags);
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
 
   shuffled.forEach((tag, i) => {
-    // Slightly smaller than before: max 22px instead of 28px
-    const fontSize  = Math.max(9, Math.min(22, 10 + Math.random() * 12));
+    const fontSize  = isMobile
+      ? Math.max(8, Math.min(16, 8  + Math.random() * 8))
+      : Math.max(9, Math.min(22, 10 + Math.random() * 12));
     const hw        = (fontSize * tag.length * 0.52) / 2;
     const hh        = fontSize * 0.65;
     const marginX   = Math.max(hw + 20, vw * 0.05);
     const marginY   = Math.max(hh + 20, vh * 0.08);
+    const gap       = isMobile ? 8 : 12;
 
     let px = vw / 2, py = vh / 2;
-    for (let attempt = 0; attempt < 120; attempt++) {
-      const x   = marginX + Math.random() * (vw - marginX * 2);
-      const y   = marginY + Math.random() * (vh - marginY * 2);
-      const gap = 12;
-      const ok  = placed.every(
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const x  = marginX + Math.random() * (vw - marginX * 2);
+      const y  = marginY + Math.random() * (vh - marginY * 2);
+      const ok = placed.every(
         p => Math.abs(x - p.x) > hw + p.hw + gap ||
              Math.abs(y - p.y) > hh + p.hh + gap
       );
@@ -75,8 +80,8 @@ function buildLayout(tags: string[], vw: number, vh: number): TagLayout[] {
       hh,
       fontSize,
       fontWeight: Math.random() > 0.45 ? 700 : 400,
-      driftX:     (Math.random() - 0.5) * 16,
-      driftY:     (Math.random() - 0.5) * 10,
+      driftX:     (Math.random() - 0.5) * (isMobile ? 8 : 16),
+      driftY:     (Math.random() - 0.5) * (isMobile ? 5 : 10),
       duration:   4 + Math.random() * 6,
       driftDelay: -Math.random() * 9,
       entryDelay: i * 0.018,
