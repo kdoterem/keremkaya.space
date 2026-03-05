@@ -133,15 +133,12 @@ export default function WritingPage() {
           const isActive      = isHighlighted || isHovered;
 
           return (
-            <motion.div
+            <div
               key={post.slug}
               ref={(el) => {
                 if (el) rowRefs.current.set(post.slug, el);
                 else    rowRefs.current.delete(post.slug);
               }}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 + Math.min(i * 0.04, 1.2) }}
             >
               <Link
                 href={`/writing/${post.slug}`}
@@ -188,7 +185,7 @@ export default function WritingPage() {
                   </span>
                 </motion.div>
               </Link>
-            </motion.div>
+            </div>
           );
         })}
       </div>

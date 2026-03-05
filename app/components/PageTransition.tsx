@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 // then pulls away upward (revealing content from top to bottom).
 // Preceded by a lime green flash on route change.
 
-const DURATION = 0.5; // seconds
+const DURATION = 0.25; // seconds
 const EASE: [number, number, number, number] = [0.76, 0, 0.24, 1]; // cubic-bezier, no bounce
 
 export default function PageTransition({
