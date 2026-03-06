@@ -3,7 +3,8 @@ import "./globals.css";
 import PageTransition from "./components/PageTransition";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://believablebelief.com"),
+  metadataBase: new URL("https://keremkaya.space"),
+  icons: { icon: "/icon.png" },
   title: "Believable Belief",
   description: "Writer. Painter. Believer.",
   openGraph: {
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     siteName:    "Believable Belief",
     title:       "Believable Belief",
     description: "Writer. Painter. Believer.",
-    url:         "https://believablebelief.com",
+    url:         "https://keremkaya.space",
   },
   twitter: {
     card:        "summary",

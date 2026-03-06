@@ -18,7 +18,7 @@ export async function generateMetadata({
 
   const title       = post.title;
   const description = post.excerpt || "An essay on Believable Belief.";
-  const url         = `https://believablebelief.com/writing/${slug}`;
+  const url         = `https://keremkaya.space/writing/${slug}`;
 
   return {
     title,
