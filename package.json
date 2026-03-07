@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node node_modules/next/dist/bin/next dev -p 3001",
-    "build": "node node_modules/next/dist/bin/next build",
+    "build": "node node_modules/next/dist/bin/next build --no-turbopack",
     "start": "node node_modules/next/dist/bin/next start -p 3001",
     "lint": "eslint"
   },
