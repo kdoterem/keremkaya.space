@@ -26,6 +26,7 @@ export function getAllPosts(): PostMeta[] {
     const filePath = path.join(POSTS_DIR, filename);
     const raw = fs.readFileSync(filePath, "utf-8");
     const { data } = matter(raw);
+    const mtime = fs.statSync(filePath).mtimeMs;
 
     const rawDate = data.date;
     const date = rawDate instanceof Date
@@ -38,14 +39,18 @@ export function getAllPosts(): PostMeta[] {
       date,
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? "",
+      mtime,
     };
   });
 
-  return posts.sort((a, b) => {
-    if (!a.date) return 1;
-    if (!b.date) return -1;
-    return b.date < a.date ? -1 : b.date > a.date ? 1 : 0;
-  });
+  return posts
+    .sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      if (b.date !== a.date) return b.date < a.date ? -1 : 1;
+      return b.mtime - a.mtime;
+    })
+    .map(({ mtime: _, ...rest }) => rest);
 }
 
 export function getPostBySlug(slug: string): Post | null {
