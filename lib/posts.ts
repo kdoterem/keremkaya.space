@@ -29,9 +29,9 @@ export function getAllPosts(): PostMeta[] {
     const mtime = fs.statSync(filePath).mtimeMs;
 
     const rawDate = data.date;
-    const date = rawDate instanceof Date
-      ? rawDate.toISOString().slice(0, 10)
-      : rawDate ? String(rawDate).slice(0, 10) : "";
+    const rawStr  = rawDate instanceof Date ? rawDate.toISOString() : rawDate ? String(rawDate) : "";
+    const date    = rawStr.slice(0, 10);
+    const sortKey = rawStr;
 
     return {
       slug,
@@ -39,18 +39,17 @@ export function getAllPosts(): PostMeta[] {
       date,
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? "",
-      mtime,
+      sortKey,
     };
   });
 
   return posts
     .sort((a, b) => {
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      if (b.date !== a.date) return b.date < a.date ? -1 : 1;
-      return b.mtime - a.mtime;
+      if (!a.sortKey) return 1;
+      if (!b.sortKey) return -1;
+      return b.sortKey < a.sortKey ? -1 : b.sortKey > a.sortKey ? 1 : 0;
     })
-    .map(({ mtime: _, ...rest }) => rest);
+    .map(({ sortKey: _, ...rest }) => rest);
 }
 
 export function getPostBySlug(slug: string): Post | null {

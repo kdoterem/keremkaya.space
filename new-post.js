@@ -104,7 +104,8 @@ function slugify(str) {
 }
 
 function today() {
-  return new Date().toISOString().split("T")[0];
+  const now = new Date();
+  return now.toISOString().slice(0, 19); // YYYY-MM-DDTHH:MM:SS
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
