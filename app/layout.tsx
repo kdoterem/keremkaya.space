@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.png" },
   title: "Believable Belief",
   description: "Writer. Painter. Believer.",
+  verification: { google: "oFMz00CsAaCtLXxxanSguZXLBqOidMbxJVjPdN10CTI" },
   openGraph: {
     type:        "website",
     siteName:    "Believable Belief",
