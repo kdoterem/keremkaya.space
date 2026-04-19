@@ -146,13 +146,30 @@ export default function SaveImageButton({ title, content, date }: Props) {
       const dateWidth = ctx.measureText(date).width;
       ctx.fillText(date, W - padX - dateWidth, footerY);
 
-      // ── Download ─────────────────────────────────────────────────
-      canvas.toBlob((blob) => {
+      // ── Share or Download ─────────────────────────────────────────
+      const filename = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`;
+
+      canvas.toBlob(async (blob) => {
         if (!blob) { setGenerating(false); return; }
+
+        const file = new File([blob], filename, { type: 'image/png' });
+
+        // On mobile (iOS Safari, Android Chrome): open native share sheet
+        if (navigator.canShare?.({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title });
+            setGenerating(false);
+            return;
+          } catch {
+            // User cancelled or share failed — fall through to download
+          }
+        }
+
+        // Desktop fallback: download
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -196,7 +213,7 @@ export default function SaveImageButton({ title, content, date }: Props) {
         el.style.borderColor = 'rgba(10,10,10,0.22)';
       }}
     >
-      {generating ? 'generating…' : '↓ save as image'}
+      {generating ? 'generating…' : '↑ share / save image'}
     </button>
   );
 }
