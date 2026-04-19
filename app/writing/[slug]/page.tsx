@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
 import BookBar from "@/app/components/BookBar";
+import { getBookForPoem, getPrevNextInBook } from "@/lib/books";
 
 export const dynamic = "force-dynamic";
 
@@ -50,11 +51,24 @@ export default async function PostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  // Prev / next (list is newest-first, so idx+1 = older = "previous", idx-1 = newer = "next")
-  const all   = getAllPosts();
-  const idx   = all.findIndex(p => p.slug === slug);
-  const prev  = idx < all.length - 1 ? all[idx + 1] : null; // older
-  const next  = idx > 0              ? all[idx - 1] : null; // newer
+  // Prev / next — book-aware if the poem belongs to a book
+  const bookResult = getBookForPoem(slug);
+  let prev: { slug: string; title: string } | null = null;
+  let next: { slug: string; title: string } | null = null;
+
+  if (bookResult) {
+    const { prev: prevSlug, next: nextSlug } = getPrevNextInBook(bookResult.book, slug);
+    if (prevSlug) { const p = getPostBySlug(prevSlug); if (p) prev = { slug: prevSlug, title: p.title }; }
+    if (nextSlug) { const n = getPostBySlug(nextSlug); if (n) next = { slug: nextSlug, title: n.title }; }
+  } else {
+    // Chronological fallback for poems not in any book
+    const all = getAllPosts();
+    const idx = all.findIndex(p => p.slug === slug);
+    const older = idx < all.length - 1 ? all[idx + 1] : null;
+    const newer = idx > 0              ? all[idx - 1] : null;
+    if (older) prev = { slug: older.slug, title: older.title };
+    if (newer) next = { slug: newer.slug, title: newer.title };
+  }
 
   return (
     <main
@@ -180,45 +194,17 @@ export default async function PostPage({
           >
             {/* Previous = older post */}
             {prev ? (
-              <Link
-                href={`/writing/${prev.slug}`}
-                style={{
-                  textDecoration: "none",
-                  flex:           1,
-                }}
-              >
-                <span style={{
-                  display:       "block",
-                  fontSize:      "0.6rem",
-                  letterSpacing: "0.14em",
-                  fontVariant:   "small-caps",
-                  color:         "rgba(10,10,10,0.38)",
-                  marginBottom:  "0.35rem",
-                }}>
+              <Link href={`/writing/${prev.slug}`} style={{ textDecoration: "none", flex: 1 }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
                   ← previous
                 </span>
                 <span className="post-nav-title">{prev.title}</span>
               </Link>
             ) : <div style={{ flex: 1 }} />}
 
-            {/* Next = newer post */}
             {next ? (
-              <Link
-                href={`/writing/${next.slug}`}
-                style={{
-                  textDecoration: "none",
-                  flex:           1,
-                  textAlign:      "right",
-                }}
-              >
-                <span style={{
-                  display:       "block",
-                  fontSize:      "0.6rem",
-                  letterSpacing: "0.14em",
-                  fontVariant:   "small-caps",
-                  color:         "rgba(10,10,10,0.38)",
-                  marginBottom:  "0.35rem",
-                }}>
+              <Link href={`/writing/${next.slug}`} style={{ textDecoration: "none", flex: 1, textAlign: "right" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
                   next →
                 </span>
                 <span className="post-nav-title">{next.title}</span>
