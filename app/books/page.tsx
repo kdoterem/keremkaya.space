@@ -28,18 +28,22 @@ export default function BooksPage() {
     >
       {/* Header */}
       <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-        <p
+        <Link
+          href="/"
           style={{
-            fontSize: "0.65rem",
+            fontSize: "0.7rem",
             fontWeight: 500,
             letterSpacing: "0.15em",
             fontVariant: "small-caps",
-            opacity: 0.45,
+            color: "#0a0a0a",
+            textDecoration: "none",
+            opacity: 0.5,
+            display: "block",
             marginBottom: "3.5rem",
           }}
         >
-          BOOKS
-        </p>
+          ← HOME
+        </Link>
 
         {/* Grid */}
         <div
