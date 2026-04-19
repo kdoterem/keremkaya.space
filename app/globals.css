@@ -63,6 +63,12 @@ a:hover .post-nav-title {
   color: #0a0a0a;
 }
 
+/* Books */
+.book-card { transition: opacity 0.15s; }
+.book-card:hover { opacity: 0.85; }
+.book-poem-row { transition: opacity 0.12s; }
+.book-poem-row:hover { opacity: 0.5; }
+
 /* Prose content (post reading view) */
 .prose-content p {
   margin-bottom: 1.4em;

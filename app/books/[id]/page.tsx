@@ -126,6 +126,7 @@ export default async function BookPage({
                 style={{ textDecoration: "none", display: "block" }}
               >
                 <div
+                  className="book-poem-row"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "2.5rem 1fr auto",
@@ -133,13 +134,6 @@ export default async function BookPage({
                     gap: "0 1.25rem",
                     padding: "1rem 0",
                     borderBottom: "1px solid rgba(10,10,10,0.07)",
-                    transition: "opacity 0.12s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.opacity = "0.5";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.opacity = "1";
                   }}
                 >
                   {/* Number */}

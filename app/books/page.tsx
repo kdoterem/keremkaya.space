@@ -56,6 +56,7 @@ export default function BooksPage() {
               style={{ textDecoration: "none" }}
             >
               <div
+                className="book-card"
                 style={{
                   backgroundColor: "#0a0a0a",
                   padding: "2.5rem 2rem",
@@ -64,15 +65,8 @@ export default function BooksPage() {
                   flexDirection: "column",
                   justifyContent: "space-between",
                   cursor: "pointer",
-                  transition: "opacity 0.15s",
                   position: "relative",
                   overflow: "hidden",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.opacity = "0.85";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.opacity = "1";
                 }}
               >
                 {/* Top: status */}
