@@ -77,36 +77,70 @@ export default function SaveImageButton({ title, content, date }: Props) {
       const titleLineH   = 98;
       const titleBlockH  = titleWrapped.length * titleLineH;
 
-      // ── 2. Content — first stanza only, centered ─────────────────
+      // ── 2. Content — full poem, dynamic font size ────────────────
       const plain = stripMarkdown(content);
-      // Take first stanza (lines up to the first blank line)
-      const allParagraphs = plain.split('\n');
-      const firstStanza: string[] = [];
-      for (const para of allParagraphs) {
-        if (!para.trim() && firstStanza.length > 0) break; // stop at blank line
-        if (para.trim()) firstStanza.push(para.trim());
+      const paragraphs = plain.split('\n');
+
+      // Build visual lines at a given font size
+      const buildContentLines = (size: number): Array<string | null> => {
+        // null = paragraph gap
+        ctx.font = `${size}px ${font}`;
+        const result: Array<string | null> = [];
+        for (const para of paragraphs) {
+          if (!para.trim()) {
+            if (result.length > 0) result.push(null);
+            continue;
+          }
+          result.push(...wrapLine(ctx, para.trim(), cw));
+        }
+        while (result.length && result[result.length - 1] === null) result.pop();
+        return result;
+      };
+
+      // Find largest font where content fits
+      const topReserveH  = 240;
+      const footerReserveH = 180;
+      const gapSize      = 80;
+      const availableH   = H - topReserveH - footerReserveH - titleBlockH - gapSize;
+
+      let contentFontSize = 46;
+      const minFontSize   = 28;
+      let contentLines: Array<string | null> = [];
+      let truncated = false;
+
+      while (contentFontSize >= minFontSize) {
+        const lineH = Math.round(contentFontSize * 1.8);
+        const gapH  = Math.round(lineH * 0.5);
+        contentLines = buildContentLines(contentFontSize);
+        const totalH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
+        if (totalH <= availableH) break;
+        contentFontSize -= 2;
       }
 
-      const contentFontSize = 46;
-      const contentLineH    = Math.round(contentFontSize * 1.8); // 82px
+      // If still too tall at min size, truncate
+      const lineH = Math.round(contentFontSize * 1.8);
+      const gapH  = Math.round(lineH * 0.5);
+      let usedH = 0;
+      const trimmed: Array<string | null> = [];
+      for (const l of contentLines) {
+        const inc = l === null ? gapH : lineH;
+        if (usedH + inc > availableH - lineH) { truncated = true; break; }
+        trimmed.push(l);
+        usedH += inc;
+      }
+      if (truncated) contentLines = trimmed;
+
       ctx.font = `${contentFontSize}px ${font}`;
-
-      // Wrap each line of the stanza
-      const contentLines: string[] = [];
-      for (const line of firstStanza) {
-        contentLines.push(...wrapLine(ctx, line, cw));
-      }
-      // Cap at 10 visual lines
-      const truncated    = contentLines.length > 10;
-      const visibleLines = truncated ? contentLines.slice(0, 10) : contentLines;
-      const contentBlockH = visibleLines.length * contentLineH + (truncated ? contentLineH : 0);
+      const visibleLines  = contentLines;
+      const contentBlockH = visibleLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0)
+        + (truncated ? lineH : 0);
 
       // ── 3. Layout: vertically center the whole poem block ────────
       const footerReserve = 180;
       const topReserve    = 240;
       const available     = H - topReserve - footerReserve;
+      const gap           = gapSize;
 
-      const gap        = 80; // between title and content
       const totalBlock = titleBlockH + gap + contentBlockH;
       const startY     = topReserve + Math.max(0, Math.round((available - totalBlock) / 2));
 
@@ -133,8 +167,9 @@ export default function SaveImageButton({ title, content, date }: Props) {
       // ── Draw content ─────────────────────────────────────────────
       ctx.font = `${contentFontSize}px ${font}`;
       for (const line of visibleLines) {
+        if (line === null) { y += gapH; continue; }
         drawCentered(ctx, line, y, W, '#0a0a0a');
-        y += contentLineH;
+        y += lineH;
       }
       if (truncated) {
         drawCentered(ctx, '…', y, W, 'rgba(10,10,10,0.3)');
