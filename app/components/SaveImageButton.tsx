@@ -11,8 +11,8 @@ interface Props {
 function stripMarkdown(md: string): string {
   return md
     .replace(/#{1,6}\s+/g, '')
-    .replace(/\*\*(.*?)\*\*/gs, '$1')
-    .replace(/\*(.*?)\*/gs, '$1')
+    .replace(/\*\*([\s\S]*?)\*\*/g, '$1')
+    .replace(/\*([\s\S]*?)\*/g, '$1')
     .replace(/`{1,3}[\s\S]*?`{1,3}/g, '')
     .replace(/\[(.*?)\]\(.*?\)/g, '$1')
     .replace(/^>\s*/gm, '')
