@@ -42,7 +42,7 @@ export default function BooksPage() {
             marginBottom: "3.5rem",
           }}
         >
-          ← HOME
+          RETURN
         </Link>
 
         {/* Grid */}
