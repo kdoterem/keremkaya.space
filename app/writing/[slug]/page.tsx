@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
+import BookBar from "@/app/components/BookBar";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,9 @@ export default async function PostPage({
         padding: "4rem 5vw 6rem",
       }}
     >
+      {/* Book bar */}
+      <BookBar slug={slug} />
+
       {/* Back to writing */}
       <Link
         href="/writing"
