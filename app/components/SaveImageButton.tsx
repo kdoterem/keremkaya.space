@@ -21,49 +21,30 @@ function stripMarkdown(md: string): string {
     .trim();
 }
 
-function wrapParagraph(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+// Wrap a single line of text to fit maxWidth, returns array of lines
+function wrapLine(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
-  let current = '';
+  let cur = '';
   for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
+    const test = cur ? `${cur} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && cur) {
+      lines.push(cur);
+      cur = word;
     } else {
-      current = test;
+      cur = test;
     }
   }
-  if (current) lines.push(current);
+  if (cur) lines.push(cur);
   return lines;
 }
 
-// Returns visual lines ('' = paragraph gap), capped at maxLines
-function buildLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number): { lines: string[]; truncated: boolean } {
-  const paragraphs = text.split('\n');
-  const lines: string[] = [];
-  let truncated = false;
-
-  for (const para of paragraphs) {
-    if (lines.length >= maxLines) { truncated = true; break; }
-
-    const trimmed = para.trim();
-    if (!trimmed) {
-      if (lines.length > 0) lines.push('');
-      continue;
-    }
-
-    const wrapped = wrapParagraph(ctx, trimmed, maxWidth);
-    for (const wl of wrapped) {
-      if (lines.length >= maxLines) { truncated = true; break; }
-      lines.push(wl);
-    }
-    if (truncated) break;
-  }
-
-  // trim trailing gaps
-  while (lines.length && lines[lines.length - 1] === '') lines.pop();
-  return { lines, truncated };
+// Draw centered text, returns new y
+function drawCentered(ctx: CanvasRenderingContext2D, text: string, y: number, W: number, color: string): number {
+  const measured = ctx.measureText(text).width;
+  ctx.fillStyle = color;
+  ctx.fillText(text, (W - measured) / 2, y);
+  return y;
 }
 
 export default function SaveImageButton({ title, content, date }: Props) {
@@ -82,90 +63,91 @@ export default function SaveImageButton({ title, content, date }: Props) {
       const ctx = canvas.getContext('2d')!;
       const font = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-      // ── Background ───────────────────────────────────────────────
+      // Background
       ctx.fillStyle = '#aaff00';
       ctx.fillRect(0, 0, W, H);
-
       ctx.textBaseline = 'top';
 
-      const padX   = 120;
-      const padTop = 220;
-      const padBot = 200;
-      const cw     = W - padX * 2;
+      const padX = 100;
+      const cw   = W - padX * 2;
 
-      // ── Title ────────────────────────────────────────────────────
-      ctx.font = `bold 70px ${font}`;
-      ctx.fillStyle = '#0a0a0a';
-      const titleLines = wrapParagraph(ctx, title, cw);
-      const titleLineH = 88;
-      let y = padTop;
-      for (const line of titleLines) {
-        ctx.fillText(line, padX, y);
+      // ── 1. Title — centered, bold, large ────────────────────────
+      ctx.font = `bold 80px ${font}`;
+      const titleWrapped = wrapLine(ctx, title, cw);
+      const titleLineH   = 98;
+      const titleBlockH  = titleWrapped.length * titleLineH;
+
+      // ── 2. Content — first stanza only, centered ─────────────────
+      const plain = stripMarkdown(content);
+      // Take first stanza (lines up to the first blank line)
+      const allParagraphs = plain.split('\n');
+      const firstStanza: string[] = [];
+      for (const para of allParagraphs) {
+        if (!para.trim() && firstStanza.length > 0) break; // stop at blank line
+        if (para.trim()) firstStanza.push(para.trim());
+      }
+
+      const contentFontSize = 46;
+      const contentLineH    = Math.round(contentFontSize * 1.8); // 82px
+      ctx.font = `${contentFontSize}px ${font}`;
+
+      // Wrap each line of the stanza
+      const contentLines: string[] = [];
+      for (const line of firstStanza) {
+        contentLines.push(...wrapLine(ctx, line, cw));
+      }
+      // Cap at 10 visual lines
+      const truncated    = contentLines.length > 10;
+      const visibleLines = truncated ? contentLines.slice(0, 10) : contentLines;
+      const contentBlockH = visibleLines.length * contentLineH + (truncated ? contentLineH : 0);
+
+      // ── 3. Layout: vertically center the whole poem block ────────
+      const footerReserve = 180;
+      const topReserve    = 240;
+      const available     = H - topReserve - footerReserve;
+
+      const gap        = 80; // between title and content
+      const totalBlock = titleBlockH + gap + contentBlockH;
+      const startY     = topReserve + Math.max(0, Math.round((available - totalBlock) / 2));
+
+      // ── Draw title ───────────────────────────────────────────────
+      ctx.font = `bold 80px ${font}`;
+      let y = startY;
+      for (const line of titleWrapped) {
+        drawCentered(ctx, line, y, W, '#0a0a0a');
         y += titleLineH;
       }
-      const titleBottom = y;
 
-      // ── Divider ──────────────────────────────────────────────────
-      const divY = titleBottom + 60;
-      ctx.strokeStyle = 'rgba(10,10,10,0.13)';
-      ctx.lineWidth = 1.5;
+      // ── Thin rule ────────────────────────────────────────────────
+      const ruleY = y + Math.round(gap / 2) - 1;
+      ctx.strokeStyle = 'rgba(10,10,10,0.12)';
+      ctx.lineWidth   = 1;
+      const ruleW     = Math.min(320, cw * 0.35);
       ctx.beginPath();
-      ctx.moveTo(padX, divY);
-      ctx.lineTo(W - padX, divY);
+      ctx.moveTo((W - ruleW) / 2, ruleY);
+      ctx.lineTo((W + ruleW) / 2, ruleY);
       ctx.stroke();
 
-      // ── Content zone boundaries ──────────────────────────────────
-      const zoneTop = divY + 80;
-      const footerH = 100;
-      const zoneBot = H - padBot - footerH;
-      const zoneH   = zoneBot - zoneTop;
-
-      // ── Build content lines (max 14) ─────────────────────────────
-      const plain      = stripMarkdown(content);
-      const fontSize   = 42;
-      const lineH      = Math.round(fontSize * 1.75); // ~73px
-      const gapH       = Math.round(lineH * 0.5);    // ~37px paragraph gap
-
-      ctx.font = `${fontSize}px ${font}`;
-      const { lines, truncated } = buildLines(ctx, plain, cw, 14);
-
-      // measure total block height
-      let blockH = 0;
-      for (const l of lines) blockH += l === '' ? gapH : lineH;
-      if (truncated) blockH += lineH; // for the "…" line
-
-      // vertically center block in zone
-      const startY = zoneTop + Math.max(0, Math.round((zoneH - blockH) / 2));
+      y += gap;
 
       // ── Draw content ─────────────────────────────────────────────
-      y = startY;
-      for (const line of lines) {
-        if (line === '') { y += gapH; continue; }
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillText(line, padX, y);
-        y += lineH;
+      ctx.font = `${contentFontSize}px ${font}`;
+      for (const line of visibleLines) {
+        drawCentered(ctx, line, y, W, '#0a0a0a');
+        y += contentLineH;
       }
       if (truncated) {
-        ctx.fillStyle = 'rgba(10,10,10,0.3)';
-        ctx.fillText('…', padX, y);
+        drawCentered(ctx, '…', y, W, 'rgba(10,10,10,0.3)');
       }
 
       // ── Footer ───────────────────────────────────────────────────
-      const fLineY = H - padBot - footerH + 8;
-      const fTextY = fLineY + 36;
+      ctx.font = `26px ${font}`;
+      const url       = 'keremkaya.space';
+      const urlW      = ctx.measureText(url).width;
+      const footerY   = H - 130;
 
-      ctx.strokeStyle = 'rgba(10,10,10,0.1)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(padX, fLineY);
-      ctx.lineTo(W - padX, fLineY);
-      ctx.stroke();
-
-      ctx.fillStyle = 'rgba(10,10,10,0.35)';
-      ctx.font = `27px ${font}`;
-      ctx.fillText('keremkaya.space', padX, fTextY);
-      const dw = ctx.measureText(date).width;
-      ctx.fillText(date, W - padX - dw, fTextY);
+      ctx.fillStyle = 'rgba(10,10,10,0.32)';
+      ctx.fillText(url, (W - urlW) / 2, footerY);
 
       // ── Share (mobile) or Download (desktop) ─────────────────────
       const filename = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`;
