@@ -4,6 +4,7 @@ import remarkBreaks from "remark-breaks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import SaveImageButton from "@/app/components/SaveImageButton";
 
 export const dynamic = "force-dynamic";
 
@@ -156,6 +157,9 @@ export default async function PostPage({
             options={{ mdxOptions: { remarkPlugins: [remarkBreaks] } }}
           />
         </div>
+
+        {/* Save as image */}
+        <SaveImageButton title={post.title} content={post.content} date={post.date} />
 
         {/* Prev / Next */}
         {(prev || next) && (
