@@ -28,7 +28,6 @@ interface TagLayout {
 
 const NAV = [
   { label: "WRITING", href: "/writing"  },
-  { label: "BOOKS",   href: "/books"    },
   { label: "ART",     href: "/art"      },
   { label: "Q&A",     href: "/answers"  },
   { label: "FIND ME", href: "/find-me"  },

@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "node node_modules/next/dist/bin/next dev -p 3001",
-    "prebuild": "node scripts/assign-new-poems.js",
     "build": "node node_modules/next/dist/bin/next build",
     "start": "node node_modules/next/dist/bin/next start -p 3001",
     "lint": "eslint"

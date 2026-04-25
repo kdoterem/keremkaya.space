@@ -5,8 +5,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
-import BookBar from "@/app/components/BookBar";
-import { getBookForPoem, getPrevNextInBook } from "@/lib/books";
 
 export const dynamic = "force-dynamic";
 
@@ -51,24 +49,11 @@ export default async function PostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  // Prev / next — book-aware if the poem belongs to a book
-  const bookResult = getBookForPoem(slug);
-  let prev: { slug: string; title: string } | null = null;
-  let next: { slug: string; title: string } | null = null;
-
-  if (bookResult) {
-    const { prev: prevSlug, next: nextSlug } = getPrevNextInBook(bookResult.book, slug);
-    if (prevSlug) { const p = getPostBySlug(prevSlug); if (p) prev = { slug: prevSlug, title: p.title }; }
-    if (nextSlug) { const n = getPostBySlug(nextSlug); if (n) next = { slug: nextSlug, title: n.title }; }
-  } else {
-    // Chronological fallback for poems not in any book
-    const all = getAllPosts();
-    const idx = all.findIndex(p => p.slug === slug);
-    const older = idx < all.length - 1 ? all[idx + 1] : null;
-    const newer = idx > 0              ? all[idx - 1] : null;
-    if (older) prev = { slug: older.slug, title: older.title };
-    if (newer) next = { slug: newer.slug, title: newer.title };
-  }
+  // Prev / next (newest-first, so idx+1 = older = "previous", idx-1 = newer = "next")
+  const all  = getAllPosts();
+  const idx  = all.findIndex(p => p.slug === slug);
+  const prev = idx < all.length - 1 ? all[idx + 1] : null;
+  const next = idx > 0              ? all[idx - 1] : null;
 
   return (
     <main
@@ -80,9 +65,6 @@ export default async function PostPage({
         padding: "4rem 5vw 6rem",
       }}
     >
-      {/* Book bar */}
-      <BookBar slug={slug} />
-
       {/* Back to writing */}
       <Link
         href="/writing"
@@ -210,6 +192,7 @@ export default async function PostPage({
                 <span className="post-nav-title">{next.title}</span>
               </Link>
             ) : <div style={{ flex: 1 }} />}
+
           </div>
         )}
       </div>
