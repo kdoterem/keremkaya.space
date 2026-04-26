@@ -95,6 +95,55 @@ function ContactLine({ text, type, delay }: { text: string; type: string; delay:
   );
 }
 
+function RssLine() {
+  const rssText  = useScrambleReveal("quiet follow — rss", 1100);
+  const hintText = useScrambleReveal("(paste in a feed reader)", 1500);
+  const [rssVisible,  setRssVisible]  = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setRssVisible(true),  1100);
+    const t2 = setTimeout(() => setHintVisible(true), 1500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <>
+      <a
+        href="/feed.xml"
+        style={{
+          fontSize:            "clamp(1.1rem, 3vw, 1.8rem)",
+          fontWeight:          500,
+          lineHeight:          1.4,
+          letterSpacing:       "0.02em",
+          fontFamily:          '"Helvetica Neue", Helvetica, Arial, sans-serif',
+          color:               "#0a0a0a",
+          display:             "block",
+          marginBottom:        "0.4rem",
+          textDecoration:      "underline",
+          textDecorationColor: "rgba(10,10,10,0.25)",
+          textUnderlineOffset: "3px",
+          opacity:             rssVisible ? 1 : 0,
+          transition:          "opacity 0.15s",
+        }}
+      >
+        {rssText || "\u00A0"}
+      </a>
+      <span style={{
+        fontSize:      "0.85rem",
+        fontWeight:    400,
+        color:         "#0a0a0a",
+        opacity:       hintVisible ? 0.45 : 0,
+        transition:    "opacity 0.15s",
+        display:       "block",
+        fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      }}>
+        {hintText || "\u00A0"}
+      </span>
+    </>
+  );
+}
+
 export default function FindMePage() {
   return (
     <main
@@ -132,34 +181,7 @@ export default function FindMePage() {
       </div>
 
       <div style={{ marginTop: "3.6rem", textAlign: "right" }}>
-        <a
-          href="/feed.xml"
-          style={{
-            fontSize:            "clamp(1.1rem, 3vw, 1.8rem)",
-            fontWeight:          500,
-            lineHeight:          1.4,
-            letterSpacing:       "0.02em",
-            fontFamily:          '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            color:               "#0a0a0a",
-            display:             "block",
-            marginBottom:        "0.4rem",
-            textDecoration:      "underline",
-            textDecorationColor: "rgba(10,10,10,0.25)",
-            textUnderlineOffset: "3px",
-          }}
-        >
-          quiet follow — rss
-        </a>
-        <span style={{
-          fontSize:      "0.85rem",
-          fontWeight:    400,
-          color:         "#0a0a0a",
-          opacity:       0.45,
-          display:       "block",
-          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-        }}>
-          (paste in a feed reader)
-        </span>
+        <RssLine />
       </div>
     </main>
   );
