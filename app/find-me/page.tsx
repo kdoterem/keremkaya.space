@@ -129,19 +129,35 @@ export default function FindMePage() {
         {LINES.map((line, i) => (
           <ContactLine key={i} text={line.text} type={line.type} delay={line.delay} />
         ))}
-        <p style={{
+        <a
+          href="/feed.xml"
+          style={{
+            fontSize:            "clamp(1.1rem, 3vw, 1.8rem)",
+            fontWeight:          500,
+            lineHeight:          1.4,
+            letterSpacing:       "0.02em",
+            fontFamily:          '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            color:               "#0a0a0a",
+            display:             "block",
+            marginBottom:        "0.4rem",
+            textDecoration:      "underline",
+            textDecorationColor: "rgba(10,10,10,0.25)",
+            textUnderlineOffset: "3px",
+          }}
+        >
+          quiet follow — rss
+        </a>
+        <span style={{
           fontSize:      "0.85rem",
           fontWeight:    400,
           color:         "#0a0a0a",
           opacity:       0.45,
-          marginTop:     "0.4rem",
+          display:       "block",
+          marginBottom:  "1.2rem",
           fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
         }}>
-          quiet follow —{" "}
-          <a href="/feed.xml" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-            rss
-          </a>
-        </p>
+          (paste in a feed reader)
+        </span>
       </div>
     </main>
   );
