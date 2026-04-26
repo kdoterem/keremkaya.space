@@ -7,19 +7,19 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.png" },
   alternates: { types: { "application/rss+xml": "/feed.xml" } },
   title: "Believable Belief",
-  description: "Writer. Painter. Believer.",
+  description: "rider. righter. re-writer.",
   verification: { google: "oFMz00CsAaCtLXxxanSguZXLBqOidMbxJVjPdN10CTI" },
   openGraph: {
     type:        "website",
     siteName:    "Believable Belief",
     title:       "Believable Belief",
-    description: "Writer. Painter. Believer.",
+    description: "rider. righter. re-writer.",
     url:         "https://keremkaya.space",
   },
   twitter: {
     card:        "summary",
     title:       "Believable Belief",
-    description: "Writer. Painter. Believer.",
+    description: "rider. righter. re-writer.",
   },
 };
 
