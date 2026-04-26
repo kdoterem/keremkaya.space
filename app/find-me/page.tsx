@@ -129,6 +129,9 @@ export default function FindMePage() {
         {LINES.map((line, i) => (
           <ContactLine key={i} text={line.text} type={line.type} delay={line.delay} />
         ))}
+      </div>
+
+      <div style={{ marginTop: "3.6rem", textAlign: "right" }}>
         <a
           href="/feed.xml"
           style={{
@@ -153,7 +156,6 @@ export default function FindMePage() {
           color:         "#0a0a0a",
           opacity:       0.45,
           display:       "block",
-          marginBottom:  "1.2rem",
           fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
         }}>
           (paste in a feed reader)
