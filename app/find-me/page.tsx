@@ -129,6 +129,19 @@ export default function FindMePage() {
         {LINES.map((line, i) => (
           <ContactLine key={i} text={line.text} type={line.type} delay={line.delay} />
         ))}
+        <p style={{
+          fontSize:      "0.85rem",
+          fontWeight:    400,
+          color:         "#0a0a0a",
+          opacity:       0.45,
+          marginTop:     "0.4rem",
+          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        }}>
+          quiet follow —{" "}
+          <a href="/feed.xml" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+            rss
+          </a>
+        </p>
       </div>
     </main>
   );
