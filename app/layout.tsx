@@ -5,6 +5,7 @@ import PageTransition from "./components/PageTransition";
 export const metadata: Metadata = {
   metadataBase: new URL("https://keremkaya.space"),
   icons: { icon: "/icon.png" },
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
   title: "Believable Belief",
   description: "Writer. Painter. Believer.",
   verification: { google: "oFMz00CsAaCtLXxxanSguZXLBqOidMbxJVjPdN10CTI" },
