@@ -10,9 +10,7 @@ const POSTS_DIR = path.join(__dirname, "content", "posts");
 function prompt(label, defaultVal) {
   const hint = defaultVal ? ` (default: ${defaultVal})` : "";
   process.stdout.write(`\n${label}${hint}\n> `);
-  const drain = 'while IFS= read -r -t 0.05 _l < /dev/tty 2>/dev/null; do :; done';
-  const read  = 'read -r val < /dev/tty; printf "%s" "$val"';
-  const r = spawnSync("/bin/sh", ["-c", `${drain}; ${read}`], {
+  const r = spawnSync("/bin/sh", ["-c", 'read -r val < /dev/tty; printf "%s" "$val"'], {
     stdio: ["inherit", "pipe", "inherit"],
   });
   const val = r.stdout ? r.stdout.toString().trim() : "";
@@ -42,7 +40,12 @@ function getExistingTags() {
   if (!fs.existsSync(POSTS_DIR)) return [];
   for (const f of fs.readdirSync(POSTS_DIR)) {
     if (!f.endsWith(".mdx") && !f.endsWith(".md")) continue;
-    const raw = fs.readFileSync(path.join(POSTS_DIR, f), "utf8");
+    // Only read first 512 bytes — tags are always in frontmatter
+    const fd = fs.openSync(path.join(POSTS_DIR, f), "r");
+    const buf = Buffer.alloc(512);
+    const bytesRead = fs.readSync(fd, buf, 0, 512, 0);
+    fs.closeSync(fd);
+    const raw = buf.toString("utf8", 0, bytesRead);
     const match = raw.match(/^tags:\s*\[([^\]]*)\]/m);
     if (!match) continue;
     const tags = match[1].match(/"([^"]+)"/g) || [];
