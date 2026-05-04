@@ -40,6 +40,7 @@ export function getAllPosts(): PostMeta[] {
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? "",
       sortKey,
+      mtime,
     };
   });
 
@@ -47,9 +48,11 @@ export function getAllPosts(): PostMeta[] {
     .sort((a, b) => {
       if (!a.sortKey) return 1;
       if (!b.sortKey) return -1;
-      return b.sortKey < a.sortKey ? -1 : b.sortKey > a.sortKey ? 1 : 0;
+      const cmp = b.sortKey < a.sortKey ? -1 : b.sortKey > a.sortKey ? 1 : 0;
+      if (cmp !== 0) return cmp;
+      return b.mtime - a.mtime;
     })
-    .map(({ sortKey: _, ...rest }) => rest);
+    .map(({ sortKey: _, mtime: __, ...rest }) => rest);
 }
 
 export function getPostBySlug(slug: string): Post | null {

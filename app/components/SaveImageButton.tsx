@@ -57,10 +57,12 @@ export default function SaveImageButton({ title, content, date }: Props) {
       const canvas = document.createElement('canvas');
       const W = 1080;
       const H = 1920;
-      canvas.width = W;
-      canvas.height = H;
+      const SCALE = 2;
+      canvas.width = W * SCALE;
+      canvas.height = H * SCALE;
 
       const ctx = canvas.getContext('2d')!;
+      ctx.scale(SCALE, SCALE);;
       const font = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
       // Background
