@@ -6,6 +6,48 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
 
+// Transforms <p>line1<br>line2</p> → <p><span style="display:block">line1</span>…</p>
+// Block elements copy as \n on all browsers; bare <br> does not on iOS Safari.
+function rehypeBlockLines() {
+  return (tree: any) => {
+    function walk(node: any) {
+      if (!node.children) return;
+      node.children = node.children.map((child: any) => {
+        if (child.type === 'element' && child.tagName === 'p') {
+          const hasBr = child.children?.some(
+            (c: any) => c.type === 'element' && c.tagName === 'br'
+          );
+          if (!hasBr) { walk(child); return child; }
+
+          const lines: any[][] = [[]];
+          for (const c of child.children) {
+            if (c.type === 'element' && c.tagName === 'br') {
+              lines.push([]);
+            } else {
+              lines[lines.length - 1].push(c);
+            }
+          }
+
+          return {
+            ...child,
+            children: lines
+              .filter(l => l.some((n: any) => n.type !== 'text' || n.value.trim()))
+              .map(lineChildren => ({
+                type: 'element',
+                tagName: 'span',
+                properties: { style: 'display:block' },
+                children: lineChildren,
+              })),
+          };
+        }
+        walk(child);
+        return child;
+      });
+    }
+    walk(tree);
+  };
+}
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -154,7 +196,7 @@ export default async function PostPage({
         >
           <MDXRemote
             source={post.content}
-            options={{ mdxOptions: { remarkPlugins: [remarkBreaks] } }}
+            options={{ mdxOptions: { remarkPlugins: [remarkBreaks], rehypePlugins: [rehypeBlockLines] } }}
           />
         </div>
 
