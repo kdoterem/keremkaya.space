@@ -31,7 +31,8 @@ function slugify(str) {
 }
 
 function today() {
-  return new Date().toISOString().split("T")[0];
+  // Full datetime so same-day posts sort by creation time (lib/posts.ts displays only the date portion)
+  return new Date().toISOString().replace(/\.\d{3}Z$/, "");
 }
 
 // Read all existing tags from post frontmatter, sorted by frequency
