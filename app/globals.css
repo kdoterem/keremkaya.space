@@ -70,3 +70,9 @@ a:hover .post-nav-title {
 .prose-content p:last-child {
   margin-bottom: 0;
 }
+.prose-content .poem-stanza {
+  margin-bottom: 1.4em;
+}
+.prose-content .poem-stanza:last-child {
+  margin-bottom: 0;
+}

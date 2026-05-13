@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
 
-// Transforms <p>line1<br>line2</p> → <p><span style="display:block">line1</span>…</p>
-// Block elements copy as \n on all browsers; bare <br> does not on iOS Safari.
+// Transforms <p>line1<br>line2</p> → <div class="poem-stanza"><div>line1</div>…</div>
+// Real block elements (div) copy as \n on every browser; <span style="display:block"> does not
+// on iOS Safari and some desktop browsers because they use tag name, not computed style.
 function rehypeBlockLines() {
   return (tree: any) => {
     function walk(node: any) {
@@ -30,12 +31,14 @@ function rehypeBlockLines() {
 
           return {
             ...child,
+            tagName: 'div',
+            properties: { className: ['poem-stanza'] },
             children: lines
               .filter(l => l.some((n: any) => n.type !== 'text' || n.value.trim()))
               .map(lineChildren => ({
                 type: 'element',
-                tagName: 'span',
-                properties: { style: 'display:block' },
+                tagName: 'div',
+                properties: {},
                 children: lineChildren,
               })),
           };
