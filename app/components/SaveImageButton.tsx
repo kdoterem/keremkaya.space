@@ -259,10 +259,13 @@ export default function SaveImageButton({ title, content }: Props) {
         );
 
         // Mobile: share sheet (supports multi-file → Instagram carousel)
+        // Only return on success — cancellation falls through to desktop download
         if (navigator.canShare?.({ files })) {
-          try { await navigator.share({ files, title }); } catch { /* cancelled */ }
-          setGenerating(false);
-          return;
+          try {
+            await navigator.share({ files, title });
+            setGenerating(false);
+            return;
+          } catch { /* cancelled — fall through to download */ }
         }
 
         // Desktop: sequential download
