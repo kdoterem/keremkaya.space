@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 
 interface PostMeta {
   slug:  string;
@@ -22,10 +22,22 @@ export default function WritingPage() {
   const [btnLabel,       setBtnLabel]       = useState(LABEL);
   const [firing,         setFiring]         = useState(false);
 
-  const [scrolled, setScrolled] = useState(false);
-  const rafRef    = useRef<number | null>(null);
-  const firingRef = useRef(false);
-  const rowRefs   = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [searchQuery,  setSearchQuery]  = useState("");
+  const [searchOpen,   setSearchOpen]   = useState(false);
+  const [scrolled,     setScrolled]     = useState(false);
+  const rafRef         = useRef<number | null>(null);
+  const firingRef      = useRef(false);
+  const rowRefs        = useRef<Map<string, HTMLDivElement>>(new Map());
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredPosts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return posts;
+    return posts.filter(p =>
+      p.title.toLowerCase().includes(q) ||
+      p.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }, [posts, searchQuery]);
 
   useEffect(() => {
     fetch("/api/posts").then(r => r.json()).then(setPosts);
@@ -42,13 +54,27 @@ export default function WritingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+    else setSearchQuery("");
+  }, [searchOpen]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const handleTakeMe = useCallback(() => {
-    if (firingRef.current || posts.length === 0) return;
+    const pool = filteredPosts.length > 0 ? filteredPosts : posts;
+    if (firingRef.current || pool.length === 0) return;
     firingRef.current = true;
     setFiring(true);
     setHighlightedSlug(null);
 
-    const target = posts[Math.floor(Math.random() * posts.length)];
+    const target = pool[Math.floor(Math.random() * pool.length)];
     let start: number | null = null;
 
     const run = (now: number) => {
@@ -83,7 +109,7 @@ export default function WritingPage() {
     };
 
     rafRef.current = requestAnimationFrame(run);
-  }, [posts]);
+  }, [posts, filteredPosts]);
 
   return (
     <main
@@ -93,21 +119,42 @@ export default function WritingPage() {
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
       }}
     >
-      {/* Back */}
-      <Link
-        href="/"
-        style={{
-          fontSize:       "0.7rem",
-          fontWeight:     500,
-          letterSpacing:  "0.15em",
-          fontVariant:    "small-caps",
-          color:          "#0a0a0a",
-          textDecoration: "none",
-          opacity:        0.5,
-        }}
-      >
-        RETURN
-      </Link>
+      {/* Back + Search toggle */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Link
+          href="/"
+          style={{
+            fontSize:       "0.7rem",
+            fontWeight:     500,
+            letterSpacing:  "0.15em",
+            fontVariant:    "small-caps",
+            color:          "#0a0a0a",
+            textDecoration: "none",
+            opacity:        0.5,
+          }}
+        >
+          RETURN
+        </Link>
+        <button
+          onClick={() => setSearchOpen(o => !o)}
+          style={{
+            background:    "none",
+            border:        "none",
+            cursor:        "pointer",
+            fontSize:      "0.7rem",
+            fontWeight:    500,
+            letterSpacing: "0.15em",
+            fontVariant:   "small-caps",
+            fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            color:         "#0a0a0a",
+            opacity:       searchOpen ? 1 : 0.5,
+            padding:       0,
+            transition:    "opacity 0.15s",
+          }}
+        >
+          {searchOpen ? "✕ close" : "⌕ search"}
+        </button>
+      </div>
 
       <motion.h2
         initial={{ opacity: 0, y: 8 }}
@@ -119,15 +166,49 @@ export default function WritingPage() {
           letterSpacing: "-0.02em",
           color:         "#0a0a0a",
           marginTop:     "2.5rem",
-          marginBottom:  "3rem",
+          marginBottom:  searchOpen ? "1.5rem" : "3rem",
         }}
       >
         WRITING
       </motion.h2>
 
+      {/* Search input */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: searchOpen ? 1 : 0, height: searchOpen ? "auto" : 0 }}
+        transition={{ duration: 0.2 }}
+        style={{ overflow: "hidden", marginBottom: searchOpen ? "2rem" : 0 }}
+      >
+        <input
+          ref={searchInputRef}
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="search titles and tags…"
+          style={{
+            width:         "100%",
+            background:    "none",
+            border:        "none",
+            borderBottom:  "1px solid rgba(10,10,10,0.2)",
+            outline:       "none",
+            fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
+            fontWeight:    400,
+            color:         "#0a0a0a",
+            padding:       "0.5rem 0",
+            letterSpacing: "-0.01em",
+          }}
+        />
+        {searchQuery && (
+          <p style={{ marginTop: "0.5rem", fontSize: "0.7rem", opacity: 0.4, letterSpacing: "0.05em" }}>
+            {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
+          </p>
+        )}
+      </motion.div>
+
       {/* Post list */}
       <div style={{ display: "flex", flexDirection: "column", paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}>
-        {posts.map((post, i) => {
+        {filteredPosts.map((post, i) => {
           const isHighlighted = highlightedSlug === post.slug;
           const isHovered     = hoveredSlug     === post.slug;
           const isActive      = isHighlighted || isHovered;
