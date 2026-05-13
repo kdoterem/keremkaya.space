@@ -8,6 +8,32 @@ interface Props {
   date: string;
 }
 
+// ── constants ────────────────────────────────────────────────────────────────
+const W     = 1080;
+const H     = 1920;
+const SCALE = 2;
+const PAD_X = 100;
+const CW    = W - PAD_X * 2;  // content width
+
+const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+
+const TOP_RESERVE    = 240;
+const FOOTER_RESERVE = 180;
+const GAP            = 80;   // gap between title block and content
+
+const TITLE_SIZE   = 80;
+const TITLE_LINE_H = 98;
+
+const CONT_TITLE_SIZE   = 36;   // continuation-page title
+const CONT_TITLE_LINE_H = 50;
+
+const MAX_FONT = 46;
+const MIN_FONT = 28;
+
+type Line = string | null;  // null = paragraph-gap sentinel
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
 function stripMarkdown(md: string): string {
   return md
     .replace(/#{1,6}\s+/g, '')
@@ -21,196 +47,237 @@ function stripMarkdown(md: string): string {
     .trim();
 }
 
-// Wrap a single line of text to fit maxWidth, returns array of lines
 function wrapLine(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const words = text.split(' ');
-  const lines: string[] = [];
+  const out: string[] = [];
   let cur = '';
   for (const word of words) {
     const test = cur ? `${cur} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && cur) {
-      lines.push(cur);
-      cur = word;
-    } else {
-      cur = test;
-    }
+    if (ctx.measureText(test).width > maxWidth && cur) { out.push(cur); cur = word; }
+    else cur = test;
   }
-  if (cur) lines.push(cur);
-  return lines;
+  if (cur) out.push(cur);
+  return out;
 }
 
-// Draw centered text, returns new y
-function drawCentered(ctx: CanvasRenderingContext2D, text: string, y: number, W: number, color: string): number {
-  const measured = ctx.measureText(text).width;
+function drawCentered(ctx: CanvasRenderingContext2D, text: string, y: number, color: string) {
+  const x = (W - ctx.measureText(text).width) / 2;
   ctx.fillStyle = color;
-  ctx.fillText(text, (W - measured) / 2, y);
-  return y;
+  ctx.fillText(text, x, y);
 }
 
-export default function SaveImageButton({ title, content, date }: Props) {
+function drawRule(ctx: CanvasRenderingContext2D, y: number) {
+  ctx.strokeStyle = 'rgba(10,10,10,0.12)';
+  ctx.lineWidth   = 1;
+  const rw = Math.min(320, CW * 0.35);
+  ctx.beginPath();
+  ctx.moveTo((W - rw) / 2, y);
+  ctx.lineTo((W + rw) / 2, y);
+  ctx.stroke();
+}
+
+// ── build pages ──────────────────────────────────────────────────────────────
+
+function buildPages(title: string, content: string) {
+  const mc  = document.createElement('canvas');
+  const ctx = mc.getContext('2d')!;
+
+  // Title block height
+  ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
+  const titleWrapped = wrapLine(ctx, title, CW);
+  const titleBlockH  = titleWrapped.length * TITLE_LINE_H;
+
+  // Available content height per page type
+  const availPage1 = H - TOP_RESERVE - FOOTER_RESERVE - titleBlockH        - GAP;
+  const availCont  = H - TOP_RESERVE - FOOTER_RESERVE - CONT_TITLE_LINE_H  - GAP;
+
+  // Parse content
+  const paragraphs = stripMarkdown(content).split('\n');
+
+  // Find largest font that fits everything on one page (or fall back to MIN_FONT)
+  let fontSize = MAX_FONT;
+  let allLines: Line[] = [];
+
+  while (fontSize >= MIN_FONT) {
+    ctx.font = `${fontSize}px ${FONT}`;
+    const lines: Line[] = [];
+    for (const para of paragraphs) {
+      if (!para.trim()) { if (lines.length) lines.push(null); continue; }
+      lines.push(...wrapLine(ctx, para.trim(), CW));
+    }
+    while (lines.length && lines[lines.length - 1] === null) lines.pop();
+    allLines = lines;
+
+    const lh = Math.round(fontSize * 1.8);
+    const gh = Math.round(lh * 0.5);
+    const total = lines.reduce((h, l) => h + (l === null ? gh : lh), 0);
+    if (total <= availPage1) break;
+    fontSize -= 2;
+  }
+
+  const lineH = Math.round(fontSize * 1.8);
+  const gapH  = Math.round(lineH * 0.5);
+
+  // Split all lines into pages
+  const pages: Line[][] = [];
+  let remaining = [...allLines];
+  while (remaining.length && remaining[0] === null) remaining.shift();
+
+  let firstPage = true;
+  while (remaining.length > 0) {
+    const capacity  = firstPage ? availPage1 : availCont;
+    const pageLines: Line[] = [];
+    let usedH = 0;
+
+    while (remaining.length > 0) {
+      const next = remaining[0];
+      const inc  = next === null ? gapH : lineH;
+      if (usedH + inc > capacity) {
+        if (pageLines.length === 0) pageLines.push(remaining.shift()!); // never stall
+        break;
+      }
+      pageLines.push(remaining.shift()!);
+      usedH += inc;
+    }
+
+    while (pageLines.length  && pageLines[pageLines.length - 1]  === null) pageLines.pop();
+    while (remaining.length && remaining[0] === null) remaining.shift();
+
+    if (pageLines.length) pages.push(pageLines);
+    firstPage = false;
+  }
+
+  if (pages.length === 0) pages.push([]);
+  return { titleWrapped, pages, fontSize, lineH, gapH };
+}
+
+// ── render one page ──────────────────────────────────────────────────────────
+
+function renderPage(
+  titleWrapped: string[],
+  contentLines: Line[],
+  title: string,
+  pageNum: number,
+  totalPages: number,
+  fontSize: number,
+  lineH: number,
+  gapH: number,
+  baseFilename: string,
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const canvas    = document.createElement('canvas');
+    canvas.width    = W * SCALE;
+    canvas.height   = H * SCALE;
+    const ctx       = canvas.getContext('2d')!;
+    ctx.scale(SCALE, SCALE);
+    ctx.textBaseline = 'top';
+
+    // Background
+    ctx.fillStyle = '#aaff00';
+    ctx.fillRect(0, 0, W, H);
+
+    const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
+    const available     = H - TOP_RESERVE - FOOTER_RESERVE;
+    let y: number;
+
+    if (pageNum === 1) {
+      const titleBlockH = titleWrapped.length * TITLE_LINE_H;
+      const totalBlock  = titleBlockH + GAP + contentBlockH;
+      y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
+
+      ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
+      for (const line of titleWrapped) {
+        drawCentered(ctx, line, y, '#0a0a0a');
+        y += TITLE_LINE_H;
+      }
+    } else {
+      const totalBlock = CONT_TITLE_LINE_H + GAP + contentBlockH;
+      y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
+
+      // Small faded title on continuation pages
+      ctx.font = `${CONT_TITLE_SIZE}px ${FONT}`;
+      let display = title;
+      while (ctx.measureText(display).width > CW && display.length > 1)
+        display = display.slice(0, -1);
+      if (display !== title) display = display.trimEnd() + '…';
+      drawCentered(ctx, display, y, 'rgba(10,10,10,0.28)');
+      y += CONT_TITLE_LINE_H;
+    }
+
+    // Rule
+    drawRule(ctx, y + Math.round(GAP / 2) - 1);
+    y += GAP;
+
+    // Content lines
+    ctx.font = `${fontSize}px ${FONT}`;
+    for (const line of contentLines) {
+      if (line === null) { y += gapH; continue; }
+      drawCentered(ctx, line, y, '#0a0a0a');
+      y += lineH;
+    }
+
+    // Footer
+    const footerY = H - 130;
+    ctx.font      = `26px ${FONT}`;
+    ctx.fillStyle = 'rgba(10,10,10,0.32)';
+    drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.32)');
+
+    if (totalPages > 1) {
+      ctx.font = `22px ${FONT}`;
+      drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.22)');
+    }
+
+    const filename = totalPages > 1
+      ? `${baseFilename}-${pageNum}.png`
+      : `${baseFilename}.png`;
+
+    canvas.toBlob(blob => {
+      if (!blob) { reject(new Error('toBlob failed')); return; }
+      resolve(new File([blob], filename, { type: 'image/png' }));
+    }, 'image/png');
+  });
+}
+
+// ── component ────────────────────────────────────────────────────────────────
+
+export default function SaveImageButton({ title, content }: Props) {
   const [generating, setGenerating] = useState(false);
 
   const handleSave = () => {
     setGenerating(true);
 
-    setTimeout(() => {
-      const canvas = document.createElement('canvas');
-      const W = 1080;
-      const H = 1920;
-      const SCALE = 2;
-      canvas.width = W * SCALE;
-      canvas.height = H * SCALE;
+    setTimeout(async () => {
+      try {
+        const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content);
+        const totalPages   = pages.length;
+        const baseFilename = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-      const ctx = canvas.getContext('2d')!;
-      ctx.scale(SCALE, SCALE);;
-      const font = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+        const files = await Promise.all(
+          pages.map((lines, i) =>
+            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename)
+          )
+        );
 
-      // Background
-      ctx.fillStyle = '#aaff00';
-      ctx.fillRect(0, 0, W, H);
-      ctx.textBaseline = 'top';
-
-      const padX = 100;
-      const cw   = W - padX * 2;
-
-      // ── 1. Title — centered, bold, large ────────────────────────
-      ctx.font = `bold 80px ${font}`;
-      const titleWrapped = wrapLine(ctx, title, cw);
-      const titleLineH   = 98;
-      const titleBlockH  = titleWrapped.length * titleLineH;
-
-      // ── 2. Content — full poem, dynamic font size ────────────────
-      const plain = stripMarkdown(content);
-      const paragraphs = plain.split('\n');
-
-      // Build visual lines at a given font size
-      const buildContentLines = (size: number): Array<string | null> => {
-        // null = paragraph gap
-        ctx.font = `${size}px ${font}`;
-        const result: Array<string | null> = [];
-        for (const para of paragraphs) {
-          if (!para.trim()) {
-            if (result.length > 0) result.push(null);
-            continue;
-          }
-          result.push(...wrapLine(ctx, para.trim(), cw));
-        }
-        while (result.length && result[result.length - 1] === null) result.pop();
-        return result;
-      };
-
-      // Find largest font where content fits
-      const topReserveH  = 240;
-      const footerReserveH = 180;
-      const gapSize      = 80;
-      const availableH   = H - topReserveH - footerReserveH - titleBlockH - gapSize;
-
-      let contentFontSize = 46;
-      const minFontSize   = 28;
-      let contentLines: Array<string | null> = [];
-      let truncated = false;
-
-      while (contentFontSize >= minFontSize) {
-        const lineH = Math.round(contentFontSize * 1.8);
-        const gapH  = Math.round(lineH * 0.5);
-        contentLines = buildContentLines(contentFontSize);
-        const totalH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
-        if (totalH <= availableH) break;
-        contentFontSize -= 2;
-      }
-
-      // If still too tall at min size, truncate
-      const lineH = Math.round(contentFontSize * 1.8);
-      const gapH  = Math.round(lineH * 0.5);
-      let usedH = 0;
-      const trimmed: Array<string | null> = [];
-      for (const l of contentLines) {
-        const inc = l === null ? gapH : lineH;
-        if (usedH + inc > availableH - lineH) { truncated = true; break; }
-        trimmed.push(l);
-        usedH += inc;
-      }
-      if (truncated) contentLines = trimmed;
-
-      ctx.font = `${contentFontSize}px ${font}`;
-      const visibleLines  = contentLines;
-      const contentBlockH = visibleLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0)
-        + (truncated ? lineH : 0);
-
-      // ── 3. Layout: vertically center the whole poem block ────────
-      const footerReserve = 180;
-      const topReserve    = 240;
-      const available     = H - topReserve - footerReserve;
-      const gap           = gapSize;
-
-      const totalBlock = titleBlockH + gap + contentBlockH;
-      const startY     = topReserve + Math.max(0, Math.round((available - totalBlock) / 2));
-
-      // ── Draw title ───────────────────────────────────────────────
-      ctx.font = `bold 80px ${font}`;
-      let y = startY;
-      for (const line of titleWrapped) {
-        drawCentered(ctx, line, y, W, '#0a0a0a');
-        y += titleLineH;
-      }
-
-      // ── Thin rule ────────────────────────────────────────────────
-      const ruleY = y + Math.round(gap / 2) - 1;
-      ctx.strokeStyle = 'rgba(10,10,10,0.12)';
-      ctx.lineWidth   = 1;
-      const ruleW     = Math.min(320, cw * 0.35);
-      ctx.beginPath();
-      ctx.moveTo((W - ruleW) / 2, ruleY);
-      ctx.lineTo((W + ruleW) / 2, ruleY);
-      ctx.stroke();
-
-      y += gap;
-
-      // ── Draw content ─────────────────────────────────────────────
-      ctx.font = `${contentFontSize}px ${font}`;
-      for (const line of visibleLines) {
-        if (line === null) { y += gapH; continue; }
-        drawCentered(ctx, line, y, W, '#0a0a0a');
-        y += lineH;
-      }
-      if (truncated) {
-        drawCentered(ctx, '…', y, W, 'rgba(10,10,10,0.3)');
-      }
-
-      // ── Footer ───────────────────────────────────────────────────
-      ctx.font = `26px ${font}`;
-      const url       = 'keremkaya.space';
-      const urlW      = ctx.measureText(url).width;
-      const footerY   = H - 130;
-
-      ctx.fillStyle = 'rgba(10,10,10,0.32)';
-      ctx.fillText(url, (W - urlW) / 2, footerY);
-
-      // ── Share (mobile) or Download (desktop) ─────────────────────
-      const filename = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`;
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) { setGenerating(false); return; }
-        const file = new File([blob], filename, { type: 'image/png' });
-
-        if (navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title });
-            setGenerating(false);
-            return;
-          } catch { /* cancelled */ }
+        // Mobile: share sheet (supports multi-file → Instagram carousel)
+        if (navigator.canShare?.({ files })) {
+          try { await navigator.share({ files, title }); } catch { /* cancelled */ }
+          setGenerating(false);
+          return;
         }
 
-        const url = URL.createObjectURL(blob);
-        const a   = document.createElement('a');
-        a.href     = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        setGenerating(false);
-      }, 'image/png');
+        // Desktop: sequential download
+        for (let i = 0; i < files.length; i++) {
+          const url = URL.createObjectURL(files[i]);
+          const a   = document.createElement('a');
+          a.href = url; a.download = files[i].name;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a); URL.revokeObjectURL(url);
+          if (i < files.length - 1) await new Promise(r => setTimeout(r, 150));
+        }
+      } catch (err) {
+        console.error('image generation failed', err);
+      }
+      setGenerating(false);
     }, 30);
   };
 
@@ -219,33 +286,33 @@ export default function SaveImageButton({ title, content, date }: Props) {
       onClick={handleSave}
       disabled={generating}
       style={{
-        display: 'inline-block',
-        fontSize: '0.65rem',
-        fontWeight: 500,
-        letterSpacing: '0.12em',
-        fontVariant: 'small-caps',
-        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-        color: generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a',
+        display:         'inline-block',
+        fontSize:        '0.65rem',
+        fontWeight:      500,
+        letterSpacing:   '0.12em',
+        fontVariant:     'small-caps',
+        fontFamily:      FONT,
+        color:           generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a',
         backgroundColor: 'transparent',
-        border: '1px solid rgba(10,10,10,0.22)',
-        padding: '0.55rem 1.2rem',
-        cursor: generating ? 'default' : 'pointer',
-        transition: 'background-color 0.15s, color 0.15s, border-color 0.15s',
-        marginTop: '2.5rem',
-        userSelect: 'none',
+        border:          '1px solid rgba(10,10,10,0.22)',
+        padding:         '0.55rem 1.2rem',
+        cursor:          generating ? 'default' : 'pointer',
+        transition:      'background-color 0.15s, color 0.15s, border-color 0.15s',
+        marginTop:       '2.5rem',
+        userSelect:      'none',
       }}
       onMouseEnter={e => {
         if (generating) return;
         const el = e.currentTarget as HTMLButtonElement;
         el.style.backgroundColor = '#0a0a0a';
-        el.style.color = '#aaff00';
-        el.style.borderColor = '#0a0a0a';
+        el.style.color           = '#aaff00';
+        el.style.borderColor     = '#0a0a0a';
       }}
       onMouseLeave={e => {
         const el = e.currentTarget as HTMLButtonElement;
         el.style.backgroundColor = 'transparent';
-        el.style.color = generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a';
-        el.style.borderColor = 'rgba(10,10,10,0.22)';
+        el.style.color           = generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a';
+        el.style.borderColor     = 'rgba(10,10,10,0.22)';
       }}
     >
       {generating ? 'generating…' : '↑ share / save image'}
