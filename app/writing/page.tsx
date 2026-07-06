@@ -11,9 +11,91 @@ interface PostMeta {
   tags:  string[];
 }
 
+interface SearchDoc extends PostMeta {
+  body: string;
+}
+
+interface Result extends PostMeta {
+  score:   number;
+  snippet: string;
+}
+
 const CHARS      = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 const LABEL      = "take me somewhere";
 const SCRAMBLE_MS = 500;
+
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Count whole-word occurrences of a term inside text.
+function countWholeWord(text: string, term: string): number {
+  const m = text.match(new RegExp(`\\b${escapeRegex(term)}\\b`, "g"));
+  return m ? m.length : 0;
+}
+
+// Relevance score: title > tags > whole-word body hits > substring hits.
+function scorePost(title: string, tags: string[], body: string, terms: string[]): number {
+  const t   = title.toLowerCase();
+  const tgs = tags.map(x => x.toLowerCase());
+  const b   = body.toLowerCase();
+
+  let score = 0;
+  let matchedTerms = 0;
+
+  for (const term of terms) {
+    let hit = 0;
+    if (t === term)                        hit += 120;
+    else if (countWholeWord(t, term))      hit += 45;
+    else if (t.includes(term))             hit += 16;
+
+    if (tgs.includes(term))                hit += 30;
+    else if (tgs.some(x => x.includes(term))) hit += 9;
+
+    const whole = countWholeWord(b, term);
+    hit += whole * 7;
+    const subs = b.split(term).length - 1;      // total substring occurrences
+    hit += Math.max(0, subs - whole) * 1.5;     // partial matches count for less
+
+    if (hit > 0) matchedTerms += 1;
+    score += hit;
+  }
+
+  // Reward poems that contain every term the reader typed.
+  if (terms.length > 1 && matchedTerms === terms.length) score += 25;
+
+  return score;
+}
+
+// Pull a short excerpt from the body centred on the first matched term.
+function snippetFor(body: string, terms: string[]): string {
+  if (!body) return "";
+  const clean = body.replace(/\s+/g, " ").trim();
+  const low   = clean.toLowerCase();
+
+  let at = -1;
+  for (const term of terms) {
+    const i = low.indexOf(term);
+    if (i !== -1 && (at === -1 || i < at)) at = i;
+  }
+  if (at === -1) return "";
+
+  const start = Math.max(0, at - 32);
+  const end   = Math.min(clean.length, at + 64);
+  let s = clean.slice(start, end).trim();
+  if (start > 0)          s = "…" + s;
+  if (end < clean.length) s = s + "…";
+  return s;
+}
+
+// Split a snippet so matched terms can be rendered emphasised.
+function highlightParts(text: string, terms: string[]): React.ReactNode[] {
+  if (!terms.length) return [text];
+  const re = new RegExp(`(${terms.map(escapeRegex).join("|")})`, "ig");
+  return text.split(re).map((part, i) =>
+    terms.some(t => t === part.toLowerCase())
+      ? <mark key={i} style={{ background: "none", color: "inherit", fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "0.15em" }}>{part}</mark>
+      : <span key={i}>{part}</span>
+  );
+}
 
 export default function WritingPage() {
   const [posts,          setPosts]          = useState<PostMeta[]>([]);
@@ -25,23 +107,44 @@ export default function WritingPage() {
   const [searchQuery,  setSearchQuery]  = useState("");
   const [searchOpen,   setSearchOpen]   = useState(false);
   const [scrolled,     setScrolled]     = useState(false);
+  const [bodies,       setBodies]       = useState<Record<string, string>>({});
   const rafRef         = useRef<number | null>(null);
   const firingRef      = useRef(false);
   const rowRefs        = useRef<Map<string, HTMLDivElement>>(new Map());
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredPosts = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return posts;
-    return posts.filter(p =>
-      p.title.toLowerCase().includes(q) ||
-      p.tags.some(t => t.toLowerCase().includes(q))
-    );
-  }, [posts, searchQuery]);
+  const terms = useMemo(
+    () => searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean),
+    [searchQuery],
+  );
+
+  // No query → the full list in date order. Query → poems that match any term,
+  // ranked by relevance, each with a snippet of where the word appears.
+  const results = useMemo<Result[]>(() => {
+    if (terms.length === 0) return posts.map(p => ({ ...p, score: 0, snippet: "" }));
+    return posts
+      .map(p => {
+        const body = bodies[p.slug] ?? "";
+        const score = scorePost(p.title, p.tags, body, terms);
+        return { ...p, score, snippet: score > 0 ? snippetFor(body, terms) : "" };
+      })
+      .filter(r => r.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }, [posts, bodies, terms]);
 
   useEffect(() => {
     fetch("/api/posts").then(r => r.json()).then(setPosts);
   }, []);
+
+  // Load poem bodies lazily the first time search is opened.
+  useEffect(() => {
+    if (!searchOpen || Object.keys(bodies).length > 0) return;
+    fetch("/api/search-index").then(r => r.json()).then((docs: SearchDoc[]) => {
+      const map: Record<string, string> = {};
+      for (const d of docs) map[d.slug] = d.body;
+      setBodies(map);
+    });
+  }, [searchOpen, bodies]);
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -68,7 +171,7 @@ export default function WritingPage() {
   }, []);
 
   const handleTakeMe = useCallback(() => {
-    const pool = filteredPosts.length > 0 ? filteredPosts : posts;
+    const pool = results.length > 0 ? results : posts;
     if (firingRef.current || pool.length === 0) return;
     firingRef.current = true;
     setFiring(true);
@@ -109,7 +212,7 @@ export default function WritingPage() {
     };
 
     rafRef.current = requestAnimationFrame(run);
-  }, [posts, filteredPosts]);
+  }, [posts, results]);
 
   return (
     <main
@@ -184,7 +287,7 @@ export default function WritingPage() {
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="search titles and tags…"
+          placeholder="search the words in the poems…"
           style={{
             width:         "100%",
             background:    "none",
@@ -201,14 +304,14 @@ export default function WritingPage() {
         />
         {searchQuery && (
           <p style={{ marginTop: "0.5rem", fontSize: "0.7rem", opacity: 0.4, letterSpacing: "0.05em" }}>
-            {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
+            {results.length} result{results.length !== 1 ? "s" : ""}
           </p>
         )}
       </motion.div>
 
       {/* Post list */}
       <div style={{ display: "flex", flexDirection: "column", paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}>
-        {filteredPosts.map((post, i) => {
+        {results.map((post) => {
           const isHighlighted = highlightedSlug === post.slug;
           const isHovered     = hoveredSlug     === post.slug;
           const isActive      = isHighlighted || isHovered;
@@ -240,16 +343,33 @@ export default function WritingPage() {
                     cursor:         "pointer",
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
-                      fontWeight:    isHighlighted && !isHovered ? 700 : 500,
-                      color:         isActive ? "#aaff00" : "#0a0a0a",
-                      transition:    "color 0.15s, font-weight 0.15s",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {post.title}
+                  <span style={{ display: "flex", flexDirection: "column", gap: "0.3rem", minWidth: 0 }}>
+                    <span
+                      style={{
+                        fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
+                        fontWeight:    isHighlighted && !isHovered ? 700 : 500,
+                        color:         isActive ? "#aaff00" : "#0a0a0a",
+                        transition:    "color 0.15s, font-weight 0.15s",
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {post.title}
+                    </span>
+                    {post.snippet && (
+                      <span
+                        style={{
+                          fontSize:      "0.78rem",
+                          fontWeight:    400,
+                          fontStyle:     "italic",
+                          lineHeight:    1.4,
+                          color:         isActive ? "rgba(184,240,74,0.65)" : "rgba(10,10,10,0.5)",
+                          transition:    "color 0.15s",
+                          letterSpacing: "-0.005em",
+                        }}
+                      >
+                        {highlightParts(post.snippet, terms)}
+                      </span>
+                    )}
                   </span>
                   <span
                     style={{

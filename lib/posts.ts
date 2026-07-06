@@ -80,6 +80,41 @@ export function getPostBySlug(slug: string): Post | null {
   return null;
 }
 
+export interface SearchDoc {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  body: string;
+}
+
+// Full-text index: metadata + the raw poem body, used for word-match search.
+export function getSearchIndex(): SearchDoc[] {
+  if (!fs.existsSync(POSTS_DIR)) return [];
+
+  const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+
+  return files.map((filename) => {
+    const slug = filename.replace(/\.mdx?$/, "");
+    const filePath = path.join(POSTS_DIR, filename);
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const { data, content } = matter(raw);
+
+    const rawDate = data.date;
+    const date = rawDate instanceof Date
+      ? rawDate.toISOString().slice(0, 10)
+      : rawDate ? String(rawDate).slice(0, 10) : "";
+
+    return {
+      slug,
+      title: data.title ?? slug,
+      date,
+      tags: data.tags ?? [],
+      body: content.trim(),
+    };
+  });
+}
+
 export function getAllTags(): string[] {
   const posts = getAllPosts();
   const tagSet = new Set<string>();

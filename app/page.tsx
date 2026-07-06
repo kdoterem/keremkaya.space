@@ -481,6 +481,44 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* ── advisory sticker — the tags are incomplete, so say so plainly ── */}
+      <div
+        style={{
+          position:      "fixed",
+          top:           "calc(1.25rem + env(safe-area-inset-top))",
+          left:          "1.25rem",
+          zIndex:        5,
+          pointerEvents: "none",
+          display:       "inline-block",
+          background:    "#0a0a0a",
+          color:         "#fff",
+          border:        "1.5px solid #0a0a0a",
+          opacity:       0.55,
+          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+          userSelect:    "none",
+        }}
+      >
+        <div style={{
+          padding:       "2px 6px",
+          fontSize:      "0.44rem",
+          fontWeight:    700,
+          letterSpacing: "0.22em",
+          textAlign:     "center",
+          borderBottom:  "1px solid rgba(255,255,255,0.55)",
+        }}>
+          ADVISORY
+        </div>
+        <div style={{
+          padding:       "3px 6px",
+          fontSize:      "0.5rem",
+          fontWeight:    700,
+          letterSpacing: "0.14em",
+          textAlign:     "center",
+        }}>
+          NOT EVERYTHING HERE IS TAGGED
+        </div>
+      </div>
+
       {/* ── nav — always visible, visually distinct from tags ── */}
       <nav
         style={{
