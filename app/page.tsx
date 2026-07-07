@@ -44,7 +44,9 @@ function buildLayout(tags: string[], vw: number, vh: number): TagLayout[] {
 
   const isMobile = vw < 500;
   const isTablet = vw < 900;
-  const maxTags  = isMobile ? 45 : isTablet ? 70 : n;
+  // Cap the cloud so the free-form vocabulary (hundreds of tags) stays smooth.
+  // The list is shuffled below, so each visit surfaces a fresh sample.
+  const maxTags  = Math.min(n, isMobile ? 45 : isTablet ? 70 : 110);
 
   const shuffled = [...tags].sort(() => Math.random() - 0.5).slice(0, maxTags);
   const result: TagLayout[] = [];
@@ -493,7 +495,7 @@ export default function Home() {
           background:    "#0a0a0a",
           color:         "#fff",
           border:        "1.5px solid #0a0a0a",
-          opacity:       0.55,
+          opacity:       1,
           fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
           userSelect:    "none",
         }}
@@ -515,7 +517,7 @@ export default function Home() {
           letterSpacing: "0.14em",
           textAlign:     "center",
         }}>
-          NOT EVERYTHING HERE IS TAGGED
+          NOT ALL WRITINGS ARE TAGGED
         </div>
       </div>
 
