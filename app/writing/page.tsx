@@ -32,14 +32,21 @@ function countWholeWord(text: string, term: string): number {
   return m ? m.length : 0;
 }
 
-// Relevance score: title > tags > whole-word body hits > substring hits.
+// Relevance score: whole-title match > title > tags > whole-word body hits > substring hits.
 function scorePost(title: string, tags: string[], body: string, terms: string[]): number {
-  const t   = title.toLowerCase();
-  const tgs = tags.map(x => x.toLowerCase());
-  const b   = body.toLowerCase();
+  const t     = title.toLowerCase();
+  const tgs   = tags.map(x => x.toLowerCase());
+  const b     = body.toLowerCase();
+  const query = terms.join(" ");             // the full phrase the reader typed
 
   let score = 0;
   let matchedTerms = 0;
+
+  // Typing a poem's name should surface that poem, period — a whole-title match
+  // dominates any amount of common-word body noise. A contiguous phrase in the
+  // title (e.g. "shrinking star") gets a strong, lesser boost.
+  if (t === query)            score += 100_000;
+  else if (t.includes(query)) score += 500;
 
   for (const term of terms) {
     let hit = 0;
@@ -50,10 +57,12 @@ function scorePost(title: string, tags: string[], body: string, terms: string[])
     if (tgs.includes(term))                hit += 30;
     else if (tgs.some(x => x.includes(term))) hit += 9;
 
+    // Cap per-term body contribution so a stopword ("a", "the") repeated dozens
+    // of times in one long poem can't outweigh a real title match.
     const whole = countWholeWord(b, term);
-    hit += whole * 7;
-    const subs = b.split(term).length - 1;      // total substring occurrences
-    hit += Math.max(0, subs - whole) * 1.5;     // partial matches count for less
+    hit += Math.min(whole, 6) * 7;
+    const subs = b.split(term).length - 1;                 // total substring occurrences
+    hit += Math.min(Math.max(0, subs - whole), 6) * 1.5;   // partial matches count for less
 
     if (hit > 0) matchedTerms += 1;
     score += hit;
