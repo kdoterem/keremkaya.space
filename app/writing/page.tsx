@@ -97,8 +97,14 @@ function highlightParts(text: string, terms: string[]): React.ReactNode[] {
   );
 }
 
+// Persist list + scroll across navigation to a poem and back.
+// Module-level so it survives client-side route changes (the bundle stays loaded),
+// mirroring the tag-cloud caching on the home page.
+let _postsCache: PostMeta[] | null = null;
+let _scrollY = 0;
+
 export default function WritingPage() {
-  const [posts,          setPosts]          = useState<PostMeta[]>([]);
+  const [posts,          setPosts]          = useState<PostMeta[]>(_postsCache ?? []);
   const [hoveredSlug,    setHoveredSlug]    = useState<string | null>(null);
   const [highlightedSlug,setHighlightedSlug]= useState<string | null>(null);
   const [btnLabel,       setBtnLabel]       = useState(LABEL);
@@ -133,8 +139,21 @@ export default function WritingPage() {
   }, [posts, bodies, terms]);
 
   useEffect(() => {
-    fetch("/api/posts").then(r => r.json()).then(setPosts);
+    if (_postsCache) return;               // already loaded — no refetch, no flicker
+    fetch("/api/posts").then(r => r.json()).then((p: PostMeta[]) => {
+      _postsCache = p;
+      setPosts(p);
+    });
   }, []);
+
+  // Restore the scroll offset once the list is in the DOM, so returning from a
+  // poem lands you exactly where you clicked instead of jumping to the top.
+  const didRestore = useRef(false);
+  useEffect(() => {
+    if (didRestore.current || posts.length === 0) return;
+    didRestore.current = true;
+    if (_scrollY > 0) window.scrollTo(0, _scrollY);
+  }, [posts.length]);
 
   // Load poem bodies lazily the first time search is opened.
   useEffect(() => {
@@ -152,7 +171,10 @@ export default function WritingPage() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 200);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 200);
+      _scrollY = window.scrollY;           // remember position for the return trip
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
