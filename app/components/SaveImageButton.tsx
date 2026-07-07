@@ -242,9 +242,11 @@ function renderPage(
 
 export default function SaveImageButton({ title, content }: Props) {
   const [generating, setGenerating] = useState(false);
+  const [hint,       setHint]       = useState<string | null>(null);
 
   const handleSave = () => {
     setGenerating(true);
+    setHint(null);
 
     setTimeout(async () => {
       try {
@@ -258,9 +260,19 @@ export default function SaveImageButton({ title, content }: Props) {
           )
         );
 
-        // Mobile: share sheet (supports multi-file → Instagram carousel)
-        // Only return on success — cancellation falls through to desktop download
+        // Mobile: share sheet. Instagram (and most apps) only accept the FIRST
+        // file from a web share — it can't receive a multi-image carousel — so
+        // for long, multi-page poems steer the reader to "Save N Images" and let
+        // them build the carousel in the Instagram app from their photos.
+        // Only return on success — cancellation falls through to desktop download.
         if (navigator.canShare?.({ files })) {
+          if (files.length > 1) {
+            setHint(
+              `long poem — ${files.length} images. in the share sheet choose ` +
+              `“save ${files.length} images”, then post them as a carousel in instagram. ` +
+              `(sharing straight to instagram only sends the first image.)`
+            );
+          }
           try {
             await navigator.share({ files, title });
             setGenerating(false);
@@ -285,6 +297,7 @@ export default function SaveImageButton({ title, content }: Props) {
   };
 
   return (
+    <>
     <button
       onClick={handleSave}
       disabled={generating}
@@ -320,5 +333,22 @@ export default function SaveImageButton({ title, content }: Props) {
     >
       {generating ? 'generating…' : '↑ share / save image'}
     </button>
+
+    {hint && (
+      <p
+        style={{
+          maxWidth:      '32rem',
+          marginTop:     '0.9rem',
+          fontSize:      '0.72rem',
+          lineHeight:    1.5,
+          letterSpacing: '0.01em',
+          color:         'rgba(10,10,10,0.5)',
+          fontFamily:    FONT,
+        }}
+      >
+        {hint}
+      </p>
+    )}
+    </>
   );
 }
