@@ -26,10 +26,30 @@ const SCRAMBLE_MS = 500;
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// Count whole-word occurrences of a term inside text.
+// Cheap morphology so "voices" finds poems tagged/worded "voice", "loving" finds
+// "love", etc. — a reader's exact word form shouldn't decide whether the closest
+// poem shows up at all.
+function wordStems(w: string): Set<string> {
+  const s = w.toLowerCase();
+  const out = new Set([s]);
+  if (s.endsWith("ing") && s.length > 5) { const b = s.slice(0, -3); out.add(b); out.add(b + "e"); }
+  if (s.endsWith("ed")  && s.length > 4) { const b = s.slice(0, -2); out.add(b); out.add(b + "e"); }
+  if (s.endsWith("s") && !s.endsWith("ss") && s.length > 3) out.add(s.slice(0, -1));
+  return out;
+}
+function stemsOverlap(a: string, b: string): boolean {
+  const sb = wordStems(b);
+  for (const x of wordStems(a)) if (sb.has(x)) return true;
+  return false;
+}
+
+// Count whole-word occurrences of a term inside text, matching stemmed variants.
 function countWholeWord(text: string, term: string): number {
-  const m = text.match(new RegExp(`\\b${escapeRegex(term)}\\b`, "g"));
-  return m ? m.length : 0;
+  const words = text.match(/[a-z']+/gi);
+  if (!words) return 0;
+  let count = 0;
+  for (const w of words) if (stemsOverlap(w, term)) count++;
+  return count;
 }
 
 // Relevance score: whole-title match > title > tags > whole-word body hits > substring hits.
@@ -54,7 +74,8 @@ function scorePost(title: string, tags: string[], body: string, terms: string[])
     else if (countWholeWord(t, term))      hit += 45;
     else if (t.includes(term))             hit += 16;
 
-    if (tgs.includes(term))                hit += 30;
+    if (tgs.includes(term) || tgs.some(tag => tag.split(/\s+/).some(w => stemsOverlap(w, term))))
+      hit += 30;
     else if (tgs.some(x => x.includes(term))) hit += 9;
 
     // Cap per-term body contribution so a stopword ("a", "the") repeated dozens
