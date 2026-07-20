@@ -86,7 +86,7 @@ function promptTags(suggestedTags, allTags) {
   for (let i = 0; i < allTags.length; i += 6) chunks.push(allTags.slice(i, i + 6));
   chunks.forEach((row) => console.log("  " + row.join(", ")));
   console.log("\nType a tag to toggle it on/off (from the list or a new one).");
-  console.log("Type 'done' or leave blank when finished. Aim for 3–5 tags, most important first.");
+  console.log("Type 'done' or leave blank when finished. Aim for 3–6 tags, most important first.");
 
   while (true) {
     process.stdout.write(`\n  [${selected.length ? selected.join(", ") : "none"}]\n> `);
@@ -100,8 +100,8 @@ function promptTags(suggestedTags, allTags) {
 
     const idx = selected.findIndex((t) => t.toLowerCase() === input);
     if (idx === -1) {
-      if (selected.length >= 5) {
-        console.log("  (max 5 tags — remove one first)");
+      if (selected.length >= 12) {
+        console.log("  (max 12 tags — remove one first)");
       } else {
         selected.push(input);
         console.log(`  + added "${input}"`);
