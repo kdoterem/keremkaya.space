@@ -100,12 +100,8 @@ function promptTags(suggestedTags, allTags) {
 
     const idx = selected.findIndex((t) => t.toLowerCase() === input);
     if (idx === -1) {
-      if (selected.length >= 12) {
-        console.log("  (max 12 tags — remove one first)");
-      } else {
-        selected.push(input);
-        console.log(`  + added "${input}"`);
-      }
+      selected.push(input);
+      console.log(`  + added "${input}"`);
     } else {
       selected.splice(idx, 1);
       console.log(`  - removed "${input}"`);
