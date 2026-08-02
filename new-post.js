@@ -82,8 +82,9 @@ function promptTags(suggestedTags, allTags) {
     console.log("  (none matched automatically)");
   }
   console.log("\nAll existing tags:");
+  const sortedTags = [...allTags].sort((a, b) => a.localeCompare(b));
   const chunks = [];
-  for (let i = 0; i < allTags.length; i += 6) chunks.push(allTags.slice(i, i + 6));
+  for (let i = 0; i < sortedTags.length; i += 6) chunks.push(sortedTags.slice(i, i + 6));
   chunks.forEach((row) => console.log("  " + row.join(", ")));
   console.log("\nType a tag to toggle it on/off (from the list or a new one).");
   console.log("Type 'done' or leave blank when finished. Aim for 3–6 tags, most important first.");
