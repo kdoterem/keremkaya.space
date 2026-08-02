@@ -441,6 +441,23 @@ export default function WritingPage() {
             </div>
           );
         })}
+
+        {/* Sign-off line — same rhythm as a poem row, typography matched to the date stamps */}
+        <div
+          style={{
+            fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontSize:      "0.75rem",
+            fontWeight:    400,
+            letterSpacing: "0.05em",
+            color:         "rgba(10,10,10,0.4)",
+            paddingTop:    "1.1rem",
+            paddingLeft:   "calc(1rem + clamp(1.5em, 5vw, 2.5em))",
+            paddingRight:  "1rem",
+            marginBottom:  "2.75rem",
+          }}
+        >
+          you're{" "}at{" "}the{" "}bottom{" "}eh? been{" "}there
+        </div>
       </div>
 
       {/* Gradient fade — fades posts out and blocks clicks in button zone */}
