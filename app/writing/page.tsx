@@ -442,7 +442,9 @@ export default function WritingPage() {
           );
         })}
 
-        {/* Sign-off line — same rhythm as a poem row, typography matched to the date stamps */}
+        {/* Sign-off line — same rhythm as a poem row, typography matched to the date stamps.
+            Gated on posts having loaded so it doesn't flash at the top before hydration. */}
+        {posts.length > 0 && (
         <div
           style={{
             fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -458,6 +460,7 @@ export default function WritingPage() {
         >
           you're{" "}at{" "}the{" "}bottom{" "}eh? been{" "}there
         </div>
+        )}
       </div>
 
       {/* Gradient fade — fades posts out and blocks clicks in button zone */}
