@@ -125,3 +125,22 @@ export function getAllTags(): string[] {
   }
   return Array.from(tagSet).sort();
 }
+
+export interface TagCount {
+  tag:   string;
+  count: number;
+}
+
+// Same tag universe as getAllTags(), paired with how many posts carry each —
+// the basis for sizing the homepage tag cloud by frequency instead of chance.
+export function getTagCounts(): TagCount[] {
+  const posts = getAllPosts();
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  return Array.from(counts, ([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}

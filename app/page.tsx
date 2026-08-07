@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, animate, useMotionValue } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import type { TagCount } from "@/lib/posts";
 
 interface PostMeta {
   slug:  string;
@@ -13,6 +14,7 @@ interface PostMeta {
 
 interface TagLayout {
   tag:        string;
+  count:      number;
   x:          number;
   y:          number;
   hw:         number;
@@ -26,6 +28,12 @@ interface TagLayout {
   entryDelay: number;
 }
 
+// Guaranteed top-N-by-count tags always shown, plus a shuffled sample of the
+// remainder filling out the rest of each breakpoint's cap.
+const MOBILE_TOP_GUARANTEED  = 30, MOBILE_ROTATING  = 15;  // 45 total
+const TABLET_TOP_GUARANTEED  = 35, TABLET_ROTATING  = 35;  // 70 total
+const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
+
 const NAV = [
   { label: "WRITING", href: "/writing"  },
   { label: "ART",     href: "/art"      },
@@ -38,24 +46,41 @@ let _layoutCache:  TagLayout[]  | null = null;
 let _postsCache:   PostMeta[]   | null = null;
 let _cacheVw = 0, _cacheVh = 0;
 
-function buildLayout(tags: string[], vw: number, vh: number): TagLayout[] {
-  const n = tags.length;
+function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[] {
+  const n = tagCounts.length;
   if (n === 0) return [];
 
   const isMobile = vw < 500;
   const isTablet = vw < 900;
-  // Cap the cloud so the free-form vocabulary (hundreds of tags) stays smooth.
-  // The list is shuffled below, so each visit surfaces a fresh sample.
-  const maxTags  = Math.min(n, isMobile ? 45 : isTablet ? 70 : 110);
 
-  const shuffled = [...tags].sort(() => Math.random() - 0.5).slice(0, maxTags);
+  const topGuaranteed = isMobile ? MOBILE_TOP_GUARANTEED  : isTablet ? TABLET_TOP_GUARANTEED  : DESKTOP_TOP_GUARANTEED;
+  const rotatingCount  = isMobile ? MOBILE_ROTATING        : isTablet ? TABLET_ROTATING        : DESKTOP_ROTATING;
+
+  // The most-used tags are always present; only the long tail is sampled,
+  // so the cloud's shape reflects the archive instead of chance.
+  const byCount    = [...tagCounts].sort((a, b) => b.count - a.count);
+  const guaranteed = byCount.slice(0, topGuaranteed);
+  const remainder  = byCount.slice(topGuaranteed);
+  const rotating   = [...remainder].sort(() => Math.random() - 0.5).slice(0, rotatingCount);
+  const selected   = [...guaranteed, ...rotating].sort(() => Math.random() - 0.5);
+
+  // Frequency → size, on a sqrt scale so a handful of heavily-used tags
+  // don't flatten the rare ones into unreadable noise.
+  const allCounts = tagCounts.map(t => t.count);
+  const minCount  = Math.min(...allCounts);
+  const maxCount  = Math.max(...allCounts);
+  const sqrtMin   = Math.sqrt(minCount);
+  const sqrtSpan  = Math.sqrt(maxCount) - sqrtMin || 1;
+
+  const FONT_MIN = isMobile ? 8 : 9;
+  const FONT_MAX = isMobile ? 16 : 22;
+
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
 
-  shuffled.forEach((tag, i) => {
-    const fontSize  = isMobile
-      ? Math.max(8, Math.min(16, 8  + Math.random() * 8))
-      : Math.max(9, Math.min(22, 10 + Math.random() * 12));
+  selected.forEach(({ tag, count }, i) => {
+    const weight   = (Math.sqrt(count) - sqrtMin) / sqrtSpan;  // 0..1, frequency-normalised
+    const fontSize = FONT_MIN + weight * (FONT_MAX - FONT_MIN);
     const hw        = (fontSize * tag.length * 0.52) / 2;
     const hh        = fontSize * 0.65;
     const marginX   = Math.max(hw + 20, vw * 0.05);
@@ -77,12 +102,13 @@ function buildLayout(tags: string[], vw: number, vh: number): TagLayout[] {
     placed.push({ x: px, y: py, hw, hh });
     result.push({
       tag,
+      count,
       x:          px,
       y:          py,
       hw,
       hh,
       fontSize,
-      fontWeight: Math.random() > 0.45 ? 700 : 400,
+      fontWeight: weight >= 0.5 ? 700 : 400,
       driftX:     (Math.random() - 0.5) * (isMobile ? 8 : 16),
       driftY:     (Math.random() - 0.5) * (isMobile ? 5 : 10),
       duration:   4 + Math.random() * 6,
@@ -326,8 +352,8 @@ export default function Home() {
     Promise.all([
       fetch("/api/tags").then(r  => r.json()),
       fetch("/api/posts").then(r => r.json()),
-    ]).then(([tags, allPosts]: [string[], PostMeta[]]) => {
-      const layout = buildLayout(tags, vw, vh);
+    ]).then(([tagCounts, allPosts]: [TagCount[], PostMeta[]]) => {
+      const layout = buildLayout(tagCounts, vw, vh);
       _layoutCache = layout;
       _postsCache  = allPosts;
       _cacheVw     = vw;
@@ -350,7 +376,7 @@ export default function Home() {
       setLayout(prev => {
         if (!prev.length) return prev;
         const vw = window.innerWidth, vh = window.innerHeight;
-        const newLayout = buildLayout(prev.map(l => l.tag), vw, vh);
+        const newLayout = buildLayout(prev.map(l => ({ tag: l.tag, count: l.count })), vw, vh);
         _layoutCache = newLayout;
         _cacheVw = vw; _cacheVh = vh;
         return newLayout;

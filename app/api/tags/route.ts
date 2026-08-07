@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getAllTags } from "@/lib/posts";
+import { getTagCounts } from "@/lib/posts";
 
 export function GET() {
-  const tags = getAllTags();
+  const tags = getTagCounts();
   return NextResponse.json(tags);
 }
