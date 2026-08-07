@@ -105,7 +105,7 @@ def main():
 
         # Title
         pdf.set_font("Arial", style="B", size=16)
-        pdf.multi_cell(PAGE_W, 8, post["title"])
+        pdf.multi_cell(PAGE_W, 8, post["title"], new_x="LMARGIN", new_y="NEXT")
         pdf.ln(6)
 
         # Content
@@ -121,7 +121,7 @@ def main():
                 for line in lines:
                     line = line.strip()
                     if line:
-                        pdf.multi_cell(PAGE_W, 6, line)
+                        pdf.multi_cell(PAGE_W, 6, line, new_x="LMARGIN", new_y="NEXT")
                     else:
                         pdf.ln(3)
                 pdf.ln(4)

@@ -11,7 +11,7 @@ interface Props {
 // ── constants ────────────────────────────────────────────────────────────────
 const W     = 1080;
 const H     = 1920;
-const SCALE = 2;
+const SCALE = 3;
 const PAD_X = 100;
 const CW    = W - PAD_X * 2;  // content width
 
