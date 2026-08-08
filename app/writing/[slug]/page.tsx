@@ -51,6 +51,50 @@ function rehypeBlockLines() {
   };
 }
 
+const SITE_DESCRIPTION = "rider. righter. re-writer.";
+const DESCRIPTION_MAX_LEN = 100;
+
+function stripMarkdownLine(line: string): string {
+  return line
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/\*\*([\s\S]*?)\*\*/g, "$1")
+    .replace(/\*([\s\S]*?)\*/g, "$1")
+    .replace(/`{1,3}([\s\S]*?)`{1,3}/g, "$1")
+    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/^>\s*/, "")
+    .replace(/^[-*+]\s+/, "")
+    .trim();
+}
+
+// Cut to ~maxLen at a word boundary; only append an ellipsis if we actually cut something.
+function truncateAtWord(s: string, maxLen: number): string {
+  if (s.length <= maxLen) return s;
+  const cut  = s.slice(0, maxLen);
+  const stop = cut.lastIndexOf(" ");
+  return (stop > 0 ? cut.slice(0, stop) : cut).trim() + "…";
+}
+
+// Fallback description for posts without an excerpt: the first non-empty,
+// markdown-stripped line of the poem itself, trimmed to a snippet.
+function deriveDescription(content: string): string {
+  if (!content) return SITE_DESCRIPTION;
+
+  // Defensive — content from getPostBySlug is already frontmatter-stripped,
+  // but guard against a stray leading block just in case.
+  let body = content;
+  if (body.startsWith("---")) {
+    const end = body.indexOf("---", 3);
+    if (end !== -1) body = body.slice(end + 3);
+  }
+
+  for (const raw of body.split("\n")) {
+    const stripped = stripMarkdownLine(raw.trim());
+    if (stripped) return truncateAtWord(stripped, DESCRIPTION_MAX_LEN);
+  }
+
+  return SITE_DESCRIPTION;
+}
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -63,7 +107,7 @@ export async function generateMetadata({
   if (!post) return {};
 
   const title       = post.title;
-  const description = post.excerpt || "An essay on Believable Belief.";
+  const description = post.excerpt || deriveDescription(post.content);
   const url         = `https://keremkaya.space/writing/${slug}`;
 
   return {
