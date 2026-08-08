@@ -443,8 +443,10 @@ export default function WritingPage() {
         })}
 
         {/* Sign-off line — same rhythm as a poem row, typography matched to the date stamps.
-            Gated on posts having loaded so it doesn't flash at the top before hydration. */}
-        {posts.length > 0 && (
+            Gated on posts having loaded so it doesn't flash at the top before hydration,
+            and on no active search filter — it marks the end of the full archive, not
+            the end of a short filtered results list. */}
+        {posts.length > 0 && terms.length === 0 && (
         <div
           style={{
             fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
