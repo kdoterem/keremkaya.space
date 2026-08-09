@@ -14,10 +14,11 @@ const DISSOLVE_MS       = 700;  // button breaking apart, before cards begin
 const CARD_STAGGER_MS   = 500;  // fixed gap between each card's reveal starting
 const CARD_SCRAMBLE_MS  = 1100; // per-card resolve — noticeably longer than /writing's 500ms
 const CARD_TICK_MS      = 75;   // glyph substitution rate — legible cycling, not noise (60-90ms range)
-// A single repeated neutral glyph, not a letter pool — random lowercase letters
-// read as garbled words ("fire war xvbtw"); a lone dot reads as text being
-// uncovered instead. Spaces still pass through as spaces (see CryptoScramble).
-const CARD_CHARS        = "·";
+// Symbol pool, not letters — random lowercase letters read as garbled fake
+// words ("fire war xvbtw"); a single repeated dot was too static. Non-alphabetic
+// glyphs sit between the two: a classic decryption look that can't be misread
+// as language. Spaces still pass through as spaces (see CryptoScramble).
+const CARD_CHARS        = "!@#$%^&*()_+-=[]{}|;:,.<>?/~█▓▒░┃╱╲╳";
 
 interface StoredDraw {
   cards:   Card[];

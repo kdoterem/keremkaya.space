@@ -34,6 +34,11 @@ const MOBILE_TOP_GUARANTEED  = 30, MOBILE_ROTATING  = 15;  // 45 total
 const TABLET_TOP_GUARANTEED  = 35, TABLET_ROTATING  = 35;  // 70 total
 const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
 
+// Keeps tags clear of the fixed nav row (which sits 2rem from the viewport
+// bottom, plus its own text height) — shared by initial placement and by
+// where a flung tag comes to rest, so neither can land under the nav.
+const NAV_CLEARANCE = 110; // px
+
 const NAV = [
   { label: "WRITING", href: "/writing"  },
   { label: "KISMET",  href: "/kismet"   },
@@ -83,14 +88,15 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
     const fontSize = FONT_MIN + weight * (FONT_MAX - FONT_MIN);
     const hw        = (fontSize * tag.length * 0.52) / 2;
     const hh        = fontSize * 0.65;
-    const marginX   = Math.max(hw + 20, vw * 0.05);
-    const marginY   = Math.max(hh + 20, vh * 0.08);
+    const marginX      = Math.max(hw + 20, vw * 0.05);
+    const marginTop    = Math.max(hh + 20, vh * 0.08);
+    const marginBottom = Math.max(hh + 20, NAV_CLEARANCE);
     const gap       = isMobile ? 8 : 12;
 
     let px = vw / 2, py = vh / 2;
     for (let attempt = 0; attempt < 200; attempt++) {
       const x  = marginX + Math.random() * (vw - marginX * 2);
-      const y  = marginY + Math.random() * (vh - marginY * 2);
+      const y  = marginTop + Math.random() * (vh - marginTop - marginBottom);
       const ok = placed.every(
         p => Math.abs(x - p.x) > hw + p.hw + gap ||
              Math.abs(y - p.y) > hh + p.hh + gap
@@ -204,10 +210,14 @@ function TagWord({
       const cx = posX.get(), cy = posY.get();
       let nx = cx + vx, ny = cy + vy;
 
-      if (nx < l.hw)      { nx = l.hw;      vx =  Math.abs(vx) * 0.75; }
-      if (nx > vw - l.hw) { nx = vw - l.hw; vx = -Math.abs(vx) * 0.75; }
-      if (ny < l.hh)      { ny = l.hh;      vy =  Math.abs(vy) * 0.75; }
-      if (ny > vh - l.hh) { ny = vh - l.hh; vy = -Math.abs(vy) * 0.75; }
+      // Bottom bound mirrors buildLayout's marginBottom exactly, so a flung
+      // tag settles above the nav row instead of bouncing off the raw edge.
+      const bottomBound = vh - Math.max(l.hh + 20, NAV_CLEARANCE);
+
+      if (nx < l.hw)         { nx = l.hw;         vx =  Math.abs(vx) * 0.75; }
+      if (nx > vw - l.hw)    { nx = vw - l.hw;     vx = -Math.abs(vx) * 0.75; }
+      if (ny < l.hh)         { ny = l.hh;          vy =  Math.abs(vy) * 0.75; }
+      if (ny > bottomBound)  { ny = bottomBound;   vy = -Math.abs(vy) * 0.75; }
 
       posX.set(nx); posY.set(ny);
 
