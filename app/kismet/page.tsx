@@ -11,25 +11,13 @@ const LOCK_DAYS   = 7;
 
 const LABEL             = "draw";
 const DISSOLVE_MS       = 700;  // button breaking apart, before cards begin
+const CARD_STAGGER_MS   = 500;  // fixed gap between each card's reveal starting
 const CARD_SCRAMBLE_MS  = 1100; // per-card resolve — noticeably longer than /writing's 500ms
 const CARD_TICK_MS      = 75;   // glyph substitution rate — legible cycling, not noise (60-90ms range)
-const CARD_CHARS        = "abcdefghijklmnopqrstuvwxyz"; // smaller pool reads better at a slow churn
-
-// Gap before the *next* card starts, based on how long the *preceding* card
-// is — so the next arrival lands roughly halfway through a reader settling
-// into the previous one, rather than a fixed beat regardless of length.
-const STAGGER_MS_PER_WORD = 275;
-const STAGGER_FLOOR_MS    = 1500;
-const STAGGER_CEILING_MS  = 4000;
-
-function wordCount(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
-}
-
-function staggerAfter(text: string): number {
-  const raw = wordCount(text) * STAGGER_MS_PER_WORD;
-  return Math.min(STAGGER_CEILING_MS, Math.max(STAGGER_FLOOR_MS, raw));
-}
+// A single repeated neutral glyph, not a letter pool — random lowercase letters
+// read as garbled words ("fire war xvbtw"); a lone dot reads as text being
+// uncovered instead. Spaces still pass through as spaces (see CryptoScramble).
+const CARD_CHARS        = "·";
 
 interface StoredDraw {
   cards:   Card[];
@@ -119,23 +107,17 @@ export default function ArtPage() {
     }
   }, []);
 
-  // Stagger the three cards' reveals whenever a fresh draw starts resolving.
-  // Each gap is driven by the word count of the card before it.
+  // Stagger the three cards' reveals whenever a fresh draw starts resolving —
+  // a fixed beat so the spread lands as one movement: one, two, three.
   useEffect(() => {
-    if (phase !== "revealing" || !spread) return;
+    if (phase !== "revealing") return;
     setRevealedCount(0);
     revealTimeouts.current.forEach(clearTimeout);
-
-    const startAt: number[] = [0];
-    for (let i = 1; i < spread.length; i++) {
-      startAt.push(startAt[i - 1] + staggerAfter(spread[i - 1].text));
-    }
-
-    revealTimeouts.current = spread.map((_, i) =>
-      window.setTimeout(() => setRevealedCount(c => Math.max(c, i + 1)), startAt[i])
+    revealTimeouts.current = [0, 1, 2].map(i =>
+      window.setTimeout(() => setRevealedCount(c => Math.max(c, i + 1)), i * CARD_STAGGER_MS)
     );
     return () => { revealTimeouts.current.forEach(clearTimeout); revealTimeouts.current = []; };
-  }, [phase, spread]);
+  }, [phase]);
 
   const handleDraw = useCallback(() => {
     // Letters scatter like ash — random drift, rotation, and shrink, each
