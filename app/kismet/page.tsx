@@ -14,11 +14,10 @@ const DISSOLVE_MS       = 700;  // button breaking apart, before cards begin
 const CARD_STAGGER_MS   = 500;  // fixed gap between each card's reveal starting
 const CARD_SCRAMBLE_MS  = 1100; // per-card resolve — noticeably longer than /writing's 500ms
 const CARD_TICK_MS      = 75;   // glyph substitution rate — legible cycling, not noise (60-90ms range)
-// Symbol pool, not letters — random lowercase letters read as garbled fake
-// words ("fire war xvbtw"); a single repeated dot was too static. Non-alphabetic
-// glyphs sit between the two: a classic decryption look that can't be misread
-// as language. Spaces still pass through as spaces (see CryptoScramble).
-const CARD_CHARS        = "!@#$%^&*()_+-=[]{}|;:,.<>?/~█▓▒░┃╱╲╳";
+// Same pool as /writing's take-me-somewhere effect. A symbol-heavy pool
+// (underscore, box-drawing, block shading) produced underline-like artifacts
+// under resolved text and read as a terminal dump rather than a cipher.
+const CARD_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 
 interface StoredDraw {
   cards:   Card[];
@@ -196,6 +195,7 @@ export default function ArtPage() {
                   duration={CARD_SCRAMBLE_MS}
                   tickMs={CARD_TICK_MS}
                   chars={CARD_CHARS}
+                  scrambleSpaces
                   style={cardTextStyle}
                 />
               )}

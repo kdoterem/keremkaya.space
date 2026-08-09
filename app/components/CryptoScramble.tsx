@@ -10,6 +10,7 @@ interface Props {
   duration?: number; // ms — total reveal time
   tickMs?: number; // ms between random-glyph substitutions; 0 = every frame (default, original behaviour)
   chars?: string; // glyph pool to draw random substitutions from
+  scrambleSpaces?: boolean; // if true, spaces scramble like any other position until revealed (default false = original behaviour: spaces always shown)
   style?: React.CSSProperties;
 }
 
@@ -19,6 +20,7 @@ export default function CryptoScramble({
   duration = 700,
   tickMs = 0,
   chars = CHARS,
+  scrambleSpaces = false,
   style,
 }: Props) {
   const [displayed, setDisplayed] = useState(text);
@@ -52,7 +54,7 @@ export default function CryptoScramble({
       const result = text
         .split("")
         .map((char, i) => {
-          if (char === " ") return " ";
+          if (!scrambleSpaces && char === " ") return " ";
           if (i < lockIndex) return char;
           return glyphsRef.current[i];
         })
@@ -72,7 +74,7 @@ export default function CryptoScramble({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [text, trigger, duration, tickMs, chars]);
+  }, [text, trigger, duration, tickMs, chars, scrambleSpaces]);
 
   return <span style={style}>{displayed}</span>;
 }
