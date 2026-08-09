@@ -15,7 +15,8 @@ interface Props {
   // word boundaries — keeps normal wrapping without spelling out real word
   // shapes. Default false = original behaviour: real spaces always shown.
   scrambleSpaces?: boolean;
-  style?: React.CSSProperties;
+  style?:     React.CSSProperties;
+  className?: string;
 }
 
 // 2-9 non-space characters per chunk, decorrelated from the text's real
@@ -42,6 +43,7 @@ export default function CryptoScramble({
   chars = CHARS,
   scrambleSpaces = false,
   style,
+  className,
 }: Props) {
   const [displayed, setDisplayed] = useState(text);
   const rafRef      = useRef<number | null>(null);
@@ -100,5 +102,5 @@ export default function CryptoScramble({
     };
   }, [text, trigger, duration, tickMs, chars, scrambleSpaces]);
 
-  return <span style={style}>{displayed}</span>;
+  return <span className={className} style={style}>{displayed}</span>;
 }

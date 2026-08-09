@@ -63,14 +63,18 @@ a:hover .post-nav-title {
   color: #0a0a0a;
 }
 
-/* /kismet — three-card spread: row on desktop, stacked on mobile */
+/* /kismet — three tall cards in a row on desktop; three full-width landscape
+   bands stacked with no scrolling on mobile (see the 640px query below) */
+.kismet-main {
+  padding: 4rem 5vw 8rem;
+}
 .art-spread {
   display:         flex;
   gap:              1.5rem;
   justify-content: center;
   width:           100%;
   max-width:       900px;
-  margin:          0 auto;
+  margin:          5rem auto 0;
 }
 .art-card {
   flex:            1 1 0;
@@ -81,14 +85,57 @@ a:hover .post-nav-title {
   align-items:     flex-start;  /* all three cards start text at the same height */
   padding:         2rem 1.75rem;
 }
+.art-card-text {
+  font-size:      clamp(1.3rem, 6vw, 1.85rem);
+  font-weight:    600;
+  color:          #0a0a0a;
+  line-height:    1.25;
+  letter-spacing: -0.015em;
+  text-align:     left;
+  overflow-wrap:  anywhere; /* safety net — nothing should ever push past the box */
+}
+.kismet-status {
+  margin-top: 2.5rem;
+}
+.kismet-reserve {
+  min-height: 6rem;
+}
+
 @media (max-width: 640px) {
-  .art-spread {
+  /* Three landscape bands, all visible at once — no portrait stacking, no scroll. */
+  .kismet-main {
+    height:         100dvh;
+    display:        flex;
     flex-direction: column;
-    align-items:    center;
+    padding:        2.5rem 5vw 1.25rem;
+    overflow:       hidden; /* belt-and-suspenders against any future edge case */
+  }
+  .art-spread {
+    flex:           1;
+    min-height:     0;
+    max-width:      none;
+    margin:         1.25rem 0 0;
+    flex-direction: column;
+    align-items:    stretch;
+    gap:            0.6rem;
   }
   .art-card {
-    max-width: 320px;
-    width:     100%;
+    flex:         1;
+    min-height:   0;
+    max-width:    none;
+    width:        100%;
+    aspect-ratio: auto;
+    padding:      1rem 1.25rem;
+    overflow:     hidden;
+  }
+  .art-card-text {
+    font-size: clamp(1.05rem, 5.5vw, 1.35rem);
+  }
+  .kismet-status {
+    margin-top: 0.75rem;
+  }
+  .kismet-reserve {
+    min-height: 0.5rem;
   }
 }
 

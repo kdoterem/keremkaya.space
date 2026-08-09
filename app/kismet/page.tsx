@@ -59,16 +59,6 @@ function formatDate(ts: number): string {
   return new Date(ts).toISOString().slice(0, 10);
 }
 
-const cardTextStyle: React.CSSProperties = {
-  fontSize:      "clamp(1.3rem, 6vw, 1.85rem)",
-  fontWeight:    600,
-  color:         "#0a0a0a",
-  lineHeight:    1.25,
-  letterSpacing: "-0.015em",
-  textAlign:     "left",
-  overflowWrap:  "anywhere", // safety net — nothing should ever push past the box
-};
-
 export default function ArtPage() {
   const [phase,      setPhase]      = useState<Phase>("pending");
   const [spread,     setSpread]     = useState<Card[] | null>(null);
@@ -151,9 +141,9 @@ export default function ArtPage() {
 
   return (
     <main
+      className="kismet-main"
       style={{
         minHeight:  "100vh",
-        padding:    "4rem 5vw 8rem",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
       }}
     >
@@ -181,14 +171,13 @@ export default function ArtPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         className="art-spread"
-        style={{ marginTop: "5rem" }}
       >
         {[0, 1, 2].map((i) => {
           const card = spread?.[i];
           return (
             <div key={i} className="art-card">
               {phase === "static" && card && (
-                <span style={cardTextStyle}>{card.text}</span>
+                <span className="art-card-text">{card.text}</span>
               )}
               {phase === "revealing" && card && i < revealedCount && (
                 <CryptoScramble
@@ -197,7 +186,7 @@ export default function ArtPage() {
                   tickMs={CARD_TICK_MS}
                   chars={CARD_CHARS}
                   scrambleSpaces
-                  style={cardTextStyle}
+                  className="art-card-text"
                 />
               )}
             </div>
@@ -211,7 +200,8 @@ export default function ArtPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          style={{ textAlign: "center", marginTop: "2.5rem" }}
+          className="kismet-status"
+          style={{ textAlign: "center" }}
         >
           {showButton ? (
             <button
@@ -262,7 +252,7 @@ export default function ArtPage() {
       )}
 
       {/* Reserved for image export / notes / email — not built yet */}
-      <div style={{ minHeight: "6rem" }} />
+      <div className="kismet-reserve" />
     </main>
   );
 }
