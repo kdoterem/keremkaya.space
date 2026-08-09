@@ -6,7 +6,7 @@ import Link from "next/link";
 import { CARDS, type Card } from "@/lib/cards";
 
 const STORAGE_KEY = "art:draw";
-const WEEK_MS     = 7 * 24 * 60 * 60 * 1000;
+const LOCK_DAYS   = 7;
 
 interface StoredDraw {
   cards:   Card[];
@@ -24,6 +24,17 @@ function drawSpread(): Card[] {
   return [doubleCard, ...rest].sort(() => Math.random() - 0.5);
 }
 
+// Local midnight, `days` days after the calendar day `ts` falls on — so a
+// lock always expires at the start of a day rather than at the exact
+// time-of-day someone happened to draw (draw at 11pm, still unlock at
+// midnight seven days later, not 11pm).
+function startOfLocalDayPlus(ts: number, days: number): number {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d.getTime();
+}
+
 function formatDate(ts: number): string {
   return new Date(ts).toISOString().slice(0, 10);
 }
@@ -38,19 +49,19 @@ export default function ArtPage() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const saved: StoredDraw = JSON.parse(raw);
-        const elapsed = Date.now() - saved.drawnAt;
+        const unlockAt = startOfLocalDayPlus(saved.drawnAt, LOCK_DAYS);
 
-        if (elapsed < WEEK_MS) {
+        if (Date.now() < unlockAt) {
           // Within the week — same spread, no redraw.
           setSpread(saved.cards);
-          setNextDrawAt(saved.drawnAt + WEEK_MS);
+          setNextDrawAt(unlockAt);
         } else {
           // Lock expired — a fresh spread on this visit, no click required.
           const fresh   = drawSpread();
           const drawnAt = Date.now();
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt }));
           setSpread(fresh);
-          setNextDrawAt(drawnAt + WEEK_MS);
+          setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
         }
       }
       // else: no record at all — true first visit, wait for the click below.
@@ -69,7 +80,7 @@ export default function ArtPage() {
       // ignore — spread still shows for this session even if it can't persist
     }
     setSpread(fresh);
-    setNextDrawAt(drawnAt + WEEK_MS);
+    setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
   }, []);
 
   return (
@@ -157,7 +168,7 @@ export default function ArtPage() {
                 letterSpacing: "0.05em",
               }}
             >
-              next draw available {formatDate(nextDrawAt)}
+              one draw a week. next: {formatDate(nextDrawAt)}
             </p>
           ) : null}
         </motion.div>
