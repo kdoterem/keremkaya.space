@@ -128,6 +128,13 @@ a:hover .post-nav-title {
     padding:      1rem 1.25rem;
     overflow:     hidden;
   }
+  /* Empty boxes (no draw yet) don't need to claim the full flex-1 height that
+     a filled spread does — .art-spread is the only growing item in the column,
+     so without this it always eats all remaining space and pushes the invite
+     button below the fold. */
+  .art-spread.art-spread-empty {
+    margin-bottom: 2rem;
+  }
   .art-card-text {
     font-size: clamp(1.05rem, 5.5vw, 1.35rem);
   }
