@@ -63,6 +63,50 @@ a:hover .post-nav-title {
   color: #0a0a0a;
 }
 
+/* /art — three-card spread: row on desktop, stacked on mobile */
+.art-spread {
+  display:         flex;
+  gap:              1.5rem;
+  justify-content: center;
+  width:           100%;
+  max-width:       900px;
+  margin:          0 auto;
+}
+.art-card {
+  flex:            1 1 0;
+  max-width:       260px;
+  aspect-ratio:    2 / 3;
+  border:          1px solid rgba(10, 10, 10, 0.12);
+  display:         flex;
+  align-items:     center;
+  padding:         2rem 1.75rem;
+}
+@media (max-width: 640px) {
+  .art-spread {
+    flex-direction: column;
+    align-items:    center;
+  }
+  .art-card {
+    max-width: 320px;
+    width:     100%;
+  }
+}
+
+/* Draw-invite line on /art's first-ever visit — text button, same family as
+   "take me somewhere" on /writing */
+.art-invite {
+  background: none;
+  border:     none;
+  cursor:     pointer;
+  font:       inherit;
+  color:      #0a0a0a;
+  opacity:    0.55;
+  transition: opacity 0.15s;
+}
+.art-invite:hover {
+  opacity: 1;
+}
+
 /* Prose content (post reading view) */
 .prose-content p {
   margin-bottom: 1.4em;

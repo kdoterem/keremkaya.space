@@ -1,224 +1,170 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { CARDS, type Card } from "@/lib/cards";
 
-interface Painting {
-  title: string;
-  date: string;
+const STORAGE_KEY = "art:draw";
+const WEEK_MS     = 7 * 24 * 60 * 60 * 1000;
+
+interface StoredDraw {
+  cards:   Card[];
+  drawnAt: number;
 }
 
-// Add paintings here: { title, date } — images go in /public/art/ as painting-1.jpg, etc.
-const PAINTINGS: Painting[] = [
-  { title: "untitled I", date: "2023" },
-  { title: "untitled II", date: "2023" },
-  { title: "untitled III", date: "2024" },
-];
+// Exactly one "double" card, plus two more from everything else (any group,
+// including other "double" cards) — no duplicates, order shuffled so the
+// guaranteed slot can't be inferred by position.
+function drawSpread(): Card[] {
+  const doubles    = CARDS.filter(c => c.group === "double");
+  const doubleCard = doubles[Math.floor(Math.random() * doubles.length)];
+  const remaining  = CARDS.filter(c => c !== doubleCard);
+  const rest       = [...remaining].sort(() => Math.random() - 0.5).slice(0, 2);
+  return [doubleCard, ...rest].sort(() => Math.random() - 0.5);
+}
+
+function formatDate(ts: number): string {
+  return new Date(ts).toISOString().slice(0, 10);
+}
 
 export default function ArtPage() {
-  const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward (from right), -1 = back
+  const [loaded,     setLoaded]     = useState(false);
+  const [spread,     setSpread]     = useState<Card[] | null>(null);
+  const [nextDrawAt, setNextDrawAt] = useState<number | null>(null);
 
-  const goTo = useCallback(
-    (index: number) => {
-      if (index === current) return;
-      setDirection(index > current ? 1 : -1);
-      setCurrent(index);
-    },
-    [current]
-  );
-
-  // Wheel scroll handler
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.deltaY > 0 && current < PAINTINGS.length - 1) {
-        goTo(current + 1);
-      } else if (e.deltaY < 0 && current > 0) {
-        goTo(current - 1);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved: StoredDraw = JSON.parse(raw);
+        const elapsed = Date.now() - saved.drawnAt;
+
+        if (elapsed < WEEK_MS) {
+          // Within the week — same spread, no redraw.
+          setSpread(saved.cards);
+          setNextDrawAt(saved.drawnAt + WEEK_MS);
+        } else {
+          // Lock expired — a fresh spread on this visit, no click required.
+          const fresh   = drawSpread();
+          const drawnAt = Date.now();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt }));
+          setSpread(fresh);
+          setNextDrawAt(drawnAt + WEEK_MS);
+        }
       }
-    };
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, [current, goTo]);
+      // else: no record at all — true first visit, wait for the click below.
+    } catch {
+      // localStorage unavailable — behave like a first visit.
+    }
+    setLoaded(true);
+  }, []);
 
-  const variants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? "-30%" : "30%",
-      opacity: 0,
-    }),
-  };
-
-  const painting = PAINTINGS[current];
+  const handleDraw = useCallback(() => {
+    const fresh   = drawSpread();
+    const drawnAt = Date.now();
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt }));
+    } catch {
+      // ignore — spread still shows for this session even if it can't persist
+    }
+    setSpread(fresh);
+    setNextDrawAt(drawnAt + WEEK_MS);
+  }, []);
 
   return (
     <main
       style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        minHeight:  "100vh",
+        padding:    "4rem 5vw 8rem",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
       }}
     >
-      {/* Back nav */}
-      <Link
-        href="/"
-        style={{
-          position: "absolute",
-          top: "2.5rem",
-          left: "3rem",
-          fontSize: "0.7rem",
-          fontWeight: 500,
-          letterSpacing: "0.15em",
-          fontVariant: "small-caps",
-          color: "#0a0a0a",
-          textDecoration: "none",
-          opacity: 0.5,
-          zIndex: 10,
-        }}
-      >
-        RETURN
-      </Link>
-
-      {/* Painting */}
-      <AnimatePresence mode="wait" custom={direction}>
-        <motion.div
-          key={current}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
+      {/* Back */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Link
+          href="/"
           style={{
-            position: "absolute",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "80vw",
-            height: "80vh",
+            fontSize:       "0.7rem",
+            fontWeight:     500,
+            letterSpacing:  "0.15em",
+            fontVariant:    "small-caps",
+            color:          "#0a0a0a",
+            textDecoration: "none",
+            opacity:        0.5,
           }}
         >
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "1px solid rgba(10,10,10,0.12)",
-              color: "rgba(10,10,10,0.3)",
-              fontSize: "0.75rem",
-              letterSpacing: "0.12em",
-              fontVariant: "small-caps",
-            }}
-          >
-            coming soon
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Caption — bottom right */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`caption-${current}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          style={{
-            position: "absolute",
-            bottom: "2.5rem",
-            right: "3rem",
-            textAlign: "right",
-            zIndex: 10,
-          }}
-        >
-          <p
-            style={{
-              fontSize: "0.8rem",
-              fontWeight: 500,
-              color: "#0a0a0a",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {painting.title}
-          </p>
-          <p
-            style={{
-              fontSize: "0.65rem",
-              color: "rgba(10,10,10,0.45)",
-              letterSpacing: "0.05em",
-              marginTop: "0.15rem",
-            }}
-          >
-            {painting.date}
-          </p>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Dot navigation */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "2.5rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          gap: "0.6rem",
-          zIndex: 10,
-        }}
-      >
-        {PAINTINGS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            style={{
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              background: i === current ? "#0a0a0a" : "rgba(10,10,10,0.25)",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              transition: "background 0.2s",
-            }}
-          />
-        ))}
+          RETURN
+        </Link>
       </div>
 
-      {/* Scroll hint */}
-      {current === 0 && (
-        <motion.p
+      {/* Card spread */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="art-spread"
+        style={{ marginTop: "5rem" }}
+      >
+        {[0, 1, 2].map((i) => {
+          const card = spread?.[i];
+          return (
+            <div key={i} className="art-card">
+              {card && (
+                <span
+                  style={{
+                    fontSize:      "clamp(0.95rem, 2.4vw, 1.1rem)",
+                    fontWeight:    500,
+                    color:         "#0a0a0a",
+                    lineHeight:    1.5,
+                    letterSpacing: "-0.01em",
+                    textAlign:     "left",
+                  }}
+                >
+                  {card.text}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </motion.div>
+
+      {/* Invite (first visit) / weekly-lock date-stamp */}
+      {loaded && (
+        <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.35 }}
-          transition={{ delay: 1.5 }}
-          style={{
-            position: "absolute",
-            bottom: "2.5rem",
-            left: "3rem",
-            fontSize: "0.65rem",
-            letterSpacing: "0.1em",
-            fontVariant: "small-caps",
-            color: "#0a0a0a",
-          }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          style={{ textAlign: "center", marginTop: "2.5rem" }}
         >
-          scroll to navigate
-        </motion.p>
+          {!spread ? (
+            <button
+              onClick={handleDraw}
+              className="art-invite"
+              style={{
+                fontSize:      "0.88rem",
+                fontWeight:    500,
+                letterSpacing: "0.06em",
+              }}
+            >
+              draw
+            </button>
+          ) : nextDrawAt ? (
+            <p
+              style={{
+                fontSize:      "0.75rem",
+                color:         "rgba(10,10,10,0.4)",
+                letterSpacing: "0.05em",
+              }}
+            >
+              next draw available {formatDate(nextDrawAt)}
+            </p>
+          ) : null}
+        </motion.div>
       )}
+
+      {/* Reserved for image export / notes / email — not built yet */}
+      <div style={{ minHeight: "6rem" }} />
     </main>
   );
 }
