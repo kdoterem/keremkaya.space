@@ -66,6 +66,7 @@ const cardTextStyle: React.CSSProperties = {
   lineHeight:    1.25,
   letterSpacing: "-0.015em",
   textAlign:     "left",
+  overflowWrap:  "anywhere", // safety net — nothing should ever push past the box
 };
 
 export default function ArtPage() {
