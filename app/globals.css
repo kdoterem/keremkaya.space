@@ -63,7 +63,7 @@ a:hover .post-nav-title {
   color: #0a0a0a;
 }
 
-/* /art — three-card spread: row on desktop, stacked on mobile */
+/* /kismet — three-card spread: row on desktop, stacked on mobile */
 .art-spread {
   display:         flex;
   gap:              1.5rem;
@@ -78,7 +78,7 @@ a:hover .post-nav-title {
   aspect-ratio:    2 / 3;
   border:          1px solid rgba(10, 10, 10, 0.12);
   display:         flex;
-  align-items:     center;
+  align-items:     flex-start;  /* all three cards start text at the same height */
   padding:         2rem 1.75rem;
 }
 @media (max-width: 640px) {
@@ -92,7 +92,7 @@ a:hover .post-nav-title {
   }
 }
 
-/* Draw-invite line on /art's first-ever visit — text button, same family as
+/* Draw-invite line on /kismet's first-ever visit — text button, same family as
    "take me somewhere" on /writing */
 .art-invite {
   background: none;

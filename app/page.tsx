@@ -36,7 +36,7 @@ const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
 
 const NAV = [
   { label: "WRITING", href: "/writing"  },
-  { label: "ART",     href: "/art"      },
+  { label: "KISMET",  href: "/kismet"   },
   { label: "Q&A",     href: "/answers"  },
   { label: "FIND ME", href: "/find-me"  },
 ];

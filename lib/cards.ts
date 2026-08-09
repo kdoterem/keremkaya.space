@@ -1,8 +1,8 @@
-// Draw deck for /art — 59 cards, from the-deck.md (drawn from the archive of
+// Draw deck for /kismet — 59 cards, from the-deck.md (drawn from the archive of
 // Kerem Kaya, February 2025 – August 2026).
 //
 // group is never shown in the UI; it only drives selection (see drawSpread
-// in app/art/page.tsx: exactly one "double" card, plus two more from the
+// in app/kismet/page.tsx: exactly one "double" card, plus two more from the
 // remaining pool across all groups). Counts: doubles 16, warnings 14,
 // doors 10, verdicts 19.
 
