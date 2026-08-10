@@ -129,6 +129,30 @@ a:hover .post-nav-title {
 }
 .kismet-note-action {
   min-height: 3rem;
+  padding-top: 0.85rem;
+}
+
+/* Send link — same plain-text treatment as take-me-somewhere on /writing
+   (no border, no box), but in the date-stamp's quiet grey rather than ink,
+   since it's a minor action sitting beneath the note, not a primary one. */
+.kismet-send {
+  display:        inline-block;
+  background:     none;
+  border:         none;
+  cursor:         pointer;
+  font-family:    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size:      0.75rem;
+  font-weight:    400;
+  letter-spacing: 0.05em;
+  color:          rgba(10, 10, 10, 0.4);
+  padding:        0;
+  transition:     color 0.15s;
+}
+.kismet-send:hover:not(:disabled) {
+  color: #0a0a0a;
+}
+.kismet-send:disabled {
+  cursor: default;
 }
 
 @media (max-width: 640px) {

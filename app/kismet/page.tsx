@@ -24,6 +24,19 @@ interface StoredDraw {
   cards:   Card[];
   drawnAt: number;
   note:    string;
+  sent:    boolean;
+}
+
+const WEB3FORMS_ENDPOINT   = "https://api.web3forms.com/submit";
+const WEB3FORMS_ACCESS_KEY = "1bf57100-9d1e-4357-9747-7155c3a32255";
+
+type SendState = "idle" | "sending" | "sent" | "error";
+
+// Cards on their own lines, then the date, then a blank line, then the note —
+// so the note arrives with the spread it's responding to.
+function buildMessage(cards: Card[], drawnAt: number, note: string): string {
+  const cardLines = cards.map(c => c.text).join("\n");
+  return `${cardLines}\n${formatDate(drawnAt)}\n\n${note}`;
 }
 
 // Best-effort — archiving a superseded draw should never block a fresh one.
@@ -31,7 +44,7 @@ function archivePastDraw(draw: StoredDraw) {
   try {
     const raw     = localStorage.getItem(ARCHIVE_KEY);
     const archive: StoredDraw[] = raw ? JSON.parse(raw) : [];
-    archive.push({ ...draw, note: draw.note ?? "" });
+    archive.push({ ...draw, note: draw.note ?? "", sent: draw.sent ?? false });
     localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
   } catch {
     // ignore
@@ -82,10 +95,12 @@ function autoGrow(el: HTMLTextAreaElement) {
 export default function ArtPage() {
   const [phase,      setPhase]      = useState<Phase>("pending");
   const [spread,     setSpread]     = useState<Card[] | null>(null);
+  const [drawnAt,    setDrawnAt]    = useState<number | null>(null);
   const [nextDrawAt, setNextDrawAt] = useState<number | null>(null);
   const [particles,  setParticles]  = useState<Particle[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [note,       setNote]       = useState("");
+  const [sendState,  setSendState]  = useState<SendState>("idle");
 
   const revealTimeouts = useRef<number[]>([]);
   const noteRef         = useRef<HTMLTextAreaElement>(null);
@@ -106,20 +121,24 @@ export default function ArtPage() {
         if (Date.now() < unlockAt) {
           // Within the week — same spread, shown instantly. No redraw, no animation.
           setSpread(saved.cards);
+          setDrawnAt(saved.drawnAt);
           setNextDrawAt(unlockAt);
           setNote(saved.note ?? "");
+          setSendState(saved.sent ? "sent" : "idle");
           setPhase("static");
         } else {
           // Lock expired — a fresh spread on this visit, no click required, but it's
           // still a real draw, so it gets the same scramble-in as a clicked one.
           // The old draw (and whatever note went with it) is kept, not discarded.
           archivePastDraw(saved);
-          const fresh   = drawSpread();
-          const drawnAt = Date.now();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt, note: "" }));
+          const fresh      = drawSpread();
+          const freshDrawnAt = Date.now();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt: freshDrawnAt, note: "", sent: false }));
           setSpread(fresh);
-          setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
+          setDrawnAt(freshDrawnAt);
+          setNextDrawAt(startOfLocalDayPlus(freshDrawnAt, LOCK_DAYS));
           setNote("");
+          setSendState("idle");
           setPhase("revealing");
         }
       } else {
@@ -155,16 +174,18 @@ export default function ArtPage() {
     setPhase("dissolving");
 
     window.setTimeout(() => {
-      const fresh   = drawSpread();
-      const drawnAt = Date.now();
+      const fresh      = drawSpread();
+      const freshDrawnAt = Date.now();
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt, note: "" }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt: freshDrawnAt, note: "", sent: false }));
       } catch {
         // ignore — spread still shows for this session even if it can't persist
       }
       setSpread(fresh);
-      setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
+      setDrawnAt(freshDrawnAt);
+      setNextDrawAt(startOfLocalDayPlus(freshDrawnAt, LOCK_DAYS));
       setNote("");
+      setSendState("idle");
       setPhase("revealing");
     }, DISSOLVE_MS);
   }, []);
@@ -184,6 +205,47 @@ export default function ArtPage() {
       // ignore — note still shows for this session even if it can't persist
     }
   }, []);
+
+  const handleSend = useCallback(async () => {
+    if (sendState === "sending" || sendState === "sent") return;
+    if (!spread || drawnAt === null) return;
+
+    setSendState("sending");
+    try {
+      const res = await fetch(WEB3FORMS_ENDPOINT, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          from_name:  "kismet",
+          subject:    "kismet — a note",
+          message:    buildMessage(spread, drawnAt, note),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) throw new Error("send failed");
+
+      setSendState("sent");
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const saved: StoredDraw = JSON.parse(raw);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, sent: true }));
+        }
+      } catch {
+        // note stays marked sent for this session even if it can't persist
+      }
+    } catch {
+      setSendState("error");
+    }
+  }, [sendState, spread, drawnAt, note]);
+
+  const sendLabel = {
+    idle:    "send this to kerem",
+    sending: "sending",
+    sent:    "sent",
+    error:   "didn't send. try again",
+  }[sendState];
 
   const showButton  = phase === "invite" || phase === "dissolving";
   const showDateLine = (phase === "revealing" || phase === "static") && nextDrawAt !== null;
@@ -256,12 +318,22 @@ export default function ArtPage() {
             ref={noteRef}
             value={note}
             onChange={handleNoteChange}
+            readOnly={sendState === "sent"}
             placeholder="notes"
             rows={1}
             className="kismet-note"
           />
-          {/* Reserved for a small action beneath the note (e.g. send) — not built yet */}
-          <div className="kismet-note-action" />
+          {note.trim() && (
+            <div className="kismet-note-action">
+              <button
+                onClick={handleSend}
+                disabled={sendState === "sending" || sendState === "sent"}
+                className="kismet-send"
+              >
+                {sendLabel}
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
 
