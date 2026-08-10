@@ -60,6 +60,15 @@ type Phase = "pending" | "invite" | "dissolving" | "revealing" | "static";
 
 interface Particle { dx: number; dy: number; rot: number }
 
+// Picks uniformly from pool, minus whatever's in exclude — unless that would
+// leave nothing to pick from, in which case the exclusion is dropped rather
+// than failing (the door pool is only 10 cards; unlikely to bite, but possible).
+function pickAvoiding(pool: Card[], exclude: Set<string>): Card {
+  const filtered = pool.filter(c => !exclude.has(c.text));
+  const from     = filtered.length > 0 ? filtered : pool;
+  return from[Math.floor(Math.random() * from.length)];
+}
+
 // Fixed shape, by position — not shuffled after selection, the order is the
 // structure:
 //   1. warning or verdict — the spread opens with a hard statement.
@@ -69,14 +78,17 @@ interface Particle { dx: number; dy: number; rot: number }
 //      preferable to a spread that never opens: with doubles allowed here too,
 //      16 doubles against 10 doors meant position three landed on a double
 //      ~62% of the time and the door frequently never showed up at all.
-function drawSpread(): Card[] {
+//
+// exclude is the previous draw's three card texts, if any — no card can
+// appear in two consecutive weekly spreads.
+function drawSpread(exclude: Set<string> = new Set()): Card[] {
   const openers = CARDS.filter(c => c.group === "warning" || c.group === "verdict");
   const doubles = CARDS.filter(c => c.group === "double");
   const doors   = CARDS.filter(c => c.group === "door");
 
-  const first  = openers[Math.floor(Math.random() * openers.length)];
-  const second = doubles[Math.floor(Math.random() * doubles.length)];
-  const third  = doors[Math.floor(Math.random() * doors.length)];
+  const first  = pickAvoiding(openers, exclude);
+  const second = pickAvoiding(doubles, exclude);
+  const third  = pickAvoiding(doors, exclude);
 
   return [first, second, third];
 }
@@ -141,7 +153,7 @@ export default function ArtPage() {
           // still a real draw, so it gets the same scramble-in as a clicked one.
           // The old draw (and whatever note went with it) is kept, not discarded.
           archivePastDraw(saved);
-          const fresh      = drawSpread();
+          const fresh      = drawSpread(new Set(saved.cards.map(c => c.text)));
           const freshDrawnAt = Date.now();
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt: freshDrawnAt, note: "", sent: false }));
           setSpread(fresh);
