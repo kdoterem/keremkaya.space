@@ -64,20 +64,19 @@ interface Particle { dx: number; dy: number; rot: number }
 // structure:
 //   1. warning or verdict — the spread opens with a hard statement.
 //   2. always double — the card that won't resolve sits in the middle.
-//   3. door, or double if needed (only 10 doors; allowing doubles here gives
-//      26 cards to draw from so the position doesn't repeat too often across
-//      weekly draws) — excluding whichever double landed in position 2, so
-//      the spread never repeats a card.
+//   3. always door — closes the arc. Doors repeat more across weekly draws
+//      (only 10 of them) than letting doubles fill the slot would, but that's
+//      preferable to a spread that never opens: with doubles allowed here too,
+//      16 doubles against 10 doors meant position three landed on a double
+//      ~62% of the time and the door frequently never showed up at all.
 function drawSpread(): Card[] {
   const openers = CARDS.filter(c => c.group === "warning" || c.group === "verdict");
   const doubles = CARDS.filter(c => c.group === "double");
-  const closers = CARDS.filter(c => c.group === "door" || c.group === "double");
+  const doors   = CARDS.filter(c => c.group === "door");
 
   const first  = openers[Math.floor(Math.random() * openers.length)];
   const second = doubles[Math.floor(Math.random() * doubles.length)];
-
-  const closerPool = closers.filter(c => c !== second);
-  const third = closerPool[Math.floor(Math.random() * closerPool.length)];
+  const third  = doors[Math.floor(Math.random() * doors.length)];
 
   return [first, second, third];
 }
