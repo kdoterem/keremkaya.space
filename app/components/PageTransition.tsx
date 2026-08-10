@@ -49,7 +49,7 @@ export default function PageTransition({
   }, [pathname, children]);
 
   return (
-    <div style={{ position: "relative", minHeight: "100vh" }}>
+    <div style={{ position: "relative", minHeight: "100dvh" }}>
       {displayChildren}
 
       {/* Flash overlay */}
