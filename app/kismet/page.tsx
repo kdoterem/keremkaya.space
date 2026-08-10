@@ -60,15 +60,26 @@ type Phase = "pending" | "invite" | "dissolving" | "revealing" | "static";
 
 interface Particle { dx: number; dy: number; rot: number }
 
-// Exactly one "double" card, plus two more from everything else (any group,
-// including other "double" cards) — no duplicates, order shuffled so the
-// guaranteed slot can't be inferred by position.
+// Fixed shape, by position — not shuffled after selection, the order is the
+// structure:
+//   1. warning or verdict — the spread opens with a hard statement.
+//   2. always double — the card that won't resolve sits in the middle.
+//   3. door, or double if needed (only 10 doors; allowing doubles here gives
+//      26 cards to draw from so the position doesn't repeat too often across
+//      weekly draws) — excluding whichever double landed in position 2, so
+//      the spread never repeats a card.
 function drawSpread(): Card[] {
-  const doubles    = CARDS.filter(c => c.group === "double");
-  const doubleCard = doubles[Math.floor(Math.random() * doubles.length)];
-  const remaining  = CARDS.filter(c => c !== doubleCard);
-  const rest       = [...remaining].sort(() => Math.random() - 0.5).slice(0, 2);
-  return [doubleCard, ...rest].sort(() => Math.random() - 0.5);
+  const openers = CARDS.filter(c => c.group === "warning" || c.group === "verdict");
+  const doubles = CARDS.filter(c => c.group === "double");
+  const closers = CARDS.filter(c => c.group === "door" || c.group === "double");
+
+  const first  = openers[Math.floor(Math.random() * openers.length)];
+  const second = doubles[Math.floor(Math.random() * doubles.length)];
+
+  const closerPool = closers.filter(c => c !== second);
+  const third = closerPool[Math.floor(Math.random() * closerPool.length)];
+
+  return [first, second, third];
 }
 
 // Local midnight, `days` days after the calendar day `ts` falls on — so a
