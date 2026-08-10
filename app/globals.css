@@ -101,14 +101,46 @@ a:hover .post-nav-title {
   min-height: 6rem;
 }
 
+/* The note — no box, no border, reads as a place to write. Grows with content
+   instead of scrolling inside a fixed area (see autoGrow in page.tsx). */
+.kismet-note-wrap {
+  width:      100%;
+  max-width:  900px;
+  margin:     2.5rem auto 0;
+}
+.kismet-note {
+  display:        block;
+  width:          100%;
+  resize:         none;
+  overflow:       hidden;
+  border:         none;
+  outline:        none;
+  background:     none;
+  padding:        0;
+  font-family:    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size:      1rem;
+  font-weight:    400;
+  line-height:    1.6;
+  letter-spacing: -0.005em;
+  color:          rgba(10, 10, 10, 0.85);
+}
+.kismet-note::placeholder {
+  color: rgba(10, 10, 10, 0.4);
+}
+.kismet-note-action {
+  min-height: 3rem;
+}
+
 @media (max-width: 640px) {
-  /* Three landscape bands, all visible at once — no portrait stacking, no scroll. */
+  /* Three landscape bands fill exactly one screen when the note is short;
+     min-height (not a fixed height) lets the page grow and scroll normally
+     if a longer note pushes past it — the no-scroll guarantee is about the
+     card reveal, not a hard cap on writing. */
   .kismet-main {
-    height:         100dvh;
+    min-height:     100dvh;
     display:        flex;
     flex-direction: column;
     padding:        2.5rem 5vw 1.25rem;
-    overflow:       hidden; /* belt-and-suspenders against any future edge case */
   }
   .art-spread {
     flex:           1;
@@ -143,6 +175,12 @@ a:hover .post-nav-title {
   }
   .kismet-reserve {
     min-height: 0.5rem;
+  }
+  .kismet-note-wrap {
+    margin-top: 1.25rem;
+  }
+  .kismet-note-action {
+    min-height: 1.5rem;
   }
 }
 

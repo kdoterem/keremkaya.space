@@ -6,8 +6,9 @@ import Link from "next/link";
 import { CARDS, type Card } from "@/lib/cards";
 import CryptoScramble from "@/app/components/CryptoScramble";
 
-const STORAGE_KEY = "art:draw";
-const LOCK_DAYS   = 7;
+const STORAGE_KEY  = "art:draw";
+const ARCHIVE_KEY  = "art:archive"; // past draws + notes, kept but not surfaced yet
+const LOCK_DAYS    = 7;
 
 const LABEL             = "draw";
 const DISSOLVE_MS       = 700;  // button breaking apart, before cards begin
@@ -22,6 +23,19 @@ const CARD_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0
 interface StoredDraw {
   cards:   Card[];
   drawnAt: number;
+  note:    string;
+}
+
+// Best-effort — archiving a superseded draw should never block a fresh one.
+function archivePastDraw(draw: StoredDraw) {
+  try {
+    const raw     = localStorage.getItem(ARCHIVE_KEY);
+    const archive: StoredDraw[] = raw ? JSON.parse(raw) : [];
+    archive.push({ ...draw, note: draw.note ?? "" });
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
+  } catch {
+    // ignore
+  }
 }
 
 // pending  — still reading localStorage, nothing rendered yet (avoids a flash)
@@ -59,14 +73,28 @@ function formatDate(ts: number): string {
   return new Date(ts).toISOString().slice(0, 10);
 }
 
+// Grows the textarea to fit its content instead of scrolling inside a fixed box.
+function autoGrow(el: HTMLTextAreaElement) {
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
+
 export default function ArtPage() {
   const [phase,      setPhase]      = useState<Phase>("pending");
   const [spread,     setSpread]     = useState<Card[] | null>(null);
   const [nextDrawAt, setNextDrawAt] = useState<number | null>(null);
   const [particles,  setParticles]  = useState<Particle[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
+  const [note,       setNote]       = useState("");
 
   const revealTimeouts = useRef<number[]>([]);
+  const noteRef         = useRef<HTMLTextAreaElement>(null);
+
+  // Fit the textarea to whatever's in it — on mount (a restored note may be
+  // multiple lines) and on every keystroke.
+  useEffect(() => {
+    if (noteRef.current) autoGrow(noteRef.current);
+  }, [note]);
 
   useEffect(() => {
     try {
@@ -79,15 +107,19 @@ export default function ArtPage() {
           // Within the week — same spread, shown instantly. No redraw, no animation.
           setSpread(saved.cards);
           setNextDrawAt(unlockAt);
+          setNote(saved.note ?? "");
           setPhase("static");
         } else {
           // Lock expired — a fresh spread on this visit, no click required, but it's
           // still a real draw, so it gets the same scramble-in as a clicked one.
+          // The old draw (and whatever note went with it) is kept, not discarded.
+          archivePastDraw(saved);
           const fresh   = drawSpread();
           const drawnAt = Date.now();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt }));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt, note: "" }));
           setSpread(fresh);
           setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
+          setNote("");
           setPhase("revealing");
         }
       } else {
@@ -126,14 +158,31 @@ export default function ArtPage() {
       const fresh   = drawSpread();
       const drawnAt = Date.now();
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: fresh, drawnAt, note: "" }));
       } catch {
         // ignore — spread still shows for this session even if it can't persist
       }
       setSpread(fresh);
       setNextDrawAt(startOfLocalDayPlus(drawnAt, LOCK_DAYS));
+      setNote("");
       setPhase("revealing");
     }, DISSOLVE_MS);
+  }, []);
+
+  // Autosaves on every keystroke, merged into the current draw so the note
+  // stays tied to those specific three cards.
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setNote(value);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved: StoredDraw = JSON.parse(raw);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, note: value }));
+      }
+    } catch {
+      // ignore — note still shows for this session even if it can't persist
+    }
   }, []);
 
   const showButton  = phase === "invite" || phase === "dissolving";
@@ -194,6 +243,28 @@ export default function ArtPage() {
         })}
       </motion.div>
 
+      {/* Note — appears once there's a spread to write about; autosaves as-you-type,
+          tied to this draw's own storage entry so it belongs to these three cards */}
+      {spread && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="kismet-note-wrap"
+        >
+          <textarea
+            ref={noteRef}
+            value={note}
+            onChange={handleNoteChange}
+            placeholder="notes"
+            rows={1}
+            className="kismet-note"
+          />
+          {/* Reserved for a small action beneath the note (e.g. send) — not built yet */}
+          <div className="kismet-note-action" />
+        </motion.div>
+      )}
+
       {/* Invite (first visit) / weekly-lock date-stamp */}
       {(showButton || showDateLine) && (
         <motion.div
@@ -251,7 +322,7 @@ export default function ArtPage() {
         </motion.div>
       )}
 
-      {/* Reserved for image export / notes / email — not built yet */}
+      {/* Reserved for image export — not built yet */}
       <div className="kismet-reserve" />
     </main>
   );
