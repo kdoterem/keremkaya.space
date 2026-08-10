@@ -263,7 +263,7 @@ export default function ArtPage() {
 
   return (
     <main
-      className="kismet-main"
+      className={`kismet-main${spread ? "" : " kismet-main-empty"}`}
       style={{
         minHeight:  "100vh",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',

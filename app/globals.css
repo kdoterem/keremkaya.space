@@ -166,6 +166,13 @@ a:hover .post-nav-title {
     flex-direction: column;
     padding:        2.5rem 5vw 1.25rem;
   }
+  /* Before a draw exists there's no note to worry about clipping, so go back
+     to a hard-capped screen: guarantees the draw button never sits a few
+     pixels past the fold. */
+  .kismet-main.kismet-main-empty {
+    height:   100dvh;
+    overflow: hidden;
+  }
   .art-spread {
     flex:           1;
     min-height:     0;
