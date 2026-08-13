@@ -144,3 +144,59 @@ export function getTagCounts(): TagCount[] {
   return Array.from(counts, ([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
+
+export interface MonthlyProfile {
+  month: string; // YYYY-MM
+  count: number;
+  words: number;
+}
+
+// One entry per calendar month from the earliest post to the most recent,
+// zero-filled so the series has no gaps — the basis for a terrain/timeline view.
+export function getMonthlyProfile(): MonthlyProfile[] {
+  if (!fs.existsSync(POSTS_DIR)) return [];
+
+  const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+
+  const monthly = new Map<string, { count: number; words: number }>();
+
+  for (const filename of files) {
+    const filePath = path.join(POSTS_DIR, filename);
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const { data, content } = matter(raw);
+
+    const rawDate = data.date;
+    const rawStr = rawDate instanceof Date ? rawDate.toISOString() : rawDate ? String(rawDate) : "";
+    if (!rawStr) continue;
+    const month = rawStr.slice(0, 7);
+
+    const words = content.trim().split(/\s+/).filter(Boolean).length;
+
+    const entry = monthly.get(month) ?? { count: 0, words: 0 };
+    entry.count += 1;
+    entry.words += words;
+    monthly.set(month, entry);
+  }
+
+  const months = Array.from(monthly.keys()).sort();
+  if (months.length === 0) return [];
+
+  const [startY, startM] = months[0].split("-").map(Number);
+  const [endY, endM] = months[months.length - 1].split("-").map(Number);
+
+  const series: MonthlyProfile[] = [];
+  let y = startY;
+  let m = startM;
+  while (y < endY || (y === endY && m <= endM)) {
+    const month = `${y}-${String(m).padStart(2, "0")}`;
+    const entry = monthly.get(month) ?? { count: 0, words: 0 };
+    series.push({ month, count: entry.count, words: entry.words });
+    m += 1;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+  }
+
+  return series;
+}
