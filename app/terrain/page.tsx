@@ -127,10 +127,32 @@ const HAZE_OPACITY = 0.45; // ceiling opacity of the partially-resolved band
 const MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
 const PROSE = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-const POS_KEY   = "range:position";
-const READ_KEY  = "range:read";
-const NOTES_KEY = "range:notes";
-const LOG_KEY   = "range:log";
+const POS_KEY       = "range:position";
+const READ_KEY      = "range:read";
+const NOTES_KEY     = "range:notes";
+const LOG_KEY       = "range:log";
+const STRETCHES_KEY = "range:stretches";
+
+// ── The route's named stretches, in walking order (present → Feb 2025) ──
+// Shown once each, as a full-screen card, the first time the reader crosses
+// into one — nowhere else. The route is named; nothing on it is signed.
+interface Stretch { name: string; start: string; end: string } // start/end are YYYY-MM, inclusive
+const STRETCHES: Stretch[] = [
+  { name: "THE APPROACH", start: "2026-06", end: "2026-08" },
+  { name: "THE ENGINE",   start: "2026-02", end: "2026-05" },
+  { name: "THE SHAFT",    start: "2026-01", end: "2026-01" },
+  { name: "THE TRAVERSE", start: "2025-07", end: "2025-12" },
+  { name: "THE NARROWS",  start: "2025-05", end: "2025-06" },
+  { name: "THE FACE",     start: "2025-02", end: "2025-04" },
+];
+
+// YYYY-MM strings compare correctly as plain strings.
+function stretchForMonth(month: string): string | null {
+  for (const s of STRETCHES) if (month >= s.start && month <= s.end) return s.name;
+  return null;
+}
+
+const STRETCH_CARD_MS = 1000; // "roughly one second"
 
 const WEB3FORMS_ENDPOINT   = "https://api.web3forms.com/submit";
 const WEB3FORMS_ACCESS_KEY = "1bf57100-9d1e-4357-9747-7155c3a32255";
@@ -175,6 +197,15 @@ function loadNotes(): Record<string, NoteEntry> {
   return {};
 }
 function saveNotes(n: Record<string, NoteEntry>) { try { localStorage.setItem(NOTES_KEY, JSON.stringify(n)); } catch { /* ignore */ } }
+
+function loadCrossedStretches(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STRETCHES_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch { /* ignore */ }
+  return new Set();
+}
+function saveCrossedStretches(s: Set<string>) { try { localStorage.setItem(STRETCHES_KEY, JSON.stringify([...s])); } catch { /* ignore */ } }
 
 // Stage A stub — Stage D specifies the real banishment mechanism.
 function logPussOut(entry: { slug: string; position: number; at: number }) {
@@ -271,11 +302,16 @@ export default function TerrainPage() {
   const [note,        setNote]        = useState("");
   const [sendState,   setSendState]   = useState<SendState>("idle");
 
+  const [crossedStretches, setCrossedStretches] = useState<Set<string>>(new Set());
+  const [stretchCard,      setStretchCard]      = useState<string | null>(null);
+
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const frameRef = useRef<HTMLDivElement>(null);
   const noteRef  = useRef<HTMLTextAreaElement>(null);
   const initedPos = useRef(false);
-  const revealTimeouts = useRef<number[]>([]);
+  const revealTimeouts  = useRef<number[]>([]);
+  const revealDelayRef  = useRef(0);   // extra ms the current poem's reveal-stagger waits — set when a stretch card is showing
+  const stretchTimeout  = useRef<number | null>(null);
 
   useEffect(() => {
     fetch("/api/terrain").then(r => r.json()).then((m: TerrainMonth[]) => setMonths(m));
@@ -296,15 +332,19 @@ export default function TerrainPage() {
     });
   }, []);
 
-  // Position, read-set, and notes are restored once — the moment the month
-  // list is known (needed to clamp a stored position to a valid index).
+  // Position, read-set, notes, and which stretches have already been
+  // crossed are restored once — the moment the month list is known (needed
+  // to clamp a stored position to a valid index).
   useEffect(() => {
     if (initedPos.current || months.length === 0) return;
     initedPos.current = true;
     setPosition(loadPosition(months.length - 1));
     setReadSet(loadReadSet());
     setNotesMap(loadNotes());
+    setCrossedStretches(loadCrossedStretches());
   }, [months.length]);
+
+  useEffect(() => () => { if (stretchTimeout.current != null) window.clearTimeout(stretchTimeout.current); }, []);
 
   useEffect(() => {
     const el = frameRef.current;
@@ -321,13 +361,16 @@ export default function TerrainPage() {
 
   // Title → date → body, staggered — a CryptoScramble instance doesn't mount
   // (and so doesn't start resolving) until its stage arrives, same as
-  // kismet's three-card reveal.
+  // kismet's three-card reveal. revealDelayRef holds off the whole sequence
+  // when a stretch card is covering the poem, so it starts fresh once the
+  // card clears rather than having already been running underneath it.
   useEffect(() => {
     revealTimeouts.current.forEach(clearTimeout);
     if (!currentPoem) { setRevealStage(0); return; }
     setRevealStage(0);
+    const base = revealDelayRef.current;
     revealTimeouts.current = [0, 1, 2].map(i =>
-      window.setTimeout(() => setRevealStage(s => Math.max(s, i + 1)), i * STAGGER_MS)
+      window.setTimeout(() => setRevealStage(s => Math.max(s, i + 1)), base + i * STAGGER_MS)
     );
     return () => { revealTimeouts.current.forEach(clearTimeout); revealTimeouts.current = []; };
   }, [currentPoem]);
@@ -386,14 +429,32 @@ export default function TerrainPage() {
 
   // Shared by the very first READ and by PROCEED's direct delivery — puts a
   // poem on screen and restarts its title/date/body stagger + button timer.
+  // If the poem's month belongs to a stretch not yet crossed, a full-screen
+  // card takes over first: the poem is still delivered underneath it, but
+  // its own reveal is held off (via revealDelayRef) until the card clears,
+  // so it starts fresh rather than having been quietly running the whole
+  // time behind an opaque screen.
   const deliverPoem = useCallback((poem: SearchDoc) => {
+    const stretch = stretchForMonth(poem.date.slice(0, 7));
+    let delay = 0;
+    if (stretch && !crossedStretches.has(stretch)) {
+      const next = new Set(crossedStretches);
+      next.add(stretch);
+      setCrossedStretches(next);
+      saveCrossedStretches(next);
+      if (stretchTimeout.current != null) window.clearTimeout(stretchTimeout.current);
+      setStretchCard(stretch);
+      stretchTimeout.current = window.setTimeout(() => setStretchCard(null), STRETCH_CARD_MS);
+      delay = STRETCH_CARD_MS;
+    }
+    revealDelayRef.current = delay;
     setCurrentPoem(poem);
     setNote(notesMap[poem.slug]?.text ?? "");
     setSendState(notesMap[poem.slug]?.sent ? "sent" : "idle");
     setShowButtons(false);
     setPhase("poem");
-    window.setTimeout(() => setShowButtons(true), TOTAL_REVEAL_MS);
-  }, [notesMap]);
+    window.setTimeout(() => setShowButtons(true), delay + TOTAL_REVEAL_MS);
+  }, [notesMap, crossedStretches]);
 
   // READ only ever fires once per session — to enter the loop. Every poem
   // after that arrives via PROCEED.
@@ -669,6 +730,47 @@ export default function TerrainPage() {
           )}
         </motion.div>
       ) : null}
+      </AnimatePresence>
+
+      {/* Stretch card — full-screen, name only, no interaction. Shown once per
+          stretch per reader (crossedStretches, localStorage-backed above).
+          Deliberately outside the view/poem AnimatePresence: it's an overlay
+          on top of whichever of those is current, not a third phase. */}
+      <AnimatePresence>
+        {stretchCard && (
+          <motion.div
+            key={stretchCard}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: SETTLE_EASE }}
+            style={{
+              position:       "fixed",
+              inset:          0,
+              background:     "#aaff00",
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              padding:        "0 5vw",
+              zIndex:         200,
+              pointerEvents:  "none",
+            }}
+          >
+            <span
+              style={{
+                fontFamily:    MONO,
+                fontSize:      "clamp(1.8rem, 7vw, 4rem)",
+                fontWeight:    700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color:         "#0a0a0a",
+                textAlign:     "center",
+              }}
+            >
+              {stretchCard}
+            </span>
+          </motion.div>
+        )}
       </AnimatePresence>
     </main>
   );
