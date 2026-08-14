@@ -18,6 +18,10 @@ interface Props {
   // Never resolves — every character stays randomised forever at tickMs,
   // ignoring duration/lockIndex entirely. text still sets the fixed length.
   infinite?: boolean;
+  // Fires each time the glyph pool actually refreshes (every tickMs) — lets
+  // a caller drive something else off the same jump, rather than running an
+  // independent, out-of-phase timer of its own.
+  onTick?: () => void;
   style?:     React.CSSProperties;
   className?: string;
 }
@@ -46,6 +50,7 @@ export default function CryptoScramble({
   chars = CHARS,
   scrambleSpaces = false,
   infinite = false,
+  onTick,
   style,
   className,
 }: Props) {
@@ -80,6 +85,7 @@ export default function CryptoScramble({
       if (now - lastTickRef.current >= tickMs) {
         lastTickRef.current = now;
         glyphsRef.current = text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]);
+        onTick?.();
       }
 
       const result = text
@@ -105,7 +111,7 @@ export default function CryptoScramble({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite]);
+  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick]);
 
   return <span className={className} style={style}>{displayed}</span>;
 }

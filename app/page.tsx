@@ -55,8 +55,20 @@ const NAV_CLEARANCE = 110; // px
 const CORE_LINE_LENGTHS = [9, 10, 8, 5, 3];
 const CORE_LINES        = CORE_LINE_LENGTHS.map(n => "•".repeat(n)); // content is irrelevant — infinite mode never reveals it
 const CORE_TICK_MS      = 75;
+// Each line's glyphs refresh at a slightly different rate — close to 75ms
+// but not identical — so five lines that all mount in the same instant
+// still drift out of phase with each other rather than jumping in unison.
+const CORE_LINE_TICKS   = [70, 78, 73, 82, 68];
 const CORE_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 const CORE_RESTITUTION  = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
+
+// The core's own small motion: each line nudges to a new random point every
+// time its own glyphs jump — the scramble's "attack" is what moves it, not
+// an independent clock. Far smaller and quicker than the tag field's slow
+// ambient drift (8-16px over 4-10s) — this is a vibration, not a drift.
+const CORE_VIBRATE_AMP       = 1.4; // px, resting
+const CORE_VIBRATE_AMP_HOVER = 4.5; // px, while hovered — the orbit widens
+const CORE_HOVER_SCALE       = 1.22; // same whileHover scale the tags use
 
 // Shared by buildLayout (keeps tags out) and the fling physics (bounces off
 // it) so the exclusion zone is identical in both places.
@@ -384,52 +396,102 @@ function TagWord({
   );
 }
 
+// One line of the core — its own CryptoScramble instance (so its tick timing
+// is naturally independent of the other four), nudged to a new small random
+// point every time its own glyphs actually jump. hoveringRef is shared
+// across all five lines so hovering anywhere on the core widens every
+// line's vibration together, not just whichever one the pointer sits over.
+function CoreLine({
+  text, tickMs, hoveringRef,
+}: {
+  text:        string;
+  tickMs:      number;
+  hoveringRef: React.MutableRefObject<boolean>;
+}) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const onTick = useCallback(() => {
+    const amp = hoveringRef.current ? CORE_VIBRATE_AMP_HOVER : CORE_VIBRATE_AMP;
+    animate(x, (Math.random() - 0.5) * amp, { duration: tickMs / 1000, ease: "easeOut" });
+    animate(y, (Math.random() - 0.5) * amp, { duration: tickMs / 1000, ease: "easeOut" });
+  }, [x, y, tickMs, hoveringRef]);
+
+  return (
+    <motion.span style={{ display: "block", x, y }}>
+      <CryptoScramble
+        text={text}
+        tickMs={tickMs}
+        chars={CORE_CHARS}
+        infinite
+        onTick={onTick}
+        style={{
+          display:       "block",
+          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+          fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
+          fontWeight:    800,
+          color:         "#0a0a0a",
+          letterSpacing: "-0.02em",
+          textAlign:     "center",
+          // Well below normal (this site's prose runs 1.6-1.8) — the five
+          // lines sit close enough to read as one dense body, not a stack
+          // of separate strings.
+          lineHeight:    0.82,
+        }}
+      />
+    </motion.span>
+  );
+}
+
 // ── The core — fixed, unlabelled, permanently scrambling. Not a TagWord: no
-// drift, no drag, no fling, no fade when a tag panel is open. Just a click
-// target that happens to sit at the centre of the field. ──
+// drag, no fling, no fade when a tag panel is open, no label or tooltip.
+// It does move, in the sense that each line nudges itself on its own
+// scramble ticks (CoreLine, above) — the field's one exception to "no
+// ambient motion," since the motion isn't decorative drift, it's the same
+// jump the text itself is already doing. Hover scales it up exactly like a
+// tag does and widens that vibration; nothing else marks it as clickable. ──
 function ScrambleCore() {
+  const hoveringRef = useRef(false);
+  const [hover, setHover] = useState(false);
+
   return (
     <Link
       href="/terrain"
       onClick={(e) => e.stopPropagation()}
+      onMouseEnter={() => { hoveringRef.current = true;  setHover(true);  }}
+      onMouseLeave={() => { hoveringRef.current = false; setHover(false); }}
       style={{
         position:       "absolute",
         left:           "50%",
         top:            "50%",
-        transform:      "translate(-50%, -50%)",
-        // Shrink-wraps to the widest ("body") line, so every shorter line
-        // below centres symmetrically within that same width — that's what
-        // makes the taper read as pointed rather than lopsided.
-        display:        "inline-block",
-        textAlign:      "center",
         textDecoration: "none",
         cursor:         "pointer",
         userSelect:     "none",
         zIndex:         2,
       }}
     >
-      {CORE_LINES.map((line, i) => (
-        <CryptoScramble
-          key={i}
-          text={line}
-          tickMs={CORE_TICK_MS}
-          chars={CORE_CHARS}
-          infinite
-          style={{
-            display:       "block",
-            fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
-            fontWeight:    800,
-            color:         "#0a0a0a",
-            letterSpacing: "-0.02em",
-            textAlign:     "center",
-            // Well below normal (this site's prose runs 1.6-1.8) — the five
-            // lines sit close enough to read as one dense body, not a stack
-            // of separate strings.
-            lineHeight:    0.82,
-          }}
-        />
-      ))}
+      <motion.div
+        animate={{ scale: hover ? CORE_HOVER_SCALE : 1 }}
+        transition={{ duration: 0.12 }}
+        style={{
+          x: "-50%",
+          y: "-50%",
+          // Shrink-wraps to the widest ("body") line, so every shorter line
+          // below centres symmetrically within that same width — that's what
+          // makes the taper read as pointed rather than lopsided.
+          display:   "inline-block",
+          textAlign: "center",
+        }}
+      >
+        {CORE_LINES.map((line, i) => (
+          <CoreLine
+            key={i}
+            text={line}
+            tickMs={CORE_LINE_TICKS[i] ?? CORE_TICK_MS}
+            hoveringRef={hoveringRef}
+          />
+        ))}
+      </motion.div>
     </Link>
   );
 }
