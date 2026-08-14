@@ -65,6 +65,15 @@ const CORE_RESTITUTION  = 0.28; // vs ~0.7 tag-on-tag — noticeably more resist
 const CORE_TICK_RESTING = [195, 218, 204, 229, 190];
 const CORE_TICK_CONTACT = [55, 61, 57, 64, 53];
 
+// How many of that line's own characters re-roll per tick — the rest hold.
+// At rest this is 1 everywhere (barely-there activity, never a full-line
+// flicker); at contact it opens up to roughly a third of the line, per line
+// length, so approaching makes the block visibly more agitated, not just
+// faster. Which positions get chosen is decided inside CryptoScramble
+// (neighbour-biased), not here — this only sets how many.
+const CORE_CHURN_RESTING = CORE_LINE_LENGTHS.map(() => 1);
+const CORE_CHURN_CONTACT = CORE_LINE_LENGTHS.map(n => Math.max(2, Math.round(n * 0.4)));
+
 // The core's own small motion: each line nudges to a new random point every
 // time its own glyphs jump — the scramble's "attack" is what moves it, not
 // an independent clock. Amplitude ramps on the same proximity curve as the
@@ -409,32 +418,37 @@ function TagWord({
 // is naturally independent of the other four), nudged to a new small random
 // point every time its own glyphs actually jump. proximityRef is shared
 // across all five lines (0 = cursor beyond CORE_PROXIMITY_RADIUS, 1 = right
-// on the block) so approaching the core anywhere speeds all five up and
-// widens their vibration together, continuously — not a per-line or
-// on/off state. tickMsRef is what actually carries that live rate into
-// CryptoScramble; recomputing it here each tick (rather than every frame)
-// is enough — even the slowest resting tick is ~200ms, so it still tracks
-// the cursor smoothly.
+// on the block) so approaching the core anywhere speeds all five up,
+// widens their vibration, and opens up how many characters change per
+// tick — together, continuously, not a per-line or on/off state. tickMsRef
+// / churnCountRef are what actually carry those live values into
+// CryptoScramble; recomputing them here each tick (rather than every
+// frame) is enough — even the slowest resting tick is ~200ms, so it still
+// tracks the cursor smoothly.
 function CoreLine({
-  text, restTick, contactTick, proximityRef,
+  text, restTick, contactTick, restChurn, contactChurn, proximityRef,
 }: {
   text:         string;
   restTick:     number;
   contactTick:  number;
+  restChurn:    number;
+  contactChurn: number;
   proximityRef: React.MutableRefObject<number>;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const tickMsRef = useRef(restTick);
+  const tickMsRef    = useRef(restTick);
+  const churnCountRef = useRef(restChurn);
 
   const onTick = useCallback(() => {
     const t = proximityRef.current;
     const nextTick = lerp(restTick, contactTick, t);
     const amp      = lerp(CORE_VIBRATE_AMP, CORE_VIBRATE_AMP_CONTACT, t);
-    tickMsRef.current = nextTick;
+    tickMsRef.current    = nextTick;
+    churnCountRef.current = lerp(restChurn, contactChurn, t);
     animate(x, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
     animate(y, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
-  }, [x, y, restTick, contactTick, proximityRef]);
+  }, [x, y, restTick, contactTick, restChurn, contactChurn, proximityRef]);
 
   return (
     <motion.span style={{ display: "block", x, y }}>
@@ -442,6 +456,8 @@ function CoreLine({
         text={text}
         tickMs={restTick}
         tickMsRef={tickMsRef}
+        churnCount={restChurn}
+        churnCountRef={churnCountRef}
         chars={CORE_CHARS}
         infinite
         onTick={onTick}
@@ -525,6 +541,8 @@ function ScrambleCore() {
             text={line}
             restTick={CORE_TICK_RESTING[i]}
             contactTick={CORE_TICK_CONTACT[i]}
+            restChurn={CORE_CHURN_RESTING[i]}
+            contactChurn={CORE_CHURN_CONTACT[i]}
             proximityRef={proximityRef}
           />
         ))}

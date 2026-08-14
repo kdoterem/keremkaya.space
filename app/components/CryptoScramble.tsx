@@ -29,8 +29,45 @@ interface Props {
   // (the effect below depends on it). tickMs is still used as the seed value
   // before the ref's first write.
   tickMsRef?: React.MutableRefObject<number>;
+  // If set (via either prop), only this many positions are re-rolled per
+  // tick instead of the whole string — the rest hold their current glyph.
+  // Selection is biased toward the neighbours of whichever positions
+  // changed last tick, so activity reads as travelling through the text
+  // rather than flickering evenly. Omit both to keep the original
+  // reroll-everything-every-tick behaviour.
+  churnCount?: number;
+  churnCountRef?: React.MutableRefObject<number>;
   style?:     React.CSSProperties;
   className?: string;
+}
+
+// Weighted sample of `count` distinct positions out of `length`, biased
+// toward prevActive and its immediate neighbours (weight boosted, never
+// zero elsewhere) — a soft random walk rather than a hard-confined one, so
+// the "current" can still occasionally seed somewhere new.
+function pickChurnIndices(length: number, count: number, prevActive: number[]): number[] {
+  const n = Math.max(0, Math.min(count, length));
+  if (n === 0) return [];
+  const weights = new Array(length).fill(1);
+  for (const p of prevActive) {
+    for (const idx of [p - 1, p, p + 1]) {
+      if (idx >= 0 && idx < length) weights[idx] += 6;
+    }
+  }
+  const chosen = new Set<number>();
+  let guard = 0;
+  while (chosen.size < n && guard < n * 25) {
+    guard++;
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    let idx = length - 1;
+    for (let i = 0; i < length; i++) {
+      r -= weights[i];
+      if (r <= 0) { idx = i; break; }
+    }
+    chosen.add(idx);
+  }
+  return Array.from(chosen);
 }
 
 // 2-9 non-space characters per chunk, decorrelated from the text's real
@@ -59,6 +96,8 @@ export default function CryptoScramble({
   infinite = false,
   onTick,
   tickMsRef,
+  churnCount,
+  churnCountRef,
   style,
   className,
 }: Props) {
@@ -68,12 +107,16 @@ export default function CryptoScramble({
   const lastTickRef  = useRef(0);
   const glyphsRef    = useRef<string[]>([]);
   const fakeMaskRef  = useRef<boolean[]>([]);
+  const activeRef    = useRef<number[]>([]); // positions changed on the most recent tick — biases the next one
+
+  const partial = churnCount != null || churnCountRef != null;
 
   useEffect(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     startRef.current  = null;
     lastTickRef.current = 0;
     glyphsRef.current = text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]);
+    activeRef.current = [];
     // Chunk boundaries computed once per run and held fixed for its
     // duration — they must not jitter every tick.
     fakeMaskRef.current = scrambleSpaces ? buildFakeSpaceMask(text.length) : [];
@@ -96,7 +139,18 @@ export default function CryptoScramble({
       const activeTickMs = tickMsRef ? tickMsRef.current : tickMs;
       if (now - lastTickRef.current >= activeTickMs) {
         lastTickRef.current = now;
-        glyphsRef.current = text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]);
+        if (partial) {
+          // Hold everything except a small, neighbour-biased subset — the
+          // rest of the string keeps whatever glyph it already had.
+          const count = churnCountRef ? churnCountRef.current : (churnCount ?? text.length);
+          const indices = pickChurnIndices(text.length, Math.round(count), activeRef.current);
+          for (const idx of indices) {
+            glyphsRef.current[idx] = chars[Math.floor(Math.random() * chars.length)];
+          }
+          activeRef.current = indices;
+        } else {
+          glyphsRef.current = text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]);
+        }
         onTick?.();
       }
 
@@ -123,7 +177,7 @@ export default function CryptoScramble({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick, tickMsRef]);
+  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick, tickMsRef, partial, churnCount, churnCountRef]);
 
   return <span className={className} style={style}>{displayed}</span>;
 }
