@@ -71,6 +71,19 @@ const EDGE_ZONE    = 0.12; // fraction of travel, near each end, where the fader
 const FRICTION     = 0.94;
 const SWELL_AMP    = 7;    // px the line rises at the point nearest the cursor/finger
 const DOT_MARKS    = [0.2, 0.4, 0.6, 0.8];
+const BG           = "#aaff00";
+
+// The single profile is redrawn NUM_CONTOURS times, each copy offset a little
+// further down and to the right — a depth-sounding / ridged-surface read
+// instead of one plotted line. All copies share the same geometry (same
+// smoothPath output, just translated), so the swell/jitter/fader math never
+// has to know the stack exists.
+const NUM_CONTOURS   = 14;
+const STACK_DX       = 2.4;    // px sideways per layer, receding
+const STACK_DY       = 3.1;    // px downward per layer, receding
+const SKEW_DEG       = 2;      // gentle — a hint of recession, not a video-game tilt
+const FRONT_OPACITY  = 0.6;    // stroke opacity of the nearest (readable) contour
+const REAR_OPACITY   = 0.08;   // stroke opacity of the furthest contour
 
 let _terrainCache: TerrainMonth[] | null = null;
 
@@ -322,34 +335,46 @@ export default function TerrainPage() {
               viewBox={`0 0 ${dims.width} ${dims.height}`}
               style={{ display: "block" }}
             >
-              <motion.path
-                d={render.fillPath}
-                fill="#0a0a0a"
-                fillOpacity={0.06}
-                stroke="none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 2, ease: "easeInOut" }}
-              />
-              <motion.path
-                d={render.linePath}
-                fill="none"
-                stroke="#0a0a0a"
-                strokeWidth={STROKE_W}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2, ease: "easeInOut" }}
-              />
+              {/* the ridge stack — one skewed group holding every contour, so the
+                  whole surface recedes together; the waterline (outside this
+                  group, below) stays flat and submerges it as one piece */}
+              <g transform={`translate(${dims.width / 2} 0) skewY(${SKEW_DEG}) translate(${-dims.width / 2} 0)`}>
+                {Array.from({ length: NUM_CONTOURS }, (_, rev) => NUM_CONTOURS - 1 - rev).map((i) => {
+                  const strokeOpacity = NUM_CONTOURS > 1
+                    ? lerp(FRONT_OPACITY, REAR_OPACITY, i / (NUM_CONTOURS - 1))
+                    : FRONT_OPACITY;
+                  return (
+                    <g key={i} transform={`translate(${i * STACK_DX} ${i * STACK_DY})`}>
+                      {/* occlusion fill — solid page colour, drawn beneath this
+                          contour's own stroke, hiding whatever sits behind it so
+                          the stack reads as an occluding surface, not a tangle */}
+                      <path d={render.fillPath} fill={BG} stroke="none" />
+                      <motion.path
+                        d={render.linePath}
+                        fill="none"
+                        stroke="#0a0a0a"
+                        strokeOpacity={strokeOpacity}
+                        strokeWidth={STROKE_W}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, ease: "easeInOut" }}
+                      />
+                    </g>
+                  );
+                })}
+              </g>
               {/* the waterline — page-colour cover, not a drawn line, so months
-                  vanish beneath it rather than being clipped against a hard edge */}
+                  vanish beneath it rather than being clipped against a hard edge.
+                  Unskewed and drawn last, so it submerges the whole stack as one
+                  flat cut rather than following the stack's own recession. */}
               <rect
                 x={0}
                 y={render.waterlineY}
                 width={dims.width}
                 height={Math.max(0, dims.height - render.waterlineY)}
-                fill="#aaff00"
+                fill={BG}
               />
             </svg>
           )}
