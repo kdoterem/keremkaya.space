@@ -44,11 +44,19 @@ const NAV_CLEARANCE = 110; // px
 // Same glyph pool as /writing's take-me-somewhere effect, same tick rate as
 // the kismet cards. Length is fixed and meaningless — it never resolves to a
 // target string, so there is none.
-const CORE_LEN         = 35;
-const CORE_TEXT        = "•".repeat(CORE_LEN); // content is irrelevant — infinite mode never reveals it
-const CORE_TICK_MS     = 75;
-const CORE_CHARS       = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
-const CORE_RESTITUTION = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
+//
+// Stacked 3-1-1: three near-equal "body" lines (differing by one or two
+// characters, so the block reads as a ragged mass rather than a rectangle),
+// then two shorter lines tapering to a point. ~35 characters total, split
+// across independent CryptoScramble instances — a single instance can't do
+// this, since infinite mode overwrites every position on every tick,
+// including any embedded newline, so a multi-line shape can't survive
+// inside one scrambling string.
+const CORE_LINE_LENGTHS = [9, 10, 8, 5, 3];
+const CORE_LINES        = CORE_LINE_LENGTHS.map(n => "•".repeat(n)); // content is irrelevant — infinite mode never reveals it
+const CORE_TICK_MS      = 75;
+const CORE_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
+const CORE_RESTITUTION  = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
 
 // Shared by buildLayout (keeps tags out) and the fling physics (bounces off
 // it) so the exclusion zone is identical in both places.
@@ -389,29 +397,39 @@ function ScrambleCore() {
         left:           "50%",
         top:            "50%",
         transform:      "translate(-50%, -50%)",
+        // Shrink-wraps to the widest ("body") line, so every shorter line
+        // below centres symmetrically within that same width — that's what
+        // makes the taper read as pointed rather than lopsided.
+        display:        "inline-block",
+        textAlign:      "center",
         textDecoration: "none",
         cursor:         "pointer",
         userSelect:     "none",
         zIndex:         2,
       }}
     >
-      <CryptoScramble
-        text={CORE_TEXT}
-        tickMs={CORE_TICK_MS}
-        chars={CORE_CHARS}
-        infinite
-        style={{
-          display:       "block",
-          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-          fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
-          fontWeight:    800,
-          color:         "#0a0a0a",
-          letterSpacing: "0.01em",
-          textAlign:     "center",
-          lineHeight:    1.3,
-          maxWidth:      "min(62vw, 460px)",
-        }}
-      />
+      {CORE_LINES.map((line, i) => (
+        <CryptoScramble
+          key={i}
+          text={line}
+          tickMs={CORE_TICK_MS}
+          chars={CORE_CHARS}
+          infinite
+          style={{
+            display:       "block",
+            fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
+            fontWeight:    800,
+            color:         "#0a0a0a",
+            letterSpacing: "-0.02em",
+            textAlign:     "center",
+            // Well below normal (this site's prose runs 1.6-1.8) — the five
+            // lines sit close enough to read as one dense body, not a stack
+            // of separate strings.
+            lineHeight:    0.82,
+          }}
+        />
+      ))}
     </Link>
   );
 }
