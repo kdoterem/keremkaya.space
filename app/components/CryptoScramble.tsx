@@ -15,6 +15,9 @@ interface Props {
   // word boundaries — keeps normal wrapping without spelling out real word
   // shapes. Default false = original behaviour: real spaces always shown.
   scrambleSpaces?: boolean;
+  // Never resolves — every character stays randomised forever at tickMs,
+  // ignoring duration/lockIndex entirely. text still sets the fixed length.
+  infinite?: boolean;
   style?:     React.CSSProperties;
   className?: string;
 }
@@ -42,6 +45,7 @@ export default function CryptoScramble({
   tickMs = 0,
   chars = CHARS,
   scrambleSpaces = false,
+  infinite = false,
   style,
   className,
 }: Props) {
@@ -64,10 +68,11 @@ export default function CryptoScramble({
     const run = (now: number) => {
       if (startRef.current === null) startRef.current = now;
       const elapsed = now - startRef.current;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = infinite ? 0 : Math.min(elapsed / duration, 1);
 
-      // Reveal left-to-right: characters before index are locked, rest are random
-      const lockIndex = Math.floor(progress * text.length);
+      // Reveal left-to-right: characters before index are locked, rest are
+      // random. infinite mode never locks anything — lockIndex stays 0.
+      const lockIndex = infinite ? 0 : Math.floor(progress * text.length);
 
       // Random glyphs only churn every tickMs — at tickMs=0 this is every
       // frame (unchanged default behaviour); slower rates keep each
@@ -88,7 +93,7 @@ export default function CryptoScramble({
 
       setDisplayed(result);
 
-      if (progress < 1) {
+      if (infinite || progress < 1) {
         rafRef.current = requestAnimationFrame(run);
       } else {
         setDisplayed(text);
@@ -100,7 +105,7 @@ export default function CryptoScramble({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [text, trigger, duration, tickMs, chars, scrambleSpaces]);
+  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite]);
 
   return <span className={className} style={style}>{displayed}</span>;
 }

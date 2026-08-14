@@ -4,6 +4,7 @@ import { motion, AnimatePresence, animate, useMotionValue } from "framer-motion"
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { TagCount } from "@/lib/posts";
+import CryptoScramble from "@/app/components/CryptoScramble";
 
 interface PostMeta {
   slug:  string;
@@ -38,6 +39,24 @@ const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
 // bottom, plus its own text height) — shared by initial placement and by
 // where a flung tag comes to rest, so neither can land under the nav.
 const NAV_CLEARANCE = 110; // px
+
+// ── The core: a permanently-scrambling, fixed, unlabelled centre-point ─────────
+// Same glyph pool as /writing's take-me-somewhere effect, same tick rate as
+// the kismet cards. Length is fixed and meaningless — it never resolves to a
+// target string, so there is none.
+const CORE_LEN         = 35;
+const CORE_TEXT        = "•".repeat(CORE_LEN); // content is irrelevant — infinite mode never reveals it
+const CORE_TICK_MS     = 75;
+const CORE_CHARS       = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
+const CORE_RESTITUTION = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
+
+// Shared by buildLayout (keeps tags out) and the fling physics (bounces off
+// it) so the exclusion zone is identical in both places.
+function coreClearanceFor(vw: number): number {
+  const isMobile = vw < 500;
+  const isTablet = vw < 900;
+  return isMobile ? 150 : isTablet ? 190 : 230;
+}
 
 const NAV = [
   { label: "WRITING", href: "/writing"  },
@@ -83,6 +102,13 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
 
+  // No tag's own bounding box may cross into the core's clearance disc —
+  // the field reads as thinning toward an empty centre rather than a
+  // drawn boundary, since it's the same stochastic first-fit placement
+  // as tag-tag spacing, just against one more (fixed, central) obstacle.
+  const coreClearance = coreClearanceFor(vw);
+  const cx = vw / 2, cy = vh / 2;
+
   selected.forEach(({ tag, count }, i) => {
     const weight   = (Math.sqrt(count) - sqrtMin) / sqrtSpan;  // 0..1, frequency-normalised
     const fontSize = FONT_MIN + weight * (FONT_MAX - FONT_MIN);
@@ -97,7 +123,8 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
     for (let attempt = 0; attempt < 200; attempt++) {
       const x  = marginX + Math.random() * (vw - marginX * 2);
       const y  = marginTop + Math.random() * (vh - marginTop - marginBottom);
-      const ok = placed.every(
+      const clearsCore = Math.hypot(x - cx, y - cy) > coreClearance + Math.max(hw, hh);
+      const ok = clearsCore && placed.every(
         p => Math.abs(x - p.x) > hw + p.hw + gap ||
              Math.abs(y - p.y) > hh + p.hh + gap
       );
@@ -219,6 +246,23 @@ function TagWord({
       if (ny < l.hh)         { ny = l.hh;          vy =  Math.abs(vy) * 0.75; }
       if (ny > bottomBound)  { ny = bottomBound;   vy = -Math.abs(vy) * 0.75; }
 
+      // The core has mass and never moves — a flung tag hitting it loses far
+      // more energy than a tag-tag collision (CORE_RESTITUTION vs ~0.7), and
+      // its position is corrected the same frame so it never visibly overlaps.
+      const coreBound = coreClearanceFor(vw) + Math.max(l.hw, l.hh);
+      const dcx = nx - vw / 2, dcy = ny - vh / 2;
+      const distCore = Math.hypot(dcx, dcy) || 1;
+      if (distCore < coreBound) {
+        const ux = dcx / distCore, uy = dcy / distCore;
+        nx = vw / 2 + ux * coreBound;
+        ny = vh / 2 + uy * coreBound;
+        const vn = vx * ux + vy * uy;
+        if (vn < 0) {
+          vx -= (1 + CORE_RESTITUTION) * vn * ux;
+          vy -= (1 + CORE_RESTITUTION) * vn * uy;
+        }
+      }
+
       posX.set(nx); posY.set(ny);
 
       positions.current.forEach((other, otherTag) => {
@@ -332,6 +376,46 @@ function TagWord({
   );
 }
 
+// ── The core — fixed, unlabelled, permanently scrambling. Not a TagWord: no
+// drift, no drag, no fling, no fade when a tag panel is open. Just a click
+// target that happens to sit at the centre of the field. ──
+function ScrambleCore() {
+  return (
+    <Link
+      href="/terrain"
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position:       "absolute",
+        left:           "50%",
+        top:            "50%",
+        transform:      "translate(-50%, -50%)",
+        textDecoration: "none",
+        cursor:         "pointer",
+        userSelect:     "none",
+        zIndex:         2,
+      }}
+    >
+      <CryptoScramble
+        text={CORE_TEXT}
+        tickMs={CORE_TICK_MS}
+        chars={CORE_CHARS}
+        infinite
+        style={{
+          display:       "block",
+          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+          fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
+          fontWeight:    800,
+          color:         "#0a0a0a",
+          letterSpacing: "0.01em",
+          textAlign:     "center",
+          lineHeight:    1.3,
+          maxWidth:      "min(62vw, 460px)",
+        }}
+      />
+    </Link>
+  );
+}
+
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function Home() {
   const [layout,      setLayout]      = useState<TagLayout[]>([]);
@@ -430,6 +514,9 @@ export default function Home() {
           positions={positions}
         />
       ))}
+
+      {/* ── the core ── */}
+      <ScrambleCore />
 
       {/* ── posts panel ── */}
       <AnimatePresence>
