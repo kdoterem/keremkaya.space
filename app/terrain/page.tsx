@@ -127,11 +127,16 @@ const HAZE_OPACITY = 0.45; // ceiling opacity of the partially-resolved band
 const MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
 const PROSE = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-const POS_KEY       = "range:position";
-const READ_KEY      = "range:read";
-const NOTES_KEY     = "range:notes";
-const LOG_KEY       = "range:log";
-const STRETCHES_KEY = "range:stretches";
+// v2 — bumped because the selection rule changed (a month's poems are now
+// fully exhausted, oldest-first, before stepping back to the previous
+// month, rather than one poem per month). Old v1 state from testing across
+// this page's earlier rewrites doesn't match that rule, so it's left behind
+// rather than resumed into.
+const POS_KEY       = "range:position:v2";
+const READ_KEY      = "range:read:v2";
+const NOTES_KEY     = "range:notes:v2";
+const LOG_KEY       = "range:log:v2";
+const STRETCHES_KEY = "range:stretches:v2";
 
 // ── The route's named stretches, in walking order (present → Feb 2025) ──
 // Shown once each, as a full-screen card, the first time the reader crosses
@@ -467,9 +472,15 @@ export default function TerrainPage() {
 
   // PROCEED delivers the next poem directly — no return trip through the
   // view and a second click. Marking the current poem read only applies
-  // when there is one (the "nothing left here" fallback has none). If the
-  // new position also has nothing unread, it falls back to that same view
-  // state rather than cascading further.
+  // when there is one (the "nothing left here" fallback has none).
+  //
+  // Selection is strictly chronological and fully deterministic: a month is
+  // crossed forward (its own poems, oldest-first, all of them) before the
+  // reader steps back to the previous — i.e. older — month. So PROCEED
+  // first looks for another unread poem in the *current* month; only once
+  // that month is exhausted does it step the position back. No
+  // randomisation anywhere — same read-state always yields the same next
+  // poem.
   const handleProceed = useCallback(() => {
     if (position == null) return;
     let effectiveRead = readSet;
@@ -479,6 +490,13 @@ export default function TerrainPage() {
       setReadSet(effectiveRead);
       saveReadSet(effectiveRead);
     }
+
+    const stillInMonth = currentMonthPosts.find(p => !effectiveRead.has(p.slug));
+    if (stillInMonth) {
+      deliverPoem(stillInMonth);
+      return;
+    }
+
     const nextPos = Math.max(0, position - 1);
     setPosition(nextPos);
     savePosition(nextPos);
@@ -493,7 +511,7 @@ export default function TerrainPage() {
       setCurrentPoem(null);
       setPhase("view");
     }
-  }, [position, currentPoem, readSet, months, postsByMonth, deliverPoem]);
+  }, [position, currentPoem, readSet, currentMonthPosts, months, postsByMonth, deliverPoem]);
 
   // Stage A stub — logs the event and returns without advancing. The real
   // banishment behaviour is Stage D.
