@@ -12,7 +12,7 @@ interface TerrainMonth {
 
 interface Pt {
   x: number;
-  y: number;      // resting position — jitter baked in, no swell, no fader
+  y: number;      // exact resting position — no jitter. Roughness lives between points, not on them.
   count: number;
   words: number;
   month: string;
@@ -28,8 +28,9 @@ function formatMonth(m: string): string {
   return `${MONTH_NAMES[mo - 1]} ${y}`;
 }
 
-// Deterministic PRNG — the hand-drawn jitter is fixed per point, not re-rolled
-// on every render, so the line doesn't crawl.
+// Deterministic PRNG — every seeded sequence below (erosion, point field) is
+// rebuilt fresh from the same seed and drawn in the same fixed order, so the
+// output is bit-identical every time. Nothing here is ever re-rolled.
 function mulberry32(seed: number) {
   let s = seed;
   return () => {
@@ -40,30 +41,94 @@ function mulberry32(seed: number) {
   };
 }
 
-// Catmull-Rom through the points, converted to cubic beziers — a continuous
-// curved line rather than straight segments snapped between data points.
-function smoothPath(pts: { x: number; y: number }[]): string {
+// ── Erosion: recursive midpoint displacement ────────────────────────────────
+// A binary tree of pre-drawn random fractions (-1..1), one per segment between
+// consecutive months. Built once from a fixed seed and cached — applying it
+// later never draws another random number, so the same fractions reshape
+// around wherever the (swelled) endpoints currently sit, but the roughness
+// pattern itself never changes.
+interface DispNode {
+  frac: number;
+  left: DispNode | null;
+  right: DispNode | null;
+}
+
+function buildDispTree(rand: () => number, levels: number): DispNode | null {
+  if (levels <= 0) return null;
+  return {
+    frac: (rand() - 0.5) * 2,
+    left: buildDispTree(rand, levels - 1),
+    right: buildDispTree(rand, levels - 1),
+  };
+}
+
+function buildSegmentTrees(numSegments: number, seed: number, levels: number): (DispNode | null)[] {
+  const rand = mulberry32(seed);
+  const trees: (DispNode | null)[] = [];
+  for (let i = 0; i < numSegments; i++) trees.push(buildDispTree(rand, levels));
+  return trees;
+}
+
+// Displaces the midpoint of (p1,p2) perpendicular to the segment by
+// node.frac * mag, then recurses into both halves with mag halved — ridges
+// within ridges. p1 is assumed already emitted by the caller; this only
+// appends from just-after p1 through p2 inclusive.
+function applyDisplacement(
+  p1: { x: number; y: number },
+  p2: { x: number; y: number },
+  node: DispNode | null,
+  mag: number,
+  out: { x: number; y: number }[],
+) {
+  if (!node) { out.push(p2); return; }
+  const mx = (p1.x + p2.x) / 2;
+  const my = (p1.y + p2.y) / 2;
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const disp = node.frac * mag;
+  const mid = { x: mx + nx * disp, y: my + ny * disp };
+  applyDisplacement(p1, mid, node.left, mag / 2, out);
+  applyDisplacement(mid, p2, node.right, mag / 2, out);
+}
+
+// Builds the eroded path through the (possibly swelled) month positions.
+// The 19 positions themselves are untouched inputs — only what happens
+// between each consecutive pair is fractal, not straight or splined.
+function erodedPath(pts: { x: number; y: number }[], trees: (DispNode | null)[], mag0: number): string {
   if (pts.length === 0) return "";
-  if (pts.length === 1) return `M ${pts[0].x},${pts[0].y}`;
-  let d = `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  if (pts.length === 1) return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  const out: { x: number; y: number }[] = [pts[0]];
   for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] ?? pts[i];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[i + 2] ?? p2;
-    const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
-    d += ` C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+    applyDisplacement(pts[i], pts[i + 1], trees[i] ?? null, mag0, out);
   }
+  let d = `M ${out[0].x.toFixed(2)},${out[0].y.toFixed(2)}`;
+  for (let k = 1; k < out.length; k++) d += ` L ${out[k].x.toFixed(2)},${out[k].y.toFixed(2)}`;
   return d;
+}
+
+// Linear reference height of the (un-eroded, un-swelled) profile at a given
+// x — used only to seed the point field's density, not for rendering.
+function referenceY(points: Pt[], x: number): number {
+  if (points.length === 0) return 0;
+  if (x <= points[0].x) return points[0].y;
+  if (x >= points[points.length - 1].x) return points[points.length - 1].y;
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    if (x >= a.x && x <= b.x) {
+      const t = (x - a.x) / (b.x - a.x || 1);
+      return a.y + (b.y - a.y) * t;
+    }
+  }
+  return points[points.length - 1].y;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
 
-const TOP_PADDING  = 44;   // headroom above the tallest peak for swell + jitter + the reveal sliver
+const TOP_PADDING  = 58;   // headroom above the tallest peak for swell + erosion + the reveal sliver
 const REVEAL_SLICE = 10;   // px of the tallest peak still visible at the most-submerged setting
 const STROKE_W     = 1.75;
 const FADER_W      = 30;
@@ -73,17 +138,17 @@ const SWELL_AMP    = 7;    // px the line rises at the point nearest the cursor/
 const DOT_MARKS    = [0.2, 0.4, 0.6, 0.8];
 const BG           = "#aaff00";
 
-// The single profile is redrawn NUM_CONTOURS times, each copy offset a little
-// further down and to the right — a depth-sounding / ridged-surface read
-// instead of one plotted line. All copies share the same geometry (same
-// smoothPath output, just translated), so the swell/jitter/fader math never
-// has to know the stack exists.
-const NUM_CONTOURS   = 14;
-const STACK_DX       = 2.4;    // px sideways per layer, receding
-const STACK_DY       = 3.1;    // px downward per layer, receding
-const SKEW_DEG       = 2;      // gentle — a hint of recession, not a video-game tilt
-const FRONT_OPACITY  = 0.6;    // stroke opacity of the nearest (readable) contour
-const REAR_OPACITY   = 0.08;   // stroke opacity of the furthest contour
+const EROSION_SEED   = 1337;
+const EROSION_LEVELS = 5;   // 4-6: ridges within ridges without turning to noise
+const EROSION_MAG0   = 14;  // px, level-1 max perpendicular displacement — halves each level after
+
+const DOTS_SEED        = 777;
+const NUM_DOTS          = 260;
+const DOT_R             = 0.7;
+const DOT_OPACITY_MAX   = 0.12;  // base opacity right at the surface
+const DOT_OPACITY_MIN   = 0.02;  // base opacity at the edge of the scatter
+const PROXIMITY_SIGMA   = 55;    // px — how wide the cursor's "scan" reads
+const PROXIMITY_BOOST   = 0.24;
 
 let _terrainCache: TerrainMonth[] | null = null;
 
@@ -113,21 +178,19 @@ export default function TerrainPage() {
 
   const maxCount = useMemo(() => Math.max(1, ...data.map(d => d.count)), [data]);
 
-  // Static layout: each point's resting position, with a small fixed jitter
-  // baked in so the drawn line reads as hand-placed rather than plotted.
+  // Static layout: each month's exact resting position. No jitter here — the
+  // erosion below is where the roughness lives; these 19 points are the fixed
+  // ground truth that swell, hover, and the readout all key to.
   const points = useMemo<Pt[]>(() => {
     const { width, height } = dims;
     if (!width || !height || data.length === 0) return [];
-    const rand      = mulberry32(42);
-    const innerW    = width - STROKE_W * 4;
-    const baseline  = height;
-    const pxPerCount = (height - TOP_PADDING) / maxCount;
+    const innerW      = width - STROKE_W * 4;
+    const baseline    = height;
+    const pxPerCount  = (height - TOP_PADDING) / maxCount;
     const n = data.length;
     return data.map((d, i) => {
-      const jx = (rand() - 0.5) * 3;
-      const jy = (rand() - 0.5) * 3;
-      const x  = STROKE_W * 2 + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW) + jx;
-      const y  = baseline - d.count * pxPerCount + jy;
+      const x = STROKE_W * 2 + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+      const y = baseline - d.count * pxPerCount;
       return { x, y, count: d.count, words: d.words, month: d.month };
     });
   }, [data, dims, maxCount]);
@@ -135,10 +198,40 @@ export default function TerrainPage() {
   const baselineY = dims.height;
   const peakY     = points.length ? Math.min(...points.map(p => p.y)) : 0;
 
-  // ── live render state — path strings, waterline, thumb + readout, all driven
-  // by one rAF loop so fader inertia and pointer swell stay in lockstep ──
+  // Built once per data length — the fixed random fractions the erosion always
+  // reapplies. Never rebuilt on resize or interaction.
+  const dispTrees = useMemo(
+    () => buildSegmentTrees(Math.max(0, points.length - 1), EROSION_SEED, EROSION_LEVELS),
+    [points.length],
+  );
+
+  // The scanned point field: static positions, denser and more opaque near the
+  // (reference) surface, thinning with distance. Computed once per layout.
+  const dots = useMemo(() => {
+    if (points.length === 0) return [];
+    const rand   = mulberry32(DOTS_SEED);
+    const spread = clamp(dims.height * 0.2, 30, 90);
+    const list: { x: number; y: number; base: number }[] = [];
+    for (let i = 0; i < NUM_DOTS; i++) {
+      const x = rand() * dims.width;
+      const ref = referenceY(points, x);
+      // Exponential falloff either side of the surface — clusters close,
+      // thins fast, matches a scanned/sounded point cloud rather than a
+      // uniform haze.
+      const side = rand() < 0.5 ? -1 : 1;
+      const offset = side * -Math.log(1 - rand()) * spread * 0.5;
+      const y = clamp(ref + offset, 0, dims.height);
+      const t = clamp(Math.abs(offset) / spread, 0, 1);
+      list.push({ x, y, base: lerp(DOT_OPACITY_MAX, DOT_OPACITY_MIN, t) });
+    }
+    return list;
+  }, [points, dims.width, dims.height]);
+
+  // ── live render state — path string, dot glow, waterline, thumb + readout,
+  // all driven by one rAF loop so fader inertia, swell, and the proximity
+  // glow stay in lockstep ──
   const [render, setRender] = useState({
-    linePath: "", fillPath: "", waterlineY: 0, faderT: 1, hoverIndex: -1,
+    linePath: "", dotOpacities: [] as number[], waterlineY: 0, faderT: 1, hoverIndex: -1,
   });
 
   const faderVal = useRef(1);   // 0 = up/submerged, 1 = down/full visibility
@@ -146,6 +239,7 @@ export default function TerrainPage() {
   const dragging = useRef(false);
   const swell    = useRef<number[]>([]);
   const pointerX = useRef<number | null>(null);
+  const pointerY = useRef<number | null>(null);
   const rafId    = useRef<number | null>(null);
   const dragHist = useRef<{ v: number; t: number }[]>([]);
 
@@ -169,6 +263,7 @@ export default function TerrainPage() {
     }
 
     const px = pointerX.current;
+    const py = pointerY.current;
     let swelling = false;
     const sw = swell.current;
     const spacing = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 1;
@@ -182,20 +277,27 @@ export default function TerrainPage() {
     }
     if (swelling) more = true;
 
-    const linePts   = points.map((p, i) => ({ x: p.x, y: p.y - (sw[i] ?? 0) }));
-    const linePath  = smoothPath(linePts);
-    const fillPath  = linePts.length
-      ? `${linePath} L ${linePts[linePts.length - 1].x.toFixed(2)},${baselineY} L ${linePts[0].x.toFixed(2)},${baselineY} Z`
-      : "";
+    const linePts  = points.map((p, i) => ({ x: p.x, y: p.y - (sw[i] ?? 0) }));
+    const linePath = erodedPath(linePts, dispTrees, EROSION_MAG0);
+
+    // Proximity glow — a soft radius around the pointer/finger where the
+    // point field reads slightly brighter, like a scan returning data.
+    const dotOpacities = dots.map(d => {
+      if (px == null || py == null) return d.base;
+      const dist2 = (d.x - px) ** 2 + (d.y - py) ** 2;
+      const boost = PROXIMITY_BOOST * Math.exp(-dist2 / (2 * PROXIMITY_SIGMA * PROXIMITY_SIGMA));
+      return Math.min(0.4, d.base + boost);
+    });
+
     const waterlineY = lerp(peakY - REVEAL_SLICE, baselineY, faderVal.current);
     const hoverIndex  = px == null || points.length === 0
       ? -1
       : points.reduce((best, p, i) => Math.abs(p.x - px) < Math.abs(points[best].x - px) ? i : best, 0);
 
-    setRender({ linePath, fillPath, waterlineY, faderT: faderVal.current, hoverIndex });
+    setRender({ linePath, dotOpacities, waterlineY, faderT: faderVal.current, hoverIndex });
 
     rafId.current = more ? requestAnimationFrame(tick) : null;
-  }, [points, baselineY, peakY]);
+  }, [points, dispTrees, dots, baselineY, peakY]);
 
   const kick = useCallback(() => {
     if (rafId.current == null) rafId.current = requestAnimationFrame(tick);
@@ -245,18 +347,20 @@ export default function TerrainPage() {
     kick();
   }, [kick]);
 
-  // ── pointer/touch swell over the terrain itself ──
-  // Pointer capture on press keeps the swell tracking a finger that drifts a
-  // few px outside the frame mid-scrub, instead of silently losing it to
-  // whatever element is now underneath.
+  // ── pointer/touch swell + proximity glow over the terrain itself ──
+  // Pointer capture on press keeps tracking a finger that drifts a few px
+  // outside the frame mid-scrub, instead of silently losing it to whatever
+  // element is now underneath.
   const onFramePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     pointerX.current = clamp(e.clientX - rect.left, 0, rect.width);
+    pointerY.current = clamp(e.clientY - rect.top, 0, rect.height);
     kick();
   }, [kick]);
 
   const onFramePointerLeave = useCallback(() => {
     pointerX.current = null;
+    pointerY.current = null;
     kick();
   }, [kick]);
 
@@ -335,40 +439,42 @@ export default function TerrainPage() {
               viewBox={`0 0 ${dims.width} ${dims.height}`}
               style={{ display: "block" }}
             >
-              {/* the ridge stack — one skewed group holding every contour, so the
-                  whole surface recedes together; the waterline (outside this
-                  group, below) stays flat and submerges it as one piece */}
-              <g transform={`translate(${dims.width / 2} 0) skewY(${SKEW_DEG}) translate(${-dims.width / 2} 0)`}>
-                {Array.from({ length: NUM_CONTOURS }, (_, rev) => NUM_CONTOURS - 1 - rev).map((i) => {
-                  const strokeOpacity = NUM_CONTOURS > 1
-                    ? lerp(FRONT_OPACITY, REAR_OPACITY, i / (NUM_CONTOURS - 1))
-                    : FRONT_OPACITY;
-                  return (
-                    <g key={i} transform={`translate(${i * STACK_DX} ${i * STACK_DY})`}>
-                      {/* occlusion fill — solid page colour, drawn beneath this
-                          contour's own stroke, hiding whatever sits behind it so
-                          the stack reads as an occluding surface, not a tangle */}
-                      <path d={render.fillPath} fill={BG} stroke="none" />
-                      <motion.path
-                        d={render.linePath}
-                        fill="none"
-                        stroke="#0a0a0a"
-                        strokeOpacity={strokeOpacity}
-                        strokeWidth={STROKE_W}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: 2, ease: "easeInOut" }}
-                      />
-                    </g>
-                  );
-                })}
-              </g>
+              {/* the sonar point field — behind the line, static positions,
+                  live opacity for the proximity scan */}
+              <motion.g
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+              >
+                {dots.map((d, i) => (
+                  <circle
+                    key={i}
+                    cx={d.x}
+                    cy={d.y}
+                    r={DOT_R}
+                    fill="#0a0a0a"
+                    fillOpacity={render.dotOpacities[i] ?? d.base}
+                  />
+                ))}
+              </motion.g>
+
+              {/* the eroded profile — one line, fractal roughness between the
+                  19 fixed month positions */}
+              <motion.path
+                d={render.linePath}
+                fill="none"
+                stroke="#0a0a0a"
+                strokeWidth={STROKE_W}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2, ease: "easeInOut" }}
+              />
+
               {/* the waterline — page-colour cover, not a drawn line, so months
-                  vanish beneath it rather than being clipped against a hard edge.
-                  Unskewed and drawn last, so it submerges the whole stack as one
-                  flat cut rather than following the stack's own recession. */}
+                  vanish beneath it rather than being clipped against a hard
+                  edge. Submerges the eroded line and the point field together. */}
               <rect
                 x={0}
                 y={render.waterlineY}
