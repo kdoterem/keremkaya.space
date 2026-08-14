@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CryptoScramble from "@/app/components/CryptoScramble";
@@ -191,15 +191,44 @@ function autoGrow(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-// ── Mechanical button — hard edges, monospace caps, instant (not eased) invert ──
+// A heavy, decelerating settle — no overshoot, matches the tag field and the
+// kismet fader's physics language. Reused for both button transitions and
+// the poem-to-poem unravel.
+const SETTLE_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const SETTLE_EASE_CSS = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+const BUTTON_HOVER_MS = 320; // slow, deliberate — no instant flicker
+const BUTTON_PRESS_DELAY_MS = 240; // beat between commit and the action landing
+
+// ── Mechanical button — hard edges, monospace caps, weighted response.
+// A press commits immediately (visual invert) but the actual action lands
+// after a short beat, so it reads as being thrown rather than tapped. ──
 function MechButton({
   label, onClick, disabled,
 }: { label: string; onClick: () => void; disabled?: boolean }) {
-  const [hover, setHover] = useState(false);
-  const active = hover && !disabled;
+  const [hover, setHover]     = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const pendingRef = useRef(false);
+  const timeoutRef  = useRef<number | null>(null);
+
+  useEffect(() => () => { if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current); }, []);
+
+  const handleActivate = useCallback(() => {
+    if (disabled || pendingRef.current) return;
+    pendingRef.current = true;
+    setPressed(true);
+    timeoutRef.current = window.setTimeout(() => {
+      pendingRef.current = false;
+      setPressed(false);
+      onClick();
+    }, BUTTON_PRESS_DELAY_MS);
+  }, [disabled, onClick]);
+
+  const active = (hover || pressed) && !disabled;
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleActivate}
       disabled={disabled}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -217,6 +246,10 @@ function MechButton({
         cursor:         disabled ? "default" : "pointer",
         opacity:        disabled ? 0.35 : 1,
         minWidth:       "9rem",
+        transform:      pressed ? "scale(0.97)" : "scale(1)",
+        transition:     `background-color ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}, `
+                       + `color ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}, `
+                       + `transform ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}`,
       }}
     >
       {label}
@@ -351,35 +384,55 @@ export default function TerrainPage() {
   const currentMonthPosts = currentMonth ? (postsByMonth.get(currentMonth) ?? []) : [];
   const hasUnread          = currentMonthPosts.some(p => !readSet.has(p.slug));
 
+  // Shared by the very first READ and by PROCEED's direct delivery — puts a
+  // poem on screen and restarts its title/date/body stagger + button timer.
+  const deliverPoem = useCallback((poem: SearchDoc) => {
+    setCurrentPoem(poem);
+    setNote(notesMap[poem.slug]?.text ?? "");
+    setSendState(notesMap[poem.slug]?.sent ? "sent" : "idle");
+    setShowButtons(false);
+    setPhase("poem");
+    window.setTimeout(() => setShowButtons(true), TOTAL_REVEAL_MS);
+  }, [notesMap]);
+
+  // READ only ever fires once per session — to enter the loop. Every poem
+  // after that arrives via PROCEED.
   const handleRead = useCallback(() => {
     if (position == null) return;
     const next = currentMonthPosts.find(p => !readSet.has(p.slug));
     if (!next) return;
-    setCurrentPoem(next);
-    setNote(notesMap[next.slug]?.text ?? "");
-    setSendState(notesMap[next.slug]?.sent ? "sent" : "idle");
-    setShowButtons(false);
-    setPhase("poem");
-    window.setTimeout(() => setShowButtons(true), TOTAL_REVEAL_MS);
-  }, [position, currentMonthPosts, readSet, notesMap]);
+    deliverPoem(next);
+  }, [position, currentMonthPosts, readSet, deliverPoem]);
 
-  // Advancing the position is the core action here; marking a poem read only
-  // applies when there is one — the "nothing left here" fallback (no unread
-  // poem at this position) still needs to proceed with no currentPoem set.
+  // PROCEED delivers the next poem directly — no return trip through the
+  // view and a second click. Marking the current poem read only applies
+  // when there is one (the "nothing left here" fallback has none). If the
+  // new position also has nothing unread, it falls back to that same view
+  // state rather than cascading further.
   const handleProceed = useCallback(() => {
     if (position == null) return;
+    let effectiveRead = readSet;
     if (currentPoem) {
-      const nextRead = new Set(readSet);
-      nextRead.add(currentPoem.slug);
-      setReadSet(nextRead);
-      saveReadSet(nextRead);
+      effectiveRead = new Set(readSet);
+      effectiveRead.add(currentPoem.slug);
+      setReadSet(effectiveRead);
+      saveReadSet(effectiveRead);
     }
     const nextPos = Math.max(0, position - 1);
     setPosition(nextPos);
     savePosition(nextPos);
-    setCurrentPoem(null);
-    setPhase("view");
-  }, [currentPoem, position, readSet]);
+
+    const nextMonth = months[nextPos]?.month;
+    const nextPosts = nextMonth ? (postsByMonth.get(nextMonth) ?? []) : [];
+    const next = nextPosts.find(p => !effectiveRead.has(p.slug));
+
+    if (next) {
+      deliverPoem(next);
+    } else {
+      setCurrentPoem(null);
+      setPhase("view");
+    }
+  }, [position, currentPoem, readSet, months, postsByMonth, deliverPoem]);
 
   // Stage A stub — logs the event and returns without advancing. The real
   // banishment behaviour is Stage D.
@@ -455,8 +508,15 @@ export default function TerrainPage() {
         Return
       </Link>
 
+      <AnimatePresence mode="popLayout">
       {!ready ? null : phase === "view" ? (
-        <motion.div key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+        <motion.div
+          key="view"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 18 }}
+          transition={{ duration: 0.48, ease: SETTLE_EASE }}
+        >
           <div
             ref={frameRef}
             style={{
@@ -535,7 +595,10 @@ export default function TerrainPage() {
       ) : currentPoem ? (
         <motion.div
           key={currentPoem.slug}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 18 }}
+          transition={{ duration: 0.48, ease: SETTLE_EASE }}
           style={{ maxWidth: "640px", margin: "3rem auto 0" }}
         >
           <h1
@@ -597,7 +660,7 @@ export default function TerrainPage() {
 
           {showButtons && (
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: SETTLE_EASE }}
               style={{ display: "flex", justifyContent: "center", gap: "1.25rem", marginTop: "3rem", paddingBottom: "3rem" }}
             >
               <MechButton label="Puss out?" onClick={handlePussOut} />
@@ -606,6 +669,7 @@ export default function TerrainPage() {
           )}
         </motion.div>
       ) : null}
+      </AnimatePresence>
     </main>
   );
 }
