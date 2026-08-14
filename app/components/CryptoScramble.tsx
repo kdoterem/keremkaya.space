@@ -22,6 +22,13 @@ interface Props {
   // a caller drive something else off the same jump, rather than running an
   // independent, out-of-phase timer of its own.
   onTick?: () => void;
+  // If provided, the tick interval is read from tickMsRef.current every
+  // frame instead of the fixed tickMs prop — lets a caller change the rate
+  // continuously (e.g. driven by cursor proximity) without restarting the
+  // scramble on every update, which passing a changing tickMs prop would do
+  // (the effect below depends on it). tickMs is still used as the seed value
+  // before the ref's first write.
+  tickMsRef?: React.MutableRefObject<number>;
   style?:     React.CSSProperties;
   className?: string;
 }
@@ -51,6 +58,7 @@ export default function CryptoScramble({
   scrambleSpaces = false,
   infinite = false,
   onTick,
+  tickMsRef,
   style,
   className,
 }: Props) {
@@ -81,8 +89,12 @@ export default function CryptoScramble({
 
       // Random glyphs only churn every tickMs — at tickMs=0 this is every
       // frame (unchanged default behaviour); slower rates keep each
-      // substitution on screen long enough to read as a character.
-      if (now - lastTickRef.current >= tickMs) {
+      // substitution on screen long enough to read as a character. Reading
+      // tickMsRef.current (when given) fresh every frame, rather than the
+      // value tickMs held when the effect last (re)started, is what lets
+      // the interval itself change live.
+      const activeTickMs = tickMsRef ? tickMsRef.current : tickMs;
+      if (now - lastTickRef.current >= activeTickMs) {
         lastTickRef.current = now;
         glyphsRef.current = text.split("").map(() => chars[Math.floor(Math.random() * chars.length)]);
         onTick?.();
@@ -111,7 +123,7 @@ export default function CryptoScramble({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick]);
+  }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick, tickMsRef]);
 
   return <span className={className} style={style}>{displayed}</span>;
 }

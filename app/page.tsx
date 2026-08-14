@@ -54,21 +54,30 @@ const NAV_CLEARANCE = 110; // px
 // inside one scrambling string.
 const CORE_LINE_LENGTHS = [9, 10, 8, 5, 3];
 const CORE_LINES        = CORE_LINE_LENGTHS.map(n => "•".repeat(n)); // content is irrelevant — infinite mode never reveals it
-const CORE_TICK_MS      = 75;
-// Each line's glyphs refresh at a slightly different rate — close to 75ms
-// but not identical — so five lines that all mount in the same instant
-// still drift out of phase with each other rather than jumping in unison.
-const CORE_LINE_TICKS   = [70, 78, 73, 82, 68];
 const CORE_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 const CORE_RESTITUTION  = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
 
+// Each line's glyph-tick interval (ms) at rest and at contact (cursor right
+// on the block) — same proportional spread across the five at both ends, so
+// they stay out of phase with each other the whole way through the ramp.
+// ~3 cycles/sec at rest is slow enough to register as individual characters
+// rather than a blur; ~3.5x faster at contact.
+const CORE_TICK_RESTING = [195, 218, 204, 229, 190];
+const CORE_TICK_CONTACT = [55, 61, 57, 64, 53];
+
 // The core's own small motion: each line nudges to a new random point every
 // time its own glyphs jump — the scramble's "attack" is what moves it, not
-// an independent clock. Far smaller and quicker than the tag field's slow
-// ambient drift (8-16px over 4-10s) — this is a vibration, not a drift.
-const CORE_VIBRATE_AMP       = 1.4; // px, resting
-const CORE_VIBRATE_AMP_HOVER = 4.5; // px, while hovered — the orbit widens
-const CORE_HOVER_SCALE       = 1.22; // same whileHover scale the tags use
+// an independent clock. Amplitude ramps on the same proximity curve as the
+// tick interval (below), continuously — not a hover on/off switch.
+const CORE_VIBRATE_AMP         = 1.4; // px, at rest
+const CORE_VIBRATE_AMP_CONTACT = 4.5; // px, at the cursor
+// Distance (px, cursor to block centre) beyond which the core is fully at
+// rest; interpolated linearly down to 0px (full contact values).
+const CORE_PROXIMITY_RADIUS    = 320;
+// Scale on hover is separate and discrete — a contact response, not a ramp.
+const CORE_HOVER_SCALE         = 1.22;
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 // Shared by buildLayout (keeps tags out) and the fling physics (bounces off
 // it) so the exclusion zone is identical in both places.
@@ -398,30 +407,41 @@ function TagWord({
 
 // One line of the core — its own CryptoScramble instance (so its tick timing
 // is naturally independent of the other four), nudged to a new small random
-// point every time its own glyphs actually jump. hoveringRef is shared
-// across all five lines so hovering anywhere on the core widens every
-// line's vibration together, not just whichever one the pointer sits over.
+// point every time its own glyphs actually jump. proximityRef is shared
+// across all five lines (0 = cursor beyond CORE_PROXIMITY_RADIUS, 1 = right
+// on the block) so approaching the core anywhere speeds all five up and
+// widens their vibration together, continuously — not a per-line or
+// on/off state. tickMsRef is what actually carries that live rate into
+// CryptoScramble; recomputing it here each tick (rather than every frame)
+// is enough — even the slowest resting tick is ~200ms, so it still tracks
+// the cursor smoothly.
 function CoreLine({
-  text, tickMs, hoveringRef,
+  text, restTick, contactTick, proximityRef,
 }: {
-  text:        string;
-  tickMs:      number;
-  hoveringRef: React.MutableRefObject<boolean>;
+  text:         string;
+  restTick:     number;
+  contactTick:  number;
+  proximityRef: React.MutableRefObject<number>;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const tickMsRef = useRef(restTick);
 
   const onTick = useCallback(() => {
-    const amp = hoveringRef.current ? CORE_VIBRATE_AMP_HOVER : CORE_VIBRATE_AMP;
-    animate(x, (Math.random() - 0.5) * amp, { duration: tickMs / 1000, ease: "easeOut" });
-    animate(y, (Math.random() - 0.5) * amp, { duration: tickMs / 1000, ease: "easeOut" });
-  }, [x, y, tickMs, hoveringRef]);
+    const t = proximityRef.current;
+    const nextTick = lerp(restTick, contactTick, t);
+    const amp      = lerp(CORE_VIBRATE_AMP, CORE_VIBRATE_AMP_CONTACT, t);
+    tickMsRef.current = nextTick;
+    animate(x, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
+    animate(y, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
+  }, [x, y, restTick, contactTick, proximityRef]);
 
   return (
     <motion.span style={{ display: "block", x, y }}>
       <CryptoScramble
         text={text}
-        tickMs={tickMs}
+        tickMs={restTick}
+        tickMsRef={tickMsRef}
         chars={CORE_CHARS}
         infinite
         onTick={onTick}
@@ -448,18 +468,34 @@ function CoreLine({
 // It does move, in the sense that each line nudges itself on its own
 // scramble ticks (CoreLine, above) — the field's one exception to "no
 // ambient motion," since the motion isn't decorative drift, it's the same
-// jump the text itself is already doing. Hover scales it up exactly like a
-// tag does and widens that vibration; nothing else marks it as clickable. ──
+// jump the text itself is already doing. It reacts to approach, not arrival
+// — speed and vibration ramp continuously with cursor distance, so the
+// acceleration is what draws you in rather than a reward for reaching it.
+// Scale-on-hover is a separate, discrete contact response. Nothing else
+// marks it as clickable. ──
 function ScrambleCore() {
-  const hoveringRef = useRef(false);
+  const proximityRef = useRef(0);
   const [hover, setHover] = useState(false);
+
+  // Global, not scoped to the element — the core should start responding
+  // before the cursor is anywhere near its own (small) hit area.
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const dx = e.clientX - window.innerWidth / 2;
+      const dy = e.clientY - window.innerHeight / 2;
+      const dist = Math.hypot(dx, dy);
+      proximityRef.current = 1 - Math.min(dist, CORE_PROXIMITY_RADIUS) / CORE_PROXIMITY_RADIUS;
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
 
   return (
     <Link
       href="/terrain"
       onClick={(e) => e.stopPropagation()}
-      onMouseEnter={() => { hoveringRef.current = true;  setHover(true);  }}
-      onMouseLeave={() => { hoveringRef.current = false; setHover(false); }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
         position:       "absolute",
         left:           "50%",
@@ -487,8 +523,9 @@ function ScrambleCore() {
           <CoreLine
             key={i}
             text={line}
-            tickMs={CORE_LINE_TICKS[i] ?? CORE_TICK_MS}
-            hoveringRef={hoveringRef}
+            restTick={CORE_TICK_RESTING[i]}
+            contactTick={CORE_TICK_CONTACT[i]}
+            proximityRef={proximityRef}
           />
         ))}
       </motion.div>
