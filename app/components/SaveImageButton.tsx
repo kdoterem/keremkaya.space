@@ -260,34 +260,44 @@ export default function SaveImageButton({ title, content }: Props) {
           )
         );
 
+        // Both the mobile Photos library (via the share sheet's "Save Images")
+        // and desktop downloads shelves/folders commonly sort newest-first —
+        // so saving/downloading in page order (1, 2, 3…) makes page 2 the
+        // most recent, and it displays *above* page 1. Reversed to last-page-
+        // first / page-1-last, whichever one lands most recently — page 1 —
+        // is the one that sorts first, so the saved/downloaded order matches
+        // reading order. Filenames are unaffected: they still read "-1", "-2"…
+        // regardless of save order, self-documenting the intended order too.
+        const orderedFiles = files.length > 1 ? [...files].reverse() : files;
+
         // Mobile: share sheet. Instagram (and most apps) only accept the FIRST
         // file from a web share — it can't receive a multi-image carousel — so
         // for long, multi-page poems steer the reader to "Save N Images" and let
         // them build the carousel in the Instagram app from their photos.
         // Only return on success — cancellation falls through to desktop download.
-        if (navigator.canShare?.({ files })) {
+        if (navigator.canShare?.({ files: orderedFiles })) {
           if (files.length > 1) {
             setHint(
               `long poem — ${files.length} images. in the share sheet choose ` +
               `“save ${files.length} images”, then post them as a carousel in instagram. ` +
-              `(sharing straight to instagram only sends the first image.)`
+              `(sharing straight to instagram only sends one image, not the whole poem.)`
             );
           }
           try {
-            await navigator.share({ files, title });
+            await navigator.share({ files: orderedFiles, title });
             setGenerating(false);
             return;
           } catch { /* cancelled — fall through to download */ }
         }
 
         // Desktop: sequential download
-        for (let i = 0; i < files.length; i++) {
-          const url = URL.createObjectURL(files[i]);
+        for (let i = 0; i < orderedFiles.length; i++) {
+          const url = URL.createObjectURL(orderedFiles[i]);
           const a   = document.createElement('a');
-          a.href = url; a.download = files[i].name;
+          a.href = url; a.download = orderedFiles[i].name;
           document.body.appendChild(a); a.click();
           document.body.removeChild(a); URL.revokeObjectURL(url);
-          if (i < files.length - 1) await new Promise(r => setTimeout(r, 150));
+          if (i < orderedFiles.length - 1) await new Promise(r => setTimeout(r, 150));
         }
       } catch (err) {
         console.error('image generation failed', err);
