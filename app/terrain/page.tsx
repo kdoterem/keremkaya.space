@@ -159,6 +159,15 @@ function stretchForMonth(month: string): string | null {
 
 const STRETCH_CARD_MS = 1000; // "roughly one second"
 
+// How many of a month's poems PROCEED serves before stepping back to the
+// previous month, regardless of how many remain unread — sub-linear so a
+// populous month (Feb 2025, 67) isn't a wall the reader can never get past.
+// sqrt(67)≈8, sqrt(32)≈6, sqrt(1)=1. Poems not served on this pass just stay
+// in the month, unvisited — not deleted, not queued, simply not walked.
+function quotaFor(monthPostCount: number): number {
+  return Math.max(1, Math.round(Math.sqrt(monthPostCount)));
+}
+
 const WEB3FORMS_ENDPOINT   = "https://api.web3forms.com/submit";
 const WEB3FORMS_ACCESS_KEY = "1bf57100-9d1e-4357-9747-7155c3a32255";
 
@@ -475,12 +484,14 @@ export default function TerrainPage() {
   // when there is one (the "nothing left here" fallback has none).
   //
   // Selection is strictly chronological and fully deterministic: a month is
-  // crossed forward (its own poems, oldest-first, all of them) before the
-  // reader steps back to the previous — i.e. older — month. So PROCEED
-  // first looks for another unread poem in the *current* month; only once
-  // that month is exhausted does it step the position back. No
-  // randomisation anywhere — same read-state always yields the same next
-  // poem.
+  // crossed forward (its own poems, oldest-first) up to its quota
+  // (quotaFor — roughly sqrt of the month's poem count, minimum one) before
+  // the reader steps back to the previous — i.e. older — month. So PROCEED
+  // first checks whether this pass has already served that many poems from
+  // the *current* month; if not, it delivers the next unread one there
+  // without moving position. Only once the quota's met (or the month's
+  // truly exhausted) does it step the position back. No randomisation
+  // anywhere — same read-state always yields the same next poem.
   const handleProceed = useCallback(() => {
     if (position == null) return;
     let effectiveRead = readSet;
@@ -491,10 +502,13 @@ export default function TerrainPage() {
       saveReadSet(effectiveRead);
     }
 
-    const stillInMonth = currentMonthPosts.find(p => !effectiveRead.has(p.slug));
-    if (stillInMonth) {
-      deliverPoem(stillInMonth);
-      return;
+    const servedThisMonth = currentMonthPosts.filter(p => effectiveRead.has(p.slug)).length;
+    if (servedThisMonth < quotaFor(currentMonthPosts.length)) {
+      const stillInMonth = currentMonthPosts.find(p => !effectiveRead.has(p.slug));
+      if (stillInMonth) {
+        deliverPoem(stillInMonth);
+        return;
+      }
     }
 
     const nextPos = Math.max(0, position - 1);
