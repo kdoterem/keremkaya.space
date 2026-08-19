@@ -109,23 +109,45 @@ function seamX(months: TerrainMonth[]): number | null {
 // roughness (rock/snow micro-detail) riding on top of the main shape.
 const SEGMENTS_X = 240;
 const SEGMENTS_Z = 48;
-const MICRO_AMPLITUDE = 0.045; // small — roughness, not a second landform
+const MICRO_AMPLITUDE = 0.045; // small base — roughness, not a second landform (scaled by local intensity below)
 
-// Height was Z-invariant (the same curve repeated straight across depth) —
-// verified by rendering it (a hand-rolled software rasterizer reproducing
-// this exact math, since there's no browser/WebGL tool in this environment)
-// that this reads as corrugated sheet metal / ribbon candy, not a mountain:
-// every peak became an infinite straight extruded ridge no matter the
-// camera or light. A cosine taper across Z rounds each ridge into an actual
-// mass — full height at the centreline, tapering down toward the front/back
-// edges, the way a real ridge's cross-section is domed, not flat-topped.
-// This goes one step beyond "camera + light only", but the corrugation was
-// the actual root cause of "doesn't read as a mountain" once verified, and
-// leaving it in would still fail that test regardless of camera/light.
-function zTaper(zNorm: number): number { // zNorm in [-1, 1]
-  const t = Math.cos(zNorm * Math.PI / 2); // 1 at centre, 0 at the edges
-  return 0.24 + 0.76 * t;
+// ── deterministic value noise + FBM ──
+// A uniform cosine taper (same cross-section at every peak) plus a purely
+// periodic sine lattice for micro-detail were verified (by actually
+// rendering them) to read as corrugated sheet metal / ribbon candy — the
+// same fold repeated at a fixed interval, not a mountain range with
+// distinct character. Replaced with a hashed, non-periodic value-noise
+// field (huge effective period, far beyond anything this scene's
+// coordinates reach) layered at multiple octaves (FBM) — no fixed-interval
+// repetition anywhere.
+function hashNoise2D(ix: number, iy: number, seed: number): number {
+  let h = (ix * 374761393 + iy * 668265263 + seed * 2246822519) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h = h ^ (h >>> 16);
+  return ((h >>> 0) % 1000000) / 1000000;
 }
+function smoothstep(t: number): number { return t * t * (3 - 2 * t); }
+function valueNoise2D(x: number, y: number, seed: number): number {
+  const x0 = Math.floor(x), y0 = Math.floor(y);
+  const sx = smoothstep(x - x0), sy = smoothstep(y - y0);
+  const n00 = hashNoise2D(x0, y0, seed), n10 = hashNoise2D(x0 + 1, y0, seed);
+  const n01 = hashNoise2D(x0, y0 + 1, seed), n11 = hashNoise2D(x0 + 1, y0 + 1, seed);
+  const ix0 = n00 + (n10 - n00) * sx, ix1 = n01 + (n11 - n01) * sx;
+  return ix0 + (ix1 - ix0) * sy;
+}
+function fbm2D(x: number, y: number, seed: number, octaves: number): number {
+  let sum = 0, amp = 1, freq = 1, maxAmp = 0;
+  for (let o = 0; o < octaves; o++) {
+    sum += valueNoise2D(x * freq, y * freq, seed + o * 101) * amp;
+    maxAmp += amp;
+    amp *= 0.5;
+    freq *= 2.15; // not exactly 2x — avoids octave-aligned repetition artifacts
+  }
+  return sum / maxAmp;
+}
+
+const TAPER_NOISE_FREQ_X = 0.6, TAPER_NOISE_FREQ_Z = 1.1, TAPER_SEED = 5301;
+const MICRO_FREQ_X = 3.4, MICRO_FREQ_Z = 4.1, MICRO_SEED = 8807;
 
 function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
   const maxCount = Math.max(1, ...months.map(m => m.count));
@@ -140,12 +162,29 @@ function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
     const z = pos.getZ(i);
     const xNorm = x / SCENE_WIDTH + 0.5;
     const zNorm = z / (SCENE_DEPTH / 2);
-    const base = heightAt(normalized, xNorm) * HEIGHT_SCALE * zTaper(zNorm);
-    const micro = (
-      Math.sin(x * 7.3 + z * 5.1) * 0.5 +
-      Math.sin(x * 13.7 - z * 9.2) * 0.25 +
-      Math.sin(x * 23.1 + z * 17.4) * 0.125
-    ) * MICRO_AMPLITUDE;
+    const localIntensity = heightAt(normalized, xNorm); // 0..1 — reused for height AND roughness below
+
+    // Centre falloff is exactly 1 at z=0 for every x, so Math.pow(1, *)=1:
+    // the centreline is architecturally guaranteed to be the true, unaltered
+    // Catmull-Rom height — the 19 real months stay the dominant shape no
+    // matter what the noise below does. Only the falloff SHARPNESS (how
+    // fast a ridge narrows away from centre) varies per-x via noise — sharp,
+    // steep peaks next to wide, rounded ones, without ever burying the real
+    // data under generic noise.
+    const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
+    const falloffNoise = fbm2D(x * TAPER_NOISE_FREQ_X, z * TAPER_NOISE_FREQ_Z, TAPER_SEED, 3);
+    const falloffSharpness = 0.7 + 1.4 * falloffNoise;
+    const taper = Math.pow(centerFalloff, falloffSharpness);
+
+    const base = localIntensity * HEIGHT_SCALE * taper;
+
+    // Roughness scales with the data's own local intensity — dense/tall
+    // months (Feb 2025) read rockier, thin/low months (Jan 2026) read
+    // smoother, reinforcing the archive's own logic at the texture level,
+    // not just the elevation level.
+    const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity);
+    const micro = (fbm2D(x * MICRO_FREQ_X, z * MICRO_FREQ_Z, MICRO_SEED, 4) - 0.5) * 2 * localRoughness;
+
     pos.setY(i, Math.max(0, base + micro));
   }
   pos.needsUpdate = true;
@@ -214,19 +253,28 @@ function Annotation3D({
   sublabel?: string;
   variant?: "data" | "seam" | "transient";
 }) {
-  const opacity = variant === "transient" ? 0.85 : variant === "seam" ? 0.7 : 0.55;
+  const opacity = variant === "transient" ? 0.92 : variant === "seam" ? 0.85 : 0.8;
   return (
-    <Html position={position} distanceFactor={7} style={{ pointerEvents: "none" }} zIndexRange={[10, 0]}>
+    // A high, fixed z-index rather than relying on drei's distance-based
+    // zIndexRange, plus an opaque backing chip — labels were reading as
+    // "behind" the mesh's peaks not because of stacking order (Html always
+    // paints as a DOM overlay above the canvas), but because a background-
+    // less label sitting near a peak's silhouette had nothing to visually
+    // separate it from the geometry right behind it. A solid chip removes
+    // the ambiguity regardless of camera angle.
+    <Html position={position} distanceFactor={7} style={{ pointerEvents: "none", zIndex: 9999 }}>
       <div
         style={{
           fontFamily: HUD_MONO, fontSize: "9px", letterSpacing: "0.06em",
-          textTransform: "uppercase", color: "#0a0a0a", opacity,
+          textTransform: "uppercase", color: "#0a0a0a",
           whiteSpace: "nowrap", lineHeight: 1.4, transform: "translate(8px, -10px)",
-          borderLeft: "1px solid rgba(10,10,10,0.45)", paddingLeft: "5px",
+          background: `rgba(170,255,0,${opacity})`,
+          border: "1px solid rgba(10,10,10,0.45)",
+          padding: "2px 5px",
         }}
       >
         <div>{label}</div>
-        {sublabel && <div style={{ opacity: 0.7 }}>{sublabel}</div>}
+        {sublabel && <div style={{ opacity: 0.72 }}>{sublabel}</div>}
       </div>
     </Html>
   );

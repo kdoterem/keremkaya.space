@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CryptoScramble from "@/app/components/CryptoScramble";
 import MechButton, { SETTLE_EASE } from "@/app/components/MechButton";
 import LandingTerrain from "@/app/components/LandingTerrain";
 import ReadingJourney from "@/app/components/ReadingJourney";
@@ -24,11 +23,6 @@ type Mode = "landing" | "choice" | "play" | "browse-range" | "browse-month";
 
 const PROSE = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 const MONO  = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
-
-const TITLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
-const TITLE_SCRAMBLE_MS = 650;  // one reveal pass
-const TITLE_TICK_MS     = 40;
-const TITLE_REPLAY_MS   = 7000; // how often the title re-scrambles-then-resolves
 
 const DODGE_RANGE = 64; // px the button can jump on its first click
 
@@ -59,19 +53,6 @@ export default function WritingPage() {
 
   const [dodged, setDodged] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-
-  // Ambient title replay — CryptoScramble's `infinite` mode never locks a
-  // single character in (lockIndex stays 0 forever, by design, for the
-  // homepage core's never-resolving placeholder text), so it was rendering
-  // as permanent, fully-scrambled gibberish here rather than the intended
-  // "mostly WRITING, occasionally alive" read. Fixed by using the normal
-  // duration-based reveal (which DOES resolve and hold) and periodically
-  // bumping trigger to replay it — same mechanism kismet/search already use.
-  const [titleTrigger, setTitleTrigger] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => setTitleTrigger(t => t + 1), TITLE_REPLAY_MS);
-    return () => window.clearInterval(id);
-  }, []);
 
   useEffect(() => {
     if (!_monthsCache) {
@@ -113,7 +94,6 @@ export default function WritingPage() {
   }, [postsByMonth]);
 
   const showTopReturn = mode === "landing" || mode === "choice" || mode === "browse-range";
-  const showTitle     = mode === "landing" || mode === "choice" || mode === "browse-range";
   const terrainDim    = mode === "browse-month";
   const terrainClickable = mode === "browse-range";
 
@@ -159,27 +139,6 @@ export default function WritingPage() {
           </Link>
         )}
 
-        {showTitle && (
-          <h2
-            style={{
-              fontSize:      "clamp(2rem, 5vw, 3.5rem)",
-              fontWeight:    700,
-              letterSpacing: "-0.02em",
-              color:         "#0a0a0a",
-              marginTop:     "2.5rem",
-              marginBottom:  "2.5rem",
-            }}
-          >
-            <CryptoScramble
-              text="WRITING"
-              trigger={titleTrigger}
-              duration={TITLE_SCRAMBLE_MS}
-              tickMs={TITLE_TICK_MS}
-              chars={TITLE_CHARS}
-            />
-          </h2>
-        )}
-
         {(mode === "landing" || mode === "choice" || mode === "browse-range") && months.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "50vh" }}>
             {mode === "landing" && (
@@ -194,7 +153,12 @@ export default function WritingPage() {
                   fontWeight:      600,
                   letterSpacing:   "0.12em",
                   textTransform:   "uppercase",
-                  background:      "transparent",
+                  // Opaque, not transparent — this sits directly over the
+                  // fixed 3D backdrop, and a transparent button let the
+                  // terrain show through it, reading as "the mesh is
+                  // obscuring the button" even though it was already
+                  // correctly stacked above it.
+                  background:      "#aaff00",
                   border:          "1px solid #0a0a0a",
                   color:           "#0a0a0a",
                   padding:         "0.75rem 1.75rem",
