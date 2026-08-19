@@ -4,7 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CryptoScramble from "@/app/components/CryptoScramble";
-import tagProvenanceData from "@/tag-provenance.json";
+import {
+  getProvenanceTags,
+  computeWeights,
+  bodyWeightStyle,
+  titleWeightStyle,
+  provenanceBoundaryDate,
+} from "@/lib/tagProvenance";
 
 // ── The range: a reader traverses backward through time, present → Feb 2025,
 // one poem per position. No progress bar, no counter — the terrain itself
@@ -179,65 +185,11 @@ const STAGGER_MS    = 500; // title → date → body
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 const TOTAL_REVEAL_MS = STAGGER_MS * 2 + SCRAMBLE_MS + 200;
 
-// ── Tag provenance — close-read spans for the 2026-08-13..08-18 stretch ──
-// Built once (the data never changes at runtime) into slug -> tags. Posts
-// with no entry here (i.e. everything outside that stretch) render exactly
-// as before: computeWeights returns undefined, CryptoScramble falls back
-// to its plain flat-span render.
-interface ProvenanceEntry { type: string; spans?: string[]; note?: string }
-interface PostProvenance  { slug: string; date: string; tags: Record<string, ProvenanceEntry> }
-const provenanceBySlug = new Map<string, Record<string, ProvenanceEntry>>(
-  // Each post's tags object gets inferred as its own distinct literal shape
-  // (different posts have different tag names as literal keys), not a
-  // generic Record — TS won't allow a direct cast between those without
-  // going through unknown first.
-  (tagProvenanceData as unknown as PostProvenance[]).map(p => [p.slug, p.tags]),
-);
-
-// One entry per character in `text` — how many tags' spans cover that
-// position. A span is only ever located in the text it's actually found in
-// (title or body get computeWeights called separately), so a title-only
-// span like "god" in percept-and-define-intercept-the-divine never marks
-// anything in the body, and vice versa. Returns undefined (not an
-// all-zero array) when nothing matched, so the caller can skip the
-// styled-runs path entirely for plain text.
-function computeWeights(text: string, tags: Record<string, ProvenanceEntry> | undefined): number[] | undefined {
-  if (!tags) return undefined;
-  const weights = new Array(text.length).fill(0);
-  let any = false;
-  for (const entry of Object.values(tags)) {
-    if (entry.type === "none" || !entry.spans) continue;
-    for (const span of entry.spans) {
-      const idx = text.indexOf(span);
-      if (idx === -1) continue; // lives in the other field (title vs body), or doesn't apply here
-      any = true;
-      for (let i = idx; i < idx + span.length; i++) weights[i]++;
-    }
-  }
-  return any ? weights : undefined;
-}
-
-// Body starts at normal weight/size and has room to move — both step up.
-// Kindle-highlight-subtle: a nudge, not a shout. Capped at 3 tags deep.
-function bodyWeightStyle(level: number): React.CSSProperties {
-  const l = Math.min(level, 3);
-  return [
-    {},
-    { fontWeight: 600, fontSize: "1.03em" },
-    { fontWeight: 700, fontSize: "1.06em" },
-    { fontWeight: 800, fontSize: "1.09em" },
-  ][l];
-}
-
-// Title is already bold (700) and already big — the marked portion only
-// goes blacker/heavier from here, no further size change, so it reads as
-// one continuous gradient of intensity rather than a second, different
-// kind of emphasis competing with the first. Capped at 2 (titles are short;
-// three-deep overlaps don't occur in this stretch).
-function titleWeightStyle(level: number): React.CSSProperties {
-  const l = Math.min(level, 2);
-  return [{}, { fontWeight: 800 }, { fontWeight: 900 }][l];
-}
+// ── Tag provenance — logic lives in lib/tagProvenance.tsx, shared with
+// /writing so both surfaces render identical emphasis for identical data.
+// Posts with no entry there (i.e. everything before the boundary date)
+// render exactly as before: computeWeights returns undefined, CryptoScramble
+// falls back to its plain flat-span render. ──
 
 type Phase = "view" | "poem";
 type SendState = "idle" | "sending" | "sent" | "error";
@@ -493,6 +445,30 @@ export default function TerrainPage() {
   const spacing   = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 40;
   const hazeWidth = spacing * 0.9;
 
+  // MILAT seam — where deep tagging currently ends going backward in time.
+  // The x-axis is linear by month index, not by calendar day, so the exact
+  // day within its month is interpolated between that month's point and the
+  // previous (older) one's, proportional to how far into the month it falls.
+  // Looked up dynamically from the provenance data's earliest date, not
+  // hardcoded — a future addition to tag-provenance.json with an earlier
+  // date would move the seam automatically.
+  const milatX = useMemo(() => {
+    if (points.length === 0 || months.length === 0) return null;
+    const boundary = provenanceBoundaryDate();
+    if (!boundary) return null;
+    const [by, bm, bd] = boundary.split("-").map(Number);
+    if (!by || !bm || !bd) return null;
+    const boundaryMonth = `${by}-${String(bm).padStart(2, "0")}`;
+    const idx = months.findIndex(m => m.month === boundaryMonth);
+    if (idx === -1) return null;
+    const thisPt = points[idx];
+    if (idx === 0) return thisPt.x; // no older month to interpolate from
+    const daysInMonth = new Date(by, bm, 0).getDate();
+    const frac = clamp((bd - 1) / daysInMonth, 0, 1);
+    const prevPt = points[idx - 1];
+    return prevPt.x + (thisPt.x - prevPt.x) * frac;
+  }, [points, months]);
+
   const resolveX = position != null && points[position] ? points[position].x : 0;
   const resolveY = position != null && points[position] ? points[position].y : 0;
 
@@ -641,7 +617,7 @@ export default function TerrainPage() {
 
   // undefined for every post outside the provenance data — CryptoScramble
   // renders those exactly as it did before this pass.
-  const provenanceTags = currentPoem ? provenanceBySlug.get(currentPoem.slug) : undefined;
+  const provenanceTags = currentPoem ? getProvenanceTags(currentPoem.slug) : undefined;
   const titleWeights = useMemo(
     () => currentPoem ? computeWeights(currentPoem.title, provenanceTags) : undefined,
     [currentPoem, provenanceTags],
@@ -737,6 +713,17 @@ export default function TerrainPage() {
                   d={linePath} fill="none" stroke="#0a0a0a" strokeWidth={STROKE_W}
                   clipPath="url(#rangeResolvedClip)"
                 />
+
+                {/* MILAT seam — a literal crossing in the terrain, not a label.
+                    Perforated rather than solid (unlike the ridgeline) and
+                    unmarked (unlike the reader's position below) — always
+                    present, independent of reading progress. */}
+                {milatX != null && (
+                  <line
+                    x1={milatX} y1={0} x2={milatX} y2={dims.height}
+                    stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                  />
+                )}
 
                 {/* the reader's position — marked, hard-edged */}
                 <line x1={resolveX} y1={resolveY} x2={resolveX} y2={dims.height} stroke="#0a0a0a" strokeWidth={1} />

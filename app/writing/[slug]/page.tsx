@@ -5,6 +5,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
+import {
+  hasProvenance,
+  getProvenanceTags,
+  computeWeights,
+  bodyWeightStyle,
+  titleWeightStyle,
+  WeightedText,
+} from "@/lib/tagProvenance";
 
 // Transforms <p>line1<br>line2</p> → <div class="poem-stanza"><div>line1</div>…</div>
 // Real block elements (div) copy as \n on every browser; <span style="display:block"> does not
@@ -144,6 +152,22 @@ export default async function PostPage({
   const prev = idx < all.length - 1 ? all[idx + 1] : null;
   const next = idx > 0              ? all[idx - 1] : null;
 
+  // Tag provenance — same data, same weighting functions as /terrain
+  // (lib/tagProvenance.tsx), so the two surfaces render identical emphasis
+  // for identical posts by construction. Posts with no provenance entry
+  // (everything before the boundary date) fall through to the untouched
+  // MDXRemote path below, exactly as before this feature existed.
+  //
+  // body.trim() matches getSearchIndex()'s body (what /terrain reads) — the
+  // raw post.content getPostBySlug returns isn't trimmed, and provenance
+  // spans were located against the trimmed text, so trimming here keeps the
+  // character offsets aligned.
+  const bodyText       = post.content.trim();
+  const provenanceTags = getProvenanceTags(slug);
+  const showProvenance = hasProvenance(slug);
+  const titleWeights   = computeWeights(post.title, provenanceTags);
+  const bodyWeights    = computeWeights(bodyText, provenanceTags);
+
   return (
     <main
       style={{
@@ -217,7 +241,11 @@ export default async function PostPage({
             color: "#0a0a0a",
           }}
         >
-          {post.title}
+          {showProvenance ? (
+            <WeightedText text={post.title} weights={titleWeights} weightStyle={titleWeightStyle} />
+          ) : (
+            post.title
+          )}
         </h1>
 
         {/* Date */}
@@ -241,14 +269,23 @@ export default async function PostPage({
           }}
           className="prose-content"
         >
-          <MDXRemote
-            source={post.content}
-            options={{ mdxOptions: { remarkPlugins: [remarkBreaks], rehypePlugins: [rehypeBlockLines] } }}
-          />
+          {showProvenance ? (
+            // Same technique as /terrain's poem body — plain pre-wrap text
+            // with weighted runs, not markdown-rendered. Matches it exactly
+            // rather than approximating it through MDXRemote.
+            <div style={{ whiteSpace: "pre-wrap" }}>
+              <WeightedText text={bodyText} weights={bodyWeights} weightStyle={bodyWeightStyle} />
+            </div>
+          ) : (
+            <MDXRemote
+              source={post.content}
+              options={{ mdxOptions: { remarkPlugins: [remarkBreaks], rehypePlugins: [rehypeBlockLines] } }}
+            />
+          )}
         </div>
 
         {/* Save as image */}
-        <SaveImageButton title={post.title} content={post.content} date={post.date} />
+        <SaveImageButton title={post.title} content={post.content} date={post.date} slug={slug} />
 
         {/* Prev / Next */}
         {(prev || next) && (

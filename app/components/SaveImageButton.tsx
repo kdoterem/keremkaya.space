@@ -1,11 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  getProvenanceTags,
+  computeWeights,
+  bodyWeightStyle,
+  titleWeightStyle,
+} from '@/lib/tagProvenance';
 
 interface Props {
   title: string;
   content: string;
   date: string;
+  slug?: string;
 }
 
 // ── constants ────────────────────────────────────────────────────────────────
@@ -30,7 +37,18 @@ const CONT_TITLE_LINE_H = 50;
 const MAX_FONT = 46;
 const MIN_FONT = 28;
 
-type Line = string | null;  // null = paragraph-gap sentinel
+// A word plus its offset within the full stripped-content string — carried
+// through wrapping so a per-character provenance weight array (computed
+// against that same stripped string) can be sliced back out per word once
+// paragraphs have been split apart and re-wrapped.
+interface WordTok { word: string; start: number }
+
+// null = paragraph-gap sentinel (unchanged). A line is either a plain string
+// (the original, untouched path — every post without provenance data) or an
+// array of word tokens (the weighted path, only ever produced when a weight
+// array was passed into buildPages).
+type Line = string | WordTok[] | null;
+type TitleLine = string | WordTok[];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,6 +84,108 @@ function drawCentered(ctx: CanvasRenderingContext2D, text: string, y: number, co
   ctx.fillText(text, x, y);
 }
 
+// ── weighted variants — same wrap/centering shape as above, but tracking
+// each word's source offset (so its weight can be looked up) and drawing
+// each word in its own font instead of one flat fillText call. Only ever
+// invoked when a weight array exists; the plain functions above are
+// untouched and still handle every post without provenance data. ──
+
+function tokenizeWords(text: string): WordTok[] {
+  const words: WordTok[] = [];
+  const re = /\S+/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) words.push({ word: m[0], start: m.index });
+  return words;
+}
+
+// Same greedy width-based wrap as wrapLine, operating on word tokens instead
+// of raw split(' ') strings so each line keeps its words' source offsets.
+function wrapLineWithOffsets(
+  ctx: CanvasRenderingContext2D,
+  words: WordTok[],
+  maxWidth: number,
+): WordTok[][] {
+  const out: WordTok[][] = [];
+  let cur: WordTok[] = [];
+  let curText = '';
+  for (const tok of words) {
+    const test = curText ? `${curText} ${tok.word}` : tok.word;
+    if (ctx.measureText(test).width > maxWidth && curText) {
+      out.push(cur);
+      cur = [tok];
+      curText = tok.word;
+    } else {
+      cur.push(tok);
+      curText = test;
+    }
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+// Highest weight level touching any character of this word — a word gets
+// bolded if a span covers any part of it, matching how it reads visually
+// rather than requiring full-word coverage.
+function wordWeightLevel(weights: number[], word: WordTok): number {
+  let max = 0;
+  for (let i = word.start; i < word.start + word.word.length; i++) {
+    if (weights[i] !== undefined) max = Math.max(max, weights[i]);
+  }
+  return max;
+}
+
+// Maps a weightStyle's React.CSSProperties (fontWeight + optional em-based
+// fontSize) onto a canvas font string, falling back to the run's base
+// weight/size when a level-0 style leaves them unset.
+function canvasFontForWeightStyle(
+  baseFontSize: number,
+  baseFontWeight: string,
+  style: React.CSSProperties,
+): string {
+  const fw = style.fontWeight ?? baseFontWeight;
+  const sizeStr = typeof style.fontSize === 'string' ? style.fontSize : undefined;
+  const mult = sizeStr ? parseFloat(sizeStr) : 1;
+  const size = Math.round(baseFontSize * mult);
+  return `${fw} ${size}px ${FONT}`;
+}
+
+// Draws one line word-by-word, each in its own weight-appropriate font,
+// manually positioned (canvas has no inline flow) and centered as a whole —
+// the direct canvas equivalent of CryptoScramble/WeightedText's styled runs.
+function drawWeightedLineCentered(
+  ctx: CanvasRenderingContext2D,
+  words: WordTok[],
+  weights: number[],
+  y: number,
+  baseFontSize: number,
+  baseFontWeight: string,
+  weightStyleFn: (level: number) => React.CSSProperties,
+) {
+  const wordFonts = words.map(w => {
+    const level = wordWeightLevel(weights, w);
+    const style = level > 0 ? weightStyleFn(level) : {};
+    return canvasFontForWeightStyle(baseFontSize, baseFontWeight, style);
+  });
+
+  ctx.font = `${baseFontWeight} ${baseFontSize}px ${FONT}`;
+  const spaceWidth = ctx.measureText(' ').width;
+
+  let totalWidth = 0;
+  words.forEach((w, i) => {
+    ctx.font = wordFonts[i];
+    totalWidth += ctx.measureText(w.word).width;
+    if (i < words.length - 1) totalWidth += spaceWidth;
+  });
+
+  let x = (W - totalWidth) / 2;
+  ctx.fillStyle = '#0a0a0a';
+  words.forEach((w, i) => {
+    ctx.font = wordFonts[i];
+    ctx.fillText(w.word, x, y);
+    x += ctx.measureText(w.word).width + (i < words.length - 1 ? spaceWidth : 0);
+  });
+}
+
 function drawRule(ctx: CanvasRenderingContext2D, y: number) {
   ctx.strokeStyle = 'rgba(10,10,10,0.12)';
   ctx.lineWidth   = 1;
@@ -78,13 +198,23 @@ function drawRule(ctx: CanvasRenderingContext2D, y: number) {
 
 // ── build pages ──────────────────────────────────────────────────────────────
 
-function buildPages(title: string, content: string) {
+function buildPages(
+  title: string,
+  content: string,
+  titleWeights: number[] | undefined,
+  bodyWeights: number[] | undefined,
+) {
   const mc  = document.createElement('canvas');
   const ctx = mc.getContext('2d')!;
 
-  // Title block height
+  // Title block height — weighted path only when titleWeights exists
+  // (provenance touched a span inside the title itself; several of the 8
+  // posts' spans are body-only, so this can be undefined even when
+  // bodyWeights isn't).
   ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
-  const titleWrapped = wrapLine(ctx, title, CW);
+  const titleWrapped: TitleLine[] = titleWeights
+    ? wrapLineWithOffsets(ctx, tokenizeWords(title), CW)
+    : wrapLine(ctx, title, CW);
   const titleBlockH  = titleWrapped.length * TITLE_LINE_H;
 
   // Available content height per page type
@@ -92,7 +222,18 @@ function buildPages(title: string, content: string) {
   const availCont  = H - TOP_RESERVE - FOOTER_RESERVE - CONT_TITLE_LINE_H  - GAP;
 
   // Parse content
-  const paragraphs = stripMarkdown(content).split('\n');
+  const stripped   = stripMarkdown(content);
+  const paragraphs = stripped.split('\n');
+
+  // Cumulative offset of each paragraph within `stripped` — only used on the
+  // weighted path, to recover each word's absolute index (and so its
+  // weight) once paragraphs are split apart and independently re-wrapped.
+  let cursor = 0;
+  const paraOffsets: number[] = [];
+  for (const para of paragraphs) {
+    paraOffsets.push(cursor);
+    cursor += para.length + 1; // +1 for the '\n' the split consumed
+  }
 
   // Find largest font that fits everything on one page (or fall back to MIN_FONT)
   let fontSize = MAX_FONT;
@@ -101,10 +242,18 @@ function buildPages(title: string, content: string) {
   while (fontSize >= MIN_FONT) {
     ctx.font = `${fontSize}px ${FONT}`;
     const lines: Line[] = [];
-    for (const para of paragraphs) {
-      if (!para.trim()) { if (lines.length) lines.push(null); continue; }
-      lines.push(...wrapLine(ctx, para.trim(), CW));
-    }
+    paragraphs.forEach((para, pi) => {
+      if (!para.trim()) { if (lines.length) lines.push(null); return; }
+      if (bodyWeights) {
+        const trimmedPara = para.trim();
+        const leadingWs   = para.length - para.trimStart().length;
+        const paraStart   = paraOffsets[pi] + leadingWs;
+        const words = tokenizeWords(trimmedPara).map(w => ({ word: w.word, start: paraStart + w.start }));
+        lines.push(...wrapLineWithOffsets(ctx, words, CW));
+      } else {
+        lines.push(...wrapLine(ctx, para.trim(), CW));
+      }
+    });
     while (lines.length && lines[lines.length - 1] === null) lines.pop();
     allLines = lines;
 
@@ -154,7 +303,7 @@ function buildPages(title: string, content: string) {
 // ── render one page ──────────────────────────────────────────────────────────
 
 function renderPage(
-  titleWrapped: string[],
+  titleWrapped: TitleLine[],
   contentLines: Line[],
   title: string,
   pageNum: number,
@@ -163,6 +312,8 @@ function renderPage(
   lineH: number,
   gapH: number,
   baseFilename: string,
+  titleWeights: number[] | undefined,
+  bodyWeights: number[] | undefined,
 ): Promise<File> {
   return new Promise((resolve, reject) => {
     const canvas    = document.createElement('canvas');
@@ -187,7 +338,11 @@ function renderPage(
 
       ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
       for (const line of titleWrapped) {
-        drawCentered(ctx, line, y, '#0a0a0a');
+        if (Array.isArray(line)) {
+          drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
+        } else {
+          drawCentered(ctx, line, y, '#0a0a0a');
+        }
         y += TITLE_LINE_H;
       }
     } else {
@@ -212,7 +367,11 @@ function renderPage(
     ctx.font = `${fontSize}px ${FONT}`;
     for (const line of contentLines) {
       if (line === null) { y += gapH; continue; }
-      drawCentered(ctx, line, y, '#0a0a0a');
+      if (Array.isArray(line)) {
+        drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle);
+      } else {
+        drawCentered(ctx, line, y, '#0a0a0a');
+      }
       y += lineH;
     }
 
@@ -240,7 +399,7 @@ function renderPage(
 
 // ── component ────────────────────────────────────────────────────────────────
 
-export default function SaveImageButton({ title, content }: Props) {
+export default function SaveImageButton({ title, content, slug }: Props) {
   const [generating, setGenerating] = useState(false);
   const [hint,       setHint]       = useState<string | null>(null);
 
@@ -250,13 +409,21 @@ export default function SaveImageButton({ title, content }: Props) {
 
     setTimeout(async () => {
       try {
-        const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content);
+        // Same data, same weighting functions as /terrain and /writing
+        // (lib/tagProvenance.tsx) — posts with no provenance entry get
+        // undefined here and buildPages/renderPage fall back to the
+        // original flat, unweighted render untouched.
+        const tags = slug ? getProvenanceTags(slug) : undefined;
+        const titleWeights = computeWeights(title, tags);
+        const bodyWeights  = computeWeights(stripMarkdown(content), tags);
+
+        const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content, titleWeights, bodyWeights);
         const totalPages   = pages.length;
         const baseFilename = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
         const files = await Promise.all(
           pages.map((lines, i) =>
-            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename)
+            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
           )
         );
 
