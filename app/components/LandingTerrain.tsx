@@ -2,18 +2,24 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
+import * as THREE from "three";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
 import { mulberry32 } from "@/app/components/TerrainScan";
 
-// ── A genuine 3D scene — three attempts at faking depth in 2D (parallel
-// offset lines, a crossing grid, perspective compression) were all the
-// wrong tool. This is a real camera in a real three.js scene, orbitable.
-// Replaces the SVG/wireframe rendering entirely, not a styling pass.
+// ── A genuine 3D landform, not a chart. Three failures corrected from the
+// prior pass: (1) it was a bordered box, not a borderless landform sitting
+// on the page — fixed by making the canvas a full-viewport backdrop with no
+// frame; (2) it was a connected-dot line, not a continuous surface — fixed
+// by displacing a subdivided plane's vertices via Catmull-Rom interpolation
+// across the 19 real data points, lit with real directional light so peaks
+// catch light and valleys sit in shadow; (3) the ambient "WRITING" title
+// was rendering as permanent scrambled gibberish (a CryptoScramble bug, not
+// a leftover of this component) — fixed at the call site in
+// app/writing/page.tsx.
 //
-// The waterline fader is dropped (confirmed) — orbit + zoom is now the
-// exploration mechanic that used to belong to the fader. Every month is
-// directly reachable by rotating/zooming rather than raising a waterline. ──
+// The waterline fader stays dropped, confirmed with the user — orbit + zoom
+// is the exploration mechanic now. ──
 
 export interface TerrainMonth {
   month: string; // YYYY-MM
@@ -40,28 +46,46 @@ const HUD_MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Co
 
 // ── scene layout — world units, not pixels ──
 const SCENE_WIDTH  = 10;   // x spans -HALF..HALF — the time axis, Feb 2025 -> present
-const SCENE_DEPTH  = 2.4;  // z spread per month's point cluster — gives the ridge real mass
-const HEIGHT_SCALE = 3.4;  // world units per fully-normalized (max) count
+const SCENE_DEPTH  = 3;    // z depth of the terrain slab itself
+const HEIGHT_SCALE = 3.2;  // world units at the fullest month
 
-interface MonthPoint {
-  x: number; y: number; count: number; words: number; month: string; elevFrac: number;
+// Material colour deviates from strict flat #0a0a0a — a pure-black surface
+// under directional light still reads as flat, since black has no headroom
+// to visibly lighten. This is the darkest/lightest pair the palette can
+// bear while still reading as "black" against the green, per spec.
+const SURFACE_COLOR = "#151515";
+
+// ── Catmull-Rom across the 19 known points — passes exactly through each
+// real value, smoothly curved between them, unlike a linear/segment join. ──
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t, t3 = t2 * t;
+  return 0.5 * (
+    (2 * p1) +
+    (-p0 + p2) * t +
+    (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+    (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+  );
 }
 
-function layoutMonths(months: TerrainMonth[]): MonthPoint[] {
-  const n = months.length;
-  const maxCount = Math.max(1, ...months.map(m => m.count));
-  return months.map((m, i) => {
-    const x = n > 1 ? (i / (n - 1) - 0.5) * SCENE_WIDTH : 0;
-    const elevFrac = m.count / maxCount;
-    const y = elevFrac * HEIGHT_SCALE;
-    return { x, y, count: m.count, words: m.words, month: m.month, elevFrac };
-  });
+function heightAt(values: number[], xNorm: number): number {
+  const n = values.length;
+  if (n === 0) return 0;
+  if (n === 1) return values[0];
+  const clamped = Math.max(0, Math.min(1, xNorm));
+  const scaled = clamped * (n - 1);
+  const i = Math.floor(scaled);
+  const t = scaled - i;
+  const p0 = values[Math.max(0, i - 1)];
+  const p1 = values[Math.min(n - 1, i)];
+  const p2 = values[Math.min(n - 1, i + 1)];
+  const p3 = values[Math.min(n - 1, i + 2)];
+  return catmullRom(p0, p1, p2, p3, t);
 }
 
-// MILAT seam x — same day-fraction interpolation as the earlier 2D passes,
+// MILAT seam x — same day-fraction interpolation as the earlier passes,
 // just in scene x-units instead of pixels. Shared boundary-date lookup, not
 // re-derived or hardcoded.
-function seamX(months: TerrainMonth[], pts: MonthPoint[]): number | null {
+function seamX(months: TerrainMonth[]): number | null {
   const boundary = provenanceBoundaryDate();
   if (!boundary) return null;
   const [by, bm, bd] = boundary.split("-").map(Number);
@@ -69,107 +93,84 @@ function seamX(months: TerrainMonth[], pts: MonthPoint[]): number | null {
   const boundaryMonth = `${by}-${String(bm).padStart(2, "0")}`;
   const idx = months.findIndex(m => m.month === boundaryMonth);
   if (idx === -1) return null;
-  if (idx === 0) return pts[0].x;
+  const n = months.length;
+  const idxX = n > 1 ? (idx / (n - 1) - 0.5) * SCENE_WIDTH : 0;
+  if (idx === 0) return idxX;
+  const prevX = n > 1 ? ((idx - 1) / (n - 1) - 0.5) * SCENE_WIDTH : 0;
   const daysInMonth = new Date(by, bm, 0).getDate();
   const frac = Math.max(0, Math.min(1, (bd - 1) / daysInMonth));
-  return pts[idx - 1].x + (pts[idx].x - pts[idx - 1].x) * frac;
+  return prevX + (idxX - prevX) * frac;
 }
 
-// ── elevation -> point density/size/opacity, same tiered-weight principle
-// as the 2D passes, now genuinely spatial: a peak isn't just brighter, it's
-// physically more points occupying more of the cluster's depth. ──
-const ELEV_TIERS   = [0.25, 0.5, 0.75];
-const TIER_ROWS    = [2, 4, 6, 9];    // point rows across z, by tier
-const TIER_SIZE    = [0.035, 0.05, 0.065, 0.085];
-const TIER_OPACITY = [0.32, 0.5, 0.72, 0.95];
+// ── The landform ──
+// PlaneGeometry, hundreds of segments, each vertex's height set by
+// interpolating the 19 real monthly counts across its position on the time
+// axis, plus a small deterministic secondary noise layer for surface
+// roughness (rock/snow micro-detail) riding on top of the main shape.
+const SEGMENTS_X = 240;
+const SEGMENTS_Z = 48;
+const MICRO_AMPLITUDE = 0.045; // small — roughness, not a second landform
 
-function elevationTier(frac: number): number {
-  for (let i = 0; i < ELEV_TIERS.length; i++) if (frac < ELEV_TIERS[i]) return i;
-  return ELEV_TIERS.length;
+function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
+  const maxCount = Math.max(1, ...months.map(m => m.count));
+  const normalized = months.map(m => m.count / maxCount);
+
+  const geo = new THREE.PlaneGeometry(SCENE_WIDTH, SCENE_DEPTH, SEGMENTS_X, SEGMENTS_Z);
+  geo.rotateX(-Math.PI / 2); // lay flat: local Y becomes height, local X stays the time axis
+
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    const xNorm = x / SCENE_WIDTH + 0.5;
+    const base = heightAt(normalized, xNorm) * HEIGHT_SCALE;
+    const micro = (
+      Math.sin(x * 7.3 + z * 5.1) * 0.5 +
+      Math.sin(x * 13.7 - z * 9.2) * 0.25 +
+      Math.sin(x * 23.1 + z * 17.4) * 0.125
+    ) * MICRO_AMPLITUDE;
+    pos.setY(i, Math.max(0, base + micro));
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
 }
 
-// A raw points object — hand-rolled via R3F's intrinsic elements (which map
-// 1:1 to core three.js classes) rather than a drei sugar component, so this
-// depends only on three.js's own long-stable BufferGeometry/PointsMaterial
-// API, not a helper's specific prop shape.
-function PointCloud({ positions, size, opacity }: { positions: Float32Array; size: number; opacity: number }) {
+function Terrain({ months }: { months: TerrainMonth[] }) {
+  const geometry = useMemo(() => buildTerrainGeometry(months), [months]);
+  return (
+    <mesh geometry={geometry} receiveShadow castShadow>
+      <meshStandardMaterial color={SURFACE_COLOR} roughness={0.82} metalness={0.04} />
+    </mesh>
+  );
+}
+
+// The sonar field — genuinely 3D, scattered through a large volume so it
+// reads as the page's full-viewport ambient texture rather than a cluster
+// around a small chart. Deterministic (mulberry32, the same PRNG the rest
+// of the terrain work has used all along). sizeAttenuation is what gives
+// the perspective-based size response as the camera moves — nearer points
+// read larger, further ones smaller, natively, with no extra per-point work.
+function BackgroundField() {
+  const positions = useMemo(() => {
+    const rand = mulberry32(4242);
+    const n = 1100;
+    const arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      arr[i * 3]     = (rand() - 0.5) * SCENE_WIDTH * 3.4;
+      arr[i * 3 + 1] = rand() * HEIGHT_SCALE * 1.6;
+      arr[i * 3 + 2] = (rand() - 0.5) * SCENE_DEPTH * 9;
+    }
+    return arr;
+  }, []);
   return (
     <points>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial color="#0a0a0a" size={size} sizeAttenuation transparent opacity={opacity} depthWrite={false} />
+      <pointsMaterial color="#0a0a0a" size={0.03} sizeAttenuation transparent opacity={0.12} depthWrite={false} />
     </points>
   );
-}
-
-// The terrain itself — each month's real height becomes a small jittered
-// cluster of points across z (mass, not a ribbon), grouped into up to 4
-// tiered point-cloud objects so density/size/opacity can vary by elevation.
-function TerrainPoints({ points }: { points: MonthPoint[] }) {
-  const tierArrays = useMemo(() => {
-    const buckets: number[][] = [[], [], [], []];
-    points.forEach((p, i) => {
-      const tier = elevationTier(p.elevFrac);
-      const rand = mulberry32(9001 + i);
-      const rows = TIER_ROWS[tier];
-      for (let r = 0; r < rows; r++) {
-        const z = rows > 1 ? (r / (rows - 1) - 0.5) * SCENE_DEPTH : 0;
-        const jx = (rand() - 0.5) * 0.1;
-        const jy = (rand() - 0.5) * 0.08;
-        buckets[tier].push(p.x + jx, Math.max(0.015, p.y + jy), z);
-      }
-    });
-    return buckets.map(b => new Float32Array(b));
-  }, [points]);
-
-  return (
-    <>
-      {tierArrays.map((arr, tier) => (
-        arr.length === 0 ? null : (
-          <PointCloud key={tier} positions={arr} size={TIER_SIZE[tier]} opacity={TIER_OPACITY[tier]} />
-        )
-      ))}
-    </>
-  );
-}
-
-// A very light connecting line through each month's true height — so the
-// eye still reads it as continuous ground rather than scattered noise, kept
-// deliberately faint since the point cloud is the primary read.
-function RidgeLine({ points }: { points: MonthPoint[] }) {
-  const positions = useMemo(() => {
-    const arr = new Float32Array(points.length * 3);
-    points.forEach((p, i) => { arr[i * 3] = p.x; arr[i * 3 + 1] = p.y; arr[i * 3 + 2] = 0; });
-    return arr;
-  }, [points]);
-  return (
-    <line>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <lineBasicMaterial color="#0a0a0a" transparent opacity={0.16} />
-    </line>
-  );
-}
-
-// The sonar field, genuinely 3D this time — scattered through a volume
-// around and behind the terrain rather than painted flat behind it, so the
-// ridge reads as emerging out of detected space. Deterministic (mulberry32,
-// same PRNG the rest of the terrain work has used all along).
-function BackgroundField() {
-  const positions = useMemo(() => {
-    const rand = mulberry32(4242);
-    const n = 380;
-    const arr = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      arr[i * 3]     = (rand() - 0.5) * SCENE_WIDTH * 1.7;
-      arr[i * 3 + 1] = rand() * HEIGHT_SCALE * 1.5;
-      arr[i * 3 + 2] = (rand() - 0.5) * SCENE_DEPTH * 3.4;
-    }
-    return arr;
-  }, []);
-  return <PointCloud positions={positions} size={0.022} opacity={0.09} />;
 }
 
 // The MILAT seam — a thin vertical rod (a cylinder, not a flat line or
@@ -177,17 +178,17 @@ function BackgroundField() {
 // vanishing edge-on the way a 2D line or a flat plane would.
 function SeamMarker({ x }: { x: number }) {
   return (
-    <mesh position={[x, (HEIGHT_SCALE * 1.25) / 2, 0]}>
-      <cylinderGeometry args={[0.022, 0.022, HEIGHT_SCALE * 1.25, 8]} />
-      <meshBasicMaterial color="#0a0a0a" transparent opacity={0.32} />
+    <mesh position={[x, (HEIGHT_SCALE * 1.3) / 2, 0]}>
+      <cylinderGeometry args={[0.02, 0.02, HEIGHT_SCALE * 1.3, 8]} />
+      <meshBasicMaterial color="#0a0a0a" transparent opacity={0.3} />
     </mesh>
   );
 }
 
 // A 3D-space-anchored label — drei's <Html> projects the given 3D point to
-// screen coordinates every frame, so this stays attached to the correct
-// spot on the terrain as the camera orbits, rather than being a 2D overlay
-// pasted on top.
+// screen coordinates every frame, so it stays attached to the correct spot
+// on the terrain as the camera orbits. distanceFactor is what gives the
+// camera-distance-based scaling — larger near the camera, smaller far away.
 function Annotation3D({
   position, label, sublabel, variant = "data",
 }: {
@@ -198,7 +199,7 @@ function Annotation3D({
 }) {
   const opacity = variant === "transient" ? 0.85 : variant === "seam" ? 0.7 : 0.55;
   return (
-    <Html position={position} distanceFactor={9} style={{ pointerEvents: "none" }} zIndexRange={[10, 0]}>
+    <Html position={position} distanceFactor={7} style={{ pointerEvents: "none" }} zIndexRange={[10, 0]}>
       <div
         style={{
           fontFamily: HUD_MONO, fontSize: "9px", letterSpacing: "0.06em",
@@ -214,85 +215,97 @@ function Annotation3D({
   );
 }
 
+interface MonthMeta { x: number; height: number; count: number; words: number; month: string }
+
 // Invisible, generously-sized hit target per month — raycasting against the
-// sparse, jittered point cloud directly would be a poor target; this gives
-// BROWSE's click-to-month (and hover) something reliable to hit, decoupled
-// from what's actually drawn.
+// continuous surface directly would give an ambiguous z-column; this gives
+// BROWSE's click-to-month (and hover) a clean, reliable target instead.
 function MonthHitTarget({
-  p, spacing, onHover, onSelect,
+  m, spacing, onHover, onSelect,
 }: {
-  p: MonthPoint; spacing: number;
-  onHover: (p: MonthPoint | null) => void;
+  m: MonthMeta; spacing: number;
+  onHover: (m: MonthMeta | null) => void;
   onSelect: (month: string, clientX: number, clientY: number) => void;
 }) {
   return (
     <mesh
-      position={[p.x, p.y / 2, 0]}
-      onPointerMove={(e) => { e.stopPropagation(); onHover(p); }}
+      position={[m.x, HEIGHT_SCALE * 0.65, 0]}
+      onPointerMove={(e) => { e.stopPropagation(); onHover(m); }}
       onPointerOut={() => onHover(null)}
-      onClick={(e) => { e.stopPropagation(); onSelect(p.month, e.nativeEvent.clientX, e.nativeEvent.clientY); }}
+      onClick={(e) => { e.stopPropagation(); onSelect(m.month, e.nativeEvent.clientX, e.nativeEvent.clientY); }}
     >
-      <boxGeometry args={[Math.max(spacing * 0.9, 0.2), Math.max(p.y, 0.3), SCENE_DEPTH * 1.4]} />
+      <boxGeometry args={[Math.max(spacing * 0.9, 0.2), HEIGHT_SCALE * 1.3, SCENE_DEPTH * 1.6]} />
       <meshBasicMaterial transparent opacity={0} depthWrite={false} />
     </mesh>
   );
 }
 
-const DEFAULT_CAM_POS: [number, number, number] = [0, HEIGHT_SCALE * 1.35, SCENE_WIDTH * 0.95];
+const DEFAULT_CAM_POS: [number, number, number] = [0, HEIGHT_SCALE * 1.6, SCENE_WIDTH * 1.05];
 const DEFAULT_TARGET:  [number, number, number] = [0, HEIGHT_SCALE * 0.2, 0];
 
 function Scene({
-  points, months, clickable, onHover, onSelect,
+  months, clickable, onHover, onSelect,
 }: {
-  points: MonthPoint[]; months: TerrainMonth[]; clickable: boolean;
-  onHover: (p: MonthPoint | null) => void;
+  months: TerrainMonth[]; clickable: boolean;
+  onHover: (m: MonthMeta | null) => void;
   onSelect: (month: string, clientX: number, clientY: number) => void;
 }) {
+  const meta = useMemo<MonthMeta[]>(() => {
+    const n = months.length;
+    const maxCount = Math.max(1, ...months.map(m => m.count));
+    return months.map((m, i) => ({
+      x: n > 1 ? (i / (n - 1) - 0.5) * SCENE_WIDTH : 0,
+      height: (m.count / maxCount) * HEIGHT_SCALE, // the surface's real height at this month — annotations sit here
+      count: m.count, words: m.words, month: m.month,
+    }));
+  }, [months]);
+
   const peakIdx = useMemo(() => {
-    if (points.length === 0) return -1;
+    if (months.length === 0) return -1;
     let best = 0;
-    for (let i = 1; i < points.length; i++) if (points[i].count > points[best].count) best = i;
+    for (let i = 1; i < months.length; i++) if (months[i].count > months[best].count) best = i;
     return best;
-  }, [points]);
+  }, [months]);
 
   const troughIdx = useMemo(() => {
-    const withPosts = points.map((p, i) => ({ p, i })).filter(x => x.p.count > 0);
+    const withPosts = months.map((m, i) => ({ m, i })).filter(x => x.m.count > 0);
     if (withPosts.length === 0) return -1;
     let best = withPosts[0];
-    for (const x of withPosts) if (x.p.count < best.p.count) best = x;
+    for (const x of withPosts) if (x.m.count < best.m.count) best = x;
     return best.i;
-  }, [points]);
+  }, [months]);
 
-  const seam = useMemo(() => seamX(months, points), [months, points]);
-  const spacing = points.length > 1 ? points[1].x - points[0].x : 1;
+  const seam = useMemo(() => seamX(months), [months]);
+  const spacing = meta.length > 1 ? meta[1].x - meta[0].x : 1;
 
   return (
     <>
-      <ambientLight intensity={1.4} />
-      <BackgroundField />
-      <RidgeLine points={points} />
-      <TerrainPoints points={points} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[SCENE_WIDTH * 0.4, HEIGHT_SCALE * 3, SCENE_DEPTH * 2.2]} intensity={1.7} />
 
-      {clickable && points.map(p => (
-        <MonthHitTarget key={p.month} p={p} spacing={spacing} onHover={onHover} onSelect={onSelect} />
+      <BackgroundField />
+      <Terrain months={months} />
+
+      {clickable && meta.map((m) => (
+        <MonthHitTarget key={m.month} m={m} spacing={spacing} onHover={onHover} onSelect={onSelect} />
       ))}
 
       {seam != null && <SeamMarker x={seam} />}
       {seam != null && (
-        <Annotation3D position={[seam, HEIGHT_SCALE * 1.3, 0]} label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined} variant="seam" />
+        <Annotation3D position={[seam, HEIGHT_SCALE * 1.35, 0]} label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined} variant="seam" />
       )}
       {peakIdx >= 0 && (
         <Annotation3D
-          position={[points[peakIdx].x, points[peakIdx].y, 0]}
-          label={formatMonthShort(points[peakIdx].month)}
-          sublabel={`${points[peakIdx].count} poems`}
+          position={[meta[peakIdx].x, meta[peakIdx].height, 0]}
+          label={formatMonthShort(months[peakIdx].month)}
+          sublabel={`${months[peakIdx].count} poems`}
         />
       )}
       {troughIdx >= 0 && troughIdx !== peakIdx && (
         <Annotation3D
-          position={[points[troughIdx].x, points[troughIdx].y, 0]}
-          label={formatMonthShort(points[troughIdx].month)}
-          sublabel={`${points[troughIdx].count} poem${points[troughIdx].count === 1 ? "" : "s"}`}
+          position={[meta[troughIdx].x, meta[troughIdx].height, 0]}
+          label={formatMonthShort(months[troughIdx].month)}
+          sublabel={`${months[troughIdx].count} poem${months[troughIdx].count === 1 ? "" : "s"}`}
         />
       )}
     </>
@@ -300,9 +313,7 @@ function Scene({
 }
 
 export default function LandingTerrain({ months, dim = false, onMonthClick }: Props) {
-  const points = useMemo(() => layoutMonths(months), [months]);
-  const [hovered, setHovered] = useState<MonthPoint | null>(null);
-  const controlsRef = useRef<any>(null);
+  const [hovered, setHovered] = useState<MonthMeta | null>(null);
 
   // Distinguishes a genuine click (BROWSE navigation) from a drag-to-orbit
   // that happens to end over a month's hit target — OrbitControls captures
@@ -321,93 +332,46 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     onMonthClick?.(month);
   }, [onMonthClick]);
 
-  const resetView = useCallback(() => {
-    controlsRef.current?.reset?.();
-  }, []);
+  if (months.length === 0) return null;
 
   return (
     <div
+      onPointerDownCapture={onPointerDownCapture}
       style={{
-        opacity: dim ? 0.18 : 1,
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        opacity: dim ? 0.16 : 1,
         pointerEvents: dim ? "none" : "auto",
         transition: "opacity 400ms",
       }}
     >
-      <div
-        onPointerDownCapture={onPointerDownCapture}
-        style={{
-          maxWidth:  "700px",
-          margin:    "0 auto",
-          aspectRatio: "16 / 10",
-          position:  "relative",
-          border:    "1px solid rgba(10,10,10,0.18)",
-          background: "transparent",
-        }}
-      >
-        {points.length > 0 && (
-          <Canvas camera={{ position: DEFAULT_CAM_POS, fov: 42 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-            <Scene
-              points={points}
-              months={months}
-              clickable={!!onMonthClick}
-              onHover={setHovered}
-              onSelect={handleSelect}
-            />
-            {hovered && (
-              <Annotation3D
-                position={[hovered.x, hovered.y, 0]}
-                label={formatMonthShort(hovered.month)}
-                sublabel={`${hovered.count} poem${hovered.count === 1 ? "" : "s"}, ${hovered.words.toLocaleString()}w`}
-                variant="transient"
-              />
-            )}
-            <OrbitControls
-              ref={controlsRef}
-              target={DEFAULT_TARGET}
-              enablePan={false}
-              enableDamping
-              dampingFactor={0.08}
-              minDistance={SCENE_WIDTH * 0.5}
-              maxDistance={SCENE_WIDTH * 1.8}
-              minPolarAngle={Math.PI * 0.08}
-              maxPolarAngle={Math.PI * 0.49}
-            />
-          </Canvas>
+      <Canvas camera={{ position: DEFAULT_CAM_POS, fov: 46 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+        <Scene
+          months={months}
+          clickable={!!onMonthClick}
+          onHover={setHovered}
+          onSelect={handleSelect}
+        />
+        {hovered && (
+          <Annotation3D
+            position={[hovered.x, hovered.height, 0]}
+            label={formatMonthShort(hovered.month)}
+            sublabel={`${hovered.count} poem${hovered.count === 1 ? "" : "s"}, ${hovered.words.toLocaleString()}w`}
+            variant="transient"
+          />
         )}
-
-        {/* right-edge nav affordance — a plain hairline track, not a joystick.
-            Purely a visual cue; drag-to-rotate works anywhere on the canvas
-            regardless of whether this is noticed. */}
-        <div style={{ position: "absolute", right: "10px", top: "14%", bottom: "14%", width: "14px", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: "rgba(10,10,10,0.18)", transform: "translateX(-50%)" }} />
-          {[0.25, 0.5, 0.75].map(t => (
-            <div key={t} style={{
-              position: "absolute", left: "50%", top: `${t * 100}%`,
-              width: 5, height: 5, borderRadius: "50%",
-              border: "1px solid rgba(10,10,10,0.3)", transform: "translate(-50%, -50%)",
-            }} />
-          ))}
-        </div>
-
-        {/* reset — returns the camera to its default position/target */}
-        <button
-          onClick={resetView}
-          style={{
-            position: "absolute", left: "10px", bottom: "10px",
-            fontFamily: HUD_MONO, fontSize: "0.62rem", fontWeight: 600,
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            background: "none", border: "1px solid rgba(10,10,10,0.25)",
-            color: "#0a0a0a", opacity: 0.6, padding: "0.3rem 0.55rem",
-            cursor: "pointer",
-          }}
-        >
-          Reset
-        </button>
-      </div>
-
-      <div style={{ marginTop: "0.75rem", fontSize: "0.7rem", letterSpacing: "0.08em", color: "rgba(10,10,10,0.4)", textAlign: "center" }}>
-        drag to rotate — scroll to zoom
-      </div>
+        <OrbitControls
+          target={DEFAULT_TARGET}
+          enablePan={false}
+          enableDamping
+          dampingFactor={0.08}
+          minDistance={SCENE_WIDTH * 0.5}
+          maxDistance={SCENE_WIDTH * 2.4}
+          minPolarAngle={Math.PI * 0.08}
+          maxPolarAngle={Math.PI * 0.49}
+        />
+      </Canvas>
     </div>
   );
 }

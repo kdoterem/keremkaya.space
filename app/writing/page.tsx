@@ -26,8 +26,9 @@ const PROSE = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 const MONO  = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
 
 const TITLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
-const TITLE_TICK_MS = 220; // same register as the tag-field core's resting churn
-const TITLE_CHURN   = 1;   // one letter at a time — legible, just not still
+const TITLE_SCRAMBLE_MS = 650;  // one reveal pass
+const TITLE_TICK_MS     = 40;
+const TITLE_REPLAY_MS   = 7000; // how often the title re-scrambles-then-resolves
 
 const DODGE_RANGE = 64; // px the button can jump on its first click
 
@@ -58,6 +59,19 @@ export default function WritingPage() {
 
   const [dodged, setDodged] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  // Ambient title replay — CryptoScramble's `infinite` mode never locks a
+  // single character in (lockIndex stays 0 forever, by design, for the
+  // homepage core's never-resolving placeholder text), so it was rendering
+  // as permanent, fully-scrambled gibberish here rather than the intended
+  // "mostly WRITING, occasionally alive" read. Fixed by using the normal
+  // duration-based reveal (which DOES resolve and hold) and periodically
+  // bumping trigger to replay it — same mechanism kismet/search already use.
+  const [titleTrigger, setTitleTrigger] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTitleTrigger(t => t + 1), TITLE_REPLAY_MS);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!_monthsCache) {
@@ -109,53 +123,16 @@ export default function WritingPage() {
     <main
       style={{
         minHeight:  "100vh",
-        padding:    "4rem 5vw 6rem",
         fontFamily: PROSE,
       }}
     >
-      {showTopReturn && (
-        <Link
-          href="/"
-          style={{
-            fontSize:       "0.7rem",
-            fontWeight:     500,
-            letterSpacing:  "0.15em",
-            fontVariant:    "small-caps",
-            color:          "#0a0a0a",
-            textDecoration: "none",
-            opacity:        0.5,
-          }}
-        >
-          RETURN
-        </Link>
-      )}
-
-      {showTitle && (
-        <h2
-          style={{
-            fontSize:      "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight:    700,
-            letterSpacing: "-0.02em",
-            color:         "#0a0a0a",
-            marginTop:     "2.5rem",
-            marginBottom:  "2.5rem",
-          }}
-        >
-          <CryptoScramble
-            text="WRITING"
-            infinite
-            tickMs={TITLE_TICK_MS}
-            churnCount={TITLE_CHURN}
-            chars={TITLE_CHARS}
-          />
-        </h2>
-      )}
-
-      {/* One continuous LandingTerrain instance across landing/choice/browse —
-          never remounted between them, so the fader's position (and its
-          inertia mid-settle) survives the reader moving between modes
-          instead of resetting to full-visibility every time. Only PLAY
-          replaces it outright, with its own position-driven rendering. */}
+      {/* The terrain is now a fixed, full-viewport backdrop (its own
+          position:fixed, set internally) sitting behind everything else on
+          the page — the dot field is meant to read as the page's base
+          layer, not contents of a boxed chart. Everything below is wrapped
+          in its own stacking context, explicitly above it, so the page's
+          normal content and controls stay reachable/clickable over the
+          animated backdrop. */}
       {mode !== "play" && months.length > 0 && (
         <LandingTerrain
           months={orderedMonths}
@@ -164,64 +141,104 @@ export default function WritingPage() {
         />
       )}
 
-      {(mode === "landing" || mode === "choice" || mode === "browse-range") && months.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem", minHeight: "3.5rem" }}>
-          {mode === "landing" && (
-            <motion.button
-              onClick={handleTakeJourneyClick}
-              animate={{ x: offset.x, y: offset.y }}
-              transition={{ duration: 0.35, ease: SETTLE_EASE }}
-              whileHover={{ backgroundColor: "#0a0a0a", color: "#aaff00" }}
-              style={{
-                fontFamily:      MONO,
-                fontSize:        "0.8rem",
-                fontWeight:      600,
-                letterSpacing:   "0.12em",
-                textTransform:   "uppercase",
-                background:      "transparent",
-                border:          "1px solid #0a0a0a",
-                color:           "#0a0a0a",
-                padding:         "0.75rem 1.75rem",
-                cursor:          "pointer",
-                transition:      `background-color 0.2s, color 0.2s`,
-              }}
-            >
-              Take the journey
-            </motion.button>
-          )}
+      <div style={{ position: "relative", zIndex: 1, padding: "4rem 5vw 6rem" }}>
+        {showTopReturn && (
+          <Link
+            href="/"
+            style={{
+              fontSize:       "0.7rem",
+              fontWeight:     500,
+              letterSpacing:  "0.15em",
+              fontVariant:    "small-caps",
+              color:          "#0a0a0a",
+              textDecoration: "none",
+              opacity:        0.5,
+            }}
+          >
+            RETURN
+          </Link>
+        )}
 
-          {mode === "choice" && (
-            <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center" }}>
-              <MechButton label="Play" onClick={() => setMode("play")} />
-              <MechButton label="Browse" onClick={() => setMode("browse-range")} />
-            </div>
-          )}
+        {showTitle && (
+          <h2
+            style={{
+              fontSize:      "clamp(2rem, 5vw, 3.5rem)",
+              fontWeight:    700,
+              letterSpacing: "-0.02em",
+              color:         "#0a0a0a",
+              marginTop:     "2.5rem",
+              marginBottom:  "2.5rem",
+            }}
+          >
+            <CryptoScramble
+              text="WRITING"
+              trigger={titleTrigger}
+              duration={TITLE_SCRAMBLE_MS}
+              tickMs={TITLE_TICK_MS}
+              chars={TITLE_CHARS}
+            />
+          </h2>
+        )}
 
-          {mode === "browse-range" && (
-            <span style={{ fontSize: "0.7rem", letterSpacing: "0.08em", color: "rgba(10,10,10,0.4)" }}>
-              tap a month on the terrain to read it
-            </span>
-          )}
-        </div>
-      )}
+        {(mode === "landing" || mode === "choice" || mode === "browse-range") && months.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "50vh" }}>
+            {mode === "landing" && (
+              <motion.button
+                onClick={handleTakeJourneyClick}
+                animate={{ x: offset.x, y: offset.y }}
+                transition={{ duration: 0.35, ease: SETTLE_EASE }}
+                whileHover={{ backgroundColor: "#0a0a0a", color: "#aaff00" }}
+                style={{
+                  fontFamily:      MONO,
+                  fontSize:        "0.8rem",
+                  fontWeight:      600,
+                  letterSpacing:   "0.12em",
+                  textTransform:   "uppercase",
+                  background:      "transparent",
+                  border:          "1px solid #0a0a0a",
+                  color:           "#0a0a0a",
+                  padding:         "0.75rem 1.75rem",
+                  cursor:          "pointer",
+                  transition:      `background-color 0.2s, color 0.2s`,
+                }}
+              >
+                Take the journey
+              </motion.button>
+            )}
 
-      {mode === "play" && (
-        <div style={{ marginTop: "1.5rem" }}>
-          <ReadingJourney onExit={() => setMode("landing")} />
-        </div>
-      )}
+            {mode === "choice" && (
+              <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center" }}>
+                <MechButton label="Play" onClick={() => setMode("play")} />
+                <MechButton label="Browse" onClick={() => setMode("browse-range")} />
+              </div>
+            )}
 
-      {mode === "browse-month" && browseMonth && (
-        <div style={{ marginTop: "2.5rem" }}>
-          <BrowseView
-            months={orderedMonths}
-            postsByMonth={postsByMonth}
-            month={browseMonth}
-            onNavigate={(m) => setBrowseMonth(m)}
-            onReturn={() => setMode("browse-range")}
-          />
-        </div>
-      )}
+            {mode === "browse-range" && (
+              <span style={{ fontSize: "0.7rem", letterSpacing: "0.08em", color: "rgba(10,10,10,0.4)" }}>
+                tap a month on the terrain to read it
+              </span>
+            )}
+          </div>
+        )}
+
+        {mode === "play" && (
+          <div style={{ marginTop: "1.5rem" }}>
+            <ReadingJourney onExit={() => setMode("landing")} />
+          </div>
+        )}
+
+        {mode === "browse-month" && browseMonth && (
+          <div style={{ marginTop: "2.5rem" }}>
+            <BrowseView
+              months={orderedMonths}
+              postsByMonth={postsByMonth}
+              month={browseMonth}
+              onNavigate={(m) => setBrowseMonth(m)}
+              onReturn={() => setMode("browse-range")}
+            />
+          </div>
+        )}
+      </div>
     </main>
   );
 }
