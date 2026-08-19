@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CryptoScramble from "@/app/components/CryptoScramble";
+import tagProvenanceData from "@/tag-provenance.json";
 
 // ── The range: a reader traverses backward through time, present → Feb 2025,
 // one poem per position. No progress bar, no counter — the terrain itself
@@ -177,6 +178,62 @@ const TICK_MS      = 75;
 const STAGGER_MS    = 500; // title → date → body
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
 const TOTAL_REVEAL_MS = STAGGER_MS * 2 + SCRAMBLE_MS + 200;
+
+// ── Tag provenance — close-read spans for the 2026-08-13..08-18 stretch ──
+// Built once (the data never changes at runtime) into slug -> tags. Posts
+// with no entry here (i.e. everything outside that stretch) render exactly
+// as before: computeWeights returns undefined, CryptoScramble falls back
+// to its plain flat-span render.
+interface ProvenanceEntry { type: string; spans?: string[]; note?: string }
+interface PostProvenance  { slug: string; date: string; tags: Record<string, ProvenanceEntry> }
+const provenanceBySlug = new Map<string, Record<string, ProvenanceEntry>>(
+  (tagProvenanceData as PostProvenance[]).map(p => [p.slug, p.tags]),
+);
+
+// One entry per character in `text` — how many tags' spans cover that
+// position. A span is only ever located in the text it's actually found in
+// (title or body get computeWeights called separately), so a title-only
+// span like "god" in percept-and-define-intercept-the-divine never marks
+// anything in the body, and vice versa. Returns undefined (not an
+// all-zero array) when nothing matched, so the caller can skip the
+// styled-runs path entirely for plain text.
+function computeWeights(text: string, tags: Record<string, ProvenanceEntry> | undefined): number[] | undefined {
+  if (!tags) return undefined;
+  const weights = new Array(text.length).fill(0);
+  let any = false;
+  for (const entry of Object.values(tags)) {
+    if (entry.type === "none" || !entry.spans) continue;
+    for (const span of entry.spans) {
+      const idx = text.indexOf(span);
+      if (idx === -1) continue; // lives in the other field (title vs body), or doesn't apply here
+      any = true;
+      for (let i = idx; i < idx + span.length; i++) weights[i]++;
+    }
+  }
+  return any ? weights : undefined;
+}
+
+// Body starts at normal weight/size and has room to move — both step up.
+// Kindle-highlight-subtle: a nudge, not a shout. Capped at 3 tags deep.
+function bodyWeightStyle(level: number): React.CSSProperties {
+  const l = Math.min(level, 3);
+  return [
+    {},
+    { fontWeight: 600, fontSize: "1.03em" },
+    { fontWeight: 700, fontSize: "1.06em" },
+    { fontWeight: 800, fontSize: "1.09em" },
+  ][l];
+}
+
+// Title is already bold (700) and already big — the marked portion only
+// goes blacker/heavier from here, no further size change, so it reads as
+// one continuous gradient of intensity rather than a second, different
+// kind of emphasis competing with the first. Capped at 2 (titles are short;
+// three-deep overlaps don't occur in this stretch).
+function titleWeightStyle(level: number): React.CSSProperties {
+  const l = Math.min(level, 2);
+  return [{}, { fontWeight: 800 }, { fontWeight: 900 }][l];
+}
 
 type Phase = "view" | "poem";
 type SendState = "idle" | "sending" | "sent" | "error";
@@ -578,6 +635,18 @@ export default function TerrainPage() {
     idle: "send this to kerem", sending: "sending", sent: "sent", error: "didn't send. try again",
   }[sendState];
 
+  // undefined for every post outside the provenance data — CryptoScramble
+  // renders those exactly as it did before this pass.
+  const provenanceTags = currentPoem ? provenanceBySlug.get(currentPoem.slug) : undefined;
+  const titleWeights = useMemo(
+    () => currentPoem ? computeWeights(currentPoem.title, provenanceTags) : undefined,
+    [currentPoem, provenanceTags],
+  );
+  const bodyWeights = useMemo(
+    () => currentPoem ? computeWeights(currentPoem.body, provenanceTags) : undefined,
+    [currentPoem, provenanceTags],
+  );
+
   return (
     <main
       style={{
@@ -705,6 +774,7 @@ export default function TerrainPage() {
               <CryptoScramble
                 text={currentPoem.title} duration={SCRAMBLE_MS} tickMs={TICK_MS}
                 chars={SCRAMBLE_CHARS} scrambleSpaces
+                weights={titleWeights} weightStyle={titleWeightStyle}
               />
             )}
           </h1>
@@ -723,6 +793,7 @@ export default function TerrainPage() {
               <CryptoScramble
                 text={currentPoem.body} duration={SCRAMBLE_MS} tickMs={TICK_MS}
                 chars={SCRAMBLE_CHARS} scrambleSpaces
+                weights={bodyWeights} weightStyle={bodyWeightStyle}
               />
             )}
           </div>

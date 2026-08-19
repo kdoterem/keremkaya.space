@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
 
@@ -37,8 +37,34 @@ interface Props {
   // reroll-everything-every-tick behaviour.
   churnCount?: number;
   churnCountRef?: React.MutableRefObject<number>;
+  // Per-character emphasis level, same length as text (0 = no emphasis).
+  // When given, the text renders as styled runs instead of one flat text
+  // node — a pure index-based split, so it applies to whatever's currently
+  // showing at that position (real character or still-scrambling glyph)
+  // rather than requiring the text to already be resolved. weightStyle maps
+  // a run's level to the style applied to it; level 0 / undefined return
+  // gets no wrapper styling at all.
+  weights?: number[];
+  weightStyle?: (level: number) => React.CSSProperties | undefined;
   style?:     React.CSSProperties;
   className?: string;
+}
+
+// Collapses a per-character weight array into contiguous same-level runs —
+// computed once from the (static) weights, independent of the (constantly
+// changing, during a scramble) displayed text, so it's cheap to reuse every
+// frame: only the substring sliced out of each run changes.
+function buildRuns(length: number, weights: number[]): { start: number; end: number; weight: number }[] {
+  const runs: { start: number; end: number; weight: number }[] = [];
+  let i = 0;
+  while (i < length) {
+    const w = weights[i] ?? 0;
+    let j = i + 1;
+    while (j < length && (weights[j] ?? 0) === w) j++;
+    runs.push({ start: i, end: j, weight: w });
+    i = j;
+  }
+  return runs;
 }
 
 // Weighted sample of `count` distinct positions out of `length`, biased
@@ -98,10 +124,16 @@ export default function CryptoScramble({
   tickMsRef,
   churnCount,
   churnCountRef,
+  weights,
+  weightStyle,
   style,
   className,
 }: Props) {
   const [displayed, setDisplayed] = useState(text);
+  const runs = useMemo(
+    () => (weights ? buildRuns(text.length, weights) : null),
+    [text.length, weights],
+  );
   const rafRef      = useRef<number | null>(null);
   const startRef     = useRef<number | null>(null);
   const lastTickRef  = useRef(0);
@@ -178,6 +210,18 @@ export default function CryptoScramble({
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [text, trigger, duration, tickMs, chars, scrambleSpaces, infinite, onTick, tickMsRef, partial, churnCount, churnCountRef]);
+
+  if (runs) {
+    return (
+      <span className={className} style={style}>
+        {runs.map((r, i) => (
+          <span key={i} style={r.weight > 0 ? weightStyle?.(r.weight) : undefined}>
+            {displayed.slice(r.start, r.end)}
+          </span>
+        ))}
+      </span>
+    );
+  }
 
   return <span className={className} style={style}>{displayed}</span>;
 }
