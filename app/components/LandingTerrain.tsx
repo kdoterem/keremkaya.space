@@ -1,16 +1,24 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
+import {
+  mulberry32,
+  buildSegmentTrees,
+  MeshLayers,
+  SweepOverlay,
+  Annotation,
+  computeConfidences,
+  type Pt as ScanPt,
+} from "@/app/components/TerrainScan";
 
-// ── The free-scrub terrain — /writing's landing state and BROWSE mode.
-// Ported forward from /terrain's pre-Stage-A build (the "fader, hover
-// readout" version, replaced there in an earlier pass and now restored
-// here): eroded ridgeline, sonar point field, proximity swell/glow, a
-// draggable waterline fader with inertia and edge resistance. Unchanged
-// from that version except: the MILAT seam (new, shared with the
-// PLAY-mode terrain) and optional per-month click targets for BROWSE. ──
+// ── The scan — /writing's landing state and BROWSE mode. A HUD readout, not
+// a chart: the ridge is a wireframe mesh under continuous scan (TerrainScan
+// handles the mesh + sweep), annotated in place (seam, peak, trough, and —
+// on hover — whatever's nearest) rather than captioned below the frame. The
+// fader (physics, four reference dots, inertia) is unchanged; only its
+// chrome was restyled to the same hairline language as everything else
+// here. ──
 
 export interface TerrainMonth {
   month: string; // YYYY-MM
@@ -18,9 +26,7 @@ export interface TerrainMonth {
   words: number;
 }
 
-interface Pt {
-  x: number;
-  y: number;      // exact resting position — no jitter. Roughness lives between points, not on them.
+interface Pt extends ScanPt {
   count: number;
   words: number;
   month: string;
@@ -31,78 +37,9 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-function formatMonth(m: string): string {
+function formatMonthShort(m: string): string {
   const [y, mo] = m.split("-").map(Number);
-  return `${MONTH_NAMES[mo - 1]} ${y}`;
-}
-
-// Deterministic PRNG — every seeded sequence below (erosion, point field) is
-// rebuilt fresh from the same seed and drawn in the same fixed order, so the
-// output is bit-identical every time. Nothing here is ever re-rolled.
-function mulberry32(seed: number) {
-  let s = seed;
-  return () => {
-    s |= 0; s = (s + 0x6D2B79F5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// ── Erosion: recursive midpoint displacement ────────────────────────────────
-interface DispNode {
-  frac: number;
-  left: DispNode | null;
-  right: DispNode | null;
-}
-
-function buildDispTree(rand: () => number, levels: number): DispNode | null {
-  if (levels <= 0) return null;
-  return {
-    frac: (rand() - 0.5) * 2,
-    left: buildDispTree(rand, levels - 1),
-    right: buildDispTree(rand, levels - 1),
-  };
-}
-
-function buildSegmentTrees(numSegments: number, seed: number, levels: number): (DispNode | null)[] {
-  const rand = mulberry32(seed);
-  const trees: (DispNode | null)[] = [];
-  for (let i = 0; i < numSegments; i++) trees.push(buildDispTree(rand, levels));
-  return trees;
-}
-
-function applyDisplacement(
-  p1: { x: number; y: number },
-  p2: { x: number; y: number },
-  node: DispNode | null,
-  mag: number,
-  out: { x: number; y: number }[],
-) {
-  if (!node) { out.push(p2); return; }
-  const mx = (p1.x + p2.x) / 2;
-  const my = (p1.y + p2.y) / 2;
-  const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const nx = -dy / len;
-  const ny = dx / len;
-  const disp = node.frac * mag;
-  const mid = { x: mx + nx * disp, y: my + ny * disp };
-  applyDisplacement(p1, mid, node.left, mag / 2, out);
-  applyDisplacement(mid, p2, node.right, mag / 2, out);
-}
-
-function erodedPath(pts: { x: number; y: number }[], trees: (DispNode | null)[], mag0: number): string {
-  if (pts.length === 0) return "";
-  if (pts.length === 1) return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
-  const out: { x: number; y: number }[] = [pts[0]];
-  for (let i = 0; i < pts.length - 1; i++) {
-    applyDisplacement(pts[i], pts[i + 1], trees[i] ?? null, mag0, out);
-  }
-  let d = `M ${out[0].x.toFixed(2)},${out[0].y.toFixed(2)}`;
-  for (let k = 1; k < out.length; k++) d += ` L ${out[k].x.toFixed(2)},${out[k].y.toFixed(2)}`;
-  return d;
+  return `${MONTH_NAMES[mo - 1].slice(0, 3)} ${y}`;
 }
 
 function referenceY(points: Pt[], x: number): number {
@@ -124,7 +61,6 @@ const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const TOP_PADDING  = 58;
 const REVEAL_SLICE = 10;
-const STROKE_W     = 1.75;
 const FADER_W      = 30;
 const EDGE_ZONE    = 0.12;
 const FRICTION     = 0.94;
@@ -144,6 +80,7 @@ const DOT_OPACITY_MIN   = 0.02;
 const PROXIMITY_SIGMA   = 55;
 const PROXIMITY_BOOST   = 0.24;
 
+const SWEEP_DURATION_S = 10;
 const DIM_MS = 400;
 
 interface Props {
@@ -172,16 +109,18 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
   const points = useMemo<Pt[]>(() => {
     const { width, height } = dims;
     if (!width || !height || months.length === 0) return [];
-    const innerW      = width - STROKE_W * 4;
+    const innerW      = width - 4; // was STROKE_W*4 (~7px) — the mesh's own hairlines don't need that margin
     const baseline    = height;
     const pxPerCount  = (height - TOP_PADDING) / maxCount;
     const n = months.length;
     return months.map((d, i) => {
-      const x = STROKE_W * 2 + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+      const x = 2 + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
       const y = baseline - d.count * pxPerCount;
       return { x, y, count: d.count, words: d.words, month: d.month };
     });
   }, [months, dims, maxCount]);
+
+  const confidences = useMemo(() => computeConfidences(months.map(m => m.count)), [months]);
 
   const baselineY = dims.height;
   const peakY     = points.length ? Math.min(...points.map(p => p.y)) : 0;
@@ -208,9 +147,10 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     return list;
   }, [points, dims.width, dims.height]);
 
-  // MILAT seam — same interpolation as the PLAY-mode terrain (lib/tagProvenance's
-  // provenanceBoundaryDate, not hardcoded), so both renderings agree on where it
-  // falls without duplicating the date itself.
+  // MILAT seam — shared boundary-date lookup with the PLAY-mode terrain, so
+  // both agree on where it falls without duplicating the date itself. Now
+  // carries a floating label (it didn't before) — a deliberate change from
+  // the earlier "no label, just a crossing" spec.
   const milatX = useMemo(() => {
     if (points.length === 0 || months.length === 0) return null;
     const boundary = provenanceBoundaryDate();
@@ -228,8 +168,26 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     return prevPt.x + (thisPt.x - prevPt.x) * frac;
   }, [points, months]);
 
+  // Persistent annotations — always on, geometrically placed, not collected
+  // into a single caption. Peak/trough ignore zero-post gap months (a gap
+  // isn't a "low" data point, it's an absence).
+  const peakIdx = useMemo(() => {
+    if (points.length === 0) return -1;
+    let best = 0;
+    for (let i = 1; i < points.length; i++) if (points[i].count > points[best].count) best = i;
+    return best;
+  }, [points]);
+
+  const troughIdx = useMemo(() => {
+    const withPosts = points.map((p, i) => ({ p, i })).filter(x => x.p.count > 0);
+    if (withPosts.length === 0) return -1;
+    let best = withPosts[0];
+    for (const x of withPosts) if (x.p.count < best.p.count) best = x;
+    return best.i;
+  }, [points]);
+
   const [render, setRender] = useState({
-    linePath: "", dotOpacities: [] as number[], waterlineY: 0, faderT: 1, hoverIndex: -1,
+    linePts: [] as Pt[], dotOpacities: [] as number[], waterlineY: 0, faderT: 1, hoverIndex: -1,
   });
 
   const faderVal = useRef(1);
@@ -275,8 +233,7 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     }
     if (swelling) more = true;
 
-    const linePts  = points.map((p, i) => ({ x: p.x, y: p.y - (sw[i] ?? 0) }));
-    const linePath = erodedPath(linePts, dispTrees, EROSION_MAG0);
+    const linePts = points.map((p, i) => ({ ...p, y: p.y - (sw[i] ?? 0) }));
 
     const dotOpacities = dots.map(d => {
       if (px == null || py == null) return d.base;
@@ -290,10 +247,10 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
       ? -1
       : points.reduce((best, p, i) => Math.abs(p.x - px) < Math.abs(points[best].x - px) ? i : best, 0);
 
-    setRender({ linePath, dotOpacities, waterlineY, faderT: faderVal.current, hoverIndex });
+    setRender({ linePts, dotOpacities, waterlineY, faderT: faderVal.current, hoverIndex });
 
     rafId.current = more ? requestAnimationFrame(tick) : null;
-  }, [points, dispTrees, dots, baselineY, peakY]);
+  }, [points, dots, baselineY, peakY]);
 
   const kick = useCallback(() => {
     if (rafId.current == null) rafId.current = requestAnimationFrame(tick);
@@ -364,7 +321,7 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     onFramePointerLeave();
   }, [onFramePointerLeave]);
 
-  const hovered = render.hoverIndex >= 0 ? months[render.hoverIndex] : null;
+  const hoveredIdx = !dim && render.hoverIndex >= 0 ? render.hoverIndex : -1;
   const spacing = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 40;
 
   return (
@@ -397,72 +354,96 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
               width={dims.width}
               height={dims.height}
               viewBox={`0 0 ${dims.width} ${dims.height}`}
-              style={{ display: "block" }}
+              style={{ display: "block", overflow: "visible" }}
             >
-              {/* sonar point field */}
-              <motion.g
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
-              >
+              {/* sonar point field — detected-but-unresolved ground */}
+              <g>
                 {dots.map((d, i) => (
-                  <circle
-                    key={i}
-                    cx={d.x}
-                    cy={d.y}
-                    r={DOT_R}
-                    fill="#0a0a0a"
-                    fillOpacity={render.dotOpacities[i] ?? d.base}
-                  />
+                  <circle key={i} cx={d.x} cy={d.y} r={DOT_R} fill="#0a0a0a" fillOpacity={render.dotOpacities[i] ?? d.base} />
                 ))}
-              </motion.g>
+              </g>
 
-              {/* the eroded profile */}
-              <motion.path
-                d={render.linePath}
-                fill="none"
-                stroke="#0a0a0a"
-                strokeWidth={STROKE_W}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2, ease: "easeInOut" }}
-              />
+              {/* the wireframe mesh — idle brightness, always drawn */}
+              {render.linePts.length > 0 && (
+                <MeshLayers points={render.linePts} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences} />
+              )}
 
-              {/* MILAT seam — a literal, unlabeled crossing in the terrain,
-                  perforated rather than solid (unlike the ridgeline). Always
-                  present, independent of the fader setting. */}
+              {/* the scan sweep — continuous, independent of interaction state */}
+              {render.linePts.length > 0 && (
+                <SweepOverlay
+                  width={dims.width} height={dims.height}
+                  points={render.linePts} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences}
+                  durationS={SWEEP_DURATION_S}
+                />
+              )}
+
+              {/* MILAT seam — a literal crossing, now with a floating label */}
               {milatX != null && (
-                <line
-                  x1={milatX} y1={0} x2={milatX} y2={dims.height}
-                  stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                <>
+                  <line
+                    x1={milatX} y1={0} x2={milatX} y2={dims.height}
+                    stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                  />
+                  <Annotation
+                    x={milatX} y={dims.height * 0.55}
+                    label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined}
+                    variant="seam" side={milatX > dims.width / 2 ? "left" : "right"}
+                  />
+                </>
+              )}
+
+              {/* persistent annotations — peak and trough, on screen always */}
+              {peakIdx >= 0 && points[peakIdx] && (
+                <Annotation
+                  x={points[peakIdx].x} y={points[peakIdx].y}
+                  label={formatMonthShort(points[peakIdx].month)}
+                  sublabel={`${points[peakIdx].count} poems`}
+                  variant="data"
+                  side={points[peakIdx].x > dims.width / 2 ? "left" : "right"}
+                  vSide={points[peakIdx].y < 60 ? "down" : "up"}
+                />
+              )}
+              {troughIdx >= 0 && troughIdx !== peakIdx && points[troughIdx] && (
+                <Annotation
+                  x={points[troughIdx].x} y={points[troughIdx].y}
+                  label={formatMonthShort(points[troughIdx].month)}
+                  sublabel={`${points[troughIdx].count} poem${points[troughIdx].count === 1 ? "" : "s"}`}
+                  variant="data"
+                  side={points[troughIdx].x > dims.width / 2 ? "left" : "right"}
+                  vSide={points[troughIdx].y < 60 ? "down" : "up"}
+                />
+              )}
+
+              {/* transient — nearest point to the cursor, one more annotation among several */}
+              {hoveredIdx >= 0 && points[hoveredIdx] && hoveredIdx !== peakIdx && hoveredIdx !== troughIdx && (
+                <Annotation
+                  x={points[hoveredIdx].x} y={points[hoveredIdx].y}
+                  label={formatMonthShort(points[hoveredIdx].month)}
+                  sublabel={`${points[hoveredIdx].count} poem${points[hoveredIdx].count === 1 ? "" : "s"}, ${points[hoveredIdx].words.toLocaleString()}w`}
+                  variant="transient"
+                  side={points[hoveredIdx].x > dims.width / 2 ? "left" : "right"}
+                  vSide={points[hoveredIdx].y < 60 ? "down" : "up"}
                 />
               )}
 
               {/* the waterline — page-colour cover; months vanish beneath it
                   rather than being clipped against a hard edge */}
               <rect
-                x={0}
-                y={render.waterlineY}
-                width={dims.width}
-                height={Math.max(0, dims.height - render.waterlineY)}
+                x={0} y={render.waterlineY}
+                width={dims.width} height={Math.max(0, dims.height - render.waterlineY)}
                 fill={BG}
               />
 
               {/* BROWSE month click targets — only present when onMonthClick is
                   given, and only over the water: a submerged month isn't
                   reachable until the fader raises it. */}
-              {onMonthClick && points.map((p, i) => (
+              {onMonthClick && points.map((p) => (
                 p.y >= render.waterlineY ? null : (
                   <rect
                     key={p.month}
-                    x={p.x - spacing / 2}
-                    y={0}
-                    width={spacing}
-                    height={render.waterlineY}
-                    fill="transparent"
-                    style={{ cursor: "pointer" }}
+                    x={p.x - spacing / 2} y={0}
+                    width={spacing} height={render.waterlineY}
+                    fill="transparent" style={{ cursor: "pointer" }}
                     onClick={() => onMonthClick(p.month)}
                   />
                 )
@@ -471,7 +452,7 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
           )}
         </div>
 
-        {/* ── fader ── */}
+        {/* ── fader — hairline chrome, same mechanic ── */}
         <div
           onPointerDown={onFaderDown}
           onPointerMove={onFaderMove}
@@ -488,38 +469,28 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
         >
           <div style={{
             position:  "absolute", left: "50%", top: 0, bottom: 0,
-            width:     1, background: "rgba(10,10,10,0.2)",
+            width:     1, background: "rgba(10,10,10,0.18)",
             transform: "translateX(-50%)",
           }} />
           {DOT_MARKS.map(t => (
             <div key={t} style={{
               position:     "absolute", left: "50%", top: `${t * 100}%`,
-              width:        4, height: 4, borderRadius: "50%",
-              background:   "rgba(10,10,10,0.25)",
+              width:        5, height: 5, borderRadius: "50%",
+              border:       "1px solid rgba(10,10,10,0.3)",
+              background:   "transparent",
               transform:    "translate(-50%, -50%)",
             }} />
           ))}
+          {/* thumb — a hollow bracket, not a filled bar */}
           <div style={{
             position:     "absolute", left: "50%", top: `${render.faderT * 100}%`,
-            width:        18, height: 3, borderRadius: 1.5,
-            background:   "#0a0a0a",
+            width:        16, height: 8,
+            border:       "1px solid #0a0a0a",
+            background:   "transparent",
             transform:    "translate(-50%, -50%)",
+            filter:       "drop-shadow(0 0 1.5px rgba(10,10,10,0.35))",
           }} />
         </div>
-      </div>
-
-      {/* ── readout ── */}
-      <div style={{
-        marginTop:     "1.25rem",
-        fontSize:      "0.75rem",
-        fontWeight:    400,
-        letterSpacing: "0.05em",
-        color:         "rgba(10,10,10,0.4)",
-        minHeight:     "1.2em",
-      }}>
-        {hovered
-          ? `${formatMonth(hovered.month)} — ${hovered.count} poem${hovered.count === 1 ? "" : "s"}, ${hovered.words.toLocaleString()} words`
-          : ""}
       </div>
     </div>
   );

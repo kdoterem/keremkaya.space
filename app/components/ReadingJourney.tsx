@@ -11,6 +11,15 @@ import {
   titleWeightStyle,
   provenanceBoundaryDate,
 } from "@/lib/tagProvenance";
+import {
+  mulberry32,
+  buildSegmentTrees,
+  MeshLayers,
+  SweepOverlay,
+  Annotation,
+  computeConfidences,
+  type Pt,
+} from "@/app/components/TerrainScan";
 
 // ── PLAY — a reader traverses backward through time, present → Feb 2025,
 // one poem per position. No progress bar, no counter — the terrain itself
@@ -39,66 +48,13 @@ interface SearchDoc {
   body:  string;
 }
 
-interface Pt {
-  x: number;
-  y: number;
-}
-
-// ── Erosion: recursive midpoint displacement (unchanged from the prior pass) ──
-interface DispNode {
-  frac:  number;
-  left:  DispNode | null;
-  right: DispNode | null;
-}
-
-function mulberry32(seed: number) {
-  let s = seed;
-  return () => {
-    s |= 0; s = (s + 0x6D2B79F5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function buildDispTree(rand: () => number, levels: number): DispNode | null {
-  if (levels <= 0) return null;
-  return {
-    frac:  (rand() - 0.5) * 2,
-    left:  buildDispTree(rand, levels - 1),
-    right: buildDispTree(rand, levels - 1),
-  };
-}
-
-function buildSegmentTrees(numSegments: number, seed: number, levels: number): (DispNode | null)[] {
-  const rand = mulberry32(seed);
-  const trees: (DispNode | null)[] = [];
-  for (let i = 0; i < numSegments; i++) trees.push(buildDispTree(rand, levels));
-  return trees;
-}
-
-function applyDisplacement(
-  p1: Pt, p2: Pt, node: DispNode | null, mag: number, out: Pt[],
-) {
-  if (!node) { out.push(p2); return; }
-  const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
-  const dx = p2.x - p1.x, dy = p2.y - p1.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const nx = -dy / len, ny = dx / len;
-  const disp = node.frac * mag;
-  const mid  = { x: mx + nx * disp, y: my + ny * disp };
-  applyDisplacement(p1, mid, node.left, mag / 2, out);
-  applyDisplacement(mid, p2, node.right, mag / 2, out);
-}
-
-function erodedPath(pts: Pt[], trees: (DispNode | null)[], mag0: number): string {
-  if (pts.length === 0) return "";
-  if (pts.length === 1) return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
-  const out: Pt[] = [pts[0]];
-  for (let i = 0; i < pts.length - 1; i++) applyDisplacement(pts[i], pts[i + 1], trees[i] ?? null, mag0, out);
-  let d = `M ${out[0].x.toFixed(2)},${out[0].y.toFixed(2)}`;
-  for (let k = 1; k < out.length; k++) d += ` L ${out[k].x.toFixed(2)},${out[k].y.toFixed(2)}`;
-  return d;
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+function formatMonthShort(m: string): string {
+  const [y, mo] = m.split("-").map(Number);
+  return `${MONTH_NAMES[mo - 1]} ${y}`;
 }
 
 function referenceY(points: Pt[], x: number): number {
@@ -132,7 +88,7 @@ const DOT_R          = 0.7;
 const DOT_OPACITY_MAX = 0.12;
 const DOT_OPACITY_MIN = 0.02;
 
-const HAZE_OPACITY = 0.45; // ceiling opacity of the partially-resolved band
+const SWEEP_DURATION_S = 10; // same slow loop as the landing/BROWSE terrain
 
 // ── Reading mechanics ──
 const MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
@@ -362,7 +318,23 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
     () => buildSegmentTrees(Math.max(0, points.length - 1), EROSION_SEED, EROSION_LEVELS),
     [points.length],
   );
-  const linePath = useMemo(() => erodedPath(points, dispTrees, EROSION_MAG0), [points, dispTrees]);
+
+  const confidences = useMemo(() => computeConfidences(months.map(m => m.count)), [months]);
+
+  const peakIdx = useMemo(() => {
+    if (months.length === 0) return -1;
+    let best = 0;
+    for (let i = 1; i < months.length; i++) if (months[i].count > months[best].count) best = i;
+    return best;
+  }, [months]);
+
+  const troughIdx = useMemo(() => {
+    const withPosts = months.map((m, i) => ({ m, i })).filter(x => x.m.count > 0);
+    if (withPosts.length === 0) return -1;
+    let best = withPosts[0];
+    for (const x of withPosts) if (x.m.count < best.m.count) best = x;
+    return best.i;
+  }, [months]);
 
   const dots = useMemo(() => {
     if (points.length === 0) return [];
@@ -612,7 +584,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                 width={dims.width}
                 height={dims.height}
                 viewBox={`0 0 ${dims.width} ${dims.height}`}
-                style={{ display: "block" }}
+                style={{ display: "block", overflow: "visible" }}
               >
                 <defs>
                   <linearGradient
@@ -642,32 +614,80 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                   ))}
                 </g>
 
-                {/* haze — a short, partially-resolved stretch just ahead of the reader */}
-                <path
-                  d={linePath} fill="none" stroke="#0a0a0a" strokeWidth={STROKE_W}
-                  strokeOpacity={HAZE_OPACITY} mask="url(#rangeHazeMask)"
+                {/* haze — a short, partially-resolved stretch just ahead of the reader.
+                    Same wireframe mesh as "resolved" below, at reduced brightness,
+                    masked to the short band just past the reader's position. */}
+                <g mask="url(#rangeHazeMask)">
+                  <MeshLayers points={points} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences} opacityMultiplier={0.5} />
+                </g>
+
+                {/* resolved — already passed, full-brightness mesh */}
+                <g clipPath="url(#rangeResolvedClip)">
+                  <MeshLayers points={points} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences} />
+                </g>
+
+                {/* the scan sweep — continuous, independent of reading progress.
+                    A different axis from "what's been read": the instrument keeps
+                    reading the whole range regardless of how far the reader's got. */}
+                <SweepOverlay
+                  width={dims.width} height={dims.height}
+                  points={points} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences}
+                  durationS={SWEEP_DURATION_S}
                 />
 
-                {/* resolved — already passed, fully drawn */}
-                <path
-                  d={linePath} fill="none" stroke="#0a0a0a" strokeWidth={STROKE_W}
-                  clipPath="url(#rangeResolvedClip)"
-                />
-
-                {/* MILAT seam — a literal crossing in the terrain, not a label.
-                    Perforated rather than solid (unlike the ridgeline) and
-                    unmarked (unlike the reader's position below) — always
-                    present, independent of reading progress. */}
+                {/* MILAT seam — a literal crossing, with a floating label */}
                 {milatX != null && (
-                  <line
-                    x1={milatX} y1={0} x2={milatX} y2={dims.height}
-                    stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                  <>
+                    <line
+                      x1={milatX} y1={0} x2={milatX} y2={dims.height}
+                      stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                    />
+                    <Annotation
+                      x={milatX} y={dims.height * 0.55}
+                      label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined}
+                      variant="seam" side={milatX > dims.width / 2 ? "left" : "right"}
+                    />
+                  </>
+                )}
+
+                {/* persistent annotations — peak and trough, always on */}
+                {peakIdx >= 0 && points[peakIdx] && (
+                  <Annotation
+                    x={points[peakIdx].x} y={points[peakIdx].y}
+                    label={formatMonthShort(months[peakIdx].month)}
+                    sublabel={`${months[peakIdx].count} poems`}
+                    variant="data"
+                    side={points[peakIdx].x > dims.width / 2 ? "left" : "right"}
+                    vSide={points[peakIdx].y < 60 ? "down" : "up"}
+                  />
+                )}
+                {troughIdx >= 0 && troughIdx !== peakIdx && points[troughIdx] && (
+                  <Annotation
+                    x={points[troughIdx].x} y={points[troughIdx].y}
+                    label={formatMonthShort(months[troughIdx].month)}
+                    sublabel={`${months[troughIdx].count} poem${months[troughIdx].count === 1 ? "" : "s"}`}
+                    variant="data"
+                    side={points[troughIdx].x > dims.width / 2 ? "left" : "right"}
+                    vSide={points[troughIdx].y < 60 ? "down" : "up"}
                   />
                 )}
 
-                {/* the reader's position — marked, hard-edged */}
+                {/* the reader's position — its own hard-edged marker (unchanged),
+                    plus a leader-line readout, distinct from the peak/trough
+                    annotations above. */}
                 <line x1={resolveX} y1={resolveY} x2={resolveX} y2={dims.height} stroke="#0a0a0a" strokeWidth={1} />
                 <rect x={resolveX - 3} y={resolveY - 3} width={6} height={6} fill="#0a0a0a" />
+                {position != null && months[position] && (
+                  <Annotation
+                    x={resolveX} y={resolveY}
+                    label="you are here"
+                    sublabel={formatMonthShort(months[position].month)}
+                    variant="position"
+                    side={resolveX > dims.width / 2 ? "left" : "right"}
+                    vSide={resolveY < 60 ? "down" : "up"}
+                    leaderLength={30}
+                  />
+                )}
               </svg>
             )}
           </div>
