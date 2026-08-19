@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/art", destination: "/kismet", permanent: true },
+      { source: "/writing/mimilat", destination: "/writing/thank-you", permanent: true },
     ];
   },
 };
