@@ -199,7 +199,7 @@ export default function WritingPage() {
 
           {mode === "browse-range" && (
             <span style={{ fontSize: "0.7rem", letterSpacing: "0.08em", color: "rgba(10,10,10,0.4)" }}>
-              tap the visible ridge to read a month
+              tap a month on the terrain to read it
             </span>
           )}
         </div>

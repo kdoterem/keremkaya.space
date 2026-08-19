@@ -1,24 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Html } from "@react-three/drei";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
-import {
-  mulberry32,
-  buildSegmentTrees,
-  MeshLayers,
-  SweepOverlay,
-  Annotation,
-  computeConfidences,
-  type Pt as ScanPt,
-} from "@/app/components/TerrainScan";
+import { mulberry32 } from "@/app/components/TerrainScan";
 
-// ── The scan — /writing's landing state and BROWSE mode. A HUD readout, not
-// a chart: the ridge is a wireframe mesh under continuous scan (TerrainScan
-// handles the mesh + sweep), annotated in place (seam, peak, trough, and —
-// on hover — whatever's nearest) rather than captioned below the frame. The
-// fader (physics, four reference dots, inertia) is unchanged; only its
-// chrome was restyled to the same hairline language as everything else
-// here. ──
+// ── A genuine 3D scene — three attempts at faking depth in 2D (parallel
+// offset lines, a crossing grid, perspective compression) were all the
+// wrong tool. This is a real camera in a real three.js scene, orbitable.
+// Replaces the SVG/wireframe rendering entirely, not a styling pass.
+//
+// The waterline fader is dropped (confirmed) — orbit + zoom is now the
+// exploration mechanic that used to belong to the fader. Every month is
+// directly reachable by rotating/zooming rather than raising a waterline. ──
 
 export interface TerrainMonth {
   month: string; // YYYY-MM
@@ -26,151 +21,233 @@ export interface TerrainMonth {
   words: number;
 }
 
-interface Pt extends ScanPt {
-  count: number;
-  words: number;
-  month: string;
-}
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-function formatMonthShort(m: string): string {
-  const [y, mo] = m.split("-").map(Number);
-  return `${MONTH_NAMES[mo - 1].slice(0, 3)} ${y}`;
-}
-
-function referenceY(points: Pt[], x: number): number {
-  if (points.length === 0) return 0;
-  if (x <= points[0].x) return points[0].y;
-  if (x >= points[points.length - 1].x) return points[points.length - 1].y;
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i], b = points[i + 1];
-    if (x >= a.x && x <= b.x) {
-      const t = (x - a.x) / (b.x - a.x || 1);
-      return a.y + (b.y - a.y) * t;
-    }
-  }
-  return points[points.length - 1].y;
-}
-
-const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
-
-const TOP_PADDING  = 58;
-const REVEAL_SLICE = 10;
-const FADER_W      = 30;
-const EDGE_ZONE    = 0.12;
-const FRICTION     = 0.94;
-const SWELL_AMP    = 7;
-const DOT_MARKS    = [0.2, 0.4, 0.6, 0.8];
-const BG           = "#aaff00";
-
-const EROSION_SEED   = 1337;
-const EROSION_LEVELS = 5;
-const EROSION_MAG0   = 14;
-
-const DOTS_SEED        = 777;
-const NUM_DOTS          = 260;
-const DOT_R             = 0.7;
-const DOT_OPACITY_MAX   = 0.12;
-const DOT_OPACITY_MIN   = 0.02;
-const PROXIMITY_SIGMA   = 55;
-const PROXIMITY_BOOST   = 0.24;
-
-const SWEEP_DURATION_S = 10;
-const DIM_MS = 400;
-
 interface Props {
   months: TerrainMonth[];
   dim?: boolean;                          // recedes visually — BROWSE's list is showing on top
   onMonthClick?: (month: string) => void; // present only in BROWSE mode
 }
 
-export default function LandingTerrain({ months, dim = false, onMonthClick }: Props) {
-  const [dims, setDims] = useState({ width: 0, height: 0 });
-  const frameRef = useRef<HTMLDivElement>(null);
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+function formatMonthShort(m: string): string {
+  const [y, mo] = m.split("-").map(Number);
+  return `${MONTH_NAMES[mo - 1]} ${y}`;
+}
 
-  useEffect(() => {
-    const el = frameRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setDims({ width: Math.round(width), height: Math.round(height) });
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+const HUD_MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
 
-  const maxCount = useMemo(() => Math.max(1, ...months.map(d => d.count)), [months]);
+// ── scene layout — world units, not pixels ──
+const SCENE_WIDTH  = 10;   // x spans -HALF..HALF — the time axis, Feb 2025 -> present
+const SCENE_DEPTH  = 2.4;  // z spread per month's point cluster — gives the ridge real mass
+const HEIGHT_SCALE = 3.4;  // world units per fully-normalized (max) count
 
-  const points = useMemo<Pt[]>(() => {
-    const { width, height } = dims;
-    if (!width || !height || months.length === 0) return [];
-    const innerW      = width - 4; // was STROKE_W*4 (~7px) — the mesh's own hairlines don't need that margin
-    const baseline    = height;
-    const pxPerCount  = (height - TOP_PADDING) / maxCount;
-    const n = months.length;
-    return months.map((d, i) => {
-      const x = 2 + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
-      const y = baseline - d.count * pxPerCount;
-      return { x, y, count: d.count, words: d.words, month: d.month };
-    });
-  }, [months, dims, maxCount]);
+interface MonthPoint {
+  x: number; y: number; count: number; words: number; month: string; elevFrac: number;
+}
 
-  const confidences = useMemo(() => computeConfidences(months.map(m => m.count)), [months]);
+function layoutMonths(months: TerrainMonth[]): MonthPoint[] {
+  const n = months.length;
+  const maxCount = Math.max(1, ...months.map(m => m.count));
+  return months.map((m, i) => {
+    const x = n > 1 ? (i / (n - 1) - 0.5) * SCENE_WIDTH : 0;
+    const elevFrac = m.count / maxCount;
+    const y = elevFrac * HEIGHT_SCALE;
+    return { x, y, count: m.count, words: m.words, month: m.month, elevFrac };
+  });
+}
 
-  const baselineY = dims.height;
-  const peakY     = points.length ? Math.min(...points.map(p => p.y)) : 0;
+// MILAT seam x — same day-fraction interpolation as the earlier 2D passes,
+// just in scene x-units instead of pixels. Shared boundary-date lookup, not
+// re-derived or hardcoded.
+function seamX(months: TerrainMonth[], pts: MonthPoint[]): number | null {
+  const boundary = provenanceBoundaryDate();
+  if (!boundary) return null;
+  const [by, bm, bd] = boundary.split("-").map(Number);
+  if (!by || !bm || !bd) return null;
+  const boundaryMonth = `${by}-${String(bm).padStart(2, "0")}`;
+  const idx = months.findIndex(m => m.month === boundaryMonth);
+  if (idx === -1) return null;
+  if (idx === 0) return pts[0].x;
+  const daysInMonth = new Date(by, bm, 0).getDate();
+  const frac = Math.max(0, Math.min(1, (bd - 1) / daysInMonth));
+  return pts[idx - 1].x + (pts[idx].x - pts[idx - 1].x) * frac;
+}
 
-  const dispTrees = useMemo(
-    () => buildSegmentTrees(Math.max(0, points.length - 1), EROSION_SEED, EROSION_LEVELS),
-    [points.length],
+// ── elevation -> point density/size/opacity, same tiered-weight principle
+// as the 2D passes, now genuinely spatial: a peak isn't just brighter, it's
+// physically more points occupying more of the cluster's depth. ──
+const ELEV_TIERS   = [0.25, 0.5, 0.75];
+const TIER_ROWS    = [2, 4, 6, 9];    // point rows across z, by tier
+const TIER_SIZE    = [0.035, 0.05, 0.065, 0.085];
+const TIER_OPACITY = [0.32, 0.5, 0.72, 0.95];
+
+function elevationTier(frac: number): number {
+  for (let i = 0; i < ELEV_TIERS.length; i++) if (frac < ELEV_TIERS[i]) return i;
+  return ELEV_TIERS.length;
+}
+
+// A raw points object — hand-rolled via R3F's intrinsic elements (which map
+// 1:1 to core three.js classes) rather than a drei sugar component, so this
+// depends only on three.js's own long-stable BufferGeometry/PointsMaterial
+// API, not a helper's specific prop shape.
+function PointCloud({ positions, size, opacity }: { positions: Float32Array; size: number; opacity: number }) {
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial color="#0a0a0a" size={size} sizeAttenuation transparent opacity={opacity} depthWrite={false} />
+    </points>
   );
+}
 
-  const dots = useMemo(() => {
-    if (points.length === 0) return [];
-    const rand   = mulberry32(DOTS_SEED);
-    const spread = clamp(dims.height * 0.2, 30, 90);
-    const list: { x: number; y: number; base: number }[] = [];
-    for (let i = 0; i < NUM_DOTS; i++) {
-      const x = rand() * dims.width;
-      const ref = referenceY(points, x);
-      const side = rand() < 0.5 ? -1 : 1;
-      const offset = side * -Math.log(1 - rand()) * spread * 0.5;
-      const y = clamp(ref + offset, 0, dims.height);
-      const t = clamp(Math.abs(offset) / spread, 0, 1);
-      list.push({ x, y, base: lerp(DOT_OPACITY_MAX, DOT_OPACITY_MIN, t) });
+// The terrain itself — each month's real height becomes a small jittered
+// cluster of points across z (mass, not a ribbon), grouped into up to 4
+// tiered point-cloud objects so density/size/opacity can vary by elevation.
+function TerrainPoints({ points }: { points: MonthPoint[] }) {
+  const tierArrays = useMemo(() => {
+    const buckets: number[][] = [[], [], [], []];
+    points.forEach((p, i) => {
+      const tier = elevationTier(p.elevFrac);
+      const rand = mulberry32(9001 + i);
+      const rows = TIER_ROWS[tier];
+      for (let r = 0; r < rows; r++) {
+        const z = rows > 1 ? (r / (rows - 1) - 0.5) * SCENE_DEPTH : 0;
+        const jx = (rand() - 0.5) * 0.1;
+        const jy = (rand() - 0.5) * 0.08;
+        buckets[tier].push(p.x + jx, Math.max(0.015, p.y + jy), z);
+      }
+    });
+    return buckets.map(b => new Float32Array(b));
+  }, [points]);
+
+  return (
+    <>
+      {tierArrays.map((arr, tier) => (
+        arr.length === 0 ? null : (
+          <PointCloud key={tier} positions={arr} size={TIER_SIZE[tier]} opacity={TIER_OPACITY[tier]} />
+        )
+      ))}
+    </>
+  );
+}
+
+// A very light connecting line through each month's true height — so the
+// eye still reads it as continuous ground rather than scattered noise, kept
+// deliberately faint since the point cloud is the primary read.
+function RidgeLine({ points }: { points: MonthPoint[] }) {
+  const positions = useMemo(() => {
+    const arr = new Float32Array(points.length * 3);
+    points.forEach((p, i) => { arr[i * 3] = p.x; arr[i * 3 + 1] = p.y; arr[i * 3 + 2] = 0; });
+    return arr;
+  }, [points]);
+  return (
+    <line>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial color="#0a0a0a" transparent opacity={0.16} />
+    </line>
+  );
+}
+
+// The sonar field, genuinely 3D this time — scattered through a volume
+// around and behind the terrain rather than painted flat behind it, so the
+// ridge reads as emerging out of detected space. Deterministic (mulberry32,
+// same PRNG the rest of the terrain work has used all along).
+function BackgroundField() {
+  const positions = useMemo(() => {
+    const rand = mulberry32(4242);
+    const n = 380;
+    const arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      arr[i * 3]     = (rand() - 0.5) * SCENE_WIDTH * 1.7;
+      arr[i * 3 + 1] = rand() * HEIGHT_SCALE * 1.5;
+      arr[i * 3 + 2] = (rand() - 0.5) * SCENE_DEPTH * 3.4;
     }
-    return list;
-  }, [points, dims.width, dims.height]);
+    return arr;
+  }, []);
+  return <PointCloud positions={positions} size={0.022} opacity={0.09} />;
+}
 
-  // MILAT seam — shared boundary-date lookup with the PLAY-mode terrain, so
-  // both agree on where it falls without duplicating the date itself. Now
-  // carries a floating label (it didn't before) — a deliberate change from
-  // the earlier "no label, just a crossing" spec.
-  const milatX = useMemo(() => {
-    if (points.length === 0 || months.length === 0) return null;
-    const boundary = provenanceBoundaryDate();
-    if (!boundary) return null;
-    const [by, bm, bd] = boundary.split("-").map(Number);
-    if (!by || !bm || !bd) return null;
-    const boundaryMonth = `${by}-${String(bm).padStart(2, "0")}`;
-    const idx = months.findIndex(m => m.month === boundaryMonth);
-    if (idx === -1) return null;
-    const thisPt = points[idx];
-    if (idx === 0) return thisPt.x;
-    const daysInMonth = new Date(by, bm, 0).getDate();
-    const frac = clamp((bd - 1) / daysInMonth, 0, 1);
-    const prevPt = points[idx - 1];
-    return prevPt.x + (thisPt.x - prevPt.x) * frac;
-  }, [points, months]);
+// The MILAT seam — a thin vertical rod (a cylinder, not a flat line or
+// plane) so it stays visible from every rotation angle rather than
+// vanishing edge-on the way a 2D line or a flat plane would.
+function SeamMarker({ x }: { x: number }) {
+  return (
+    <mesh position={[x, (HEIGHT_SCALE * 1.25) / 2, 0]}>
+      <cylinderGeometry args={[0.022, 0.022, HEIGHT_SCALE * 1.25, 8]} />
+      <meshBasicMaterial color="#0a0a0a" transparent opacity={0.32} />
+    </mesh>
+  );
+}
 
-  // Persistent annotations — always on, geometrically placed, not collected
-  // into a single caption. Peak/trough ignore zero-post gap months (a gap
-  // isn't a "low" data point, it's an absence).
+// A 3D-space-anchored label — drei's <Html> projects the given 3D point to
+// screen coordinates every frame, so this stays attached to the correct
+// spot on the terrain as the camera orbits, rather than being a 2D overlay
+// pasted on top.
+function Annotation3D({
+  position, label, sublabel, variant = "data",
+}: {
+  position: [number, number, number];
+  label: string;
+  sublabel?: string;
+  variant?: "data" | "seam" | "transient";
+}) {
+  const opacity = variant === "transient" ? 0.85 : variant === "seam" ? 0.7 : 0.55;
+  return (
+    <Html position={position} distanceFactor={9} style={{ pointerEvents: "none" }} zIndexRange={[10, 0]}>
+      <div
+        style={{
+          fontFamily: HUD_MONO, fontSize: "9px", letterSpacing: "0.06em",
+          textTransform: "uppercase", color: "#0a0a0a", opacity,
+          whiteSpace: "nowrap", lineHeight: 1.4, transform: "translate(8px, -10px)",
+          borderLeft: "1px solid rgba(10,10,10,0.45)", paddingLeft: "5px",
+        }}
+      >
+        <div>{label}</div>
+        {sublabel && <div style={{ opacity: 0.7 }}>{sublabel}</div>}
+      </div>
+    </Html>
+  );
+}
+
+// Invisible, generously-sized hit target per month — raycasting against the
+// sparse, jittered point cloud directly would be a poor target; this gives
+// BROWSE's click-to-month (and hover) something reliable to hit, decoupled
+// from what's actually drawn.
+function MonthHitTarget({
+  p, spacing, onHover, onSelect,
+}: {
+  p: MonthPoint; spacing: number;
+  onHover: (p: MonthPoint | null) => void;
+  onSelect: (month: string, clientX: number, clientY: number) => void;
+}) {
+  return (
+    <mesh
+      position={[p.x, p.y / 2, 0]}
+      onPointerMove={(e) => { e.stopPropagation(); onHover(p); }}
+      onPointerOut={() => onHover(null)}
+      onClick={(e) => { e.stopPropagation(); onSelect(p.month, e.nativeEvent.clientX, e.nativeEvent.clientY); }}
+    >
+      <boxGeometry args={[Math.max(spacing * 0.9, 0.2), Math.max(p.y, 0.3), SCENE_DEPTH * 1.4]} />
+      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+    </mesh>
+  );
+}
+
+const DEFAULT_CAM_POS: [number, number, number] = [0, HEIGHT_SCALE * 1.35, SCENE_WIDTH * 0.95];
+const DEFAULT_TARGET:  [number, number, number] = [0, HEIGHT_SCALE * 0.2, 0];
+
+function Scene({
+  points, months, clickable, onHover, onSelect,
+}: {
+  points: MonthPoint[]; months: TerrainMonth[]; clickable: boolean;
+  onHover: (p: MonthPoint | null) => void;
+  onSelect: (month: string, clientX: number, clientY: number) => void;
+}) {
   const peakIdx = useMemo(() => {
     if (points.length === 0) return -1;
     let best = 0;
@@ -186,311 +263,150 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     return best.i;
   }, [points]);
 
-  const [render, setRender] = useState({
-    linePts: [] as Pt[], dotOpacities: [] as number[], waterlineY: 0, faderT: 1, hoverIndex: -1,
-  });
+  const seam = useMemo(() => seamX(months, points), [months, points]);
+  const spacing = points.length > 1 ? points[1].x - points[0].x : 1;
 
-  const faderVal = useRef(1);
-  const faderVel = useRef(0);
-  const dragging = useRef(false);
-  const swell    = useRef<number[]>([]);
-  const pointerX = useRef<number | null>(null);
-  const pointerY = useRef<number | null>(null);
-  const rafId    = useRef<number | null>(null);
-  const dragHist = useRef<{ v: number; t: number }[]>([]);
+  return (
+    <>
+      <ambientLight intensity={1.4} />
+      <BackgroundField />
+      <RidgeLine points={points} />
+      <TerrainPoints points={points} />
 
-  useEffect(() => { swell.current = points.map(() => 0); }, [points.length]);
+      {clickable && points.map(p => (
+        <MonthHitTarget key={p.month} p={p} spacing={spacing} onHover={onHover} onSelect={onSelect} />
+      ))}
 
-  const tick = useCallback(() => {
-    let more = false;
+      {seam != null && <SeamMarker x={seam} />}
+      {seam != null && (
+        <Annotation3D position={[seam, HEIGHT_SCALE * 1.3, 0]} label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined} variant="seam" />
+      )}
+      {peakIdx >= 0 && (
+        <Annotation3D
+          position={[points[peakIdx].x, points[peakIdx].y, 0]}
+          label={formatMonthShort(points[peakIdx].month)}
+          sublabel={`${points[peakIdx].count} poems`}
+        />
+      )}
+      {troughIdx >= 0 && troughIdx !== peakIdx && (
+        <Annotation3D
+          position={[points[troughIdx].x, points[troughIdx].y, 0]}
+          label={formatMonthShort(points[troughIdx].month)}
+          sublabel={`${points[troughIdx].count} poem${points[troughIdx].count === 1 ? "" : "s"}`}
+        />
+      )}
+    </>
+  );
+}
 
-    if (dragging.current) {
-      more = true;
-    } else if (Math.abs(faderVel.current) > 0.00006) {
-      let v = faderVal.current + faderVel.current;
-      let damp = FRICTION;
-      if (v < EDGE_ZONE)     damp -= ((EDGE_ZONE - Math.max(v, 0)) / EDGE_ZONE) * 0.5;
-      if (v > 1 - EDGE_ZONE) damp -= ((v - (1 - EDGE_ZONE)) / EDGE_ZONE) * 0.5;
-      faderVel.current *= Math.max(damp, 0.35);
-      if (v <= 0) { v = 0; faderVel.current = 0; }
-      if (v >= 1) { v = 1; faderVel.current = 0; }
-      faderVal.current = v;
-      more = Math.abs(faderVel.current) > 0.00006;
-    }
+export default function LandingTerrain({ months, dim = false, onMonthClick }: Props) {
+  const points = useMemo(() => layoutMonths(months), [months]);
+  const [hovered, setHovered] = useState<MonthPoint | null>(null);
+  const controlsRef = useRef<any>(null);
 
-    const px = pointerX.current;
-    const py = pointerY.current;
-    let swelling = false;
-    const sw = swell.current;
-    const spacing = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 1;
-    const sigma = Math.max(spacing * 0.9, 16);
-    for (let i = 0; i < points.length; i++) {
-      const target = px == null ? 0 : SWELL_AMP * Math.exp(-((points[i].x - px) ** 2) / (2 * sigma * sigma));
-      const cur  = sw[i] ?? 0;
-      const next = cur + (target - cur) * 0.18;
-      sw[i] = next;
-      if (Math.abs(next - target) > 0.03 || Math.abs(next) > 0.03) swelling = true;
-    }
-    if (swelling) more = true;
-
-    const linePts = points.map((p, i) => ({ ...p, y: p.y - (sw[i] ?? 0) }));
-
-    const dotOpacities = dots.map(d => {
-      if (px == null || py == null) return d.base;
-      const dist2 = (d.x - px) ** 2 + (d.y - py) ** 2;
-      const boost = PROXIMITY_BOOST * Math.exp(-dist2 / (2 * PROXIMITY_SIGMA * PROXIMITY_SIGMA));
-      return Math.min(0.4, d.base + boost);
-    });
-
-    const waterlineY = lerp(peakY - REVEAL_SLICE, baselineY, faderVal.current);
-    const hoverIndex  = px == null || points.length === 0
-      ? -1
-      : points.reduce((best, p, i) => Math.abs(p.x - px) < Math.abs(points[best].x - px) ? i : best, 0);
-
-    setRender({ linePts, dotOpacities, waterlineY, faderT: faderVal.current, hoverIndex });
-
-    rafId.current = more ? requestAnimationFrame(tick) : null;
-  }, [points, dots, baselineY, peakY]);
-
-  const kick = useCallback(() => {
-    if (rafId.current == null) rafId.current = requestAnimationFrame(tick);
-  }, [tick]);
-
-  useEffect(() => {
-    if (points.length === 0) return;
-    tick();
-  }, [points.length, dims.width, dims.height]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => () => { if (rafId.current != null) cancelAnimationFrame(rafId.current); }, []);
-
-  const onFaderDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragging.current = true;
-    faderVel.current = 0;
-    dragHist.current = [];
-    const track = e.currentTarget.getBoundingClientRect();
-    const t = clamp((e.clientY - track.top) / track.height, 0, 1);
-    faderVal.current = t;
-    dragHist.current.push({ v: t, t: performance.now() });
-    kick();
-  }, [kick]);
-
-  const onFaderMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
-    const track = e.currentTarget.getBoundingClientRect();
-    const t = clamp((e.clientY - track.top) / track.height, 0, 1);
-    faderVal.current = t;
-    dragHist.current.push({ v: t, t: performance.now() });
-    if (dragHist.current.length > 12) dragHist.current.shift();
+  // Distinguishes a genuine click (BROWSE navigation) from a drag-to-orbit
+  // that happens to end over a month's hit target — OrbitControls captures
+  // the pointer during a drag, but the underlying mesh can still receive a
+  // click on release, so this only counts it if the pointer barely moved
+  // between down and up.
+  const CLICK_DRAG_TOLERANCE = 6; // px
+  const downPos = useRef<{ x: number; y: number } | null>(null);
+  const onPointerDownCapture = useCallback((e: React.PointerEvent) => {
+    downPos.current = { x: e.clientX, y: e.clientY };
   }, []);
+  const handleSelect = useCallback((month: string, clientX: number, clientY: number) => {
+    const d = downPos.current;
+    const dist = d ? Math.hypot(clientX - d.x, clientY - d.y) : 0;
+    if (dist > CLICK_DRAG_TOLERANCE) return; // that was a drag, not a click
+    onMonthClick?.(month);
+  }, [onMonthClick]);
 
-  const onFaderUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    dragging.current = false;
-    const hist   = dragHist.current;
-    const now    = performance.now();
-    const recent = hist.filter(p => now - p.t < 100);
-    if (recent.length >= 2) {
-      const first = recent[0], last = recent[recent.length - 1];
-      const dt = Math.max(last.t - first.t, 1);
-      faderVel.current = (last.v - first.v) / dt * 16;
-    }
-    kick();
-  }, [kick]);
-
-  const onFramePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    pointerX.current = clamp(e.clientX - rect.left, 0, rect.width);
-    pointerY.current = clamp(e.clientY - rect.top, 0, rect.height);
-    kick();
-  }, [kick]);
-
-  const onFramePointerLeave = useCallback(() => {
-    pointerX.current = null;
-    pointerY.current = null;
-    kick();
-  }, [kick]);
-
-  const onFramePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    onFramePointerMove(e);
-  }, [onFramePointerMove]);
-
-  const onFramePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    onFramePointerLeave();
-  }, [onFramePointerLeave]);
-
-  const hoveredIdx = !dim && render.hoverIndex >= 0 ? render.hoverIndex : -1;
-  const spacing = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 40;
+  const resetView = useCallback(() => {
+    controlsRef.current?.reset?.();
+  }, []);
 
   return (
     <div
       style={{
-        opacity:    dim ? 0.22 : 1,
-        transition: `opacity ${DIM_MS}ms ${dim ? "ease-in" : "ease-out"}`,
+        opacity: dim ? 0.18 : 1,
+        pointerEvents: dim ? "none" : "auto",
+        transition: "opacity 400ms",
       }}
     >
-      <div style={{ display: "flex", alignItems: "stretch", gap: "1.25rem" }}>
-        {/* ── the terrain frame — fixed size, never scales; only the waterline moves ── */}
-        <div
-          ref={frameRef}
-          onPointerDown={dim ? undefined : onFramePointerDown}
-          onPointerMove={dim ? undefined : onFramePointerMove}
-          onPointerUp={dim ? undefined : onFramePointerUp}
-          onPointerLeave={dim ? undefined : onFramePointerLeave}
-          onPointerCancel={dim ? undefined : onFramePointerUp}
-          style={{
-            flex:      1,
-            minWidth:  0,
-            height:    "clamp(280px, 46vh, 480px)",
-            position:  "relative",
-            touchAction: "none",
-            pointerEvents: dim ? "none" : "auto",
-          }}
-        >
-          {dims.width > 0 && dims.height > 0 && (
-            <svg
-              width={dims.width}
-              height={dims.height}
-              viewBox={`0 0 ${dims.width} ${dims.height}`}
-              style={{ display: "block", overflow: "visible" }}
-            >
-              {/* sonar point field — detected-but-unresolved ground */}
-              <g>
-                {dots.map((d, i) => (
-                  <circle key={i} cx={d.x} cy={d.y} r={DOT_R} fill="#0a0a0a" fillOpacity={render.dotOpacities[i] ?? d.base} />
-                ))}
-              </g>
-
-              {/* the wireframe mesh — idle brightness, always drawn */}
-              {render.linePts.length > 0 && (
-                <MeshLayers points={render.linePts} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences} />
-              )}
-
-              {/* the scan sweep — continuous, independent of interaction state */}
-              {render.linePts.length > 0 && (
-                <SweepOverlay
-                  width={dims.width} height={dims.height}
-                  points={render.linePts} dispTrees={dispTrees} mag0={EROSION_MAG0} confidences={confidences}
-                  durationS={SWEEP_DURATION_S}
-                />
-              )}
-
-              {/* MILAT seam — a literal crossing, now with a floating label */}
-              {milatX != null && (
-                <>
-                  <line
-                    x1={milatX} y1={0} x2={milatX} y2={dims.height}
-                    stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
-                  />
-                  <Annotation
-                    x={milatX} y={dims.height * 0.55}
-                    label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined}
-                    variant="seam" side={milatX > dims.width / 2 ? "left" : "right"}
-                  />
-                </>
-              )}
-
-              {/* persistent annotations — peak and trough, on screen always */}
-              {peakIdx >= 0 && points[peakIdx] && (
-                <Annotation
-                  x={points[peakIdx].x} y={points[peakIdx].y}
-                  label={formatMonthShort(points[peakIdx].month)}
-                  sublabel={`${points[peakIdx].count} poems`}
-                  variant="data"
-                  side={points[peakIdx].x > dims.width / 2 ? "left" : "right"}
-                  vSide={points[peakIdx].y < 60 ? "down" : "up"}
-                />
-              )}
-              {troughIdx >= 0 && troughIdx !== peakIdx && points[troughIdx] && (
-                <Annotation
-                  x={points[troughIdx].x} y={points[troughIdx].y}
-                  label={formatMonthShort(points[troughIdx].month)}
-                  sublabel={`${points[troughIdx].count} poem${points[troughIdx].count === 1 ? "" : "s"}`}
-                  variant="data"
-                  side={points[troughIdx].x > dims.width / 2 ? "left" : "right"}
-                  vSide={points[troughIdx].y < 60 ? "down" : "up"}
-                />
-              )}
-
-              {/* transient — nearest point to the cursor, one more annotation among several */}
-              {hoveredIdx >= 0 && points[hoveredIdx] && hoveredIdx !== peakIdx && hoveredIdx !== troughIdx && (
-                <Annotation
-                  x={points[hoveredIdx].x} y={points[hoveredIdx].y}
-                  label={formatMonthShort(points[hoveredIdx].month)}
-                  sublabel={`${points[hoveredIdx].count} poem${points[hoveredIdx].count === 1 ? "" : "s"}, ${points[hoveredIdx].words.toLocaleString()}w`}
-                  variant="transient"
-                  side={points[hoveredIdx].x > dims.width / 2 ? "left" : "right"}
-                  vSide={points[hoveredIdx].y < 60 ? "down" : "up"}
-                />
-              )}
-
-              {/* the waterline — page-colour cover; months vanish beneath it
-                  rather than being clipped against a hard edge */}
-              <rect
-                x={0} y={render.waterlineY}
-                width={dims.width} height={Math.max(0, dims.height - render.waterlineY)}
-                fill={BG}
+      <div
+        onPointerDownCapture={onPointerDownCapture}
+        style={{
+          maxWidth:  "700px",
+          margin:    "0 auto",
+          aspectRatio: "16 / 10",
+          position:  "relative",
+          border:    "1px solid rgba(10,10,10,0.18)",
+          background: "transparent",
+        }}
+      >
+        {points.length > 0 && (
+          <Canvas camera={{ position: DEFAULT_CAM_POS, fov: 42 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+            <Scene
+              points={points}
+              months={months}
+              clickable={!!onMonthClick}
+              onHover={setHovered}
+              onSelect={handleSelect}
+            />
+            {hovered && (
+              <Annotation3D
+                position={[hovered.x, hovered.y, 0]}
+                label={formatMonthShort(hovered.month)}
+                sublabel={`${hovered.count} poem${hovered.count === 1 ? "" : "s"}, ${hovered.words.toLocaleString()}w`}
+                variant="transient"
               />
+            )}
+            <OrbitControls
+              ref={controlsRef}
+              target={DEFAULT_TARGET}
+              enablePan={false}
+              enableDamping
+              dampingFactor={0.08}
+              minDistance={SCENE_WIDTH * 0.5}
+              maxDistance={SCENE_WIDTH * 1.8}
+              minPolarAngle={Math.PI * 0.08}
+              maxPolarAngle={Math.PI * 0.49}
+            />
+          </Canvas>
+        )}
 
-              {/* BROWSE month click targets — only present when onMonthClick is
-                  given, and only over the water: a submerged month isn't
-                  reachable until the fader raises it. */}
-              {onMonthClick && points.map((p) => (
-                p.y >= render.waterlineY ? null : (
-                  <rect
-                    key={p.month}
-                    x={p.x - spacing / 2} y={0}
-                    width={spacing} height={render.waterlineY}
-                    fill="transparent" style={{ cursor: "pointer" }}
-                    onClick={() => onMonthClick(p.month)}
-                  />
-                )
-              ))}
-            </svg>
-          )}
-        </div>
-
-        {/* ── fader — hairline chrome, same mechanic ── */}
-        <div
-          onPointerDown={onFaderDown}
-          onPointerMove={onFaderMove}
-          onPointerUp={onFaderUp}
-          onPointerCancel={onFaderUp}
-          style={{
-            width:      FADER_W,
-            height:     "clamp(280px, 46vh, 480px)",
-            position:   "relative",
-            touchAction: "none",
-            cursor:     "pointer",
-            pointerEvents: dim ? "none" : "auto",
-          }}
-        >
-          <div style={{
-            position:  "absolute", left: "50%", top: 0, bottom: 0,
-            width:     1, background: "rgba(10,10,10,0.18)",
-            transform: "translateX(-50%)",
-          }} />
-          {DOT_MARKS.map(t => (
+        {/* right-edge nav affordance — a plain hairline track, not a joystick.
+            Purely a visual cue; drag-to-rotate works anywhere on the canvas
+            regardless of whether this is noticed. */}
+        <div style={{ position: "absolute", right: "10px", top: "14%", bottom: "14%", width: "14px", pointerEvents: "none" }}>
+          <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: "rgba(10,10,10,0.18)", transform: "translateX(-50%)" }} />
+          {[0.25, 0.5, 0.75].map(t => (
             <div key={t} style={{
-              position:     "absolute", left: "50%", top: `${t * 100}%`,
-              width:        5, height: 5, borderRadius: "50%",
-              border:       "1px solid rgba(10,10,10,0.3)",
-              background:   "transparent",
-              transform:    "translate(-50%, -50%)",
+              position: "absolute", left: "50%", top: `${t * 100}%`,
+              width: 5, height: 5, borderRadius: "50%",
+              border: "1px solid rgba(10,10,10,0.3)", transform: "translate(-50%, -50%)",
             }} />
           ))}
-          {/* thumb — a hollow bracket, not a filled bar */}
-          <div style={{
-            position:     "absolute", left: "50%", top: `${render.faderT * 100}%`,
-            width:        16, height: 8,
-            border:       "1px solid #0a0a0a",
-            background:   "transparent",
-            transform:    "translate(-50%, -50%)",
-            filter:       "drop-shadow(0 0 1.5px rgba(10,10,10,0.35))",
-          }} />
         </div>
+
+        {/* reset — returns the camera to its default position/target */}
+        <button
+          onClick={resetView}
+          style={{
+            position: "absolute", left: "10px", bottom: "10px",
+            fontFamily: HUD_MONO, fontSize: "0.62rem", fontWeight: 600,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            background: "none", border: "1px solid rgba(10,10,10,0.25)",
+            color: "#0a0a0a", opacity: 0.6, padding: "0.3rem 0.55rem",
+            cursor: "pointer",
+          }}
+        >
+          Reset
+        </button>
+      </div>
+
+      <div style={{ marginTop: "0.75rem", fontSize: "0.7rem", letterSpacing: "0.08em", color: "rgba(10,10,10,0.4)", textAlign: "center" }}>
+        drag to rotate — scroll to zoom
       </div>
     </div>
   );
