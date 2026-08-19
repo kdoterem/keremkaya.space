@@ -1,9 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CryptoScramble from "@/app/components/CryptoScramble";
+import MechButton, { SETTLE_EASE } from "@/app/components/MechButton";
 import {
   getProvenanceTags,
   computeWeights,
@@ -12,12 +12,18 @@ import {
   provenanceBoundaryDate,
 } from "@/lib/tagProvenance";
 
-// ── The range: a reader traverses backward through time, present → Feb 2025,
+// ── PLAY — a reader traverses backward through time, present → Feb 2025,
 // one poem per position. No progress bar, no counter — the terrain itself
 // (behind: resolved; ahead: sonar dots; just-ahead: a haze) is the only
 // indicator. Stage A only: the loop core (view → READ → poem → PROCEED/PUSS
 // OUT → view, advanced). Stages B (spawn), C (depth/composition), and D
-// (banishment) are not built here. ──
+// (banishment) are not built here.
+//
+// Relocated from the old standalone /terrain route into /writing's PLAY
+// mode — mechanically unchanged. The only difference from its previous
+// form is the exit affordance: it used to be a hard navigation back to
+// "/"; now it's the onExit callback, handing control back to /writing's
+// own landing state instead of leaving the page. ──
 
 interface TerrainMonth {
   month: string; // YYYY-MM
@@ -39,8 +45,6 @@ interface Pt {
 }
 
 // ── Erosion: recursive midpoint displacement (unchanged from the prior pass) ──
-// Fixed seeded fractions, precomputed once — reapplying them never draws
-// another random number, so the roughness pattern never changes.
 interface DispNode {
   frac:  number;
   left:  DispNode | null;
@@ -114,7 +118,7 @@ function referenceY(points: Pt[], x: number): number {
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
 
-// ── Layout / erosion / point-field constants (same values as the previous pass) ──
+// ── Layout / erosion / point-field constants (same values as the prior pass) ──
 const TOP_PADDING = 40;
 const STROKE_W    = 1.75;
 
@@ -186,10 +190,11 @@ const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123
 const TOTAL_REVEAL_MS = STAGGER_MS * 2 + SCRAMBLE_MS + 200;
 
 // ── Tag provenance — logic lives in lib/tagProvenance.tsx, shared with
-// /writing so both surfaces render identical emphasis for identical data.
-// Posts with no entry there (i.e. everything before the boundary date)
-// render exactly as before: computeWeights returns undefined, CryptoScramble
-// falls back to its plain flat-span render. ──
+// /writing's plain (non-journey) rendering so both render identical
+// emphasis for identical data. Posts with no entry there (i.e. everything
+// before the boundary date) render exactly as before: computeWeights
+// returns undefined, CryptoScramble falls back to its plain flat-span
+// render. ──
 
 type Phase = "view" | "poem";
 type SendState = "idle" | "sending" | "sent" | "error";
@@ -249,73 +254,7 @@ function autoGrow(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-// A heavy, decelerating settle — no overshoot, matches the tag field and the
-// kismet fader's physics language. Reused for both button transitions and
-// the poem-to-poem unravel.
-const SETTLE_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const SETTLE_EASE_CSS = "cubic-bezier(0.16, 1, 0.3, 1)";
-
-const BUTTON_HOVER_MS = 320; // slow, deliberate — no instant flicker
-const BUTTON_PRESS_DELAY_MS = 240; // beat between commit and the action landing
-
-// ── Mechanical button — hard edges, monospace caps, weighted response.
-// A press commits immediately (visual invert) but the actual action lands
-// after a short beat, so it reads as being thrown rather than tapped. ──
-function MechButton({
-  label, onClick, disabled,
-}: { label: string; onClick: () => void; disabled?: boolean }) {
-  const [hover, setHover]     = useState(false);
-  const [pressed, setPressed] = useState(false);
-  const pendingRef = useRef(false);
-  const timeoutRef  = useRef<number | null>(null);
-
-  useEffect(() => () => { if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current); }, []);
-
-  const handleActivate = useCallback(() => {
-    if (disabled || pendingRef.current) return;
-    pendingRef.current = true;
-    setPressed(true);
-    timeoutRef.current = window.setTimeout(() => {
-      pendingRef.current = false;
-      setPressed(false);
-      onClick();
-    }, BUTTON_PRESS_DELAY_MS);
-  }, [disabled, onClick]);
-
-  const active = (hover || pressed) && !disabled;
-
-  return (
-    <button
-      onClick={handleActivate}
-      disabled={disabled}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        fontFamily:     MONO,
-        fontSize:       "0.75rem",
-        fontWeight:     600,
-        letterSpacing:  "0.14em",
-        textTransform:  "uppercase",
-        border:         "1px solid #0a0a0a",
-        borderRadius:   0,
-        background:     active ? "#0a0a0a" : "transparent",
-        color:          active ? "#aaff00" : "#0a0a0a",
-        padding:        "0.7rem 1.5rem",
-        cursor:         disabled ? "default" : "pointer",
-        opacity:        disabled ? 0.35 : 1,
-        minWidth:       "9rem",
-        transform:      pressed ? "scale(0.97)" : "scale(1)",
-        transition:     `background-color ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}, `
-                       + `color ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}, `
-                       + `transform ${BUTTON_HOVER_MS}ms ${SETTLE_EASE_CSS}`,
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-export default function TerrainPage() {
+export default function ReadingJourney({ onExit }: { onExit: () => void }) {
   const [months,       setMonths]       = useState<TerrainMonth[]>([]);
   const [postsByMonth, setPostsByMonth] = useState<Map<string, SearchDoc[]>>(new Map());
   const [position,     setPosition]     = useState<number | null>(null);
@@ -445,6 +384,15 @@ export default function TerrainPage() {
   const spacing   = points.length > 1 ? (points[points.length - 1].x - points[0].x) / (points.length - 1) : 40;
   const hazeWidth = spacing * 0.9;
 
+  const resolveX = position != null && points[position] ? points[position].x : 0;
+  const resolveY = position != null && points[position] ? points[position].y : 0;
+
+  const ready = months.length > 0 && postsByMonth.size > 0 && position != null;
+
+  const currentMonth      = position != null ? months[position]?.month : undefined;
+  const currentMonthPosts = currentMonth ? (postsByMonth.get(currentMonth) ?? []) : [];
+  const hasUnread          = currentMonthPosts.some(p => !readSet.has(p.slug));
+
   // MILAT seam — where deep tagging currently ends going backward in time.
   // The x-axis is linear by month index, not by calendar day, so the exact
   // day within its month is interpolated between that month's point and the
@@ -468,15 +416,6 @@ export default function TerrainPage() {
     const prevPt = points[idx - 1];
     return prevPt.x + (thisPt.x - prevPt.x) * frac;
   }, [points, months]);
-
-  const resolveX = position != null && points[position] ? points[position].x : 0;
-  const resolveY = position != null && points[position] ? points[position].y : 0;
-
-  const ready = months.length > 0 && postsByMonth.size > 0 && position != null;
-
-  const currentMonth      = position != null ? months[position]?.month : undefined;
-  const currentMonthPosts = currentMonth ? (postsByMonth.get(currentMonth) ?? []) : [];
-  const hasUnread          = currentMonthPosts.some(p => !readSet.has(p.slug));
 
   // Shared by the very first READ and by PROCEED's direct delivery — puts a
   // poem on screen and restarts its title/date/body stagger + button timer.
@@ -628,27 +567,28 @@ export default function TerrainPage() {
   );
 
   return (
-    <main
+    <div
       style={{
-        minHeight:  "100vh",
-        padding:    "4rem 5vw",
         fontFamily: MONO,
       }}
     >
-      <Link
-        href="/"
+      <button
+        onClick={onExit}
         style={{
           fontSize:       "0.7rem",
           fontWeight:     600,
           letterSpacing:  "0.14em",
           textTransform:  "uppercase",
           color:          "#0a0a0a",
-          textDecoration: "none",
+          background:     "none",
+          border:         "none",
+          padding:        0,
+          cursor:         "pointer",
           opacity:        0.5,
         }}
       >
         Return
-      </Link>
+      </button>
 
       <AnimatePresence mode="popLayout">
       {!ready ? null : phase === "view" ? (
@@ -866,6 +806,6 @@ export default function TerrainPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

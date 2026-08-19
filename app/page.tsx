@@ -508,7 +508,7 @@ function ScrambleCore() {
 
   return (
     <Link
-      href="/terrain"
+      href="/writing"
       onClick={(e) => e.stopPropagation()}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}

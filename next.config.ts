@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/art", destination: "/kismet", permanent: true },
       { source: "/writing/mimilat", destination: "/writing/thank-you", permanent: true },
+      { source: "/terrain", destination: "/writing", permanent: true },
     ];
   },
 };
