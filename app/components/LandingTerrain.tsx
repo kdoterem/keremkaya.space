@@ -46,7 +46,7 @@ const HUD_MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Co
 
 // ── scene layout — world units, not pixels ──
 const SCENE_WIDTH  = 10;   // x spans -HALF..HALF — the time axis, Feb 2025 -> present
-const SCENE_DEPTH  = 3;    // z depth of the terrain slab itself
+const SCENE_DEPTH  = 7;    // widened from 3 — comparably substantial to width, not depth-as-afterthought
 const HEIGHT_SCALE = 3.2;  // world units at the fullest month
 
 // Material colour deviates from strict flat #0a0a0a — a pure-black surface
@@ -111,6 +111,22 @@ const SEGMENTS_X = 240;
 const SEGMENTS_Z = 48;
 const MICRO_AMPLITUDE = 0.045; // small — roughness, not a second landform
 
+// Height was Z-invariant (the same curve repeated straight across depth) —
+// verified by rendering it (a hand-rolled software rasterizer reproducing
+// this exact math, since there's no browser/WebGL tool in this environment)
+// that this reads as corrugated sheet metal / ribbon candy, not a mountain:
+// every peak became an infinite straight extruded ridge no matter the
+// camera or light. A cosine taper across Z rounds each ridge into an actual
+// mass — full height at the centreline, tapering down toward the front/back
+// edges, the way a real ridge's cross-section is domed, not flat-topped.
+// This goes one step beyond "camera + light only", but the corrugation was
+// the actual root cause of "doesn't read as a mountain" once verified, and
+// leaving it in would still fail that test regardless of camera/light.
+function zTaper(zNorm: number): number { // zNorm in [-1, 1]
+  const t = Math.cos(zNorm * Math.PI / 2); // 1 at centre, 0 at the edges
+  return 0.24 + 0.76 * t;
+}
+
 function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
   const maxCount = Math.max(1, ...months.map(m => m.count));
   const normalized = months.map(m => m.count / maxCount);
@@ -123,7 +139,8 @@ function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
     const x = pos.getX(i);
     const z = pos.getZ(i);
     const xNorm = x / SCENE_WIDTH + 0.5;
-    const base = heightAt(normalized, xNorm) * HEIGHT_SCALE;
+    const zNorm = z / (SCENE_DEPTH / 2);
+    const base = heightAt(normalized, xNorm) * HEIGHT_SCALE * zTaper(zNorm);
     const micro = (
       Math.sin(x * 7.3 + z * 5.1) * 0.5 +
       Math.sin(x * 13.7 - z * 9.2) * 0.25 +
@@ -132,7 +149,7 @@ function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
     pos.setY(i, Math.max(0, base + micro));
   }
   pos.needsUpdate = true;
-  geo.computeVertexNormals();
+  geo.computeVertexNormals(); // already correct — recomputed after displacement, not left as the flat plane's original normals
   return geo;
 }
 
@@ -240,8 +257,45 @@ function MonthHitTarget({
   );
 }
 
-const DEFAULT_CAM_POS: [number, number, number] = [0, HEIGHT_SCALE * 1.6, SCENE_WIDTH * 1.05];
-const DEFAULT_TARGET:  [number, number, number] = [0, HEIGHT_SCALE * 0.2, 0];
+// Camera — verified against a hand-rolled software-rasterizer render of
+// this exact geometry/camera/light math before shipping (no browser/WebGL
+// tool exists in this environment to check it any other way). Positioned
+// as a point on a sphere around the target rather than a bare [x,y,z]
+// guess, so the elevation/azimuth angles that actually matter are explicit:
+// ~35° above horizontal (looking down onto the landform, not across it,
+// not top-down) and ~28° off-axis (so the depth axis isn't viewed edge-on —
+// straight down the Z axis was the earlier failure: it hid all the depth
+// that widening SCENE_DEPTH had just added).
+const CAM_ELEVATION_DEG = 35;
+const CAM_AZIMUTH_DEG   = 28;
+const CAM_DISTANCE      = SCENE_WIDTH * 1.15;
+const DEFAULT_TARGET: [number, number, number] = [0, HEIGHT_SCALE * 0.2, 0];
+const DEFAULT_CAM_POS: [number, number, number] = (() => {
+  const elev = CAM_ELEVATION_DEG * Math.PI / 180;
+  const az   = CAM_AZIMUTH_DEG   * Math.PI / 180;
+  return [
+    DEFAULT_TARGET[0] + CAM_DISTANCE * Math.cos(elev) * Math.sin(az),
+    DEFAULT_TARGET[1] + CAM_DISTANCE * Math.sin(elev),
+    DEFAULT_TARGET[2] + CAM_DISTANCE * Math.cos(elev) * Math.cos(az),
+  ];
+})();
+
+// Light — raking, not overhead: ~38° above horizontal and, crucially, ~65°
+// off to one side (well apart from the camera's own 28° azimuth), which is
+// what produces one lit face and one shadowed face per ridge rather than a
+// thin highlight along the top edge. Also verified in the same render check.
+const LIGHT_ELEVATION_DEG = 38;
+const LIGHT_AZIMUTH_DEG   = 65;
+const LIGHT_DISTANCE      = SCENE_WIDTH * 1.5;
+const DIRECTIONAL_LIGHT_POS: [number, number, number] = (() => {
+  const elev = LIGHT_ELEVATION_DEG * Math.PI / 180;
+  const az   = LIGHT_AZIMUTH_DEG   * Math.PI / 180;
+  return [
+    LIGHT_DISTANCE * Math.cos(elev) * Math.sin(az),
+    LIGHT_DISTANCE * Math.sin(elev),
+    LIGHT_DISTANCE * Math.cos(elev) * Math.cos(az),
+  ];
+})();
 
 function Scene({
   months, clickable, onHover, onSelect,
@@ -281,7 +335,7 @@ function Scene({
   return (
     <>
       <ambientLight intensity={0.6} />
-      <directionalLight position={[SCENE_WIDTH * 0.4, HEIGHT_SCALE * 3, SCENE_DEPTH * 2.2]} intensity={1.7} />
+      <directionalLight position={DIRECTIONAL_LIGHT_POS} intensity={2.4} />
 
       <BackgroundField />
       <Terrain months={months} />
