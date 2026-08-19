@@ -187,7 +187,11 @@ const TOTAL_REVEAL_MS = STAGGER_MS * 2 + SCRAMBLE_MS + 200;
 interface ProvenanceEntry { type: string; spans?: string[]; note?: string }
 interface PostProvenance  { slug: string; date: string; tags: Record<string, ProvenanceEntry> }
 const provenanceBySlug = new Map<string, Record<string, ProvenanceEntry>>(
-  (tagProvenanceData as PostProvenance[]).map(p => [p.slug, p.tags]),
+  // Each post's tags object gets inferred as its own distinct literal shape
+  // (different posts have different tag names as literal keys), not a
+  // generic Record — TS won't allow a direct cast between those without
+  // going through unknown first.
+  (tagProvenanceData as unknown as PostProvenance[]).map(p => [p.slug, p.tags]),
 );
 
 // One entry per character in `text` — how many tags' spans cover that
