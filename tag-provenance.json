@@ -1,0 +1,126 @@
+[
+  {
+    "slug": "percept-and-define-intercept-the-divine",
+    "date": "2026-08-13",
+    "tags": {
+      "silence":       { "type": "lines", "spans": ["is your silences,", "silent?"] },
+      "death":         { "type": "line", "spans": ["until when? until death"] },
+      "absence":       { "type": "lines", "spans": ["do you know what absence of something means?", "absence of light brings shadow"] },
+      "consciousness": { "type": "none", "note": "the whole poem interrogates knowing/discovering, but that's already the carrier for wonder and existence below — no span distinct enough to call this one specifically" },
+      "god":           { "type": "phrase", "spans": ["intercept the divine"], "note": "only in the title — the body never touches divinity, god, or worship directly" },
+      "wonder":        { "type": "lines", "spans": ["have you ever had nothing?", "more you discover, more you discover, \nmore will come."] },
+      "clarity":       { "type": "lines", "spans": ["absence of light brings shadow", "light, takes it away."], "note": "the poem's one flat declarative couplet after four questions in a row — clarity as a shift in register, not a claim about content" },
+      "time":          { "type": "lines", "spans": ["until when? until death", "happening happens every day."] },
+      "truth":         { "type": "phrase", "spans": ["happening happens every day."] },
+      "existence":     { "type": "line", "spans": ["have you ever had nothing?"] },
+      "wordplay":      { "type": "lines", "spans": ["percept and define, intercept the divine", "is your silences,\nsilent?"], "note": "first span is the title (percept/intercept near-rhyme, \"define\" embedded); second is the body's noun-to-adjective turn on the same word" }
+    }
+  },
+  {
+    "slug": "want-want-me",
+    "date": "2026-08-13",
+    "tags": {
+      "conflict":  { "type": "lines", "spans": ["i wanna write on a wall,", "they want me writin off checks,", "i wanna watch the sun,", "they want me watchin the news,", "i wanna greet the bug in my home,", "they want me killin it,", "i wanna kill them,", "they wanna eviscerate me."], "note": "the whole poem is this one repeated opposition — it's the structure, not a single line" },
+      "defiance":  { "type": "lines", "spans": ["i wanna write on a wall,", "they want me writin off checks,"] },
+      "family":    { "type": "none", "note": "\"they\" is never named as family — could be read that way given the domestic details (checks, home, news), but the text doesn't say it" },
+      "contempt":  { "type": "phrase", "spans": ["i wanna kill them,"] },
+      "rage":      { "type": "lines", "spans": ["i wanna kill them,", "they wanna eviscerate me."] },
+      "control":   { "type": "lines", "spans": ["they want me writin off checks,", "they want me watchin the news,", "they want me killin it,"] },
+      "presence":  { "type": "none", "note": "not evident — the poem is about opposing demands, not about being present/attentive" },
+      "existence": { "type": "none", "note": "not evident beyond what's already carried by conflict/control" },
+      "wonder":    { "type": "none", "note": "diffuse, not localizable to specific text" },
+      "dark":      { "type": "lines", "spans": ["i wanna kill them,", "they wanna eviscerate me."] }
+    }
+  },
+  {
+    "slug": "this-message-is-broadcasted-from-a-primal-place",
+    "date": "2026-08-17",
+    "tags": {
+      "love":     { "type": "line", "spans": ["JUST LOVE I LOVE MYSELF LIKE I LOVE THE SUN AND ALL THAT IT TOUCH."] },
+      "wordplay": { "type": "lines", "spans": ["hole, is it glory hole? when i go in become all holy?", "red or flag, which invokes a hole farther?", "what molly shows, what red flag takes away"], "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart" }
+    }
+  },
+  {
+    "slug": "hear-hear-were-here",
+    "date": "2026-08-18",
+    "tags": {
+      "doubt":            { "type": "phrase", "spans": ["no doubt. patience."] },
+      "absence":          { "type": "lines", "spans": ["i, i'm sorry", "for the absence"] },
+      "identity":         { "type": "lines", "spans": ["had to craft faces,", "sis didn't eye you into an i'ness, i see,", "your beef with seeing was not being seen."] },
+      "self-acceptance":  { "type": "lines", "spans": ["now i am finally able to let it go and", "join you"] },
+      "healing":          { "type": "lines", "spans": ["it's good to see you here, hear hear,", "you look like you been through hell, \nbut you're still alive so near miss,", "not needing what was left in a mess, and if she had you wouldn't know the mess gotta be sorted"] },
+      "presence":         { "type": "lines", "spans": ["now that you're here i see you.", "are we, connecting right now, eyely??"] },
+      "self-erosion":     { "type": "lines", "spans": ["had to craft faces,", "had to interpret the shadows of the wall,", "ever since your fall."] },
+      "clarity":          { "type": "line", "spans": ["now that you're here i see you."] },
+      "existence":        { "type": "lines", "spans": ["very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."] },
+      "devotion":         { "type": "none", "note": "the reconciliation between the two voices could be read as devotional, but I don't have a span for it distinct from self-acceptance/healing above" },
+      "wonder":           { "type": "line", "spans": ["very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."], "note": "same line as existence — it carries both: what's left is unknown and that's held open, not resolved" }
+    }
+  },
+  {
+    "slug": "see-me-like-my-neighbour-does-i-eye-enacted-the-thrill-pain-gives",
+    "date": "2026-08-18",
+    "tags": {
+      "pain":          { "type": "line", "spans": ["pain is a sensation and sensations are to be enjoyed"] },
+      "existence":     { "type": "none", "note": "the arc from sensation to constructed self to ruin is existential in shape, but no span distinct from consciousness/self-erosion below" },
+      "wonder":        { "type": "lines", "spans": ["fire? burn and change you", "water? ocean womb cradles", "air? you send it back to it, the one who blows", "earth? shaping the tree, in accordance with three"], "note": "same four lines as ritual — the questioning-of-elements does both" },
+      "presence":      { "type": "phrase", "spans": ["in order to enjoy you have to get close"] },
+      "clarity":       { "type": "phrase", "spans": ["you understand, and you understand it's all constructed,"] },
+      "self-erosion":  { "type": "lines", "spans": ["tear it apart", "let the ruin tell a story."] },
+      "sensual":       { "type": "lines", "spans": ["pain is a sensation and sensations are to be enjoyed", "in order to enjoy you have to get close", "water? ocean womb cradles"] },
+      "creation":      { "type": "phrase", "spans": ["earth? shaping the tree, in accordance with three"] },
+      "truth":         { "type": "phrase", "spans": ["let the ruin tell a story."] },
+      "consciousness": { "type": "lines", "spans": ["you see, you hear,", "you hear, you try to understand,", "you understand, and you understand it's all constructed,"], "note": "the escalating perception chain is the clearest carrier in the whole set for this tag" },
+      "ritual":        { "type": "lines", "spans": ["fire? burn and change you", "water? ocean womb cradles", "air? you send it back to it, the one who blows", "earth? shaping the tree, in accordance with three"] }
+    }
+  },
+  {
+    "slug": "something-juicy",
+    "date": "2026-08-18",
+    "tags": {
+      "work":         { "type": "line", "spans": ["need a sustained mind to write"] },
+      "existence":    { "type": "lines", "spans": ["i'm what life blooms, tomato sapling small as fuck,", "i no longer am fucking universe,"] },
+      "impermanence": { "type": "lines", "spans": ["so only way things worked, doesn't work right now", "then gets big and tall and heavy,", "then green tomatoes form,", "then they get bigger and turn red", "all to be ate and enjoyed"] },
+      "creation":     { "type": "lines", "spans": ["i'm what life blooms, tomato sapling small as fuck,", "then gets big and tall and heavy,"] },
+      "wonder":       { "type": "lines", "spans": ["blow of the wind, celestial dance", "something much much much bigger than i ever anticipated"] },
+      "self-erosion": { "type": "line", "spans": ["devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] },
+      "mortality":    { "type": "lines", "spans": ["all to be ate and enjoyed", "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] },
+      "acceptance":   { "type": "phrase", "spans": ["today i am it."] },
+      "clarity":      { "type": "lines", "spans": ["i used to think i tasted the forbidden fruit,", "today i am it."] },
+      "presence":     { "type": "phrase", "spans": ["today i am it."], "note": "same line as acceptance/clarity — \"today\" is doing this work specifically" },
+      "dark":         { "type": "line", "spans": ["devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] }
+    }
+  },
+  {
+    "slug": "thank-you",
+    "date": "2026-08-18",
+    "tags": {
+      "god":              { "type": "lines", "spans": ["you, the last and the first one to act", "you swept them away"], "note": "alpha/omega framing and a single decisive act — never named \"god\" outright, but this is what makes the addressee god-scaled" },
+      "gratitude":        { "type": "lines", "spans": ["thank you for teaching me", "thank you for never changing, while i did,", "thank you for asking me to put the bow and arrow down", "thank you for such swiftness,"], "note": "the refrain itself — the most direct tag-to-text match in this batch" },
+      "devotion":         { "type": "lines", "spans": ["well you did too, you just never have been away from you"] },
+      "clarity":          { "type": "lines", "spans": ["eye saw you", "and knew", "it was looking at i"] },
+      "self-acceptance":  { "type": "lines", "spans": ["it was looking at i", "thank you for asking me to put the bow and arrow down"] },
+      "consciousness":    { "type": "lines", "spans": ["eye picks up threat first,", "i do not", "i used to"] },
+      "presence":         { "type": "phrase", "spans": ["you just never have been away from you"] },
+      "wordplay":         { "type": "lines", "spans": ["eye picks up threat first,", "i do not", "i used to", "eye saw you", "and knew", "it was looking at i"], "note": "the eye/I homophone, sustained across the whole closing stretch" },
+      "existence":        { "type": "phrase", "spans": ["thank you for never changing, while i did,"] },
+      "healing":          { "type": "phrase", "spans": ["thank you for asking me to put the bow and arrow down"] }
+    }
+  },
+  {
+    "slug": "to-the-first-comers",
+    "date": "2026-08-18",
+    "tags": {
+      "faith":           { "type": "lines", "spans": ["i did", "i believed"] },
+      "clarity":         { "type": "lines", "spans": ["today it's apparent", "today single revealed itself"] },
+      "time":            { "type": "lines", "spans": ["past me had anger, it'd go on with they didn't", "today it's apparent"] },
+      "self-acceptance": { "type": "line", "spans": ["no, i'm not too late. but i'm not the first comer either."] },
+      "existence":       { "type": "none", "note": "the poem's arc of belief and change is existential in shape, but I don't have a span distinct from faith/self-acceptance/acceptance above — citing the same closing line a third time would be padding, not a real match" },
+      "wonder":          { "type": "phrase", "spans": ["who could have believed it was gonna change like this but"] },
+      "presence":        { "type": "lines", "spans": ["today it's apparent", "today single revealed itself"], "note": "same lines as time/clarity — \"today\" is the carrier" },
+      "endurance":       { "type": "lines", "spans": ["past me had anger, it'd go on with they didn't", "but once the circulation completes and all wires get wired they'll say"] },
+      "truth":           { "type": "lines", "spans": ["and its signal is deafening for some", "the signal they cannot hear their navel can,"] },
+      "acceptance":       { "type": "line", "spans": ["no, i'm not too late. but i'm not the first comer either."] }
+    }
+  }
+]
