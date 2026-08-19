@@ -72,6 +72,8 @@ export function erodedPoints(pts: Pt[], trees: (DispNode | null)[], mag0: number
   return out;
 }
 
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
 function pointsToPath(pts: Pt[]): string {
   if (pts.length === 0) return "";
   if (pts.length === 1) return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
@@ -99,70 +101,153 @@ export function confidenceAt(x: number, monthPts: Pt[], confidences: number[]): 
 }
 
 // ── Mesh geometry ──
-// A single data line re-expressed as MESH_LAYERS depth layers: layer 0 is
-// the real, full-detail line; each layer after it is pulled toward the
-// mean height and offset upward, receding like a scanned surface rather
-// than one drawn stroke. LAYER_CONF_THRESHOLD gates how deep a region's
-// layers reach — a low-confidence (sparse-data) stretch drops its back
-// layers first, so the mesh visibly thins where "the instrument is
-// struggling to resolve" that ground, before the front layer (the real
-// data) ever does.
+// A single data line re-expressed as MESH_LAYERS depth layers, rendered as
+// landscape viewed from above at a slight downward angle, not a cross-
+// section diagram. Three things do that work:
+//
+//  1. Perspective compression — each layer's depth offset shrinks
+//     geometrically (DEPTH_COMPRESSION), so rows crowd together receding
+//     "back" instead of marching away at even steps, and each layer's line
+//     weight (LAYER_STROKE_W) thins with it. This is most of the depth cue.
+//  2. Elevation weight — a point's own height above the baseline (not just
+//     which layer it's on) bumps its stroke weight/opacity via ELEV_WEIGHT,
+//     so a peak visibly outweighs a valley within the same layer.
+//  3. A mild x-convergence toward the data's own centre (X_CONVERGE_MAX) as
+//     layers recede, plus a slight vertical foreshortening (VIEW_TILT) —
+//     together read as a downward viewing angle rather than flat side-on.
+//
+// LAYER_CONF_THRESHOLD still gates how deep a region's layers reach — a
+// low-confidence (sparse-data) stretch drops its back layers first, so the
+// mesh visibly thins where "the instrument is struggling to resolve" that
+// ground, before the front layer (the real data) ever does.
 export const MESH_LAYERS = 4;
-const DEPTH_GAP        = 6;     // px, upward offset per layer
-const DEPTH_FLATTEN    = 0.24;  // fraction blended toward mean height, per layer step
-const EROSION_SCALE    = [1, 0.7, 0.45, 0.25];      // erosion detail recedes with depth
-const LAYER_OPACITY    = [0.85, 0.5, 0.32, 0.2];    // front brightest
-const LAYER_CONF_THRESHOLD = [0, 0.3, 0.55, 0.8];   // min confidence required for this layer to render
-const CROSS_OPACITY    = 0.16;
-export const STROKE_W  = 0.75;  // hairline, by design — the one place on the site that isn't bold
 
-function flattenY(y: number, meanY: number, layer: number): number {
-  const t = DEPTH_FLATTEN * layer;
-  return y * (1 - t) + meanY * t - layer * DEPTH_GAP;
+const DEPTH_GAP_BASE    = 11;    // px, offset from layer 0 to layer 1 — the largest single step
+const DEPTH_COMPRESSION = 0.52;  // each further step shrinks by this factor — rows crowd going "back"
+const DEPTH_OFFSETS: number[] = (() => {
+  const out = [0];
+  let gap = DEPTH_GAP_BASE;
+  for (let i = 1; i < MESH_LAYERS; i++) { out.push(out[i - 1] + gap); gap *= DEPTH_COMPRESSION; }
+  return out;
+})();
+
+const DEPTH_FLATTEN  = 0.3;   // fraction blended toward mean height, per layer step
+const VIEW_TILT      = 0.9;   // vertical foreshortening around the mean — looked down upon, not side-on
+const X_CONVERGE_MAX = 0.16;  // deepest layer's x pulled this fraction toward the data's own centre
+
+const EROSION_SCALE   = [1, 0.7, 0.42, 0.22];        // erosion detail recedes with depth
+const LAYER_STROKE_W  = [1.1, 0.7, 0.42, 0.26];      // front heaviest, back hairline — weight IS depth
+const LAYER_OPACITY   = [0.85, 0.5, 0.3, 0.16];
+const LAYER_CONF_THRESHOLD = [0, 0.3, 0.55, 0.8];    // min confidence required for this layer to render
+
+const CROSS_OPACITY      = 0.18;
+const CROSS_STROKE_FRONT = 0.55; // the rib's near half — heavier
+const CROSS_STROKE_BACK  = 0.2;  // the rib's far half — thinner, tapering into the depth
+
+// Peaks read brighter/heavier than valleys — height itself doing visible
+// work, not just position on the page. Tiered (not a smooth gradient) so
+// it reads as a handful of deliberate weight steps, the same register as
+// the confidence gating above it.
+const ELEV_TIERS  = [0.25, 0.5, 0.75];       // fraction-of-local-peak-height breakpoints
+const ELEV_WEIGHT = [0.55, 0.78, 1, 1.35];   // valley -> peak stroke/opacity multiplier
+
+function elevationTier(frac: number): number {
+  for (let i = 0; i < ELEV_TIERS.length; i++) if (frac < ELEV_TIERS[i]) return i;
+  return ELEV_TIERS.length;
 }
 
-interface MeshLayer { layer: number; opacity: number; segments: string[] }
+function xScaleFor(layer: number): number {
+  const t = MESH_LAYERS > 1 ? layer / (MESH_LAYERS - 1) : 0;
+  return 1 - X_CONVERGE_MAX * t;
+}
+function layerXForward(x: number, centerX: number, layer: number): number {
+  return centerX + (x - centerX) * xScaleFor(layer);
+}
+// Erosion needs the converged x to displace in the drawn coordinate space,
+// but confidence/elevation are only known per original month — this
+// recovers an approximate original x from a (possibly eroded, so not
+// perfectly invertible) point on a converged layer, close enough for a
+// coarse tier lookup.
+function layerXInverse(x: number, centerX: number, layer: number): number {
+  return centerX + (x - centerX) / xScaleFor(layer);
+}
+
+function layerY(y: number, meanY: number, layer: number): number {
+  const flattenT = DEPTH_FLATTEN * layer;
+  const flattened = y * (1 - flattenT) + meanY * flattenT;
+  const tilted = meanY + (flattened - meanY) * VIEW_TILT;
+  return tilted - DEPTH_OFFSETS[layer];
+}
+
+function sceneMetrics(points: Pt[]) {
+  const meanY = points.reduce((s, p) => s + p.y, 0) / points.length;
+  const xs = points.map(p => p.x);
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const peakY = Math.min(...points.map(p => p.y));      // smallest y = tallest peak
+  const baselineY = Math.max(...points.map(p => p.y));  // largest y = valley/baseline
+  return { meanY, centerX, peakY, baselineY };
+}
+
+interface MeshSegment { d: string; tier: number }
+interface MeshLayer { layer: number; segments: MeshSegment[] }
 
 function buildMeshLayers(
   points: Pt[], dispTrees: (DispNode | null)[], mag0: number, confidences: number[],
 ): MeshLayer[] {
   if (points.length === 0) return [];
-  const meanY = points.reduce((s, p) => s + p.y, 0) / points.length;
+  const { meanY, centerX, peakY, baselineY } = sceneMetrics(points);
+  const elevations = points.map(p => clamp((baselineY - p.y) / ((baselineY - peakY) || 1), 0, 1));
+
   const out: MeshLayer[] = [];
   for (let i = 0; i < MESH_LAYERS; i++) {
-    const layerPts = points.map(p => ({ x: p.x, y: flattenY(p.y, meanY, i) }));
-    const eroded   = erodedPoints(layerPts, dispTrees, mag0 * EROSION_SCALE[i]);
+    const layerPts = points.map(p => ({ x: layerXForward(p.x, centerX, i), y: layerY(p.y, meanY, i) }));
+    const eroded    = erodedPoints(layerPts, dispTrees, mag0 * EROSION_SCALE[i]);
     const threshold = LAYER_CONF_THRESHOLD[i];
-    const segments: string[] = [];
+
+    const segments: MeshSegment[] = [];
     let run: Pt[] = [];
+    let runTier = -1;
+    const flush = () => { if (run.length > 1) segments.push({ d: pointsToPath(run), tier: runTier }); run = []; };
+
     for (const pt of eroded) {
-      const conf = confidenceAt(pt.x, points, confidences);
-      if (conf >= threshold) run.push(pt);
-      else { if (run.length > 1) segments.push(pointsToPath(run)); run = []; }
+      const origX = layerXInverse(pt.x, centerX, i);
+      const conf  = confidenceAt(origX, points, confidences);
+      if (conf < threshold) { flush(); runTier = -1; continue; }
+      const tier = elevationTier(confidenceAt(origX, points, elevations));
+      if (tier !== runTier) { flush(); runTier = tier; }
+      run.push(pt);
     }
-    if (run.length > 1) segments.push(pointsToPath(run));
-    out.push({ layer: i, opacity: LAYER_OPACITY[i], segments });
+    flush();
+    out.push({ layer: i, segments });
   }
   return out;
 }
 
-interface CrossSection { x: number; y0: number; y1: number; confidence: number }
+interface CrossSection { x0: number; y0: number; x1: number; y1: number; confidence: number; weight: number }
 
 function buildCrossSections(points: Pt[], confidences: number[]): CrossSection[] {
   if (points.length === 0) return [];
-  const meanY = points.reduce((s, p) => s + p.y, 0) / points.length;
+  const { meanY, centerX, peakY, baselineY } = sceneMetrics(points);
   return points
     .map((p, i) => {
       const conf = confidences[i] ?? 1;
       let deepest = 0;
       for (let l = 0; l < MESH_LAYERS; l++) if (conf >= LAYER_CONF_THRESHOLD[l]) deepest = l;
-      return { x: p.x, y0: flattenY(p.y, meanY, 0), y1: flattenY(p.y, meanY, deepest), confidence: conf };
+      const elevFrac = clamp((baselineY - p.y) / ((baselineY - peakY) || 1), 0, 1);
+      return {
+        x0: layerXForward(p.x, centerX, 0), y0: layerY(p.y, meanY, 0),
+        x1: layerXForward(p.x, centerX, deepest), y1: layerY(p.y, meanY, deepest),
+        confidence: conf,
+        weight: ELEV_WEIGHT[elevationTier(elevFrac)],
+      };
     })
     .filter(cs => cs.confidence > 0);
 }
 
 // The wireframe itself — contour layers (horizontal-ish, along the ridge)
-// plus cross-section ribs (perpendicular, one per month) forming a lattice.
+// plus cross-section ribs (perpendicular, one per month) forming a lattice,
+// perspective-compressed and elevation-weighted so it reads as landscape
+// under a downward-angled scan rather than a cross-section diagram.
 // opacityMultiplier > 1 is how the sweep's brightening pass reads: SVG
 // clamps opacity at 1, so a masked, boosted copy laid over the idle mesh
 // flashes to full brightness only where the mask currently allows it.
@@ -184,20 +269,23 @@ export function MeshLayers({
 
   return (
     <g style={glow ? { filter: "drop-shadow(0 0 1.5px rgba(10,10,10,0.4))" } : undefined}>
-      {crossSections.map((cs, i) => (
-        <line
-          key={`cs-${i}`}
-          x1={cs.x} y1={cs.y0} x2={cs.x} y2={cs.y1}
-          stroke="#0a0a0a" strokeWidth={STROKE_W * 0.7}
-          strokeOpacity={CROSS_OPACITY * cs.confidence * opacityMultiplier}
-        />
-      ))}
-      {layers.map(layer => layer.segments.map((d, si) => (
+      {crossSections.map((cs, i) => {
+        const midX = (cs.x0 + cs.x1) / 2, midY = (cs.y0 + cs.y1) / 2;
+        const op = CROSS_OPACITY * cs.confidence * cs.weight * opacityMultiplier;
+        return (
+          <g key={`cs-${i}`}>
+            <line x1={cs.x0} y1={cs.y0} x2={midX} y2={midY} stroke="#0a0a0a" strokeWidth={CROSS_STROKE_FRONT} strokeOpacity={op} />
+            <line x1={midX} y1={midY} x2={cs.x1} y2={cs.y1} stroke="#0a0a0a" strokeWidth={CROSS_STROKE_BACK} strokeOpacity={op} />
+          </g>
+        );
+      })}
+      {layers.map(layer => layer.segments.map((seg, si) => (
         <path
           key={`l${layer.layer}-${si}`}
-          d={d} fill="none" stroke="#0a0a0a"
-          strokeWidth={STROKE_W} strokeLinecap="round" strokeLinejoin="round"
-          strokeOpacity={Math.min(1, layer.opacity * opacityMultiplier)}
+          d={seg.d} fill="none" stroke="#0a0a0a"
+          strokeWidth={LAYER_STROKE_W[layer.layer] * ELEV_WEIGHT[seg.tier]}
+          strokeLinecap="round" strokeLinejoin="round"
+          strokeOpacity={Math.min(1, LAYER_OPACITY[layer.layer] * ELEV_WEIGHT[seg.tier] * opacityMultiplier)}
         />
       )))}
     </g>
