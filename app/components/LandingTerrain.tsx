@@ -79,6 +79,68 @@ function heightAt(values: number[], xNorm: number): number {
   return catmullRom(p0, p1, p2, p3, t);
 }
 
+// ── word-density character — a second real data signal (words/count per
+// month, i.e. average words per poem, NOT raw word count) that changes how
+// the lines are drawn, not just their colour. Log-scaled before normalising
+// because the raw range is extreme (Jan 2026: one 1,104-word poem, ~11x the
+// next-densest month) — a linear 0..1 normalisation would crush every other
+// month to near-zero and make "moderate" indistinguishable from "empty".
+// Log-scaling turns that one outlier into a clear, singular high point
+// instead of blowing out the whole scale. ──
+function smoothstepRange(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function computeDensities(months: TerrainMonth[]): number[] {
+  const perPoem = months.map(m => m.count > 0 ? m.words / m.count : 0);
+  const logs = perPoem.map(d => d > 0 ? Math.log(d) : 0);
+  const valid = months.map((m, i) => (m.count > 0 ? logs[i] : null)).filter((v): v is number => v !== null);
+  const minLog = valid.length ? Math.min(...valid) : 0;
+  const maxLog = valid.length ? Math.max(...valid) : 1;
+  const range = maxLog - minLog || 1;
+  return months.map((m, i) => (m.count > 0 ? Math.max(0, Math.min(1, (logs[i] - minLog) / range)) : 0));
+}
+
+// Linear (not Catmull-Rom) between adjacent months' density — density reads
+// as a per-month character, not a smoothly overshooting curve; linear keeps
+// the transition into and out of a water/plains month legible.
+function densityAt(densities: number[], xNorm: number): number {
+  const n = densities.length;
+  if (n === 0) return 0;
+  if (n === 1) return densities[0];
+  const clamped = Math.max(0, Math.min(1, xNorm));
+  const scaled = clamped * (n - 1);
+  const i = Math.floor(scaled);
+  const t = scaled - i;
+  const a = densities[Math.min(n - 1, i)];
+  const b = densities[Math.min(n - 1, i + 1)];
+  return a + (b - a) * t;
+}
+
+// Thresholds tuned against the real 19-month archive (verified numerically,
+// not guessed): only Jan 2026 (1 poem, 1,104 words) clears the water band,
+// giving one unambiguous water-source point rather than a common state.
+// Five months (Feb/Sep '25, Apr/May '26, and near-neighbours) sit in the
+// full plains band; two more sit in a soft partial-fade band between.
+const WATER_LO = 0.6, WATER_HI = 0.85;
+const PLAINS_LO = 0.03, PLAINS_HI = 0.13;
+const PLAINS_DRAW_CUTOFF = 0.6;   // beyond this, lines start thinning out
+const PLAINS_MIN_SURVIVAL = 0.16; // at maximum plains intensity, this fraction of lines still survive — sparse, not a clean-edged hole
+
+function waterIntensityAt(d: number): number { return smoothstepRange(WATER_LO, WATER_HI, d); }
+function plainsIntensityAt(d: number): number { return 1 - smoothstepRange(PLAINS_LO, PLAINS_HI, d); }
+// Beyond the cutoff, the chance any given line survives through a plains
+// x-range falls off toward PLAINS_MIN_SURVIVAL rather than dropping straight
+// to zero — a handful of lines keep going, thinned and patchy, instead of
+// every line cutting out at once (which read as a canyon slit, not thin
+// ground, when tried at full-cutoff).
+function plainsSurviveChance(plains: number): number {
+  if (plains < PLAINS_DRAW_CUTOFF) return 1;
+  const t = (plains - PLAINS_DRAW_CUTOFF) / (1 - PLAINS_DRAW_CUTOFF);
+  return 1 - t * (1 - PLAINS_MIN_SURVIVAL);
+}
+
 // MILAT seam x — same day-fraction interpolation as the earlier passes,
 // just in scene x-units instead of pixels. Shared boundary-date lookup, not
 // re-derived or hardcoded.
@@ -136,10 +198,19 @@ const MICRO_FREQ_X = 3.4, MICRO_FREQ_Z = 4.1, MICRO_SEED = 8807;
 // sampling function instead of a per-vertex mesh-builder loop, since the
 // line renderer below only needs to sample it at chosen points, not build
 // a continuous surface out of it.
-function terrainHeightAt(normalized: number[], x: number, z: number): number {
+//
+// One addition this pass: roughness is now also damped by local word-
+// density (`densities`), independent of height/count. A water-source month
+// reads calmer/smoother right at that point — "smoother, less jagged" is
+// enacted in the actual height-generation math, not just drawn differently
+// on top of unchanged geometry. Plains months don't change height at all
+// here; their character is entirely an absence of linework (below).
+function terrainHeightAt(normalized: number[], densities: number[], x: number, z: number): number {
   const xNorm = x / SCENE_WIDTH + 0.5;
   const zNorm = z / (SCENE_DEPTH / 2);
   const localIntensity = heightAt(normalized, xNorm);
+  const localDensity = densityAt(densities, xNorm);
+  const water = waterIntensityAt(localDensity);
 
   const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
   const falloffNoise = fbm2D(x * TAPER_NOISE_FREQ_X, z * TAPER_NOISE_FREQ_Z, TAPER_SEED, 3);
@@ -147,7 +218,7 @@ function terrainHeightAt(normalized: number[], x: number, z: number): number {
   const taper = Math.pow(centerFalloff, falloffSharpness);
   const base = localIntensity * HEIGHT_SCALE * taper;
 
-  const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity);
+  const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity) * (1 - water * 0.7);
   const micro = (fbm2D(x * MICRO_FREQ_X, z * MICRO_FREQ_Z, MICRO_SEED, 4) - 0.5) * 2 * localRoughness;
 
   return Math.max(0, base + micro);
@@ -165,33 +236,121 @@ function terrainHeightAt(normalized: number[], x: number, z: number): number {
 const PROFILE_COUNT = 48;
 const PROFILE_SAMPLES = 100;
 
-function ProfileLines({ months }: { months: TerrainMonth[] }) {
-  const lines = useMemo(() => {
-    const maxCount = Math.max(1, ...months.map(m => m.count));
-    const normalized = months.map(m => m.count / maxCount);
+// Each profile line is now built as one or more RUNS instead of one
+// continuous strip. Where a stretch of the line crosses a strong-plains
+// x-range, its points are dropped from the buffer entirely — the run ends,
+// and (if the line resumes past the gap) a new, separate run begins. That
+// gap is the plains character: an absence of linework standing in for thin,
+// sparse ground, not a fainter version of the same line. Where a run
+// crosses a water-source x-range, its opacity is boosted instead — still
+// the same technique, just weighted differently, reinforced by the ripple
+// rings drawn separately below.
+function ProfileLines({ months, normalized, densities }: { months: TerrainMonth[]; normalized: number[]; densities: number[] }) {
+  const runs = useMemo(() => {
     const out: { positions: Float32Array; opacity: number }[] = [];
     for (let li = 0; li < PROFILE_COUNT; li++) {
       const zt = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5; // 0..1
       const z = (zt - 0.5) * SCENE_DEPTH;
-      const arr = new Float32Array(PROFILE_SAMPLES * 3);
+      const baseOpacity = 0.32 + 0.4 * zt; // nearer slices read slightly brighter
+
+      let current: number[] = []; // flat x,y,z triples
+      let currentD: number[] = [];
+      const flush = () => {
+        if (current.length >= 6) { // at least 2 points
+          const avgD = currentD.reduce((a, b) => a + b, 0) / currentD.length;
+          const water = waterIntensityAt(avgD);
+          const plains = plainsIntensityAt(avgD);
+          const opacity = Math.max(0.05, Math.min(1, baseOpacity * (1 - plains * 0.45) * (1 + water * 0.55)));
+          out.push({ positions: new Float32Array(current), opacity });
+        }
+        current = []; currentD = [];
+      };
+
       for (let pi = 0; pi < PROFILE_SAMPLES; pi++) {
-        const x = (pi / (PROFILE_SAMPLES - 1) - 0.5) * SCENE_WIDTH;
-        const y = terrainHeightAt(normalized, x, z);
-        arr[pi * 3] = x; arr[pi * 3 + 1] = y; arr[pi * 3 + 2] = z;
+        const xNorm = pi / (PROFILE_SAMPLES - 1);
+        const d = densityAt(densities, xNorm);
+        const plains = plainsIntensityAt(d);
+        // Deterministic per-(line, sample) hash decides survival — not a
+        // hard cutoff, so a plains stretch thins out patchily across the
+        // 48 lines instead of every line dropping the same x-range at once.
+        const survives = hashNoise2D(li, pi, 9001) < plainsSurviveChance(plains);
+        if (!survives) {
+          flush(); // gap — the ground here doesn't get an outline
+          continue;
+        }
+        const x = (xNorm - 0.5) * SCENE_WIDTH;
+        const y = terrainHeightAt(normalized, densities, x, z);
+        current.push(x, y, z);
+        currentD.push(d);
       }
-      out.push({ positions: arr, opacity: 0.32 + 0.4 * zt }); // nearer slices read slightly brighter
+      flush();
     }
     return out;
-  }, [months]);
+  }, [months, normalized, densities]);
 
   return (
     <>
-      {lines.map((l, i) => (
+      {runs.map((l, i) => (
         <line key={i}>
           <bufferGeometry>
             <bufferAttribute attach="attributes-position" args={[l.positions, 3]} />
           </bufferGeometry>
           <lineBasicMaterial color="#0a0a0a" transparent opacity={l.opacity} />
+        </line>
+      ))}
+    </>
+  );
+}
+
+// Water-source character's second half: concentric ripple rings, flat and
+// horizontal (not following the ridge's slope) at the local terrain height
+// — a pooled-water read, and a genuinely different line pattern from the
+// profile silhouettes, not a recoloured version of them. Centred at z=0
+// (the real-data centreline) and flattened in z to match the scene's own
+// depth compression. Only months clearing the water threshold produce
+// anything — for the current archive, that's Jan 2026 alone.
+const WATER_RIPPLE_RINGS = 5;
+const WATER_RIPPLE_MAX_RADIUS = 1.05;
+
+function WaterRipples({ months, normalized, densities }: { months: TerrainMonth[]; normalized: number[]; densities: number[] }) {
+  const ripples = useMemo(() => {
+    const n = months.length;
+    const out: { positions: Float32Array; opacity: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      const water = waterIntensityAt(densities[i]);
+      if (water < 0.08) continue;
+      const xNorm = n > 1 ? i / (n - 1) : 0.5;
+      const x = (xNorm - 0.5) * SCENE_WIDTH;
+      // A small fixed lift above the local terrain height — Jan 2026 (this
+      // archive's one water-source month) is also a very short peak, so
+      // pinning the rings exactly at ground height buried them inside the
+      // surrounding profile lines. The lift keeps the signature legible as
+      // its own marker regardless of how tall the ridge is at that point.
+      const y = terrainHeightAt(normalized, densities, x, 0) + 0.09;
+      for (let r = 1; r <= WATER_RIPPLE_RINGS; r++) {
+        const radius = (r / WATER_RIPPLE_RINGS) * WATER_RIPPLE_MAX_RADIUS * (0.5 + 0.5 * water);
+        const segs = 48;
+        const arr = new Float32Array((segs + 1) * 3);
+        for (let s = 0; s <= segs; s++) {
+          const a = (s / segs) * Math.PI * 2;
+          arr[s * 3]     = x + Math.cos(a) * radius;
+          arr[s * 3 + 1] = y - r * 0.012 * water;
+          arr[s * 3 + 2] = Math.sin(a) * radius * 0.62; // flattened to match depth compression
+        }
+        out.push({ positions: arr, opacity: (0.6 - r * 0.06) * water });
+      }
+    }
+    return out;
+  }, [months, normalized, densities]);
+
+  return (
+    <>
+      {ripples.map((rp, i) => (
+        <line key={i}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[rp.positions, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={rp.opacity} />
         </line>
       ))}
     </>
@@ -394,6 +553,11 @@ function Scene({
   distanceRef: React.MutableRefObject<number>;
 }) {
   const seam = useMemo(() => seamX(months), [months]);
+  const normalized = useMemo(() => {
+    const maxCount = Math.max(1, ...months.map(m => m.count));
+    return months.map(m => m.count / maxCount);
+  }, [months]);
+  const densities = useMemo(() => computeDensities(months), [months]);
 
   return (
     <>
@@ -407,7 +571,8 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <ProfileLines months={months} />
+        <ProfileLines months={months} normalized={normalized} densities={densities} />
+        <WaterRipples months={months} normalized={normalized} densities={densities} />
         {seam != null && <SeamMarker x={seam} />}
       </TurntableAssembly>
     </>
