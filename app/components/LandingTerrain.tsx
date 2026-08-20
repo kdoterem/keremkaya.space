@@ -6,36 +6,60 @@ import { useCallback, useMemo, useRef } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
 import { mulberry32 } from "@/app/components/TerrainScan";
 
-// ── Line-drawn 3D terrain — replacing the solid, lit mesh entirely. That
-// approach converged on a ribbed slab no matter how the noise was tuned;
-// this is a genuinely different technique: the landform is many thin
-// profile lines in 3D space (parallel cross-sections across the depth
-// axis), no fill, no material lighting. Depth and form come from
-// perspective, line density, and the GPU's own depth buffer letting nearer
-// lines occlude farther ones — not from shading.
+// ── Line-drawn 3D terrain, now driven by the archive's own text instead of
+// a noise function pretending to be one. Every earlier pass used a generic
+// FBM/value-noise field to give the linework its jaggedness, roughness, and
+// per-depth variation — it looked plausibly mountain-like, but nothing
+// about *which* poem was written that month had any bearing on the shape.
+// This pass removes that noise entirely. What replaces it:
 //
-// This pass also fixes three bugs from the previous build, all with one
-// architectural change: the canvas used to be a position:fixed,
-// full-viewport backdrop with page content layered on top via z-index.
-// That's what broke dragging (the foreground UI wrapper's empty space had
-// no pointer-events:none, so it silently ate every pointer event before
-// the canvas ever saw them) and what let the mesh paint over the button
-// (relying on z-index arithmetic between a WebGL canvas and DOM siblings,
-// which didn't hold). The terrain is now a normal, bounded, in-flow block
-// on the page — nothing else ever spatially overlaps it, so there's
-// nothing left to fight over stacking order, and no invisible layer left
-// to swallow the drag.
+// - Each profile line (one of 48 depth-wise cross-sections) is, at any
+//   given month's x-range, assigned one of that month's actual poems
+//   (line index mod poem count) — so a busy month's 48 lines each trace a
+//   different real poem's rhythm, while a one-poem month has every line
+//   reading the same poem (see textMicroAt below).
+// - The height texture at each point is that assigned poem's own line-by-
+//   line word-count sequence, resampled across the local x-span and
+//   z-offset by a small per-line phase so depth still reads as organic —
+//   not synthesized, just re-read from a different point in the same real
+//   sequence. Short, wildly varying lines (fragmented, punchy poems)
+//   produce high-frequency jag because the sequence itself has many small
+//   values close together; long, steady lines (flowing prose-like poems)
+//   produce broad, slow undulation because the sequence has few, large
+//   values. That frequency/amplitude split falls out of the real data with
+//   no separate "how jagged" parameter to tune.
+// - Real punctuation density (periods, colons, dashes, question marks per
+//   word) sets how often a line breaks/restarts — reusing the same
+//   per-(line,sample) survival-hash mechanism the previous plains pass
+//   used, now keyed to a genuinely different, text-derived quantity.
+// - Real word-repetition within a poem draws a faint echo — a second,
+//   offset near-duplicate trace of the same run — mirroring the poem's own
+//   repeated structure, generically available to any month, not a special
+//   case for one.
+// - Real ALL-CAPS density boosts a run's opacity/weight, mirroring a
+//   poem's own volume shift.
 //
-// The TAKE THE JOURNEY button is removed from /writing for this pass
-// (temporarily, per instruction) so the terrain can be iterated on without
-// the occlusion bug in the way. Discovery signs, hover, and BROWSE's
-// click-to-month are deprioritized this pass too — get the line-drawn
-// shape and the fixed interaction confirmed first. ──
+// The height CURVE itself (poem count -> elevation via Catmull-Rom) is
+// unchanged — that's real data too, and was already correct. This is about
+// the texture within and around that curve, not the curve.
+//
+// Camera, light, carpet, sizing/containment, and the MILAT seam are
+// unchanged from the previous pass. The TAKE THE JOURNEY button remains
+// removed from /writing for now, per standing instruction. ──
+
+export interface PoemTextProfile {
+  words: number;
+  lineLens: number[];   // word count per non-empty line, in the poem's own order
+  punctDensity: number; // sentence-ending/pausing punctuation per word
+  capsRatio: number;    // fraction of words that are ALL-CAPS
+  repetition: number;   // 1 - unique/total words, within this one poem
+}
 
 export interface TerrainMonth {
   month: string; // YYYY-MM
   count: number;
   words: number;
+  poems: PoemTextProfile[];
 }
 
 interface Props {
@@ -79,66 +103,121 @@ function heightAt(values: number[], xNorm: number): number {
   return catmullRom(p0, p1, p2, p3, t);
 }
 
-// ── word-density character — a second real data signal (words/count per
-// month, i.e. average words per poem, NOT raw word count) that changes how
-// the lines are drawn, not just their colour. Log-scaled before normalising
-// because the raw range is extreme (Jan 2026: one 1,104-word poem, ~11x the
-// next-densest month) — a linear 0..1 normalisation would crush every other
-// month to near-zero and make "moderate" indistinguishable from "empty".
-// Log-scaling turns that one outlier into a clear, singular high point
-// instead of blowing out the whole scale. ──
+// ── text signals — derived from the actual poems, not from noise ──
 function smoothstepRange(edge0: number, edge1: number, x: number): number {
   const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 }
 
-function computeDensities(months: TerrainMonth[]): number[] {
-  const perPoem = months.map(m => m.count > 0 ? m.words / m.count : 0);
-  const logs = perPoem.map(d => d > 0 ? Math.log(d) : 0);
-  const valid = months.map((m, i) => (m.count > 0 ? logs[i] : null)).filter((v): v is number => v !== null);
-  const minLog = valid.length ? Math.min(...valid) : 0;
-  const maxLog = valid.length ? Math.max(...valid) : 1;
-  const range = maxLog - minLog || 1;
-  return months.map((m, i) => (m.count > 0 ? Math.max(0, Math.min(1, (logs[i] - minLog) / range)) : 0));
+// word-count-weighted average of a per-poem scalar, across one month's
+// actual poems — the honest way to combine several poems' properties into
+// one month-level reading (a 900-word poem should outweigh a 10-word one).
+function weightedAvg(poems: PoemTextProfile[], key: "punctDensity" | "capsRatio" | "repetition"): number {
+  const totalWords = poems.reduce((a, p) => a + p.words, 0);
+  if (!totalWords) return 0;
+  return poems.reduce((a, p) => a + p[key] * p.words, 0) / totalWords;
 }
 
-// Linear (not Catmull-Rom) between adjacent months' density — density reads
-// as a per-month character, not a smoothly overshooting curve; linear keeps
-// the transition into and out of a water/plains month legible.
-function densityAt(densities: number[], xNorm: number): number {
-  const n = densities.length;
+function linearMinMax(values: number[]): number[] {
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  return values.map(v => Math.max(0, Math.min(1, (v - min) / range)));
+}
+
+interface MonthSignals {
+  breakIntensity: number;      // real punctuation density, log+min-max normalised
+  repetitionIntensity: number; // real within-poem word repetition, linear normalised
+  capsIntensity: number;       // real ALL-CAPS fraction, linear normalised
+}
+
+function computeMonthSignals(months: TerrainMonth[]): MonthSignals[] {
+  const punct = months.map(m => weightedAvg(m.poems, "punctDensity"));
+  const rep   = months.map(m => weightedAvg(m.poems, "repetition"));
+  const caps  = months.map(m => weightedAvg(m.poems, "capsRatio"));
+  // Linear, not log: unlike raw word-density (an earlier pass's signal,
+  // now removed), punctuation density's one real outlier (Jan 2026) isn't
+  // extreme enough to need log-compression, and linear scaling actually
+  // spreads the other 18 months out better — log clustered nearly all of
+  // them into "broken" territory, verified visually before this was fixed.
+  const breakN = linearMinMax(punct);
+  const repN   = linearMinMax(rep);
+  const capsN  = linearMinMax(caps);
+  return months.map((_, i) => ({ breakIntensity: breakN[i], repetitionIntensity: repN[i], capsIntensity: capsN[i] }));
+}
+
+// Linear (not Catmull-Rom) between adjacent months' signal value — these
+// read as per-month character, not a smoothly overshooting curve.
+function signalAt(signals: MonthSignals[], key: keyof MonthSignals, xNorm: number): number {
+  const n = signals.length;
   if (n === 0) return 0;
-  if (n === 1) return densities[0];
+  if (n === 1) return signals[0][key];
   const clamped = Math.max(0, Math.min(1, xNorm));
   const scaled = clamped * (n - 1);
   const i = Math.floor(scaled);
   const t = scaled - i;
-  const a = densities[Math.min(n - 1, i)];
-  const b = densities[Math.min(n - 1, i + 1)];
+  const a = signals[Math.min(n - 1, i)][key];
+  const b = signals[Math.min(n - 1, i + 1)][key];
   return a + (b - a) * t;
 }
 
-// Thresholds tuned against the real 19-month archive (verified numerically,
-// not guessed): only Jan 2026 (1 poem, 1,104 words) clears the water band,
-// giving one unambiguous water-source point rather than a common state.
-// Five months (Feb/Sep '25, Apr/May '26, and near-neighbours) sit in the
-// full plains band; two more sit in a soft partial-fade band between.
-const WATER_LO = 0.6, WATER_HI = 0.85;
-const PLAINS_LO = 0.03, PLAINS_HI = 0.13;
-const PLAINS_DRAW_CUTOFF = 0.6;   // beyond this, lines start thinning out
-const PLAINS_MIN_SURVIVAL = 0.16; // at maximum plains intensity, this fraction of lines still survive — sparse, not a clean-edged hole
+// Beyond this break intensity, a line's survival chance falls off toward
+// BREAK_MIN_SURVIVAL rather than dropping straight to zero — a poem dense
+// with punctuation stutters and restarts the linework, it doesn't erase it.
+const BREAK_ONSET = 0.45;
+const BREAK_MIN_SURVIVAL = 0.22;
+function survivalChance(breakIntensity: number): number {
+  const t = smoothstepRange(BREAK_ONSET, 1, breakIntensity);
+  return 1 - t * (1 - BREAK_MIN_SURVIVAL);
+}
 
-function waterIntensityAt(d: number): number { return smoothstepRange(WATER_LO, WATER_HI, d); }
-function plainsIntensityAt(d: number): number { return 1 - smoothstepRange(PLAINS_LO, PLAINS_HI, d); }
-// Beyond the cutoff, the chance any given line survives through a plains
-// x-range falls off toward PLAINS_MIN_SURVIVAL rather than dropping straight
-// to zero — a handful of lines keep going, thinned and patchy, instead of
-// every line cutting out at once (which read as a canyon slit, not thin
-// ground, when tried at full-cutoff).
-function plainsSurviveChance(plains: number): number {
-  if (plains < PLAINS_DRAW_CUTOFF) return 1;
-  const t = (plains - PLAINS_DRAW_CUTOFF) / (1 - PLAINS_DRAW_CUTOFF);
-  return 1 - t * (1 - PLAINS_MIN_SURVIVAL);
+// Linear resampling over an arbitrary-length real sequence (a poem's own
+// line lengths) at fraction t in [0,1] — the literal "play this poem's
+// rhythm across this span" operation everything below relies on.
+function resampleSequence(seq: number[], t: number): number {
+  const n = seq.length;
+  if (n === 0) return 0;
+  if (n === 1) return seq[0];
+  const clamped = Math.max(0, Math.min(1, t));
+  const scaled = clamped * (n - 1);
+  const i = Math.floor(scaled);
+  const frac = scaled - i;
+  const a = seq[Math.min(n - 1, i)];
+  const b = seq[Math.min(n - 1, i + 1)];
+  return a + (b - a) * frac;
+}
+function meanOf(values: number[]): number {
+  return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+}
+
+// The height micro-texture, read directly off a real poem's line-length
+// sequence instead of a noise field. li selects which of that month's
+// poems this particular depth-slice reads (wrapping if there are more
+// lines than poems); a small per-li phase offset means even a one-poem
+// month's 48 lines each read a slightly different span of that same poem,
+// rather than all 48 perfectly synchronising on the identical value.
+const MICRO_SCALE = 0.018;
+const MICRO_CAP = 0.3;
+const PHASE_SPREAD = 0.7;
+
+function textMicroAt(months: TerrainMonth[], li: number, x: number): number {
+  const xNorm = x / SCENE_WIDTH + 0.5;
+  const n = months.length;
+  if (n === 0) return 0;
+  const monthFloat = Math.max(0, Math.min(n - 1, xNorm * (n - 1)));
+  const monthIdx = Math.round(monthFloat);
+  const poems = months[monthIdx].poems;
+  if (!poems || poems.length === 0) return 0;
+  const poem = poems[li % poems.length];
+  if (!poem.lineLens.length) return 0;
+
+  const localT0 = monthFloat - monthIdx + 0.5; // 0..1 across this month's own territory
+  const zi = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5;
+  const localT = Math.max(0, Math.min(1, localT0 + (zi - 0.5) * PHASE_SPREAD));
+
+  const sampled = resampleSequence(poem.lineLens, localT);
+  const dev = sampled - meanOf(poem.lineLens);
+  const compressed = Math.sign(dev) * Math.sqrt(Math.abs(dev));
+  return Math.max(-MICRO_CAP, Math.min(MICRO_CAP, compressed * MICRO_SCALE));
 }
 
 // MILAT seam x — same day-fraction interpolation as the earlier passes,
@@ -161,65 +240,39 @@ function seamX(months: TerrainMonth[]): number | null {
   return prevX + (idxX - prevX) * frac;
 }
 
-// ── deterministic value noise + FBM (unchanged from the prior pass) ──
+// A deterministic hash, kept from the prior pass but repurposed narrowly:
+// it no longer shapes anything (no fbm2D, no value-noise field survives
+// this pass) — it's used exactly once below, as a fair per-(line, sample)
+// coin flip deciding *which* of 48 parallel, otherwise-identical lines
+// drops out at a break point. The break RATE comes from real punctuation
+// density; this only distributes that rate fairly across the 48 lines
+// instead of every line breaking at the exact same sample in lockstep.
 function hashNoise2D(ix: number, iy: number, seed: number): number {
   let h = (ix * 374761393 + iy * 668265263 + seed * 2246822519) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   h = h ^ (h >>> 16);
   return ((h >>> 0) % 1000000) / 1000000;
 }
-function smoothstep(t: number): number { return t * t * (3 - 2 * t); }
-function valueNoise2D(x: number, y: number, seed: number): number {
-  const x0 = Math.floor(x), y0 = Math.floor(y);
-  const sx = smoothstep(x - x0), sy = smoothstep(y - y0);
-  const n00 = hashNoise2D(x0, y0, seed), n10 = hashNoise2D(x0 + 1, y0, seed);
-  const n01 = hashNoise2D(x0, y0 + 1, seed), n11 = hashNoise2D(x0 + 1, y0 + 1, seed);
-  const ix0 = n00 + (n10 - n00) * sx, ix1 = n01 + (n11 - n01) * sx;
-  return ix0 + (ix1 - ix0) * sy;
-}
-function fbm2D(x: number, y: number, seed: number, octaves: number): number {
-  let sum = 0, amp = 1, freq = 1, maxAmp = 0;
-  for (let o = 0; o < octaves; o++) {
-    sum += valueNoise2D(x * freq, y * freq, seed + o * 101) * amp;
-    maxAmp += amp;
-    amp *= 0.5;
-    freq *= 2.15;
-  }
-  return sum / maxAmp;
-}
 
-const MICRO_AMPLITUDE = 0.045;
-const TAPER_NOISE_FREQ_X = 0.6, TAPER_NOISE_FREQ_Z = 1.1, TAPER_SEED = 5301;
-const MICRO_FREQ_X = 3.4, MICRO_FREQ_Z = 4.1, MICRO_SEED = 8807;
-
-// The terrain's height at any (x, z) — unchanged math from the solid-mesh
-// pass (centreline-guaranteed real data, per-x falloff sharpness, per-point
-// roughness scaled by local data intensity), just repackaged as a plain
-// sampling function instead of a per-vertex mesh-builder loop, since the
-// line renderer below only needs to sample it at chosen points, not build
-// a continuous surface out of it.
-//
-// One addition this pass: roughness is now also damped by local word-
-// density (`densities`), independent of height/count. A water-source month
-// reads calmer/smoother right at that point — "smoother, less jagged" is
-// enacted in the actual height-generation math, not just drawn differently
-// on top of unchanged geometry. Plains months don't change height at all
-// here; their character is entirely an absence of linework (below).
-function terrainHeightAt(normalized: number[], densities: number[], x: number, z: number): number {
+// The terrain's height at any (x, z) for depth-slice li. The broad taper
+// away from centreline is now a plain, fixed cosine falloff — no per-point
+// noise varying how sharply it narrows, because that variation was exactly
+// the "make it look natural" job this pass reassigns to real text. All of
+// this point's texture comes from textMicroAt: the assigned poem's own
+// line-length sequence, resampled here. centreline-guaranteed real data is
+// still intact (centerFalloff is exactly 1 at z=0 for every x, so the taper
+// term can never touch the true Catmull-Rom height there); the poem-derived
+// micro term can still nudge it, same as before, because it's real data,
+// not decoration.
+function terrainHeightAt(normalized: number[], months: TerrainMonth[], li: number, x: number, z: number): number {
   const xNorm = x / SCENE_WIDTH + 0.5;
   const zNorm = z / (SCENE_DEPTH / 2);
   const localIntensity = heightAt(normalized, xNorm);
-  const localDensity = densityAt(densities, xNorm);
-  const water = waterIntensityAt(localDensity);
 
   const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
-  const falloffNoise = fbm2D(x * TAPER_NOISE_FREQ_X, z * TAPER_NOISE_FREQ_Z, TAPER_SEED, 3);
-  const falloffSharpness = 0.7 + 1.4 * falloffNoise;
-  const taper = Math.pow(centerFalloff, falloffSharpness);
-  const base = localIntensity * HEIGHT_SCALE * taper;
+  const base = localIntensity * HEIGHT_SCALE * centerFalloff;
 
-  const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity) * (1 - water * 0.7);
-  const micro = (fbm2D(x * MICRO_FREQ_X, z * MICRO_FREQ_Z, MICRO_SEED, 4) - 0.5) * 2 * localRoughness;
+  const micro = textMicroAt(months, li, x);
 
   return Math.max(0, base + micro);
 }
@@ -229,23 +282,27 @@ function terrainHeightAt(normalized: number[], densities: number[], x: number, z
 // clean line strip, no fill. Nearer lines occlude farther ones through
 // ordinary WebGL depth testing (the default for LineBasicMaterial) — no
 // custom visibility algorithm needed. A subtle opacity gradient by depth
-// reinforces it further. Because falloffNoise above genuinely varies with
-// z, adjacent slices show different character for the "same" peak — sharp
-// in one line, rounder in the next — which is exactly the multi-scale read
-// the solid-mesh version was trying and failing to get from shading alone.
+// reinforces it further. Adjacent slices now show different character
+// because they're reading different real poems (or different spans of the
+// same poem) via textMicroAt — the multi-scale read a noise field used to
+// approximate now comes from the archive actually containing many
+// differently-shaped poems.
 const PROFILE_COUNT = 48;
 const PROFILE_SAMPLES = 100;
 
-// Each profile line is now built as one or more RUNS instead of one
-// continuous strip. Where a stretch of the line crosses a strong-plains
-// x-range, its points are dropped from the buffer entirely — the run ends,
-// and (if the line resumes past the gap) a new, separate run begins. That
-// gap is the plains character: an absence of linework standing in for thin,
-// sparse ground, not a fainter version of the same line. Where a run
-// crosses a water-source x-range, its opacity is boosted instead — still
-// the same technique, just weighted differently, reinforced by the ripple
-// rings drawn separately below.
-function ProfileLines({ months, normalized, densities }: { months: TerrainMonth[]; normalized: number[]; densities: number[] }) {
+// Each profile line is built as one or more RUNS. A stretch with real
+// punctuation-driven break intensity above BREAK_ONSET starts dropping
+// points — the line stutters and restarts, echoing the poem's own syntax
+// breaking, rather than fading. A run with high real word-repetition also
+// gets a second, offset near-duplicate trace (an echo) alongside it; a run
+// with high real ALL-CAPS density gets boosted opacity. All three read off
+// the SAME per-month signals object — one mechanism, not a special case
+// per month.
+const REPETITION_ECHO_THRESHOLD = 0.42;
+const REPETITION_ECHO_OFFSET_Y = 0.07;
+const REPETITION_ECHO_OFFSET_Z = 0.09;
+
+function ProfileLines({ months, normalized, signals }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[] }) {
   const runs = useMemo(() => {
     const out: { positions: Float32Array; opacity: number }[] = [];
     for (let li = 0; li < PROFILE_COUNT; li++) {
@@ -254,39 +311,53 @@ function ProfileLines({ months, normalized, densities }: { months: TerrainMonth[
       const baseOpacity = 0.32 + 0.4 * zt; // nearer slices read slightly brighter
 
       let current: number[] = []; // flat x,y,z triples
-      let currentD: number[] = [];
+      let sumBreak = 0, sumCaps = 0, sumRep = 0, cnt = 0;
       const flush = () => {
-        if (current.length >= 6) { // at least 2 points
-          const avgD = currentD.reduce((a, b) => a + b, 0) / currentD.length;
-          const water = waterIntensityAt(avgD);
-          const plains = plainsIntensityAt(avgD);
-          const opacity = Math.max(0.05, Math.min(1, baseOpacity * (1 - plains * 0.45) * (1 + water * 0.55)));
+        if (current.length >= 6 && cnt > 0) { // at least 2 points
+          const avgCaps = sumCaps / cnt;
+          const avgRep = sumRep / cnt;
+          const opacity = Math.max(0.05, Math.min(1, baseOpacity * (1 + avgCaps * 0.6)));
           out.push({ positions: new Float32Array(current), opacity });
+
+          // Echo: a real repetition signal draws a second, faint,
+          // offset trace of the same run — the poem's own repeated words
+          // reflected as a repeated line, not a hand-placed symbol.
+          if (avgRep > REPETITION_ECHO_THRESHOLD) {
+            const t = (avgRep - REPETITION_ECHO_THRESHOLD) / (1 - REPETITION_ECHO_THRESHOLD);
+            const echo = new Float32Array(current.length);
+            for (let k = 0; k < current.length; k += 3) {
+              echo[k]     = current[k];
+              echo[k + 1] = current[k + 1] + REPETITION_ECHO_OFFSET_Y * t;
+              echo[k + 2] = current[k + 2] + REPETITION_ECHO_OFFSET_Z * t;
+            }
+            out.push({ positions: echo, opacity: opacity * 0.42 * t });
+          }
         }
-        current = []; currentD = [];
+        current = []; sumBreak = 0; sumCaps = 0; sumRep = 0; cnt = 0;
       };
 
       for (let pi = 0; pi < PROFILE_SAMPLES; pi++) {
         const xNorm = pi / (PROFILE_SAMPLES - 1);
-        const d = densityAt(densities, xNorm);
-        const plains = plainsIntensityAt(d);
-        // Deterministic per-(line, sample) hash decides survival — not a
-        // hard cutoff, so a plains stretch thins out patchily across the
-        // 48 lines instead of every line dropping the same x-range at once.
-        const survives = hashNoise2D(li, pi, 9001) < plainsSurviveChance(plains);
+        const breakI = signalAt(signals, "breakIntensity", xNorm);
+        // Deterministic per-(line, sample) hash decides survival — see
+        // hashNoise2D above for why this isn't shape-generating noise.
+        const survives = hashNoise2D(li, pi, 9001) < survivalChance(breakI);
         if (!survives) {
-          flush(); // gap — the ground here doesn't get an outline
+          flush(); // break — the poem's own punctuation stutters the line here
           continue;
         }
         const x = (xNorm - 0.5) * SCENE_WIDTH;
-        const y = terrainHeightAt(normalized, densities, x, z);
+        const y = terrainHeightAt(normalized, months, li, x, z);
         current.push(x, y, z);
-        currentD.push(d);
+        sumBreak += breakI;
+        sumCaps += signalAt(signals, "capsIntensity", xNorm);
+        sumRep += signalAt(signals, "repetitionIntensity", xNorm);
+        cnt++;
       }
       flush();
     }
     return out;
-  }, [months, normalized, densities]);
+  }, [months, normalized, signals]);
 
   return (
     <>
@@ -296,61 +367,6 @@ function ProfileLines({ months, normalized, densities }: { months: TerrainMonth[
             <bufferAttribute attach="attributes-position" args={[l.positions, 3]} />
           </bufferGeometry>
           <lineBasicMaterial color="#0a0a0a" transparent opacity={l.opacity} />
-        </line>
-      ))}
-    </>
-  );
-}
-
-// Water-source character's second half: concentric ripple rings, flat and
-// horizontal (not following the ridge's slope) at the local terrain height
-// — a pooled-water read, and a genuinely different line pattern from the
-// profile silhouettes, not a recoloured version of them. Centred at z=0
-// (the real-data centreline) and flattened in z to match the scene's own
-// depth compression. Only months clearing the water threshold produce
-// anything — for the current archive, that's Jan 2026 alone.
-const WATER_RIPPLE_RINGS = 5;
-const WATER_RIPPLE_MAX_RADIUS = 1.05;
-
-function WaterRipples({ months, normalized, densities }: { months: TerrainMonth[]; normalized: number[]; densities: number[] }) {
-  const ripples = useMemo(() => {
-    const n = months.length;
-    const out: { positions: Float32Array; opacity: number }[] = [];
-    for (let i = 0; i < n; i++) {
-      const water = waterIntensityAt(densities[i]);
-      if (water < 0.08) continue;
-      const xNorm = n > 1 ? i / (n - 1) : 0.5;
-      const x = (xNorm - 0.5) * SCENE_WIDTH;
-      // A small fixed lift above the local terrain height — Jan 2026 (this
-      // archive's one water-source month) is also a very short peak, so
-      // pinning the rings exactly at ground height buried them inside the
-      // surrounding profile lines. The lift keeps the signature legible as
-      // its own marker regardless of how tall the ridge is at that point.
-      const y = terrainHeightAt(normalized, densities, x, 0) + 0.09;
-      for (let r = 1; r <= WATER_RIPPLE_RINGS; r++) {
-        const radius = (r / WATER_RIPPLE_RINGS) * WATER_RIPPLE_MAX_RADIUS * (0.5 + 0.5 * water);
-        const segs = 48;
-        const arr = new Float32Array((segs + 1) * 3);
-        for (let s = 0; s <= segs; s++) {
-          const a = (s / segs) * Math.PI * 2;
-          arr[s * 3]     = x + Math.cos(a) * radius;
-          arr[s * 3 + 1] = y - r * 0.012 * water;
-          arr[s * 3 + 2] = Math.sin(a) * radius * 0.62; // flattened to match depth compression
-        }
-        out.push({ positions: arr, opacity: (0.6 - r * 0.06) * water });
-      }
-    }
-    return out;
-  }, [months, normalized, densities]);
-
-  return (
-    <>
-      {ripples.map((rp, i) => (
-        <line key={i}>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[rp.positions, 3]} />
-          </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={rp.opacity} />
         </line>
       ))}
     </>
@@ -557,7 +573,7 @@ function Scene({
     const maxCount = Math.max(1, ...months.map(m => m.count));
     return months.map(m => m.count / maxCount);
   }, [months]);
-  const densities = useMemo(() => computeDensities(months), [months]);
+  const signals = useMemo(() => computeMonthSignals(months), [months]);
 
   return (
     <>
@@ -571,8 +587,7 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <ProfileLines months={months} normalized={normalized} densities={densities} />
-        <WaterRipples months={months} normalized={normalized} densities={densities} />
+        <ProfileLines months={months} normalized={normalized} signals={signals} />
         {seam != null && <SeamMarker x={seam} />}
       </TurntableAssembly>
     </>

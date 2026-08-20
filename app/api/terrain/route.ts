@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getMonthlyProfile } from "@/lib/posts";
+import { getMonthlyTextProfile } from "@/lib/posts";
 
 export function GET() {
-  const terrain = getMonthlyProfile();
+  const terrain = getMonthlyTextProfile();
   return NextResponse.json(terrain);
 }
