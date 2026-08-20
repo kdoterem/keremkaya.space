@@ -103,6 +103,76 @@ function heightAt(values: number[], xNorm: number): number {
   return catmullRom(p0, p1, p2, p3, t);
 }
 
+// A deterministic hash — reintroduced for this pass, but for a narrowly
+// different job than any earlier use: placing individual thicket strokes
+// within a region (which candidate slot gets a stroke, its jitter, its
+// lean direction). This is layout scatter, the same category as the
+// mulberry32 dot-field scatter BackgroundField/CarpetField already use —
+// not shape-generating noise. The shape-generating jaggedness this file
+// removed a pass ago (fbm2D/value-noise driving height/character) stays
+// removed; nothing here decides height, jag amplitude, or frequency.
+function hash2D(ix: number, iy: number, seed: number): number {
+  let h = (ix * 374761393 + iy * 668265263 + seed * 2246822519) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h = h ^ (h >>> 16);
+  return ((h >>> 0) % 1000000) / 1000000;
+}
+
+// ── thicket regions — contiguous x-ranges where the real elevation curve
+// (poem count -> height, already Catmull-Rom smoothed) stays above a
+// density threshold. Reusing that exact curve as the density signal ties
+// "which stretches get the thicket treatment" directly to the same real
+// data already driving height — a tall stretch IS a busy stretch. Because
+// this walks the smooth curve rather than snapping to month indices,
+// several consecutive high-density months merge into one continuous
+// region automatically when the data stays high across all of them, and
+// the region's start/end are the real threshold-crossing points, not
+// month boundaries — similarity in the data produces continuity in the
+// terrain, the way it should.
+export interface ThicketRegion { xStart: number; xEnd: number; }
+
+const THICKET_THRESHOLD = 0.3;
+const THICKET_SAMPLES = 240;
+
+function findThicketRegions(normalized: number[]): ThicketRegion[] {
+  const regions: ThicketRegion[] = [];
+  if (normalized.length === 0) return regions;
+  let prevXNorm = 0;
+  let prevVal = heightAt(normalized, 0);
+  // If the curve is already above threshold at x=0 (a busy first month,
+  // as this archive's Feb 2025 is), the region starts at the very edge —
+  // there's no real crossing to find there. Missing this case made the
+  // scan treat the first above-threshold SAMPLE as an "entry" and
+  // extrapolate a crossing point from two values that were both already
+  // above the line, producing a nonsensical reversed region (xStart >
+  // xEnd). Caught by the rasterizer before shipping.
+  let inRegion = prevVal >= THICKET_THRESHOLD;
+  let startXNorm = 0;
+  const crossing = (x0: number, v0: number, x1: number, v1: number) =>
+    v1 === v0 ? x1 : x0 + (x1 - x0) * (THICKET_THRESHOLD - v0) / (v1 - v0);
+
+  for (let i = 1; i <= THICKET_SAMPLES; i++) {
+    const xNorm = i / THICKET_SAMPLES;
+    const val = heightAt(normalized, xNorm);
+    const above = val >= THICKET_THRESHOLD;
+    if (above && !inRegion) {
+      startXNorm = Math.max(0, Math.min(1, crossing(prevXNorm, prevVal, xNorm, val)));
+      inRegion = true;
+    } else if (!above && inRegion) {
+      const endXNorm = Math.max(0, Math.min(1, crossing(prevXNorm, prevVal, xNorm, val)));
+      regions.push({ xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (endXNorm - 0.5) * SCENE_WIDTH });
+      inRegion = false;
+    }
+    prevXNorm = xNorm; prevVal = val;
+  }
+  if (inRegion) regions.push({ xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (1 - 0.5) * SCENE_WIDTH });
+  return regions;
+}
+
+function insideAnyRegion(x: number, regions: ThicketRegion[]): boolean {
+  return regions.some(r => x >= r.xStart && x <= r.xEnd);
+}
+
 // ── text signals — derived from the actual poems, not from noise ──
 //
 // Second pass on the vocabulary these signals render into. The first text-
@@ -312,6 +382,128 @@ function terrainHeightAt(
   return Math.max(0, base + micro);
 }
 
+// ── The thicket — a genuinely different generation technique for dense
+// stretches, not a retuned version of the curve technique. A continuous
+// profile curve, however textured, is still one surface combed in one
+// direction; it can't read as "many individual things at different
+// depths" no matter how its height varies. So a thicket region is instead
+// filled with many short, independent strokes — not full-width curves —
+// each with its own position, depth, and lean angle, some skipped
+// entirely to leave real sightlines through. Ordinary WebGL depth testing
+// does the rest: strokes placed at genuinely scattered z, not a regular
+// 48-slice grid, correctly occlude each other exactly as objects at
+// different distances should.
+//
+// Still entirely text-driven: stroke COUNT scales with the real number of
+// poems the region spans (busier -> more strokes); stroke ANGLE variance
+// scales with the real line-length variance of those poems' own text
+// (more internally erratic poems -> more erratic lean); LENGTH and
+// placement use a deterministic hash purely for layout scatter (the same
+// role mulberry32 already plays for the background/carpet dot fields) —
+// it decides WHERE among the data-sized budget a stroke sits, never how
+// tall, jagged, or frequent the ground itself is.
+function monthsOverlappingRegion(months: TerrainMonth[], region: ThicketRegion): TerrainMonth[] {
+  const n = months.length;
+  const out: TerrainMonth[] = [];
+  for (let i = 0; i < n; i++) {
+    const xNorm = n > 1 ? i / (n - 1) : 0.5;
+    const x = (xNorm - 0.5) * SCENE_WIDTH;
+    if (x >= region.xStart - 1e-6 && x <= region.xEnd + 1e-6) out.push(months[i]);
+  }
+  return out;
+}
+
+function regionLineVariance(months: TerrainMonth[], region: ThicketRegion): number {
+  const overlap = monthsOverlappingRegion(months, region);
+  const all: number[] = [];
+  for (const m of overlap) for (const p of m.poems) all.push(...p.lineLens);
+  if (all.length < 2) return 0;
+  const mean = meanOf(all);
+  return all.reduce((a, b) => a + (b - mean) ** 2, 0) / all.length;
+}
+
+const STROKES_PER_POEM = 3;
+const MIN_STROKES = 36;
+const MAX_STROKES = 260;
+const STROKE_SKIP_RATE = 0.32;   // fraction of candidate slots left empty — real sightlines through
+const ANGLE_VARIANCE_SCALE = 40; // divides sqrt(line-length variance) down to a radians range
+const ANGLE_MIN = 0.12, ANGLE_MAX_CAP = 0.85;
+const STALK_MIN = 0.12, STALK_MAX = 0.42; // fraction of HEIGHT_SCALE
+const OPACITY_TIERS = 4;
+
+function angleMaxFor(variance: number): number {
+  const compressed = Math.sqrt(variance);
+  return Math.max(ANGLE_MIN, Math.min(ANGLE_MAX_CAP, compressed / ANGLE_VARIANCE_SCALE));
+}
+
+function groundHeightAt(normalized: number[], x: number, z: number): number {
+  const xNorm = x / SCENE_WIDTH + 0.5;
+  const zNorm = z / (SCENE_DEPTH / 2);
+  const localIntensity = heightAt(normalized, xNorm);
+  const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
+  return localIntensity * HEIGHT_SCALE * centerFalloff;
+}
+
+function ThicketField({ months, normalized, regions }: { months: TerrainMonth[]; normalized: number[]; regions: ThicketRegion[] }) {
+  const tierPositions = useMemo(() => {
+    const buckets: number[][] = Array.from({ length: OPACITY_TIERS }, () => []);
+    regions.forEach((region, ri) => {
+      const overlap = monthsOverlappingRegion(months, region);
+      const totalPoems = overlap.reduce((a, m) => a + m.count, 0);
+      const strokeCount = Math.max(MIN_STROKES, Math.min(MAX_STROKES, Math.round(totalPoems * STROKES_PER_POEM)));
+      const angleMax = angleMaxFor(regionLineVariance(months, region));
+      const width = region.xEnd - region.xStart;
+      if (width <= 0) return;
+
+      for (let s = 0; s < strokeCount; s++) {
+        const seedBase = ri * 100000 + s;
+        const hKeep   = hash2D(seedBase, 1, 5101);
+        if (hKeep < STROKE_SKIP_RATE) continue; // an empty slot — a sightline through
+
+        const hx     = hash2D(seedBase, 2, 5102);
+        const hz     = hash2D(seedBase, 3, 5103);
+        const hLean  = hash2D(seedBase, 4, 5104);
+        const hAngle = hash2D(seedBase, 5, 5105);
+        const hLen   = hash2D(seedBase, 6, 5106);
+        const hJit   = hash2D(seedBase, 7, 5107);
+
+        const x = region.xStart + hx * width;
+        const z = (hz - 0.5) * SCENE_DEPTH;
+        const groundY = groundHeightAt(normalized, x, z) + hJit * 0.04;
+
+        const localIntensity = heightAt(normalized, x / SCENE_WIDTH + 0.5);
+        const stalkFrac = STALK_MIN + (STALK_MAX - STALK_MIN) * hLen;
+        const length = stalkFrac * HEIGHT_SCALE * (0.4 + 0.6 * localIntensity);
+        const angle = (hAngle * 2 - 1) * angleMax; // tilt from vertical, both directions
+        const leanDir = hLean * Math.PI * 2;       // which way it leans, not just how much
+
+        const dx = Math.sin(angle) * Math.cos(leanDir) * length;
+        const dz = Math.sin(angle) * Math.sin(leanDir) * length;
+        const dy = Math.cos(angle) * length;
+
+        const zNorm = z / (SCENE_DEPTH / 2);
+        const zt = Math.max(0, Math.min(1, (zNorm + 1) / 2)); // 0..1 across depth, far -> near
+        const tier = Math.max(0, Math.min(OPACITY_TIERS - 1, Math.floor(zt * OPACITY_TIERS)));
+        buckets[tier].push(x, groundY, z, x + dx, groundY + dy, z + dz);
+      }
+    });
+    return buckets.map(b => new Float32Array(b));
+  }, [months, normalized, regions]);
+
+  return (
+    <>
+      {tierPositions.map((positions, tier) => positions.length > 0 && (
+        <lineSegments key={tier}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={0.24 + 0.16 * tier} />
+        </lineSegments>
+      ))}
+    </>
+  );
+}
+
 // ── The landform, drawn as lines ──
 // Many parallel cross-section silhouettes across the depth axis, each a
 // single continuous strip — no gaps, no dropped points. Nearer lines
@@ -331,7 +523,7 @@ const REPETITION_ECHO_THRESHOLD = 0.42;
 const REPETITION_ECHO_OFFSET_Y = -0.05; // below the line — a reflection, not a duplicate floating above it
 const REPETITION_ECHO_OFFSET_Z = 0.03;
 
-function ProfileLines({ months, normalized, signals, globalMeanLine }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[]; globalMeanLine: number }) {
+function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[]; globalMeanLine: number; regions: ThicketRegion[] }) {
   const lines = useMemo(() => {
     const out: { positions: Float32Array; opacity: number }[] = [];
     const n = months.length;
@@ -339,23 +531,33 @@ function ProfileLines({ months, normalized, signals, globalMeanLine }: { months:
       const xNorm = pi / (PROFILE_SAMPLES - 1);
       return n > 1 ? Math.round(Math.max(0, Math.min(n - 1, xNorm * (n - 1)))) : 0;
     };
+    const xAt = (pi: number) => (pi / (PROFILE_SAMPLES - 1) - 0.5) * SCENE_WIDTH;
 
     for (let li = 0; li < PROFILE_COUNT; li++) {
       const zt = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5; // 0..1
       const z = (zt - 0.5) * SCENE_DEPTH;
       const baseOpacity = 0.32 + 0.4 * zt; // nearer slices read slightly brighter
 
+      // Thicket regions are rendered entirely by ThicketField instead — a
+      // genuinely different technique, not this curve retextured. `keep`
+      // marks which samples the curve is allowed to draw; thicket-region
+      // samples are simply not part of this line at all (ThicketField owns
+      // that width), which is different from the old punctuation-driven
+      // dropout — this is a clean hand-off between two rendering systems
+      // at a real data boundary, not damage.
       const pts: { x: number; y: number; z: number }[] = [];
       const caps: number[] = [];
       const reps: number[] = [];
+      const keep: boolean[] = [];
       for (let pi = 0; pi < PROFILE_SAMPLES; pi++) {
         const xNorm = pi / (PROFILE_SAMPLES - 1);
-        const x = (xNorm - 0.5) * SCENE_WIDTH;
+        const x = xAt(pi);
         const stillness = signalAt(signals, "stillnessIntensity", xNorm);
         const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
         pts.push({ x, y, z });
         caps.push(signalAt(signals, "capsIntensity", xNorm));
         reps.push(signalAt(signals, "repetitionIntensity", xNorm));
+        keep.push(!insideAnyRegion(x, regions));
       }
 
       // The line is one continuous strip end to end — but opacity and the
@@ -396,14 +598,19 @@ function ProfileLines({ months, normalized, signals, globalMeanLine }: { months:
         }
       };
 
-      let segStart = 0;
+      let segStart = keep[0] ? 0 : -1;
       for (let pi = 1; pi < PROFILE_SAMPLES; pi++) {
+        if (!keep[pi]) {
+          if (segStart !== -1) { emit(segStart, pi - 1); segStart = -1; }
+          continue; // inside a thicket region — ThicketField draws here instead
+        }
+        if (segStart === -1) { segStart = pi; continue; } // first kept sample after a region
         if (monthIdxAt(pi) !== monthIdxAt(pi - 1)) {
           emit(segStart, pi - 1);
           segStart = pi - 1; // shared boundary point — the next segment starts here too, so nothing gaps
         }
       }
-      emit(segStart, PROFILE_SAMPLES - 1);
+      if (segStart !== -1) emit(segStart, PROFILE_SAMPLES - 1);
     }
     return out;
   }, [months, normalized, signals, globalMeanLine]);
@@ -624,6 +831,7 @@ function Scene({
   }, [months]);
   const signals = useMemo(() => computeMonthSignals(months), [months]);
   const globalMeanLine = useMemo(() => computeGlobalMeanLine(months), [months]);
+  const regions = useMemo(() => findThicketRegions(normalized), [normalized]);
 
   return (
     <>
@@ -637,7 +845,8 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <ProfileLines months={months} normalized={normalized} signals={signals} globalMeanLine={globalMeanLine} />
+        <ProfileLines months={months} normalized={normalized} signals={signals} globalMeanLine={globalMeanLine} regions={regions} />
+        <ThicketField months={months} normalized={normalized} regions={regions} />
         {seam != null && <SeamMarker x={seam} />}
       </TurntableAssembly>
     </>
