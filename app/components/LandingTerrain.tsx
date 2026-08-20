@@ -1,19 +1,36 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
 import { mulberry32 } from "@/app/components/TerrainScan";
 
-// ── A genuine 3D landform, not a chart — sitting on a platform, not
-// floating in void, spun as a single object on a turntable rather than
-// orbited by a camera, its points of interest discovered by approach
-// rather than announced permanently. This pass adds those three things;
-// the mesh geometry (multi-octave FBM noise, real-data-dominant heights,
-// per-region roughness), the camera/light setup, and normals recalculation
-// are all confirmed working from prior passes and untouched here. ──
+// ── Line-drawn 3D terrain — replacing the solid, lit mesh entirely. That
+// approach converged on a ribbed slab no matter how the noise was tuned;
+// this is a genuinely different technique: the landform is many thin
+// profile lines in 3D space (parallel cross-sections across the depth
+// axis), no fill, no material lighting. Depth and form come from
+// perspective, line density, and the GPU's own depth buffer letting nearer
+// lines occlude farther ones — not from shading.
+//
+// This pass also fixes three bugs from the previous build, all with one
+// architectural change: the canvas used to be a position:fixed,
+// full-viewport backdrop with page content layered on top via z-index.
+// That's what broke dragging (the foreground UI wrapper's empty space had
+// no pointer-events:none, so it silently ate every pointer event before
+// the canvas ever saw them) and what let the mesh paint over the button
+// (relying on z-index arithmetic between a WebGL canvas and DOM siblings,
+// which didn't hold). The terrain is now a normal, bounded, in-flow block
+// on the page — nothing else ever spatially overlaps it, so there's
+// nothing left to fight over stacking order, and no invisible layer left
+// to swallow the drag.
+//
+// The TAKE THE JOURNEY button is removed from /writing for this pass
+// (temporarily, per instruction) so the terrain can be iterated on without
+// the occlusion bug in the way. Discovery signs, hover, and BROWSE's
+// click-to-month are deprioritized this pass too — get the line-drawn
+// shape and the fixed interaction confirmed first. ──
 
 export interface TerrainMonth {
   month: string; // YYYY-MM
@@ -24,30 +41,16 @@ export interface TerrainMonth {
 interface Props {
   months: TerrainMonth[];
   dim?: boolean;                          // recedes visually — BROWSE's list is showing on top
-  onMonthClick?: (month: string) => void; // present only in BROWSE mode
+  onMonthClick?: (month: string) => void; // unused this pass — BROWSE is unreachable without the button
 }
 
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-function formatMonthShort(m: string): string {
-  const [y, mo] = m.split("-").map(Number);
-  return `${MONTH_NAMES[mo - 1]} ${y}`;
-}
-
-const HUD_MONO = '"SF Mono", "IBM Plex Mono", ui-monospace, Menlo, Consolas, "Courier New", monospace';
-
-// ── scene layout — world units, not pixels ──
-const SCENE_WIDTH  = 10;   // x spans -HALF..HALF — the time axis, Feb 2025 -> present
-const SCENE_DEPTH  = 7;    // comparably substantial to width, not depth-as-afterthought
-const HEIGHT_SCALE = 3.2;  // world units at the fullest month
-
-// Material colour deviates from strict flat #0a0a0a — a pure-black surface
-// under directional light still reads as flat, since black has no headroom
-// to visibly lighten. This is the darkest/lightest pair the palette can
-// bear while still reading as "black" against the green, per spec.
-const SURFACE_COLOR = "#151515";
+// ── scene layout — world units, not pixels. The container's on-screen
+// pixel size is what changed this pass (bounded instead of full-viewport);
+// these proportions are untouched, and the smaller container reframes them
+// automatically via the perspective camera's aspect ratio. ──
+const SCENE_WIDTH  = 10;
+const SCENE_DEPTH  = 7;
+const HEIGHT_SCALE = 3.2;
 
 // ── Catmull-Rom across the 19 known points — passes exactly through each
 // real value, smoothly curved between them, unlike a linear/segment join. ──
@@ -96,11 +99,7 @@ function seamX(months: TerrainMonth[]): number | null {
   return prevX + (idxX - prevX) * frac;
 }
 
-// ── The landform (unchanged from the prior pass) ──
-const SEGMENTS_X = 240;
-const SEGMENTS_Z = 48;
-const MICRO_AMPLITUDE = 0.045;
-
+// ── deterministic value noise + FBM (unchanged from the prior pass) ──
 function hashNoise2D(ix: number, iy: number, seed: number): number {
   let h = (ix * 374761393 + iy * 668265263 + seed * 2246822519) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
@@ -127,62 +126,90 @@ function fbm2D(x: number, y: number, seed: number, octaves: number): number {
   return sum / maxAmp;
 }
 
+const MICRO_AMPLITUDE = 0.045;
 const TAPER_NOISE_FREQ_X = 0.6, TAPER_NOISE_FREQ_Z = 1.1, TAPER_SEED = 5301;
 const MICRO_FREQ_X = 3.4, MICRO_FREQ_Z = 4.1, MICRO_SEED = 8807;
 
-function buildTerrainGeometry(months: TerrainMonth[]): THREE.PlaneGeometry {
-  const maxCount = Math.max(1, ...months.map(m => m.count));
-  const normalized = months.map(m => m.count / maxCount);
+// The terrain's height at any (x, z) — unchanged math from the solid-mesh
+// pass (centreline-guaranteed real data, per-x falloff sharpness, per-point
+// roughness scaled by local data intensity), just repackaged as a plain
+// sampling function instead of a per-vertex mesh-builder loop, since the
+// line renderer below only needs to sample it at chosen points, not build
+// a continuous surface out of it.
+function terrainHeightAt(normalized: number[], x: number, z: number): number {
+  const xNorm = x / SCENE_WIDTH + 0.5;
+  const zNorm = z / (SCENE_DEPTH / 2);
+  const localIntensity = heightAt(normalized, xNorm);
 
-  const geo = new THREE.PlaneGeometry(SCENE_WIDTH, SCENE_DEPTH, SEGMENTS_X, SEGMENTS_Z);
-  geo.rotateX(-Math.PI / 2);
+  const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
+  const falloffNoise = fbm2D(x * TAPER_NOISE_FREQ_X, z * TAPER_NOISE_FREQ_Z, TAPER_SEED, 3);
+  const falloffSharpness = 0.7 + 1.4 * falloffNoise;
+  const taper = Math.pow(centerFalloff, falloffSharpness);
+  const base = localIntensity * HEIGHT_SCALE * taper;
 
-  const pos = geo.attributes.position;
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const z = pos.getZ(i);
-    const xNorm = x / SCENE_WIDTH + 0.5;
-    const zNorm = z / (SCENE_DEPTH / 2);
-    const localIntensity = heightAt(normalized, xNorm);
+  const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity);
+  const micro = (fbm2D(x * MICRO_FREQ_X, z * MICRO_FREQ_Z, MICRO_SEED, 4) - 0.5) * 2 * localRoughness;
 
-    const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
-    const falloffNoise = fbm2D(x * TAPER_NOISE_FREQ_X, z * TAPER_NOISE_FREQ_Z, TAPER_SEED, 3);
-    const falloffSharpness = 0.7 + 1.4 * falloffNoise;
-    const taper = Math.pow(centerFalloff, falloffSharpness);
-
-    const base = localIntensity * HEIGHT_SCALE * taper;
-
-    const localRoughness = MICRO_AMPLITUDE * (0.35 + 1.3 * localIntensity);
-    const micro = (fbm2D(x * MICRO_FREQ_X, z * MICRO_FREQ_Z, MICRO_SEED, 4) - 0.5) * 2 * localRoughness;
-
-    pos.setY(i, Math.max(0, base + micro));
-  }
-  pos.needsUpdate = true;
-  geo.computeVertexNormals();
-  return geo;
+  return Math.max(0, base + micro);
 }
 
-function Terrain({ months }: { months: TerrainMonth[] }) {
-  const geometry = useMemo(() => buildTerrainGeometry(months), [months]);
+// ── The landform, drawn as lines ──
+// Many parallel cross-section silhouettes across the depth axis, each a
+// clean line strip, no fill. Nearer lines occlude farther ones through
+// ordinary WebGL depth testing (the default for LineBasicMaterial) — no
+// custom visibility algorithm needed. A subtle opacity gradient by depth
+// reinforces it further. Because falloffNoise above genuinely varies with
+// z, adjacent slices show different character for the "same" peak — sharp
+// in one line, rounder in the next — which is exactly the multi-scale read
+// the solid-mesh version was trying and failing to get from shading alone.
+const PROFILE_COUNT = 48;
+const PROFILE_SAMPLES = 100;
+
+function ProfileLines({ months }: { months: TerrainMonth[] }) {
+  const lines = useMemo(() => {
+    const maxCount = Math.max(1, ...months.map(m => m.count));
+    const normalized = months.map(m => m.count / maxCount);
+    const out: { positions: Float32Array; opacity: number }[] = [];
+    for (let li = 0; li < PROFILE_COUNT; li++) {
+      const zt = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5; // 0..1
+      const z = (zt - 0.5) * SCENE_DEPTH;
+      const arr = new Float32Array(PROFILE_SAMPLES * 3);
+      for (let pi = 0; pi < PROFILE_SAMPLES; pi++) {
+        const x = (pi / (PROFILE_SAMPLES - 1) - 0.5) * SCENE_WIDTH;
+        const y = terrainHeightAt(normalized, x, z);
+        arr[pi * 3] = x; arr[pi * 3 + 1] = y; arr[pi * 3 + 2] = z;
+      }
+      out.push({ positions: arr, opacity: 0.32 + 0.4 * zt }); // nearer slices read slightly brighter
+    }
+    return out;
+  }, [months]);
+
   return (
-    <mesh geometry={geometry} receiveShadow castShadow>
-      <meshStandardMaterial color={SURFACE_COLOR} roughness={0.82} metalness={0.04} />
-    </mesh>
+    <>
+      {lines.map((l, i) => (
+        <line key={i}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[l.positions, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={l.opacity} />
+        </line>
+      ))}
+    </>
   );
 }
 
 // The full-page ambient sonar field — unrelated to the carpet, stays
-// outside the rotating assembly, fixed in world space as the page's own
-// backdrop texture regardless of how the object spins.
+// outside the rotating assembly, fixed in world space regardless of how
+// the object spins.
 function BackgroundField() {
   const positions = useMemo(() => {
     const rand = mulberry32(4242);
-    const n = 1100;
+    const n = 700;
     const arr = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
-      arr[i * 3]     = (rand() - 0.5) * SCENE_WIDTH * 3.4;
-      arr[i * 3 + 1] = rand() * HEIGHT_SCALE * 1.6;
-      arr[i * 3 + 2] = (rand() - 0.5) * SCENE_DEPTH * 9;
+      arr[i * 3]     = (rand() - 0.5) * SCENE_WIDTH * 3;
+      arr[i * 3 + 1] = rand() * HEIGHT_SCALE * 1.5;
+      arr[i * 3 + 2] = (rand() - 0.5) * SCENE_DEPTH * 7;
     }
     return arr;
   }, []);
@@ -196,13 +223,10 @@ function BackgroundField() {
   );
 }
 
-// ── The carpet ──
-// A platform the mountain sits on — what makes it read as a scanned object
-// in a scene rather than a shape floating in void. Extends well beyond the
-// terrain's footprint, sits at the terrain's own y=0 baseline (its lowest
-// points meet the platform rather than floating above or piercing through
-// it), and carries the same dot-field texture as the page background,
-// reoriented flat instead of scattered through a volume.
+// ── The carpet — a platform the mountain sits on, kept from the prior
+// pass. Proportions unchanged (they scale with the container automatically
+// via the perspective camera), still extends beyond the terrain's own
+// footprint, still meets the terrain's y=0 baseline. ──
 const CARPET_WIDTH = SCENE_WIDTH * 1.9;
 const CARPET_DEPTH = SCENE_DEPTH * 2.4;
 const CARPET_Y = -0.03;
@@ -211,7 +235,10 @@ function CarpetSurface() {
   return (
     <mesh position={[0, CARPET_Y - 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[CARPET_WIDTH, CARPET_DEPTH]} />
-      <meshStandardMaterial color="#0d0f0a" roughness={0.95} metalness={0} transparent opacity={0.55} />
+      {/* Low opacity — verified via the rasterizer that 0.55 read as a
+          solid dark rectangle dominating the frame, not a surface the
+          mountain quietly rests on. */}
+      <meshStandardMaterial color="#0d0f0a" roughness={0.95} metalness={0} transparent opacity={0.22} />
     </mesh>
   );
 }
@@ -219,11 +246,11 @@ function CarpetSurface() {
 function CarpetField() {
   const positions = useMemo(() => {
     const rand = mulberry32(6161);
-    const n = 900;
+    const n = 600;
     const arr = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       arr[i * 3]     = (rand() - 0.5) * CARPET_WIDTH;
-      arr[i * 3 + 1] = CARPET_Y + (rand() - 0.5) * 0.06; // nearly flat — a surface, not a volume
+      arr[i * 3 + 1] = CARPET_Y + (rand() - 0.5) * 0.06;
       arr[i * 3 + 2] = (rand() - 0.5) * CARPET_DEPTH;
     }
     return arr;
@@ -241,8 +268,7 @@ function CarpetField() {
 // A ring of small tick marks at the carpet's rim, inside the rotating
 // assembly — the visible, minimal, unlabeled affordance that this is a
 // turntable: as the reader drags, the ring visibly sweeps with everything
-// else. Every 4th tick reads slightly larger/brighter, echoing the fader's
-// four reference dots from the 2D build.
+// else.
 function TurntableRing() {
   const TICKS = 16;
   const RADIUS = Math.min(CARPET_WIDTH, CARPET_DEPTH) * 0.44;
@@ -266,136 +292,24 @@ function TurntableRing() {
   );
 }
 
-// ── Discovery signs ──
-// Replaces permanently-visible labels. Each point of interest is an almost
-// imperceptible mark at rest — registering as "something is there" without
-// announcing what — that brightens and reveals its label only on approach
-// (hover on desktop, tap on touch), fading back when the reader moves away.
-// The terrain becomes something scanned with attention, not captioned.
-function DiscoverySign({
-  position, label, sublabel, primary,
-}: {
-  position: [number, number, number];
-  label: string;
-  sublabel?: string;
-  primary: boolean;
-}) {
-  const [near, setNear] = useState(false);
-  const markRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef(0);
-  const restOpacity = primary ? 0.42 : 0.2;
-  const restScale = primary ? 1 : 0.65;
-
-  useFrame(() => {
-    const target = near ? 1 : 0;
-    glowRef.current += (target - glowRef.current) * 0.15;
-    const mesh = markRef.current;
-    if (mesh) {
-      const s = restScale * (1 + glowRef.current * 1.7);
-      mesh.scale.setScalar(s);
-      const mat = mesh.material as THREE.MeshBasicMaterial;
-      mat.opacity = restOpacity + glowRef.current * (0.95 - restOpacity);
-    }
-  });
-
-  return (
-    <group position={position}>
-      {/* generous invisible hit sphere — easy to discover, not just the tiny visible dot */}
-      <mesh
-        onPointerOver={(e) => { e.stopPropagation(); setNear(true); }}
-        onPointerOut={() => setNear(false)}
-        onClick={(e) => { e.stopPropagation(); setNear(true); }} // touch: tap to reveal
-      >
-        <sphereGeometry args={[0.24, 8, 8]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-      <mesh ref={markRef}>
-        <sphereGeometry args={[0.045, 10, 10]} />
-        <meshBasicMaterial color="#0a0a0a" transparent opacity={restOpacity} />
-      </mesh>
-      {near && (
-        <Html position={[0, 0, 0]} distanceFactor={7} style={{ pointerEvents: "none", zIndex: 9999 }}>
-          <div
-            style={{
-              fontFamily: HUD_MONO, fontSize: "9px", letterSpacing: "0.06em",
-              textTransform: "uppercase", color: "#0a0a0a",
-              whiteSpace: "nowrap", lineHeight: 1.4, transform: "translate(8px, -10px)",
-              background: "rgba(170,255,0,0.92)",
-              border: "1px solid rgba(10,10,10,0.45)",
-              padding: "2px 5px",
-            }}
-          >
-            <div>{label}</div>
-            {sublabel && <div style={{ opacity: 0.72 }}>{sublabel}</div>}
-          </div>
-        </Html>
-      )}
-    </group>
-  );
-}
-
-// A faint, mostly-still-there seam — much fainter than the previous pass's
-// always-bold rod, now a background cue rather than an announcement; the
-// actual MILAT date reveal happens through its own DiscoverySign below.
+// A faint seam line — the MILAT boundary. No hover-reveal this pass
+// (discovery signs are deprioritized); just a quiet vertical crossing,
+// consistent with the line-drawn language everything else here now uses.
 function SeamMarker({ x }: { x: number }) {
+  const positions = useMemo(() => new Float32Array([x, 0, 0, x, HEIGHT_SCALE * 1.3, 0]), [x]);
   return (
-    <mesh position={[x, (HEIGHT_SCALE * 1.3) / 2, 0]}>
-      <cylinderGeometry args={[0.014, 0.014, HEIGHT_SCALE * 1.3, 8]} />
-      <meshBasicMaterial color="#0a0a0a" transparent opacity={0.14} />
-    </mesh>
-  );
-}
-
-// Local extrema across the real monthly counts — every point where a
-// stretch turns from rising to falling (a peak) or falling to rising (a
-// valley), not just the single global max/min. Edge months compare against
-// an open sentinel so the very first/last month can still register.
-function findLocalExtrema(counts: number[], kind: "peak" | "valley"): number[] {
-  const idxs: number[] = [];
-  for (let i = 0; i < counts.length; i++) {
-    const prev = i > 0 ? counts[i - 1] : (kind === "peak" ? -Infinity : Infinity);
-    const next = i < counts.length - 1 ? counts[i + 1] : (kind === "peak" ? -Infinity : Infinity);
-    const isExtreme = kind === "peak" ? (counts[i] > prev && counts[i] > next) : (counts[i] < prev && counts[i] < next);
-    if (isExtreme) idxs.push(i);
-  }
-  return idxs;
-}
-
-interface MonthMeta { x: number; height: number; count: number; words: number; month: string }
-
-// Invisible, generously-sized hit target per month — raycasting against the
-// continuous surface directly would give an ambiguous z-column; this gives
-// BROWSE's click-to-month (and hover) a clean, reliable target instead.
-// Sits inside the rotating assembly, so clicks resolve correctly against
-// the object's current orientation automatically (three.js raycasts in
-// world space against the live transform, no manual math needed here).
-function MonthHitTarget({
-  m, spacing, onHover, onSelect,
-}: {
-  m: MonthMeta; spacing: number;
-  onHover: (m: MonthMeta | null) => void;
-  onSelect: (month: string, clientX: number, clientY: number) => void;
-}) {
-  return (
-    <mesh
-      position={[m.x, HEIGHT_SCALE * 0.65, 0]}
-      onPointerMove={(e) => { e.stopPropagation(); onHover(m); }}
-      onPointerOut={() => onHover(null)}
-      onClick={(e) => { e.stopPropagation(); onSelect(m.month, e.nativeEvent.clientX, e.nativeEvent.clientY); }}
-    >
-      <boxGeometry args={[Math.max(spacing * 0.9, 0.2), HEIGHT_SCALE * 1.3, SCENE_DEPTH * 1.6]} />
-      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-    </mesh>
+    <line>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial color="#0a0a0a" transparent opacity={0.3} />
+    </line>
   );
 }
 
 // Camera — fixed, always, at the verified angle (elevation ~35°, azimuth
-// ~28°, confirmed against a hand-rolled render before shipping in an
-// earlier pass). It no longer needs to move for rotation at all now that
-// the OBJECT spins instead of the camera orbiting — this is a stricter
-// reading of "don't touch the camera" than before, not a looser one: the
-// camera never leaves this position except for zoom (distance only, same
-// angle always).
+// ~28°). Never moves for rotation (the object spins instead); only zoom
+// (distance along this same fixed angle) can move it.
 const CAM_ELEVATION_DEG = 35;
 const CAM_AZIMUTH_DEG   = 28;
 const CAM_DISTANCE      = SCENE_WIDTH * 1.15;
@@ -412,11 +326,9 @@ const DEFAULT_CAM_POS: [number, number, number] = (() => {
   ];
 })();
 
-// Light — unchanged: raking at ~38° elevation, ~65° azimuth, well apart
-// from the camera's own azimuth so ridges show a lit face against a
-// shadowed one. Stays outside the rotating assembly (fixed in world space)
-// — a light that rotated with the object would look like the sun moving
-// with it, not light falling on a turntable.
+// Light — kept for the carpet's benefit (its MeshStandardMaterial still
+// responds to it); the terrain itself no longer uses any lit material, so
+// this has no effect on the mountain's own lines.
 const LIGHT_ELEVATION_DEG = 38;
 const LIGHT_AZIMUTH_DEG   = 65;
 const LIGHT_DISTANCE      = SCENE_WIDTH * 1.5;
@@ -431,12 +343,10 @@ const DIRECTIONAL_LIGHT_POS: [number, number, number] = (() => {
 })();
 
 // Reads rotationRef every frame and applies it to a group wrapping the
-// whole turntable assembly (carpet + terrain + signs + click targets) —
-// driven by DOM-level drag handlers on LandingTerrain's outer wrapper, not
-// by R3F's own pointer events, so "drag anywhere on the canvas" works
-// regardless of what's under the cursor. Applies residual spin (inertia)
-// on release, decaying smoothly — the same "heavy, decelerating settle"
-// physics language the rest of the site already uses.
+// whole turntable assembly (carpet + terrain lines) — driven by DOM-level
+// drag handlers on LandingTerrain's outer wrapper, not R3F's own pointer
+// events, so "drag anywhere on the canvas" works regardless of what's
+// under the cursor. Applies residual spin (inertia) on release.
 function TurntableAssembly({
   rotationRef, draggingRef, velocityRef, children,
 }: {
@@ -457,8 +367,7 @@ function TurntableAssembly({
 }
 
 // Applies distanceRef (driven by wheel/pinch) to the camera every frame,
-// keeping the exact same fixed elevation/azimuth angle always — only the
-// distance from the object changes.
+// keeping the exact same fixed elevation/azimuth angle always.
 function CameraRig({ distanceRef }: { distanceRef: React.MutableRefObject<number> }) {
   const { camera } = useThree();
   useFrame(() => {
@@ -476,50 +385,15 @@ function CameraRig({ distanceRef }: { distanceRef: React.MutableRefObject<number
 }
 
 function Scene({
-  months, clickable, hovered, onHover, onSelect, rotationRef, draggingRef, velocityRef, distanceRef,
+  months, rotationRef, draggingRef, velocityRef, distanceRef,
 }: {
-  months: TerrainMonth[]; clickable: boolean;
-  hovered: MonthMeta | null;
-  onHover: (m: MonthMeta | null) => void;
-  onSelect: (month: string, clientX: number, clientY: number) => void;
+  months: TerrainMonth[];
   rotationRef: React.MutableRefObject<number>;
   draggingRef: React.MutableRefObject<boolean>;
   velocityRef: React.MutableRefObject<number>;
   distanceRef: React.MutableRefObject<number>;
 }) {
-  const meta = useMemo<MonthMeta[]>(() => {
-    const n = months.length;
-    const maxCount = Math.max(1, ...months.map(m => m.count));
-    return months.map((m, i) => ({
-      x: n > 1 ? (i / (n - 1) - 0.5) * SCENE_WIDTH : 0,
-      height: (m.count / maxCount) * HEIGHT_SCALE,
-      count: m.count, words: m.words, month: m.month,
-    }));
-  }, [months]);
-
-  const counts = useMemo(() => months.map(m => m.count), [months]);
-  const peakIdxs = useMemo(() => findLocalExtrema(counts, "peak"), [counts]);
-  const valleyIdxs = useMemo(() => findLocalExtrema(counts, "valley").filter(i => months[i].count > 0), [counts, months]);
-
-  const globalPeakIdx = useMemo(() => {
-    if (months.length === 0) return -1;
-    let best = 0;
-    for (let i = 1; i < months.length; i++) if (months[i].count > months[best].count) best = i;
-    return best;
-  }, [months]);
-
-  const globalValleyIdx = useMemo(() => {
-    const withPosts = months.map((m, i) => ({ m, i })).filter(x => x.m.count > 0);
-    if (withPosts.length === 0) return -1;
-    let best = withPosts[0];
-    for (const x of withPosts) if (x.m.count < best.m.count) best = x;
-    return best.i;
-  }, [months]);
-
-  const namedPeakIdx = useMemo(() => months.findIndex(m => m.month === "2026-05"), [months]);
-
   const seam = useMemo(() => seamX(months), [months]);
-  const spacing = meta.length > 1 ? meta[1].x - meta[0].x : 1;
 
   return (
     <>
@@ -533,60 +407,8 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <Terrain months={months} />
-
-        {clickable && meta.map((m) => (
-          <MonthHitTarget key={m.month} m={m} spacing={spacing} onHover={onHover} onSelect={onSelect} />
-        ))}
-
+        <ProfileLines months={months} />
         {seam != null && <SeamMarker x={seam} />}
-        {seam != null && (
-          <DiscoverySign
-            position={[seam, HEIGHT_SCALE * 1.1, 0]}
-            label="MILAT" sublabel={provenanceBoundaryDate() ?? undefined}
-            primary
-          />
-        )}
-
-        {peakIdxs.map(i => (
-          <DiscoverySign
-            key={`peak-${i}`}
-            position={[meta[i].x, meta[i].height, 0]}
-            label={formatMonthShort(months[i].month)}
-            sublabel={`${months[i].count} poems`}
-            primary={i === globalPeakIdx || i === namedPeakIdx}
-          />
-        ))}
-        {valleyIdxs.map(i => (
-          <DiscoverySign
-            key={`valley-${i}`}
-            position={[meta[i].x, meta[i].height, 0]}
-            label={formatMonthShort(months[i].month)}
-            sublabel={`${months[i].count} poem${months[i].count === 1 ? "" : "s"}`}
-            primary={i === globalValleyIdx}
-          />
-        ))}
-
-        {/* Rendered inside the same rotating group as its target point —
-            outside it, this would stay fixed in world space while the
-            terrain spun away underneath it. */}
-        {hovered && (
-          <Html position={[hovered.x, hovered.height, 0]} distanceFactor={7} style={{ pointerEvents: "none", zIndex: 9999 }}>
-            <div
-              style={{
-                fontFamily: HUD_MONO, fontSize: "9px", letterSpacing: "0.06em",
-                textTransform: "uppercase", color: "#0a0a0a",
-                whiteSpace: "nowrap", lineHeight: 1.4, transform: "translate(8px, -10px)",
-                background: "rgba(170,255,0,0.92)",
-                border: "1px solid rgba(10,10,10,0.45)",
-                padding: "2px 5px",
-              }}
-            >
-              <div>{formatMonthShort(hovered.month)}</div>
-              <div style={{ opacity: 0.72 }}>{hovered.count} poem{hovered.count === 1 ? "" : "s"}, {hovered.words.toLocaleString()}w</div>
-            </div>
-          </Html>
-        )}
       </TurntableAssembly>
     </>
   );
@@ -595,28 +417,18 @@ function Scene({
 const ROTATE_SENSITIVITY = 0.0075; // radians per pixel of horizontal drag
 const ZOOM_SENSITIVITY = 0.01;
 
-export default function LandingTerrain({ months, dim = false, onMonthClick }: Props) {
-  const [hovered, setHovered] = useState<MonthMeta | null>(null);
-
+export default function LandingTerrain({ months, dim = false }: Props) {
   // Turntable drag state — lives here (not in Scene) since the drag itself
   // is handled at the DOM level on the outer wrapper below, so "drag
   // anywhere on the canvas" works regardless of what 3D object (if any) is
-  // under the cursor, matching how OrbitControls' whole-canvas drag used
-  // to feel, just rotating the object now instead of orbiting the camera.
+  // under the cursor.
   const rotationRef = useRef(0);
   const velocityRef = useRef(0);
   const draggingRef = useRef(false);
   const distanceRef = useRef(CAM_DISTANCE);
   const lastXRef = useRef(0);
 
-  // Distinguishes a genuine click (BROWSE navigation) from a drag-to-rotate
-  // that happens to end over a month's hit target — only a click whose
-  // pointer barely moved counts.
-  const CLICK_DRAG_TOLERANCE = 6; // px
-  const downPos = useRef<{ x: number; y: number } | null>(null);
-
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    downPos.current = { x: e.clientX, y: e.clientY };
     draggingRef.current = true;
     velocityRef.current = 0;
     lastXRef.current = e.clientX;
@@ -635,15 +447,9 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
     (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
   }, []);
   const onWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
     distanceRef.current = Math.max(CAM_MIN_DISTANCE, Math.min(CAM_MAX_DISTANCE, distanceRef.current + e.deltaY * ZOOM_SENSITIVITY));
   }, []);
-
-  const handleSelect = useCallback((month: string, clientX: number, clientY: number) => {
-    const d = downPos.current;
-    const dist = d ? Math.hypot(clientX - d.x, clientY - d.y) : 0;
-    if (dist > CLICK_DRAG_TOLERANCE) return; // that was a drag, not a click
-    onMonthClick?.(month);
-  }, [onMonthClick]);
 
   if (months.length === 0) return null;
 
@@ -655,22 +461,26 @@ export default function LandingTerrain({ months, dim = false, onMonthClick }: Pr
       onPointerCancel={onPointerUp}
       onWheel={onWheel}
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0,
+        // A normal, bounded, in-flow block — not a full-viewport fixed
+        // backdrop. Nothing else on the page spatially overlaps this box,
+        // which is what actually fixes both the occlusion bug and the
+        // "canvas eating events meant for it" bug: there's no longer a
+        // foreground layer sitting on top of it at all.
+        width: "100%",
+        maxWidth: "880px",
+        height: "clamp(340px, 52vh, 540px)",
+        margin: "3rem auto 0",
+        position: "relative",
         opacity: dim ? 0.16 : 1,
         pointerEvents: dim ? "none" : "auto",
         transition: "opacity 400ms",
         touchAction: "none",
+        cursor: "grab",
       }}
     >
       <Canvas camera={{ position: DEFAULT_CAM_POS, fov: 46 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
         <Scene
           months={months}
-          clickable={!!onMonthClick}
-          hovered={hovered}
-          onHover={setHovered}
-          onSelect={handleSelect}
           rotationRef={rotationRef}
           draggingRef={draggingRef}
           velocityRef={velocityRef}
