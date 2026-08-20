@@ -6,46 +6,52 @@ import { useCallback, useMemo, useRef } from "react";
 import { provenanceBoundaryDate } from "@/lib/tagProvenance";
 import { mulberry32 } from "@/app/components/TerrainScan";
 
-// ── Line-drawn 3D terrain, now driven by the archive's own text instead of
-// a noise function pretending to be one. Every earlier pass used a generic
-// FBM/value-noise field to give the linework its jaggedness, roughness, and
-// per-depth variation — it looked plausibly mountain-like, but nothing
-// about *which* poem was written that month had any bearing on the shape.
-// This pass removes that noise entirely. What replaces it:
+// ── An ecosystem, not a terrain-visualisation technique. Every earlier
+// pass — noise-driven jag, text-driven jag, vocabulary shifts, dense-
+// contour zones — was still one continuous ground surface with varying
+// character. However accurate to the data, none of it gave a human
+// anything to actually recognise: no lake, no tree, no hill, nothing to
+// point at and name. This pass replaces "one surface with regional
+// character" with actual discrete, recognisable objects, each still real-
+// data-placed and real-data-shaped, assembled into one small landscape:
 //
-// - Each profile line (one of 48 depth-wise cross-sections) is, at any
-//   given month's x-range, assigned one of that month's actual poems
-//   (line index mod poem count) — so a busy month's 48 lines each trace a
-//   different real poem's rhythm, while a one-poem month has every line
-//   reading the same poem (see textMicroAt below).
-// - The height texture at each point is that assigned poem's own line-by-
-//   line word-count sequence, resampled across the local x-span and
-//   z-offset by a small per-line phase so depth still reads as organic —
-//   not synthesized, just re-read from a different point in the same real
-//   sequence. Short, wildly varying lines (fragmented, punchy poems)
-//   produce high-frequency jag because the sequence itself has many small
-//   values close together; long, steady lines (flowing prose-like poems)
-//   produce broad, slow undulation because the sequence has few, large
-//   values. That frequency/amplitude split falls out of the real data with
-//   no separate "how jagged" parameter to tune.
-// - Real punctuation density (periods, colons, dashes, question marks per
-//   word) sets how often a line breaks/restarts — reusing the same
-//   per-(line,sample) survival-hash mechanism the previous plains pass
-//   used, now keyed to a genuinely different, text-derived quantity.
-// - Real word-repetition within a poem draws a faint echo — a second,
-//   offset near-duplicate trace of the same run — mirroring the poem's own
-//   repeated structure, generically available to any month, not a special
-//   case for one.
-// - Real ALL-CAPS density boosts a run's opacity/weight, mirroring a
-//   poem's own volume shift.
+// - A MOUNTAIN sits where the real data is tallest (this archive: Feb
+//   2025, 67 poems — the same real Catmull-Rom height curve every pass
+//   has used). Its internal texture is still the dense contour-grid
+//   technique from the last pass (that part worked); a bold outline pass
+//   at the grid's own edges gives it an actual silhouette.
+// - HILLS are rounded, receding dome silhouettes wherever the real height
+//   is moderately elevated — deliberately smooth (no fine jag), because
+//   real hills are rounded, not spiky; a small amount of real per-poem
+//   texture keeps them from being perfectly synthetic.
+// - A POND sits at the one real point that is both the lowest ground in
+//   the whole range AND the calmest real writing (highest punctuation-
+//   density-derived stillness) — this archive: Jan 2026, the single
+//   month that was already a "basin" by height and separately flagged as
+//   maximally still by its own text. A flat shoreline ellipse plus real-
+//   repetition-driven ripple rings, sitting in an actual carved
+//   depression in the ground, not a height dip standing in for water.
+// - LONE TREES stand at real, individually distinctive months — highest
+//   real within-poem repetition or ALL-CAPS density, excluding whatever's
+//   already claimed by the mountain or the pond, spaced apart by a real
+//   minimum separation so they read as scattered, not a hedge. A trunk
+//   plus a canopy loop whose own edge is jittered by that specific
+//   month's real line-length sequence, the same resampling technique
+//   every pass since the text-driven rewrite has used for texture.
+// - MEADOW is everything left over — calm, sparse, low-contrast ground,
+//   the connective tissue between the four features above, deliberately
+//   unremarkable so it doesn't compete with them.
 //
-// The height CURVE itself (poem count -> elevation via Catmull-Rom) is
-// unchanged — that's real data too, and was already correct. This is about
-// the texture within and around that curve, not the curve.
+// Each feature owns its own patch of ground exclusively (no two systems
+// draw over the same x-range, the same discipline the last two passes
+// established) and each is still driven by the real per-month/per-poem
+// data this project has built up over many passes — this is not a return
+// to hand-placed decoration, it's the same real signals given a literal
+// rather than abstract shape.
 //
 // Camera, light, carpet, sizing/containment, and the MILAT seam are
-// unchanged from the previous pass. The TAKE THE JOURNEY button remains
-// removed from /writing for now, per standing instruction. ──
+// unchanged. The TAKE THE JOURNEY button remains removed from /writing
+// for now, per standing instruction.
 
 export interface PoemTextProfile {
   words: number;
@@ -68,10 +74,7 @@ interface Props {
   onMonthClick?: (month: string) => void; // unused this pass — BROWSE is unreachable without the button
 }
 
-// ── scene layout — world units, not pixels. The container's on-screen
-// pixel size is what changed this pass (bounded instead of full-viewport);
-// these proportions are untouched, and the smaller container reframes them
-// automatically via the perspective camera's aspect ratio. ──
+// ── scene layout — world units, not pixels. ──
 const SCENE_WIDTH  = 10;
 const SCENE_DEPTH  = 7;
 const HEIGHT_SCALE = 3.2;
@@ -103,153 +106,20 @@ function heightAt(values: number[], xNorm: number): number {
   return catmullRom(p0, p1, p2, p3, t);
 }
 
-// ── terrain zones — four distinct, deliberately different rendering modes
-// decided per point from real data, not one continuously-blended system.
-// The previous pass (a single blended curve/stroke system varying by
-// height and text signals) produced spiky tufts at the tall/dense end and
-// thin ripples at the low end — neither committed fully to reading as
-// anything in particular. This picks one of a small number of modes per
-// region and renders it fully as that mode:
-//
-// - "peak": the top of the real height range (this archive: Feb 2025
-//   alone clears the threshold) — dense contour mass (see MassField).
-// - "basin": the bottom of the real height range (Jan 2026 and a couple
-//   of other very-low-count months) — the calm curve technique, unchanged
-//   from the previous two passes.
-// - "dense": moderate height but real per-poem word-density well above
-//   the archive's typical range — a lighter version of the same contour-
-//   mass technique as peaks, distinct from both the dominant peak and
-//   ordinary ground.
-// - "ordinary": everything else — the connective tissue, unremarkable
-//   rolling ground, the plain curve technique.
-//
-// Height decides peak/basin first (the same real Catmull-Rom curve that
-// already drives elevation); word-density only gets a say among the
-// months height didn't already claim, which is why Jan 2026 — the
-// archive's single highest word-density month, one 1,104-word poem —
-// stays a basin rather than becoming "dense": it's already the lowest
-// point by height, and that real fact takes priority.
-export type TerrainZoneMode = "peak" | "basin" | "dense" | "ordinary";
-export interface TerrainZone { mode: TerrainZoneMode; xStart: number; xEnd: number; }
-
-const PEAK_THRESHOLD = 0.5;
-const BASIN_THRESHOLD = 0.08;
-const DENSE_THRESHOLD = 0.55;
-const ZONE_SAMPLES = 240;
-
-function computeDensitySignal(months: TerrainMonth[], normalized: number[]): number[] {
-  const wordDensity = months.map(m => (m.count > 0 ? m.words / m.count : 0));
-  const logs = wordDensity.map(v => Math.log(v + 1e-4));
-  const eligible = logs.filter((_, i) => normalized[i] > BASIN_THRESHOLD && normalized[i] < PEAK_THRESHOLD);
-  const minL = eligible.length ? Math.min(...eligible) : 0;
-  const maxL = eligible.length ? Math.max(...eligible) : 1;
-  const range = maxL - minL || 1;
-  return logs.map(l => Math.max(0, Math.min(1, (l - minL) / range)));
+// The base ground height at any (x, z) — real Catmull-Rom elevation from
+// poem count, tapered away from the centreline by a fixed cosine falloff.
+// No jag, no per-poem texture — this is the smooth reference surface
+// hills/meadow/the pond's rim are built from; the mountain adds its own
+// fine texture back on top of this same base (see terrainHeightAt).
+function groundHeightAt(normalized: number[], x: number, z: number): number {
+  const xNorm = x / SCENE_WIDTH + 0.5;
+  const zNorm = z / (SCENE_DEPTH / 2);
+  const localIntensity = heightAt(normalized, xNorm);
+  const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
+  return localIntensity * HEIGHT_SCALE * centerFalloff;
 }
 
-// Linear interpolation of a per-month scalar across x — same style as
-// signalAt below, standalone here since it's needed before MonthSignals
-// exists in the data flow.
-function monthScalarAt(values: number[], xNorm: number): number {
-  const n = values.length;
-  if (n === 0) return 0;
-  if (n === 1) return values[0];
-  const clamped = Math.max(0, Math.min(1, xNorm));
-  const scaled = clamped * (n - 1);
-  const i = Math.floor(scaled);
-  const t = scaled - i;
-  const a = values[Math.min(n - 1, i)];
-  const b = values[Math.min(n - 1, i + 1)];
-  return a + (b - a) * t;
-}
-
-function modeAt(normalized: number[], densitySignal: number[], xNorm: number): TerrainZoneMode {
-  const h = heightAt(normalized, xNorm);
-  if (h >= PEAK_THRESHOLD) return "peak";
-  if (h <= BASIN_THRESHOLD) return "basin";
-  if (monthScalarAt(densitySignal, xNorm) >= DENSE_THRESHOLD) return "dense";
-  return "ordinary";
-}
-
-// Walks the full x domain at fine resolution and groups it into contiguous
-// same-mode runs. Because this walks the real smoothed signals rather than
-// snapping to month indices, several consecutive months with genuinely
-// similar character merge into one continuous zone automatically — a real
-// stretch of high density reads as one mass, not several adjacent-but-
-// separate ones just because it spans more than one data point.
-function classifyZones(normalized: number[], densitySignal: number[]): TerrainZone[] {
-  const zones: TerrainZone[] = [];
-  if (normalized.length === 0) return zones;
-  let currentMode = modeAt(normalized, densitySignal, 0);
-  let startXNorm = 0;
-  for (let i = 1; i <= ZONE_SAMPLES; i++) {
-    const xNorm = i / ZONE_SAMPLES;
-    const mode = modeAt(normalized, densitySignal, xNorm);
-    if (mode !== currentMode) {
-      zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (xNorm - 0.5) * SCENE_WIDTH });
-      currentMode = mode;
-      startXNorm = xNorm;
-    }
-  }
-  zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (1 - 0.5) * SCENE_WIDTH });
-  return mergeTinyZones(zones);
-}
-
-// The continuous signals sometimes graze a threshold at a shallow angle
-// rather than crossing it cleanly, producing a hairline sliver zone
-// (occasionally under a tenth of a scene unit wide) — real per the
-// classifier's own logic, but the opposite of "commit fully to each
-// mode": a sliver that thin can't read as anything, dense or otherwise.
-// Fold any zone narrower than MIN_ZONE_WIDTH into whichever zone precedes
-// it, then merge any now-adjacent same-mode zones the folding produced.
-const MIN_ZONE_WIDTH = 0.25;
-function mergeTinyZones(zones: TerrainZone[]): TerrainZone[] {
-  if (zones.length === 0) return zones;
-  const folded: TerrainZone[] = [zones[0]];
-  for (let i = 1; i < zones.length; i++) {
-    const z = zones[i];
-    if (z.xEnd - z.xStart < MIN_ZONE_WIDTH) {
-      folded[folded.length - 1] = { ...folded[folded.length - 1], xEnd: z.xEnd };
-    } else {
-      folded.push(z);
-    }
-  }
-  const merged: TerrainZone[] = [folded[0]];
-  for (let i = 1; i < folded.length; i++) {
-    const z = folded[i];
-    const last = merged[merged.length - 1];
-    if (z.mode === last.mode) {
-      merged[merged.length - 1] = { ...last, xEnd: z.xEnd };
-    } else {
-      merged.push(z);
-    }
-  }
-  return merged;
-}
-
-function insideMassZone(x: number, zones: TerrainZone[]): boolean {
-  return zones.some(z => (z.mode === "peak" || z.mode === "dense") && x >= z.xStart && x <= z.xEnd);
-}
-
-// ── text signals — derived from the actual poems, not from noise ──
-//
-// Second pass on the vocabulary these signals render into. The first text-
-// driven pass was accurate to the data but read as an instrument — a
-// seismograph, a core sample, a wound — because "high intensity" always
-// meant damage: a hash-gated dropout literally erased points from the
-// line at high punctuation density, and the repetition echo floated free
-// above the run like a glitch. Same real numbers this pass, different
-// physical consequence: what used to gate whether a point gets DRAWN AT
-// ALL now only gates how STILL the line is — the line never disappears.
-// A punctuation-dense, repetitive month (this archive's Jan 2026) reads as
-// a calm, quiet basin with a faint reflection in it, not a tear in the
-// ground. A many-poem month (Feb 2025) reads as a thicket — many real
-// growth-lines at genuinely different heights, because they ARE genuinely
-// different poems — not one tightly combed surface.
-
-// word-count-weighted average of a per-poem scalar, across one month's
-// actual poems — the honest way to combine several poems' properties into
-// one month-level reading (a 900-word poem should outweigh a 10-word one).
+// ── real per-poem text signals ──
 function weightedAvg(poems: PoemTextProfile[], key: "punctDensity" | "capsRatio" | "repetition"): number {
   const totalWords = poems.reduce((a, p) => a + p.words, 0);
   if (!totalWords) return 0;
@@ -263,7 +133,7 @@ function linearMinMax(values: number[]): number[] {
 }
 
 interface MonthSignals {
-  stillnessIntensity: number;  // real punctuation density, linear normalised — high means calm, not broken
+  stillnessIntensity: number;  // real punctuation density, linear normalised — high means calm
   repetitionIntensity: number; // real within-poem word repetition, linear normalised
   capsIntensity: number;       // real ALL-CAPS fraction, linear normalised
 }
@@ -278,8 +148,8 @@ function computeMonthSignals(months: TerrainMonth[]): MonthSignals[] {
   return months.map((_, i) => ({ stillnessIntensity: stillN[i], repetitionIntensity: repN[i], capsIntensity: capsN[i] }));
 }
 
-// Linear (not Catmull-Rom) between adjacent months' signal value — these
-// read as per-month character, not a smoothly overshooting curve.
+// Linear (not Catmull-Rom) between adjacent months' signal value — reads
+// as per-month character, not a smoothly overshooting curve.
 function signalAt(signals: MonthSignals[], key: keyof MonthSignals, xNorm: number): number {
   const n = signals.length;
   if (n === 0) return 0;
@@ -295,7 +165,8 @@ function signalAt(signals: MonthSignals[], key: keyof MonthSignals, xNorm: numbe
 
 // Linear resampling over an arbitrary-length real sequence (a poem's own
 // line lengths) at fraction t in [0,1] — the literal "play this poem's
-// rhythm across this span" operation everything below relies on.
+// rhythm across this span" operation both ground texture and tree
+// canopies rely on.
 function resampleSequence(seq: number[], t: number): number {
   const n = seq.length;
   if (n === 0) return 0;
@@ -312,44 +183,21 @@ function meanOf(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 }
 
-// The archive-wide mean line length — the one fixed reference every poem's
-// own average gets compared against to produce its "growth-line height"
-// (see textMicroAt). Computed once from all real poems, not tuned by hand.
+// The archive-wide mean line length — the fixed reference every poem's
+// own average gets compared against for its texture's baseline offset.
 function computeGlobalMeanLine(months: TerrainMonth[]): number {
   const all: number[] = [];
   for (const m of months) for (const p of m.poems) all.push(...p.lineLens);
   return meanOf(all);
 }
 
-// The height texture at a point, now built from two real, separately
-// motivated components instead of one:
-//
-// - origin: how this SPECIFIC poem's own average line length compares to
-//   the archive-wide average. A wordier-lined poem's growth-line sits
-//   higher than a terser one's, as its own fixed baseline — this is what
-//   makes a many-poem month look like a thicket of individually-placed
-//   growth-lines (48 lines, up to that many different real poems, each at
-//   its own real height) instead of one combed surface all rising from
-//   the same floor. A one-poem month has no scatter here at all, by
-//   construction — every line reads the same poem, so they share one
-//   origin, which is exactly the "still, uniform basin" read Jan 2026
-//   needs.
-// - local: this poem's own internal rhythm (deviation from ITS OWN mean,
-//   resampled across the local span), same as before — the wiggle.
-//
-// `stillness` (real punctuation density, per month) damps ONLY the local
-// wiggle, toward calm rather than toward absence. It never removes a
-// point from the line — a still month is smoother ground, not a hole in
-// it.
 const ORIGIN_SCALE = 0.05;
 const ORIGIN_CAP = 0.55;
 const MICRO_SCALE = 0.018;
 const MICRO_CAP = 0.3;
 const PHASE_SPREAD = 0.7;
-const STILLNESS_DAMPING = 0.88; // at maximum stillness, wiggle drops to 12% of its usual amplitude — calm, not glassy-dead
+const STILLNESS_DAMPING = 0.88;
 
-// A poem's own mean line length, translated into an origin offset — capped
-// and sqrt-compressed the same way the local wiggle is below.
 function originFor(poem: PoemTextProfile | undefined, globalMeanLine: number): number {
   if (!poem || !poem.lineLens.length) return 0;
   const dev = meanOf(poem.lineLens) - globalMeanLine;
@@ -357,7 +205,13 @@ function originFor(poem: PoemTextProfile | undefined, globalMeanLine: number): n
   return Math.max(-ORIGIN_CAP, Math.min(ORIGIN_CAP, compressed * ORIGIN_SCALE));
 }
 
-function textMicroAt(months: TerrainMonth[], globalMeanLine: number, li: number, x: number, stillness: number): number {
+// The per-point text-derived height offset. `li` selects which of a
+// month's real poems this particular line reads; `zi` (0..1, caller-
+// supplied — different features have different line counts, so this
+// can't be a fixed global constant any more) spreads that reading's phase
+// slightly across depth so parallel lines within one feature don't all
+// read the identical point of the identical poem.
+function textMicroAt(months: TerrainMonth[], globalMeanLine: number, li: number, zi: number, x: number, stillness: number): number {
   const xNorm = x / SCENE_WIDTH + 0.5;
   const n = months.length;
   if (n === 0) return 0;
@@ -369,13 +223,6 @@ function textMicroAt(months: TerrainMonth[], globalMeanLine: number, li: number,
   if (!poem.lineLens.length) return 0;
   const poemMean = meanOf(poem.lineLens);
 
-  // Origin is blended smoothly across the month boundary (the neighbouring
-  // month's own assigned poem, crossfaded by fractional position) rather
-  // than switching in one step at the midpoint — a hard switch produced a
-  // sharp vertical snap right at the boundary (an isolated poem with an
-  // extreme mean line length would yank one growth-line straight up),
-  // which read as a glitch, not a place. Smoothing it keeps the "each
-  // poem sits at its own real height" idea without the jump.
   const m0 = Math.floor(monthFloat);
   const m1 = Math.min(n - 1, m0 + 1);
   const frac = monthFloat - m0;
@@ -384,8 +231,7 @@ function textMicroAt(months: TerrainMonth[], globalMeanLine: number, li: number,
   const origin1 = originFor(poems1 && poems1.length ? poems1[li % poems1.length] : undefined, globalMeanLine);
   const origin = origin0 + (origin1 - origin0) * frac;
 
-  const localT0 = monthFloat - monthIdx + 0.5; // 0..1 across this month's own territory
-  const zi = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5;
+  const localT0 = monthFloat - monthIdx + 0.5;
   const localT = Math.max(0, Math.min(1, localT0 + (zi - 0.5) * PHASE_SPREAD));
   const sampled = resampleSequence(poem.lineLens, localT);
   const localDev = sampled - poemMean;
@@ -395,9 +241,18 @@ function textMicroAt(months: TerrainMonth[], globalMeanLine: number, li: number,
   return origin + local * (1 - stillness * STILLNESS_DAMPING);
 }
 
-// MILAT seam x — same day-fraction interpolation as the earlier passes,
-// just in scene x-units instead of pixels. Shared boundary-date lookup, not
-// re-derived or hardcoded.
+// Full-strength textured height — the mountain's own function, real base
+// elevation plus real full-amplitude per-poem texture.
+function terrainHeightAt(
+  normalized: number[], months: TerrainMonth[], globalMeanLine: number,
+  li: number, zi: number, x: number, z: number, stillness: number,
+): number {
+  const base = groundHeightAt(normalized, x, z);
+  const micro = textMicroAt(months, globalMeanLine, li, zi, x, stillness);
+  return Math.max(0, base + micro);
+}
+
+// MILAT seam x — same day-fraction interpolation as the earlier passes.
 function seamX(months: TerrainMonth[]): number | null {
   const boundary = provenanceBoundaryDate();
   if (!boundary) return null;
@@ -415,263 +270,403 @@ function seamX(months: TerrainMonth[]): number | null {
   return prevX + (idxX - prevX) * frac;
 }
 
-// The terrain's height at any (x, z) for depth-slice li. The broad taper
-// away from centreline is a plain, fixed cosine falloff — no per-point
-// noise varying how sharply it narrows, because that variation is exactly
-// the "make it look natural" job this pass reassigns to real text. All of
-// this point's texture comes from textMicroAt. Centreline-guaranteed real
-// data is still intact (centerFalloff is exactly 1 at z=0 for every x, so
-// the taper term can never touch the true Catmull-Rom height there); the
-// poem-derived micro term can still nudge it, because it's real data, not
-// decoration.
-function terrainHeightAt(
-  normalized: number[], months: TerrainMonth[], globalMeanLine: number,
-  li: number, x: number, z: number, stillness: number,
-): number {
-  const xNorm = x / SCENE_WIDTH + 0.5;
-  const zNorm = z / (SCENE_DEPTH / 2);
-  const localIntensity = heightAt(normalized, xNorm);
+// ── ecosystem zones — mountain/hill/meadow, decided purely by the real
+// height curve (poem count -> elevation). Walks the real smoothed curve
+// at fine resolution rather than snapping to month indices, so several
+// consecutive months of genuinely similar height merge into one
+// continuous zone automatically. ──
+export type EcosystemMode = "mountain" | "hill" | "meadow";
+export interface EcosystemZone { mode: EcosystemMode; xStart: number; xEnd: number; }
 
-  const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
-  const base = localIntensity * HEIGHT_SCALE * centerFalloff;
+const MOUNTAIN_THRESHOLD = 0.5;
+const HILL_THRESHOLD = 0.2;
+const ZONE_SAMPLES = 240;
+const MIN_ZONE_WIDTH = 0.25;
 
-  const micro = textMicroAt(months, globalMeanLine, li, x, stillness);
-
-  return Math.max(0, base + micro);
+function ecosystemModeAt(normalized: number[], xNorm: number): EcosystemMode {
+  const h = heightAt(normalized, xNorm);
+  if (h >= MOUNTAIN_THRESHOLD) return "mountain";
+  if (h >= HILL_THRESHOLD) return "hill";
+  return "meadow";
 }
 
-// ── The mass — a genuinely different generation technique for peak and
-// dense zones, replacing the previous pass's individual-stroke thicket.
-// The strokes were legible as individual things but read as loose
-// scratches or tufts, not as rock — a real mountain's sense of volume and
-// shadow comes from many contour lines packed close together and
-// overlapping, following the same landform, not from sparse marks with
-// gaps between them. So a mass zone is filled with a dense GRID: many
-// x-running profile lines (the same technique ordinary ground already
-// uses) AND many z-running cross lines, both confined to the zone's own
-// width, sampled and packed far more tightly than anywhere else on the
-// terrain. Overlap and convergence between that many close lines is what
-// reads as a continuous solid mass — line density and crossing standing
-// in for shading, the way a hachured relief map suggests volume with no
-// fill at all.
-//
-// Both x- and z-running lines still use the exact same real height
-// function as ordinary ground (terrainHeightAt: real Catmull-Rom
-// elevation + real per-poem micro-texture + real stillness damping) —
-// this changes how many lines are drawn and how tightly they're packed,
-// not what data decides their shape. Peak zones get the densest, most
-// opaque grid; dense zones (real per-poem word-density, not height) get a
-// visibly lighter version of the same technique — still a mass, just a
-// smaller one, distinct from both the dominant peak and ordinary ground.
-const MASS_X_LINES_PEAK = 90, MASS_Z_LINES_PEAK = 34, MASS_OPACITY_PEAK = 0.62;
-const MASS_X_LINES_DENSE = 46, MASS_Z_LINES_DENSE = 16, MASS_OPACITY_DENSE = 0.4;
-const MASS_SAMPLES = 44;
-
-function massConfigFor(mode: TerrainZoneMode) {
-  return mode === "peak"
-    ? { xLines: MASS_X_LINES_PEAK, zLines: MASS_Z_LINES_PEAK, opacity: MASS_OPACITY_PEAK }
-    : { xLines: MASS_X_LINES_DENSE, zLines: MASS_Z_LINES_DENSE, opacity: MASS_OPACITY_DENSE };
+function classifyEcosystemZones(normalized: number[]): EcosystemZone[] {
+  const zones: EcosystemZone[] = [];
+  if (normalized.length === 0) return zones;
+  let currentMode = ecosystemModeAt(normalized, 0);
+  let startXNorm = 0;
+  for (let i = 1; i <= ZONE_SAMPLES; i++) {
+    const xNorm = i / ZONE_SAMPLES;
+    const mode = ecosystemModeAt(normalized, xNorm);
+    if (mode !== currentMode) {
+      zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (xNorm - 0.5) * SCENE_WIDTH });
+      currentMode = mode;
+      startXNorm = xNorm;
+    }
+  }
+  zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (1 - 0.5) * SCENE_WIDTH });
+  return mergeTinyZones(zones);
 }
 
-function MassField({ months, normalized, globalMeanLine, signals, zones }: {
-  months: TerrainMonth[]; normalized: number[]; globalMeanLine: number; signals: MonthSignals[]; zones: TerrainZone[];
+// A continuous signal grazing a threshold at a shallow angle can produce a
+// hairline sliver zone — real per the classifier's own logic, but too
+// thin to read as anything. Fold any zone narrower than MIN_ZONE_WIDTH
+// into its predecessor, then merge any now-adjacent same-mode zones.
+function mergeTinyZones(zones: EcosystemZone[]): EcosystemZone[] {
+  if (zones.length === 0) return zones;
+  const folded: EcosystemZone[] = [zones[0]];
+  for (let i = 1; i < zones.length; i++) {
+    const z = zones[i];
+    if (z.xEnd - z.xStart < MIN_ZONE_WIDTH) {
+      folded[folded.length - 1] = { ...folded[folded.length - 1], xEnd: z.xEnd };
+    } else {
+      folded.push(z);
+    }
+  }
+  const merged: EcosystemZone[] = [folded[0]];
+  for (let i = 1; i < folded.length; i++) {
+    const z = folded[i];
+    const last = merged[merged.length - 1];
+    if (z.mode === last.mode) {
+      merged[merged.length - 1] = { ...last, xEnd: z.xEnd };
+    } else {
+      merged.push(z);
+    }
+  }
+  return merged;
+}
+
+function insideZoneMode(x: number, zones: EcosystemZone[], mode: EcosystemMode): boolean {
+  return zones.some(z => z.mode === mode && x >= z.xStart && x <= z.xEnd);
+}
+
+// ── point features — the pond and the lone trees. Unlike zones (which
+// are about continuous ground character), these are facts about one
+// specific real month, so they're decided per month directly rather than
+// by walking an interpolated curve. ──
+export interface PointFeature { kind: "pond" | "tree"; x: number; monthIdx: number; }
+
+const POND_HEIGHT_MAX = 0.08;
+const POND_STILLNESS_MIN = 0.5;
+const TREE_SIGNAL_MIN = 0.5;
+const TREE_MIN_SEPARATION = 1.0;
+
+// The one real point that is both the lowest ground in the range AND the
+// calmest real writing — not every low point, only the one that's also
+// genuinely still. A low, restless month stays plain low meadow.
+function findPondFeature(normalized: number[], signals: MonthSignals[]): PointFeature | null {
+  const n = normalized.length;
+  let bestIdx = -1, bestStillness = -1;
+  for (let i = 0; i < n; i++) {
+    if (normalized[i] <= POND_HEIGHT_MAX && signals[i].stillnessIntensity > bestStillness) {
+      bestStillness = signals[i].stillnessIntensity;
+      bestIdx = i;
+    }
+  }
+  if (bestIdx === -1 || bestStillness < POND_STILLNESS_MIN) return null;
+  const xNorm = n > 1 ? bestIdx / (n - 1) : 0.5;
+  return { kind: "pond", x: (xNorm - 0.5) * SCENE_WIDTH, monthIdx: bestIdx };
+}
+
+// Real months with the highest within-poem repetition or ALL-CAPS density
+// — genuinely distinctive individually, not just moderately elevated —
+// become lone trees, greedily chosen strongest-first and skipped if too
+// close to one already placed, so they read as scattered, not a hedge.
+function findTreeFeatures(normalized: number[], signals: MonthSignals[], zones: EcosystemZone[], exclude: Set<number>): PointFeature[] {
+  const n = normalized.length;
+  const candidates = normalized
+    .map((_, i) => ({ i, signal: Math.max(signals[i].repetitionIntensity, signals[i].capsIntensity) }))
+    .filter(c => !exclude.has(c.i) && normalized[c.i] < MOUNTAIN_THRESHOLD && c.signal >= TREE_SIGNAL_MIN)
+    .sort((a, b) => b.signal - a.signal);
+  const chosen: PointFeature[] = [];
+  for (const c of candidates) {
+    const xNorm = n > 1 ? c.i / (n - 1) : 0.5;
+    const x = (xNorm - 0.5) * SCENE_WIDTH;
+    // A candidate month's own real height clears the mountain check, but
+    // the mountain's ZONE (built from the smoothed curve, not snapped to
+    // one month's index) can still extend geometrically past it — a tree
+    // planted there would sit inside the mountain's own dense grid rather
+    // than standing apart from it. Exclude by position, not just by that
+    // month's own value.
+    if (insideZoneMode(x, zones, "mountain")) continue;
+    if (chosen.some(f => Math.abs(f.x - x) < TREE_MIN_SEPARATION)) continue;
+    chosen.push({ kind: "tree", x, monthIdx: c.i });
+  }
+  return chosen;
+}
+
+// ── the mountain — the dense contour-grid technique proven in the last
+// pass, kept for its interior texture, now with a bold pass at the grid's
+// own outer edges so it reads with an actual silhouette against the
+// meadow instead of fading into it. ──
+const MOUNTAIN_X_LINES = 84, MOUNTAIN_Z_LINES = 30, MOUNTAIN_SAMPLES = 46;
+const MOUNTAIN_OPACITY = 0.5, MOUNTAIN_EDGE_OPACITY = 0.95;
+
+function MountainMass({ months, normalized, globalMeanLine, signals, zones }: {
+  months: TerrainMonth[]; normalized: number[]; globalMeanLine: number; signals: MonthSignals[]; zones: EcosystemZone[];
 }) {
-  const groups = useMemo(() => {
-    const peak: number[] = [];
-    const dense: number[] = [];
-
+  const { interior, edges } = useMemo(() => {
+    const interior: number[] = [];
+    const edges: number[] = [];
     for (const zone of zones) {
-      if (zone.mode !== "peak" && zone.mode !== "dense") continue;
+      if (zone.mode !== "mountain") continue;
       const width = zone.xEnd - zone.xStart;
       if (width <= 0) continue;
-      const cfg = massConfigFor(zone.mode);
-      const target = zone.mode === "peak" ? peak : dense;
 
-      // x-running: many depth-slices, each a profile curve confined to
-      // this zone's width — same technique as ordinary ground, just far
-      // denser and packed into a narrower z-range so adjacent lines
-      // overlap rather than reading as separate strokes.
-      for (let li = 0; li < cfg.xLines; li++) {
-        const zt = cfg.xLines > 1 ? li / (cfg.xLines - 1) : 0.5;
-        const z = (zt - 0.5) * SCENE_DEPTH;
+      for (let li = 0; li < MOUNTAIN_X_LINES; li++) {
+        const zi = MOUNTAIN_X_LINES > 1 ? li / (MOUNTAIN_X_LINES - 1) : 0.5;
+        const z = (zi - 0.5) * SCENE_DEPTH;
+        const isEdge = li === 0 || li === MOUNTAIN_X_LINES - 1;
+        const target = isEdge ? edges : interior;
         let prevX: number | null = null, prevY = 0, prevZ = 0;
-        for (let si = 0; si <= MASS_SAMPLES; si++) {
-          const t = si / MASS_SAMPLES;
+        for (let si = 0; si <= MOUNTAIN_SAMPLES; si++) {
+          const t = si / MOUNTAIN_SAMPLES;
           const x = zone.xStart + t * width;
           const xNorm = x / SCENE_WIDTH + 0.5;
           const stillness = signalAt(signals, "stillnessIntensity", xNorm);
-          const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
+          const y = terrainHeightAt(normalized, months, globalMeanLine, li, zi, x, z, stillness);
           if (prevX !== null) target.push(prevX, prevY, prevZ, x, y, z);
           prevX = x; prevY = y; prevZ = z;
         }
       }
-
-      // z-running: cross-sections at fixed x within the zone, sampled
-      // across depth — the orthogonal grid that makes this read as a
-      // mesh with real volume instead of many parallel strokes all
-      // running the same direction, which was exactly the earlier
-      // curve-only pass's "combed" problem.
-      for (let zi = 0; zi < cfg.zLines; zi++) {
-        const xt = cfg.zLines > 1 ? zi / (cfg.zLines - 1) : 0.5;
+      for (let zline = 0; zline < MOUNTAIN_Z_LINES; zline++) {
+        const xt = MOUNTAIN_Z_LINES > 1 ? zline / (MOUNTAIN_Z_LINES - 1) : 0.5;
         const x = zone.xStart + xt * width;
         const xNorm = x / SCENE_WIDTH + 0.5;
         const stillness = signalAt(signals, "stillnessIntensity", xNorm);
+        const isEdge = zline === 0 || zline === MOUNTAIN_Z_LINES - 1;
+        const target = isEdge ? edges : interior;
         let prevZ: number | null = null, prevY = 0, prevX = 0;
-        for (let si = 0; si <= MASS_SAMPLES; si++) {
-          const t = si / MASS_SAMPLES;
+        for (let si = 0; si <= MOUNTAIN_SAMPLES; si++) {
+          const t = si / MOUNTAIN_SAMPLES;
           const z = (t - 0.5) * SCENE_DEPTH;
-          // Reuses the same li-driven poem/phase selection as the x-lines
-          // at the matching depth, so a z-line's height agrees with the
-          // x-lines it crosses rather than reading a different poem there.
-          const li = Math.round(t * (PROFILE_COUNT - 1));
-          const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
+          const li = Math.round(t * (MOUNTAIN_X_LINES - 1));
+          const zi = li / (MOUNTAIN_X_LINES - 1);
+          const y = terrainHeightAt(normalized, months, globalMeanLine, li, zi, x, z, stillness);
           if (prevZ !== null) target.push(prevX, prevY, prevZ, x, y, z);
           prevX = x; prevY = y; prevZ = z;
         }
       }
     }
-    return { peak: new Float32Array(peak), dense: new Float32Array(dense) };
+    return { interior: new Float32Array(interior), edges: new Float32Array(edges) };
   }, [months, normalized, globalMeanLine, signals, zones]);
 
   return (
     <>
-      {groups.peak.length > 0 && (
+      {interior.length > 0 && (
         <lineSegments>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[groups.peak, 3]} />
-          </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={MASS_OPACITY_PEAK} />
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[interior, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={MOUNTAIN_OPACITY} />
         </lineSegments>
       )}
-      {groups.dense.length > 0 && (
+      {edges.length > 0 && (
         <lineSegments>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[groups.dense, 3]} />
-          </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={MASS_OPACITY_DENSE} />
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[edges, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={MOUNTAIN_EDGE_OPACITY} />
         </lineSegments>
       )}
     </>
   );
 }
 
-// ── The landform, drawn as lines — the "basin" and "ordinary" zones only
-// now; "peak" and "dense" zones are MassField's, entirely. Many parallel
-// cross-section silhouettes across the depth axis, each a single
-// continuous strip — no gaps, no dropped points. Nearer lines occlude
-// farther ones through ordinary WebGL depth testing, reinforced by a
-// subtle opacity gradient by depth. A real ALL-CAPS density boosts a
-// line's opacity/weight; a real repetition signal draws a faint mirrored
-// reflection beneath a line, not a floating duplicate above it. All
-// generic functions of the same per-month signals object — no special
-// case for any one month.
-const PROFILE_COUNT = 48;
-const PROFILE_SAMPLES = 100;
+// ── hills — a small number of smooth, nested dome silhouettes across
+// depth, deliberately undramatic: real hills are rounded, not jagged. The
+// real Catmull-Rom curve itself already produces a rounded dome shape for
+// an isolated rise in the data, so hills read correctly just by sampling
+// it cleanly — a light dose of real per-poem texture (much dimmer than
+// the mountain's) keeps them from looking synthetic without competing
+// with the meadow or the peak for attention. ──
+const HILL_ARCS = 5, HILL_SAMPLES = 50, HILL_TEXTURE_SCALE = 0.4, HILL_OPACITY = 0.4;
 
-const REPETITION_ECHO_THRESHOLD = 0.42;
-const REPETITION_ECHO_OFFSET_Y = -0.05; // below the line — a reflection, not a duplicate floating above it
-const REPETITION_ECHO_OFFSET_Z = 0.03;
-
-function ProfileLines({ months, normalized, signals, globalMeanLine, zones }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[]; globalMeanLine: number; zones: TerrainZone[] }) {
+function HillMass({ months, normalized, globalMeanLine, signals, zones }: {
+  months: TerrainMonth[]; normalized: number[]; globalMeanLine: number; signals: MonthSignals[]; zones: EcosystemZone[];
+}) {
   const lines = useMemo(() => {
-    const out: { positions: Float32Array; opacity: number }[] = [];
-    const n = months.length;
-    const monthIdxAt = (pi: number) => {
-      const xNorm = pi / (PROFILE_SAMPLES - 1);
-      return n > 1 ? Math.round(Math.max(0, Math.min(n - 1, xNorm * (n - 1)))) : 0;
-    };
-    const xAt = (pi: number) => (pi / (PROFILE_SAMPLES - 1) - 0.5) * SCENE_WIDTH;
-
-    for (let li = 0; li < PROFILE_COUNT; li++) {
-      const zt = PROFILE_COUNT > 1 ? li / (PROFILE_COUNT - 1) : 0.5; // 0..1
-      const z = (zt - 0.5) * SCENE_DEPTH;
-      const baseOpacity = 0.32 + 0.4 * zt; // nearer slices read slightly brighter
-
-      // Peak and dense zones are rendered entirely by MassField instead —
-      // a genuinely different technique, not this curve retextured. `keep`
-      // marks which samples the curve is allowed to draw; mass-zone
-      // samples are simply not part of this line at all (MassField owns
-      // that width), which is different from the old punctuation-driven
-      // dropout — this is a clean hand-off between two rendering systems
-      // at a real data boundary, not damage.
-      const pts: { x: number; y: number; z: number }[] = [];
-      const caps: number[] = [];
-      const reps: number[] = [];
-      const keep: boolean[] = [];
-      for (let pi = 0; pi < PROFILE_SAMPLES; pi++) {
-        const xNorm = pi / (PROFILE_SAMPLES - 1);
-        const x = xAt(pi);
-        const stillness = signalAt(signals, "stillnessIntensity", xNorm);
-        const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
-        pts.push({ x, y, z });
-        caps.push(signalAt(signals, "capsIntensity", xNorm));
-        reps.push(signalAt(signals, "repetitionIntensity", xNorm));
-        keep.push(!insideMassZone(x, zones));
+    const out: Float32Array[] = [];
+    for (const zone of zones) {
+      if (zone.mode !== "hill") continue;
+      const width = zone.xEnd - zone.xStart;
+      if (width <= 0) continue;
+      for (let a = 0; a < HILL_ARCS; a++) {
+        const zi = HILL_ARCS > 1 ? a / (HILL_ARCS - 1) : 0.5;
+        const z = (zi - 0.5) * SCENE_DEPTH;
+        const pts: number[] = [];
+        for (let si = 0; si <= HILL_SAMPLES; si++) {
+          const t = si / HILL_SAMPLES;
+          const x = zone.xStart + t * width;
+          const xNorm = x / SCENE_WIDTH + 0.5;
+          const stillness = signalAt(signals, "stillnessIntensity", xNorm);
+          const y = groundHeightAt(normalized, x, z) + textMicroAt(months, globalMeanLine, a, zi, x, stillness) * HILL_TEXTURE_SCALE;
+          pts.push(x, y, z);
+        }
+        out.push(new Float32Array(pts));
       }
-
-      // The line is one continuous strip end to end — but opacity and the
-      // reflection trigger need to read LOCALLY (this specific month's real
-      // caps/repetition), not as one average across all 19 months, which
-      // would wash any single month's peak down to the archive mean. So the
-      // draw calls are segmented at month boundaries — each segment's own
-      // local average drives its own opacity/reflection — while adjacent
-      // segments share their boundary point exactly, so there is never a
-      // pixel of gap between them. This is purely a rendering/opacity
-      // subdivision; every sample is still drawn, nothing is dropped.
-      const emit = (from: number, to: number) => {
-        if (to - from < 1) return;
-        const segCaps = caps.slice(from, to + 1);
-        const segReps = reps.slice(from, to + 1);
-        const avgCaps = segCaps.reduce((a, b) => a + b, 0) / segCaps.length;
-        const avgRep = segReps.reduce((a, b) => a + b, 0) / segReps.length;
-        const opacity = Math.max(0.05, Math.min(1, baseOpacity * (1 + avgCaps * 0.6)));
-        const positions = new Float32Array((to - from + 1) * 3);
-        for (let k = from; k <= to; k++) {
-          const j = (k - from) * 3;
-          positions[j] = pts[k].x; positions[j + 1] = pts[k].y; positions[j + 2] = pts[k].z;
-        }
-        out.push({ positions, opacity });
-
-        // Reflection: a real repetition signal draws a second, faint,
-        // mirrored trace beneath the line — the poem's own repeated words
-        // read as a reflection in still ground, not a hand-placed symbol.
-        if (avgRep > REPETITION_ECHO_THRESHOLD) {
-          const t = (avgRep - REPETITION_ECHO_THRESHOLD) / (1 - REPETITION_ECHO_THRESHOLD);
-          const echo = new Float32Array(positions.length);
-          for (let k = 0; k < positions.length; k += 3) {
-            echo[k]     = positions[k];
-            echo[k + 1] = positions[k + 1] + REPETITION_ECHO_OFFSET_Y * t;
-            echo[k + 2] = positions[k + 2] + REPETITION_ECHO_OFFSET_Z * t;
-          }
-          out.push({ positions: echo, opacity: opacity * 0.42 * t });
-        }
-      };
-
-      let segStart = keep[0] ? 0 : -1;
-      for (let pi = 1; pi < PROFILE_SAMPLES; pi++) {
-        if (!keep[pi]) {
-          if (segStart !== -1) { emit(segStart, pi - 1); segStart = -1; }
-          continue; // inside a peak/dense zone — MassField draws here instead
-        }
-        if (segStart === -1) { segStart = pi; continue; } // first kept sample after a region
-        if (monthIdxAt(pi) !== monthIdxAt(pi - 1)) {
-          emit(segStart, pi - 1);
-          segStart = pi - 1; // shared boundary point — the next segment starts here too, so nothing gaps
-        }
-      }
-      if (segStart !== -1) emit(segStart, PROFILE_SAMPLES - 1);
     }
     return out;
-  }, [months, normalized, signals, globalMeanLine, zones]);
+  }, [months, normalized, globalMeanLine, signals, zones]);
 
   return (
     <>
-      {lines.map((l, i) => (
+      {lines.map((positions, i) => (
         <line key={i}>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[l.positions, 3]} />
-          </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={l.opacity} />
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={HILL_OPACITY} />
+        </line>
+      ))}
+    </>
+  );
+}
+
+// ── meadow — the calm connective ground, only where nothing else has
+// already claimed the width: not the mountain, not a hill, not inside the
+// pond's own shoreline. Sparse, low-contrast, deliberately unremarkable —
+// real per-poem texture is present but heavily damped, so it doesn't read
+// as data-driven jag competing with the features that are meant to stand
+// out. ──
+const GROUND_LINES = 14, GROUND_SAMPLES = 90, MEADOW_TEXTURE_SCALE = 0.3, MEADOW_OPACITY = 0.2;
+
+function GroundField({ months, normalized, globalMeanLine, signals, zones, pond }: {
+  months: TerrainMonth[]; normalized: number[]; globalMeanLine: number; signals: MonthSignals[]; zones: EcosystemZone[]; pond: PointFeature | null;
+}) {
+  const lines = useMemo(() => {
+    const out: Float32Array[] = [];
+    for (let li = 0; li < GROUND_LINES; li++) {
+      const zi = GROUND_LINES > 1 ? li / (GROUND_LINES - 1) : 0.5;
+      const z = (zi - 0.5) * SCENE_DEPTH;
+      let current: number[] = [];
+      const flush = () => { if (current.length >= 6) out.push(new Float32Array(current)); current = []; };
+      for (let si = 0; si <= GROUND_SAMPLES; si++) {
+        const xNorm = si / GROUND_SAMPLES;
+        const x = (xNorm - 0.5) * SCENE_WIDTH;
+        const inMeadow = insideZoneMode(x, zones, "meadow");
+        const inPond = pond ? Math.hypot(x - pond.x, z) < POND_RADIUS : false;
+        if (!inMeadow || inPond) { flush(); continue; }
+        const stillness = signalAt(signals, "stillnessIntensity", xNorm);
+        const y = groundHeightAt(normalized, x, z) + textMicroAt(months, globalMeanLine, li, zi, x, stillness) * MEADOW_TEXTURE_SCALE;
+        current.push(x, y, z);
+      }
+      flush();
+    }
+    return out;
+  }, [months, normalized, globalMeanLine, signals, zones, pond]);
+
+  return (
+    <>
+      {lines.map((positions, i) => (
+        <line key={i}>
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={MEADOW_OPACITY} />
+        </line>
+      ))}
+    </>
+  );
+}
+
+// ── the pond — a flat shoreline ellipse at a fixed water level (real
+// ground height at the pond's centre, minus a real depression depth), and
+// concentric ripple rings inside it. Ring count is driven by the pond
+// month's own real repetition intensity — the more that specific poem
+// repeated its own words, the more rings ripple out from the centre, a
+// literal rather than abstract echo of the same signal earlier passes
+// used for a subtler reflection effect. Flat and level, unlike land,
+// which is what reads as water rather than a dip in the ground. ──
+const POND_RADIUS = 0.6, POND_DEPTH = 0.32;
+const POND_RIPPLE_MIN = 2, POND_RIPPLE_MAX = 5;
+const POND_SHORE_SEGS = 40;
+
+function PondFeature({ pond, normalized, signals }: { pond: PointFeature | null; normalized: number[]; signals: MonthSignals[] }) {
+  const rings = useMemo(() => {
+    if (!pond) return [];
+    // Clamped so the water level can never sink below the carpet — Jan
+    // 2026's own real ground height is only ~0.05 units above baseline,
+    // so a fixed POND_DEPTH subtracted unconditionally pushed the water
+    // to -0.27, well beneath the carpet plane (-0.03) and hidden behind
+    // it entirely. Caught by checking the actual number, not by
+    // eyeballing the render — the zoomed crop just showed empty ground.
+    const waterY = Math.max(CARPET_Y + 0.02, groundHeightAt(normalized, pond.x, 0) - POND_DEPTH);
+    const rep = signalAt(signals, "repetitionIntensity", pond.x / SCENE_WIDTH + 0.5);
+    const ringCount = Math.round(POND_RIPPLE_MIN + (POND_RIPPLE_MAX - POND_RIPPLE_MIN) * rep);
+    const out: { positions: Float32Array; opacity: number }[] = [];
+    for (let r = 0; r <= ringCount; r++) {
+      const radius = r === 0 ? POND_RADIUS : POND_RADIUS * (1 - (r / (ringCount + 1)) * 0.7);
+      const pts: number[] = [];
+      for (let s = 0; s <= POND_SHORE_SEGS; s++) {
+        const a = (s / POND_SHORE_SEGS) * Math.PI * 2;
+        pts.push(pond.x + Math.cos(a) * radius, waterY, Math.sin(a) * radius * 0.62);
+      }
+      out.push({ positions: new Float32Array(pts), opacity: r === 0 ? 0.85 : 0.4 });
+    }
+    return out;
+  }, [pond, normalized, signals]);
+
+  if (!pond) return null;
+  return (
+    <>
+      {rings.map((r, i) => (
+        <line key={i}>
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[r.positions, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={r.opacity} />
+        </line>
+      ))}
+    </>
+  );
+}
+
+// ── lone trees — a trunk plus a canopy loop, sitting at each tree
+// feature's real ground height. The canopy's edge is jittered around the
+// loop by that specific month's real, concatenated line-length sequence
+// (resampled by angle instead of by x-position, the same resampling
+// technique the rest of this file uses for texture) — an organically
+// uneven canopy outline whose particular unevenness is that one month's
+// own real writing, not a generic wobble. ──
+// Trunk taller and canopy jag capped tighter than the first pass — verified
+// via the rasterizer that the original proportions (short trunk, jag
+// uncapped) produced a spiky asterisk with no visible trunk, not a tree.
+// A real per-poem line-length sequence can have wide swings (a prose-style
+// poem's one long run-on "line" among many short ones), and without a cap
+// that swing translated directly into a canopy point flying out past the
+// loop's own centre — capping it at a fraction of the radius keeps the
+// outline organically uneven without ever producing a self-intersecting
+// star.
+const TREE_TRUNK_HEIGHT = 0.42, TREE_CANOPY_RADIUS = 0.22, TREE_CANOPY_SEGS = 22;
+const TREE_CANOPY_JAG_SCALE = 0.018, TREE_CANOPY_JAG_CAP = 0.4; // cap as a fraction of the radius
+
+function LoneTrees({ trees, months, normalized }: { trees: PointFeature[]; months: TerrainMonth[]; normalized: number[] }) {
+  const items = useMemo(() => {
+    const out: { positions: Float32Array; opacity: number }[] = [];
+    for (const t of trees) {
+      const groundY = groundHeightAt(normalized, t.x, 0);
+      const trunkTop = groundY + TREE_TRUNK_HEIGHT;
+      out.push({ positions: new Float32Array([t.x, groundY, 0, t.x, trunkTop, 0]), opacity: 0.75 });
+
+      const lens: number[] = [];
+      for (const p of months[t.monthIdx].poems) lens.push(...p.lineLens);
+      const seq = lens.length ? lens : [1];
+      const mean = meanOf(seq);
+      const jagCap = TREE_CANOPY_RADIUS * TREE_CANOPY_JAG_CAP;
+      const canopyCenterY = trunkTop + TREE_CANOPY_RADIUS; // sits fully above the trunk top, no overlap
+      const pts: number[] = [];
+      for (let s = 0; s <= TREE_CANOPY_SEGS; s++) {
+        const tt = s / TREE_CANOPY_SEGS;
+        const a = tt * Math.PI * 2;
+        const sampled = resampleSequence(seq, tt);
+        const dev = sampled - mean;
+        const jagRaw = Math.sign(dev) * Math.sqrt(Math.abs(dev)) * TREE_CANOPY_JAG_SCALE;
+        const jag = Math.max(-jagCap, Math.min(jagCap, jagRaw));
+        const r = TREE_CANOPY_RADIUS + jag;
+        pts.push(t.x + Math.cos(a) * r, canopyCenterY + Math.sin(a) * r * 0.8, Math.sin(a) * r * 0.4);
+      }
+      out.push({ positions: new Float32Array(pts), opacity: 0.65 });
+    }
+    return out;
+  }, [trees, months, normalized]);
+
+  return (
+    <>
+      {items.map((it, i) => (
+        <line key={i}>
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[it.positions, 3]} /></bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={it.opacity} />
         </line>
       ))}
     </>
@@ -703,10 +698,8 @@ function BackgroundField() {
   );
 }
 
-// ── The carpet — a platform the mountain sits on, kept from the prior
-// pass. Proportions unchanged (they scale with the container automatically
-// via the perspective camera), still extends beyond the terrain's own
-// footprint, still meets the terrain's y=0 baseline. ──
+// ── The carpet — a platform the landscape sits on, kept from the prior
+// pass. ──
 const CARPET_WIDTH = SCENE_WIDTH * 1.9;
 const CARPET_DEPTH = SCENE_DEPTH * 2.4;
 const CARPET_Y = -0.03;
@@ -715,9 +708,6 @@ function CarpetSurface() {
   return (
     <mesh position={[0, CARPET_Y - 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[CARPET_WIDTH, CARPET_DEPTH]} />
-      {/* Low opacity — verified via the rasterizer that 0.55 read as a
-          solid dark rectangle dominating the frame, not a surface the
-          mountain quietly rests on. */}
       <meshStandardMaterial color="#0d0f0a" roughness={0.95} metalness={0} transparent opacity={0.22} />
     </mesh>
   );
@@ -747,8 +737,7 @@ function CarpetField() {
 
 // A ring of small tick marks at the carpet's rim, inside the rotating
 // assembly — the visible, minimal, unlabeled affordance that this is a
-// turntable: as the reader drags, the ring visibly sweeps with everything
-// else.
+// turntable.
 function TurntableRing() {
   const TICKS = 16;
   const RADIUS = Math.min(CARPET_WIDTH, CARPET_DEPTH) * 0.44;
@@ -772,9 +761,7 @@ function TurntableRing() {
   );
 }
 
-// A faint seam line — the MILAT boundary. No hover-reveal this pass
-// (discovery signs are deprioritized); just a quiet vertical crossing,
-// consistent with the line-drawn language everything else here now uses.
+// A faint seam line — the MILAT boundary.
 function SeamMarker({ x }: { x: number }) {
   const positions = useMemo(() => new Float32Array([x, 0, 0, x, HEIGHT_SCALE * 1.3, 0]), [x]);
   return (
@@ -806,9 +793,8 @@ const DEFAULT_CAM_POS: [number, number, number] = (() => {
   ];
 })();
 
-// Light — kept for the carpet's benefit (its MeshStandardMaterial still
-// responds to it); the terrain itself no longer uses any lit material, so
-// this has no effect on the mountain's own lines.
+// Light — kept for the carpet's benefit; the terrain itself uses no lit
+// material, so this has no effect on the landscape's own lines.
 const LIGHT_ELEVATION_DEG = 38;
 const LIGHT_AZIMUTH_DEG   = 65;
 const LIGHT_DISTANCE      = SCENE_WIDTH * 1.5;
@@ -823,10 +809,9 @@ const DIRECTIONAL_LIGHT_POS: [number, number, number] = (() => {
 })();
 
 // Reads rotationRef every frame and applies it to a group wrapping the
-// whole turntable assembly (carpet + terrain lines) — driven by DOM-level
-// drag handlers on LandingTerrain's outer wrapper, not R3F's own pointer
-// events, so "drag anywhere on the canvas" works regardless of what's
-// under the cursor. Applies residual spin (inertia) on release.
+// whole turntable assembly — driven by DOM-level drag handlers on
+// LandingTerrain's outer wrapper, not R3F's own pointer events, so "drag
+// anywhere on the canvas" works regardless of what's under the cursor.
 function TurntableAssembly({
   rotationRef, draggingRef, velocityRef, children,
 }: {
@@ -880,8 +865,13 @@ function Scene({
   }, [months]);
   const signals = useMemo(() => computeMonthSignals(months), [months]);
   const globalMeanLine = useMemo(() => computeGlobalMeanLine(months), [months]);
-  const densitySignal = useMemo(() => computeDensitySignal(months, normalized), [months, normalized]);
-  const zones = useMemo(() => classifyZones(normalized, densitySignal), [normalized, densitySignal]);
+  const zones = useMemo(() => classifyEcosystemZones(normalized), [normalized]);
+  const pond = useMemo(() => findPondFeature(normalized, signals), [normalized, signals]);
+  const trees = useMemo(() => {
+    const exclude = new Set<number>();
+    if (pond) exclude.add(pond.monthIdx);
+    return findTreeFeatures(normalized, signals, zones, exclude);
+  }, [normalized, signals, zones, pond]);
 
   return (
     <>
@@ -895,8 +885,11 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <ProfileLines months={months} normalized={normalized} signals={signals} globalMeanLine={globalMeanLine} zones={zones} />
-        <MassField months={months} normalized={normalized} globalMeanLine={globalMeanLine} signals={signals} zones={zones} />
+        <GroundField months={months} normalized={normalized} globalMeanLine={globalMeanLine} signals={signals} zones={zones} pond={pond} />
+        <HillMass months={months} normalized={normalized} globalMeanLine={globalMeanLine} signals={signals} zones={zones} />
+        <MountainMass months={months} normalized={normalized} globalMeanLine={globalMeanLine} signals={signals} zones={zones} />
+        <PondFeature pond={pond} normalized={normalized} signals={signals} />
+        <LoneTrees trees={trees} months={months} normalized={normalized} />
         {seam != null && <SeamMarker x={seam} />}
       </TurntableAssembly>
     </>
@@ -950,11 +943,6 @@ export default function LandingTerrain({ months, dim = false }: Props) {
       onPointerCancel={onPointerUp}
       onWheel={onWheel}
       style={{
-        // A normal, bounded, in-flow block — not a full-viewport fixed
-        // backdrop. Nothing else on the page spatially overlaps this box,
-        // which is what actually fixes both the occlusion bug and the
-        // "canvas eating events meant for it" bug: there's no longer a
-        // foreground layer sitting on top of it at all.
         width: "100%",
         maxWidth: "880px",
         height: "clamp(340px, 52vh, 540px)",
