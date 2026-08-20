@@ -103,74 +103,132 @@ function heightAt(values: number[], xNorm: number): number {
   return catmullRom(p0, p1, p2, p3, t);
 }
 
-// A deterministic hash — reintroduced for this pass, but for a narrowly
-// different job than any earlier use: placing individual thicket strokes
-// within a region (which candidate slot gets a stroke, its jitter, its
-// lean direction). This is layout scatter, the same category as the
-// mulberry32 dot-field scatter BackgroundField/CarpetField already use —
-// not shape-generating noise. The shape-generating jaggedness this file
-// removed a pass ago (fbm2D/value-noise driving height/character) stays
-// removed; nothing here decides height, jag amplitude, or frequency.
-function hash2D(ix: number, iy: number, seed: number): number {
-  let h = (ix * 374761393 + iy * 668265263 + seed * 2246822519) | 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  h = h ^ (h >>> 16);
-  return ((h >>> 0) % 1000000) / 1000000;
+// ── terrain zones — four distinct, deliberately different rendering modes
+// decided per point from real data, not one continuously-blended system.
+// The previous pass (a single blended curve/stroke system varying by
+// height and text signals) produced spiky tufts at the tall/dense end and
+// thin ripples at the low end — neither committed fully to reading as
+// anything in particular. This picks one of a small number of modes per
+// region and renders it fully as that mode:
+//
+// - "peak": the top of the real height range (this archive: Feb 2025
+//   alone clears the threshold) — dense contour mass (see MassField).
+// - "basin": the bottom of the real height range (Jan 2026 and a couple
+//   of other very-low-count months) — the calm curve technique, unchanged
+//   from the previous two passes.
+// - "dense": moderate height but real per-poem word-density well above
+//   the archive's typical range — a lighter version of the same contour-
+//   mass technique as peaks, distinct from both the dominant peak and
+//   ordinary ground.
+// - "ordinary": everything else — the connective tissue, unremarkable
+//   rolling ground, the plain curve technique.
+//
+// Height decides peak/basin first (the same real Catmull-Rom curve that
+// already drives elevation); word-density only gets a say among the
+// months height didn't already claim, which is why Jan 2026 — the
+// archive's single highest word-density month, one 1,104-word poem —
+// stays a basin rather than becoming "dense": it's already the lowest
+// point by height, and that real fact takes priority.
+export type TerrainZoneMode = "peak" | "basin" | "dense" | "ordinary";
+export interface TerrainZone { mode: TerrainZoneMode; xStart: number; xEnd: number; }
+
+const PEAK_THRESHOLD = 0.5;
+const BASIN_THRESHOLD = 0.08;
+const DENSE_THRESHOLD = 0.55;
+const ZONE_SAMPLES = 240;
+
+function computeDensitySignal(months: TerrainMonth[], normalized: number[]): number[] {
+  const wordDensity = months.map(m => (m.count > 0 ? m.words / m.count : 0));
+  const logs = wordDensity.map(v => Math.log(v + 1e-4));
+  const eligible = logs.filter((_, i) => normalized[i] > BASIN_THRESHOLD && normalized[i] < PEAK_THRESHOLD);
+  const minL = eligible.length ? Math.min(...eligible) : 0;
+  const maxL = eligible.length ? Math.max(...eligible) : 1;
+  const range = maxL - minL || 1;
+  return logs.map(l => Math.max(0, Math.min(1, (l - minL) / range)));
 }
 
-// ── thicket regions — contiguous x-ranges where the real elevation curve
-// (poem count -> height, already Catmull-Rom smoothed) stays above a
-// density threshold. Reusing that exact curve as the density signal ties
-// "which stretches get the thicket treatment" directly to the same real
-// data already driving height — a tall stretch IS a busy stretch. Because
-// this walks the smooth curve rather than snapping to month indices,
-// several consecutive high-density months merge into one continuous
-// region automatically when the data stays high across all of them, and
-// the region's start/end are the real threshold-crossing points, not
-// month boundaries — similarity in the data produces continuity in the
-// terrain, the way it should.
-export interface ThicketRegion { xStart: number; xEnd: number; }
+// Linear interpolation of a per-month scalar across x — same style as
+// signalAt below, standalone here since it's needed before MonthSignals
+// exists in the data flow.
+function monthScalarAt(values: number[], xNorm: number): number {
+  const n = values.length;
+  if (n === 0) return 0;
+  if (n === 1) return values[0];
+  const clamped = Math.max(0, Math.min(1, xNorm));
+  const scaled = clamped * (n - 1);
+  const i = Math.floor(scaled);
+  const t = scaled - i;
+  const a = values[Math.min(n - 1, i)];
+  const b = values[Math.min(n - 1, i + 1)];
+  return a + (b - a) * t;
+}
 
-const THICKET_THRESHOLD = 0.3;
-const THICKET_SAMPLES = 240;
+function modeAt(normalized: number[], densitySignal: number[], xNorm: number): TerrainZoneMode {
+  const h = heightAt(normalized, xNorm);
+  if (h >= PEAK_THRESHOLD) return "peak";
+  if (h <= BASIN_THRESHOLD) return "basin";
+  if (monthScalarAt(densitySignal, xNorm) >= DENSE_THRESHOLD) return "dense";
+  return "ordinary";
+}
 
-function findThicketRegions(normalized: number[]): ThicketRegion[] {
-  const regions: ThicketRegion[] = [];
-  if (normalized.length === 0) return regions;
-  let prevXNorm = 0;
-  let prevVal = heightAt(normalized, 0);
-  // If the curve is already above threshold at x=0 (a busy first month,
-  // as this archive's Feb 2025 is), the region starts at the very edge —
-  // there's no real crossing to find there. Missing this case made the
-  // scan treat the first above-threshold SAMPLE as an "entry" and
-  // extrapolate a crossing point from two values that were both already
-  // above the line, producing a nonsensical reversed region (xStart >
-  // xEnd). Caught by the rasterizer before shipping.
-  let inRegion = prevVal >= THICKET_THRESHOLD;
+// Walks the full x domain at fine resolution and groups it into contiguous
+// same-mode runs. Because this walks the real smoothed signals rather than
+// snapping to month indices, several consecutive months with genuinely
+// similar character merge into one continuous zone automatically — a real
+// stretch of high density reads as one mass, not several adjacent-but-
+// separate ones just because it spans more than one data point.
+function classifyZones(normalized: number[], densitySignal: number[]): TerrainZone[] {
+  const zones: TerrainZone[] = [];
+  if (normalized.length === 0) return zones;
+  let currentMode = modeAt(normalized, densitySignal, 0);
   let startXNorm = 0;
-  const crossing = (x0: number, v0: number, x1: number, v1: number) =>
-    v1 === v0 ? x1 : x0 + (x1 - x0) * (THICKET_THRESHOLD - v0) / (v1 - v0);
-
-  for (let i = 1; i <= THICKET_SAMPLES; i++) {
-    const xNorm = i / THICKET_SAMPLES;
-    const val = heightAt(normalized, xNorm);
-    const above = val >= THICKET_THRESHOLD;
-    if (above && !inRegion) {
-      startXNorm = Math.max(0, Math.min(1, crossing(prevXNorm, prevVal, xNorm, val)));
-      inRegion = true;
-    } else if (!above && inRegion) {
-      const endXNorm = Math.max(0, Math.min(1, crossing(prevXNorm, prevVal, xNorm, val)));
-      regions.push({ xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (endXNorm - 0.5) * SCENE_WIDTH });
-      inRegion = false;
+  for (let i = 1; i <= ZONE_SAMPLES; i++) {
+    const xNorm = i / ZONE_SAMPLES;
+    const mode = modeAt(normalized, densitySignal, xNorm);
+    if (mode !== currentMode) {
+      zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (xNorm - 0.5) * SCENE_WIDTH });
+      currentMode = mode;
+      startXNorm = xNorm;
     }
-    prevXNorm = xNorm; prevVal = val;
   }
-  if (inRegion) regions.push({ xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (1 - 0.5) * SCENE_WIDTH });
-  return regions;
+  zones.push({ mode: currentMode, xStart: (startXNorm - 0.5) * SCENE_WIDTH, xEnd: (1 - 0.5) * SCENE_WIDTH });
+  return mergeTinyZones(zones);
 }
 
-function insideAnyRegion(x: number, regions: ThicketRegion[]): boolean {
-  return regions.some(r => x >= r.xStart && x <= r.xEnd);
+// The continuous signals sometimes graze a threshold at a shallow angle
+// rather than crossing it cleanly, producing a hairline sliver zone
+// (occasionally under a tenth of a scene unit wide) — real per the
+// classifier's own logic, but the opposite of "commit fully to each
+// mode": a sliver that thin can't read as anything, dense or otherwise.
+// Fold any zone narrower than MIN_ZONE_WIDTH into whichever zone precedes
+// it, then merge any now-adjacent same-mode zones the folding produced.
+const MIN_ZONE_WIDTH = 0.25;
+function mergeTinyZones(zones: TerrainZone[]): TerrainZone[] {
+  if (zones.length === 0) return zones;
+  const folded: TerrainZone[] = [zones[0]];
+  for (let i = 1; i < zones.length; i++) {
+    const z = zones[i];
+    if (z.xEnd - z.xStart < MIN_ZONE_WIDTH) {
+      folded[folded.length - 1] = { ...folded[folded.length - 1], xEnd: z.xEnd };
+    } else {
+      folded.push(z);
+    }
+  }
+  const merged: TerrainZone[] = [folded[0]];
+  for (let i = 1; i < folded.length; i++) {
+    const z = folded[i];
+    const last = merged[merged.length - 1];
+    if (z.mode === last.mode) {
+      merged[merged.length - 1] = { ...last, xEnd: z.xEnd };
+    } else {
+      merged.push(z);
+    }
+  }
+  return merged;
+}
+
+function insideMassZone(x: number, zones: TerrainZone[]): boolean {
+  return zones.some(z => (z.mode === "peak" || z.mode === "dense") && x >= z.xStart && x <= z.xEnd);
 }
 
 // ── text signals — derived from the actual poems, not from noise ──
@@ -382,140 +440,131 @@ function terrainHeightAt(
   return Math.max(0, base + micro);
 }
 
-// ── The thicket — a genuinely different generation technique for dense
-// stretches, not a retuned version of the curve technique. A continuous
-// profile curve, however textured, is still one surface combed in one
-// direction; it can't read as "many individual things at different
-// depths" no matter how its height varies. So a thicket region is instead
-// filled with many short, independent strokes — not full-width curves —
-// each with its own position, depth, and lean angle, some skipped
-// entirely to leave real sightlines through. Ordinary WebGL depth testing
-// does the rest: strokes placed at genuinely scattered z, not a regular
-// 48-slice grid, correctly occlude each other exactly as objects at
-// different distances should.
+// ── The mass — a genuinely different generation technique for peak and
+// dense zones, replacing the previous pass's individual-stroke thicket.
+// The strokes were legible as individual things but read as loose
+// scratches or tufts, not as rock — a real mountain's sense of volume and
+// shadow comes from many contour lines packed close together and
+// overlapping, following the same landform, not from sparse marks with
+// gaps between them. So a mass zone is filled with a dense GRID: many
+// x-running profile lines (the same technique ordinary ground already
+// uses) AND many z-running cross lines, both confined to the zone's own
+// width, sampled and packed far more tightly than anywhere else on the
+// terrain. Overlap and convergence between that many close lines is what
+// reads as a continuous solid mass — line density and crossing standing
+// in for shading, the way a hachured relief map suggests volume with no
+// fill at all.
 //
-// Still entirely text-driven: stroke COUNT scales with the real number of
-// poems the region spans (busier -> more strokes); stroke ANGLE variance
-// scales with the real line-length variance of those poems' own text
-// (more internally erratic poems -> more erratic lean); LENGTH and
-// placement use a deterministic hash purely for layout scatter (the same
-// role mulberry32 already plays for the background/carpet dot fields) —
-// it decides WHERE among the data-sized budget a stroke sits, never how
-// tall, jagged, or frequent the ground itself is.
-function monthsOverlappingRegion(months: TerrainMonth[], region: ThicketRegion): TerrainMonth[] {
-  const n = months.length;
-  const out: TerrainMonth[] = [];
-  for (let i = 0; i < n; i++) {
-    const xNorm = n > 1 ? i / (n - 1) : 0.5;
-    const x = (xNorm - 0.5) * SCENE_WIDTH;
-    if (x >= region.xStart - 1e-6 && x <= region.xEnd + 1e-6) out.push(months[i]);
-  }
-  return out;
+// Both x- and z-running lines still use the exact same real height
+// function as ordinary ground (terrainHeightAt: real Catmull-Rom
+// elevation + real per-poem micro-texture + real stillness damping) —
+// this changes how many lines are drawn and how tightly they're packed,
+// not what data decides their shape. Peak zones get the densest, most
+// opaque grid; dense zones (real per-poem word-density, not height) get a
+// visibly lighter version of the same technique — still a mass, just a
+// smaller one, distinct from both the dominant peak and ordinary ground.
+const MASS_X_LINES_PEAK = 90, MASS_Z_LINES_PEAK = 34, MASS_OPACITY_PEAK = 0.62;
+const MASS_X_LINES_DENSE = 46, MASS_Z_LINES_DENSE = 16, MASS_OPACITY_DENSE = 0.4;
+const MASS_SAMPLES = 44;
+
+function massConfigFor(mode: TerrainZoneMode) {
+  return mode === "peak"
+    ? { xLines: MASS_X_LINES_PEAK, zLines: MASS_Z_LINES_PEAK, opacity: MASS_OPACITY_PEAK }
+    : { xLines: MASS_X_LINES_DENSE, zLines: MASS_Z_LINES_DENSE, opacity: MASS_OPACITY_DENSE };
 }
 
-function regionLineVariance(months: TerrainMonth[], region: ThicketRegion): number {
-  const overlap = monthsOverlappingRegion(months, region);
-  const all: number[] = [];
-  for (const m of overlap) for (const p of m.poems) all.push(...p.lineLens);
-  if (all.length < 2) return 0;
-  const mean = meanOf(all);
-  return all.reduce((a, b) => a + (b - mean) ** 2, 0) / all.length;
-}
+function MassField({ months, normalized, globalMeanLine, signals, zones }: {
+  months: TerrainMonth[]; normalized: number[]; globalMeanLine: number; signals: MonthSignals[]; zones: TerrainZone[];
+}) {
+  const groups = useMemo(() => {
+    const peak: number[] = [];
+    const dense: number[] = [];
 
-const STROKES_PER_POEM = 3;
-const MIN_STROKES = 36;
-const MAX_STROKES = 260;
-const STROKE_SKIP_RATE = 0.32;   // fraction of candidate slots left empty — real sightlines through
-const ANGLE_VARIANCE_SCALE = 40; // divides sqrt(line-length variance) down to a radians range
-const ANGLE_MIN = 0.12, ANGLE_MAX_CAP = 0.85;
-const STALK_MIN = 0.12, STALK_MAX = 0.42; // fraction of HEIGHT_SCALE
-const OPACITY_TIERS = 4;
+    for (const zone of zones) {
+      if (zone.mode !== "peak" && zone.mode !== "dense") continue;
+      const width = zone.xEnd - zone.xStart;
+      if (width <= 0) continue;
+      const cfg = massConfigFor(zone.mode);
+      const target = zone.mode === "peak" ? peak : dense;
 
-function angleMaxFor(variance: number): number {
-  const compressed = Math.sqrt(variance);
-  return Math.max(ANGLE_MIN, Math.min(ANGLE_MAX_CAP, compressed / ANGLE_VARIANCE_SCALE));
-}
-
-function groundHeightAt(normalized: number[], x: number, z: number): number {
-  const xNorm = x / SCENE_WIDTH + 0.5;
-  const zNorm = z / (SCENE_DEPTH / 2);
-  const localIntensity = heightAt(normalized, xNorm);
-  const centerFalloff = Math.max(0, Math.cos(zNorm * Math.PI / 2));
-  return localIntensity * HEIGHT_SCALE * centerFalloff;
-}
-
-function ThicketField({ months, normalized, regions }: { months: TerrainMonth[]; normalized: number[]; regions: ThicketRegion[] }) {
-  const tierPositions = useMemo(() => {
-    const buckets: number[][] = Array.from({ length: OPACITY_TIERS }, () => []);
-    regions.forEach((region, ri) => {
-      const overlap = monthsOverlappingRegion(months, region);
-      const totalPoems = overlap.reduce((a, m) => a + m.count, 0);
-      const strokeCount = Math.max(MIN_STROKES, Math.min(MAX_STROKES, Math.round(totalPoems * STROKES_PER_POEM)));
-      const angleMax = angleMaxFor(regionLineVariance(months, region));
-      const width = region.xEnd - region.xStart;
-      if (width <= 0) return;
-
-      for (let s = 0; s < strokeCount; s++) {
-        const seedBase = ri * 100000 + s;
-        const hKeep   = hash2D(seedBase, 1, 5101);
-        if (hKeep < STROKE_SKIP_RATE) continue; // an empty slot — a sightline through
-
-        const hx     = hash2D(seedBase, 2, 5102);
-        const hz     = hash2D(seedBase, 3, 5103);
-        const hLean  = hash2D(seedBase, 4, 5104);
-        const hAngle = hash2D(seedBase, 5, 5105);
-        const hLen   = hash2D(seedBase, 6, 5106);
-        const hJit   = hash2D(seedBase, 7, 5107);
-
-        const x = region.xStart + hx * width;
-        const z = (hz - 0.5) * SCENE_DEPTH;
-        const groundY = groundHeightAt(normalized, x, z) + hJit * 0.04;
-
-        const localIntensity = heightAt(normalized, x / SCENE_WIDTH + 0.5);
-        const stalkFrac = STALK_MIN + (STALK_MAX - STALK_MIN) * hLen;
-        const length = stalkFrac * HEIGHT_SCALE * (0.4 + 0.6 * localIntensity);
-        const angle = (hAngle * 2 - 1) * angleMax; // tilt from vertical, both directions
-        const leanDir = hLean * Math.PI * 2;       // which way it leans, not just how much
-
-        const dx = Math.sin(angle) * Math.cos(leanDir) * length;
-        const dz = Math.sin(angle) * Math.sin(leanDir) * length;
-        const dy = Math.cos(angle) * length;
-
-        const zNorm = z / (SCENE_DEPTH / 2);
-        const zt = Math.max(0, Math.min(1, (zNorm + 1) / 2)); // 0..1 across depth, far -> near
-        const tier = Math.max(0, Math.min(OPACITY_TIERS - 1, Math.floor(zt * OPACITY_TIERS)));
-        buckets[tier].push(x, groundY, z, x + dx, groundY + dy, z + dz);
+      // x-running: many depth-slices, each a profile curve confined to
+      // this zone's width — same technique as ordinary ground, just far
+      // denser and packed into a narrower z-range so adjacent lines
+      // overlap rather than reading as separate strokes.
+      for (let li = 0; li < cfg.xLines; li++) {
+        const zt = cfg.xLines > 1 ? li / (cfg.xLines - 1) : 0.5;
+        const z = (zt - 0.5) * SCENE_DEPTH;
+        let prevX: number | null = null, prevY = 0, prevZ = 0;
+        for (let si = 0; si <= MASS_SAMPLES; si++) {
+          const t = si / MASS_SAMPLES;
+          const x = zone.xStart + t * width;
+          const xNorm = x / SCENE_WIDTH + 0.5;
+          const stillness = signalAt(signals, "stillnessIntensity", xNorm);
+          const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
+          if (prevX !== null) target.push(prevX, prevY, prevZ, x, y, z);
+          prevX = x; prevY = y; prevZ = z;
+        }
       }
-    });
-    return buckets.map(b => new Float32Array(b));
-  }, [months, normalized, regions]);
+
+      // z-running: cross-sections at fixed x within the zone, sampled
+      // across depth — the orthogonal grid that makes this read as a
+      // mesh with real volume instead of many parallel strokes all
+      // running the same direction, which was exactly the earlier
+      // curve-only pass's "combed" problem.
+      for (let zi = 0; zi < cfg.zLines; zi++) {
+        const xt = cfg.zLines > 1 ? zi / (cfg.zLines - 1) : 0.5;
+        const x = zone.xStart + xt * width;
+        const xNorm = x / SCENE_WIDTH + 0.5;
+        const stillness = signalAt(signals, "stillnessIntensity", xNorm);
+        let prevZ: number | null = null, prevY = 0, prevX = 0;
+        for (let si = 0; si <= MASS_SAMPLES; si++) {
+          const t = si / MASS_SAMPLES;
+          const z = (t - 0.5) * SCENE_DEPTH;
+          // Reuses the same li-driven poem/phase selection as the x-lines
+          // at the matching depth, so a z-line's height agrees with the
+          // x-lines it crosses rather than reading a different poem there.
+          const li = Math.round(t * (PROFILE_COUNT - 1));
+          const y = terrainHeightAt(normalized, months, globalMeanLine, li, x, z, stillness);
+          if (prevZ !== null) target.push(prevX, prevY, prevZ, x, y, z);
+          prevX = x; prevY = y; prevZ = z;
+        }
+      }
+    }
+    return { peak: new Float32Array(peak), dense: new Float32Array(dense) };
+  }, [months, normalized, globalMeanLine, signals, zones]);
 
   return (
     <>
-      {tierPositions.map((positions, tier) => positions.length > 0 && (
-        <lineSegments key={tier}>
+      {groups.peak.length > 0 && (
+        <lineSegments>
           <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+            <bufferAttribute attach="attributes-position" args={[groups.peak, 3]} />
           </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={0.24 + 0.16 * tier} />
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={MASS_OPACITY_PEAK} />
         </lineSegments>
-      ))}
+      )}
+      {groups.dense.length > 0 && (
+        <lineSegments>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[groups.dense, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial color="#0a0a0a" transparent opacity={MASS_OPACITY_DENSE} />
+        </lineSegments>
+      )}
     </>
   );
 }
 
-// ── The landform, drawn as lines ──
-// Many parallel cross-section silhouettes across the depth axis, each a
-// single continuous strip — no gaps, no dropped points. Nearer lines
-// occlude farther ones through ordinary WebGL depth testing, reinforced by
-// a subtle opacity gradient by depth. Adjacent slices show different
-// character because they're reading different real poems (or different
-// spans of the same poem, at different real baseline heights) via
-// textMicroAt — many-poem months read as a thicket of individually placed
-// growth-lines; a real ALL-CAPS density boosts a line's opacity/weight; a
-// real repetition signal draws a faint mirrored reflection beneath a line,
-// not a floating duplicate above it. All generic functions of the same
-// per-month signals object — no special case for any one month.
+// ── The landform, drawn as lines — the "basin" and "ordinary" zones only
+// now; "peak" and "dense" zones are MassField's, entirely. Many parallel
+// cross-section silhouettes across the depth axis, each a single
+// continuous strip — no gaps, no dropped points. Nearer lines occlude
+// farther ones through ordinary WebGL depth testing, reinforced by a
+// subtle opacity gradient by depth. A real ALL-CAPS density boosts a
+// line's opacity/weight; a real repetition signal draws a faint mirrored
+// reflection beneath a line, not a floating duplicate above it. All
+// generic functions of the same per-month signals object — no special
+// case for any one month.
 const PROFILE_COUNT = 48;
 const PROFILE_SAMPLES = 100;
 
@@ -523,7 +572,7 @@ const REPETITION_ECHO_THRESHOLD = 0.42;
 const REPETITION_ECHO_OFFSET_Y = -0.05; // below the line — a reflection, not a duplicate floating above it
 const REPETITION_ECHO_OFFSET_Z = 0.03;
 
-function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[]; globalMeanLine: number; regions: ThicketRegion[] }) {
+function ProfileLines({ months, normalized, signals, globalMeanLine, zones }: { months: TerrainMonth[]; normalized: number[]; signals: MonthSignals[]; globalMeanLine: number; zones: TerrainZone[] }) {
   const lines = useMemo(() => {
     const out: { positions: Float32Array; opacity: number }[] = [];
     const n = months.length;
@@ -538,10 +587,10 @@ function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: 
       const z = (zt - 0.5) * SCENE_DEPTH;
       const baseOpacity = 0.32 + 0.4 * zt; // nearer slices read slightly brighter
 
-      // Thicket regions are rendered entirely by ThicketField instead — a
-      // genuinely different technique, not this curve retextured. `keep`
-      // marks which samples the curve is allowed to draw; thicket-region
-      // samples are simply not part of this line at all (ThicketField owns
+      // Peak and dense zones are rendered entirely by MassField instead —
+      // a genuinely different technique, not this curve retextured. `keep`
+      // marks which samples the curve is allowed to draw; mass-zone
+      // samples are simply not part of this line at all (MassField owns
       // that width), which is different from the old punctuation-driven
       // dropout — this is a clean hand-off between two rendering systems
       // at a real data boundary, not damage.
@@ -557,7 +606,7 @@ function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: 
         pts.push({ x, y, z });
         caps.push(signalAt(signals, "capsIntensity", xNorm));
         reps.push(signalAt(signals, "repetitionIntensity", xNorm));
-        keep.push(!insideAnyRegion(x, regions));
+        keep.push(!insideMassZone(x, zones));
       }
 
       // The line is one continuous strip end to end — but opacity and the
@@ -602,7 +651,7 @@ function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: 
       for (let pi = 1; pi < PROFILE_SAMPLES; pi++) {
         if (!keep[pi]) {
           if (segStart !== -1) { emit(segStart, pi - 1); segStart = -1; }
-          continue; // inside a thicket region — ThicketField draws here instead
+          continue; // inside a peak/dense zone — MassField draws here instead
         }
         if (segStart === -1) { segStart = pi; continue; } // first kept sample after a region
         if (monthIdxAt(pi) !== monthIdxAt(pi - 1)) {
@@ -613,7 +662,7 @@ function ProfileLines({ months, normalized, signals, globalMeanLine, regions }: 
       if (segStart !== -1) emit(segStart, PROFILE_SAMPLES - 1);
     }
     return out;
-  }, [months, normalized, signals, globalMeanLine]);
+  }, [months, normalized, signals, globalMeanLine, zones]);
 
   return (
     <>
@@ -831,7 +880,8 @@ function Scene({
   }, [months]);
   const signals = useMemo(() => computeMonthSignals(months), [months]);
   const globalMeanLine = useMemo(() => computeGlobalMeanLine(months), [months]);
-  const regions = useMemo(() => findThicketRegions(normalized), [normalized]);
+  const densitySignal = useMemo(() => computeDensitySignal(months, normalized), [months, normalized]);
+  const zones = useMemo(() => classifyZones(normalized, densitySignal), [normalized, densitySignal]);
 
   return (
     <>
@@ -845,8 +895,8 @@ function Scene({
         <CarpetSurface />
         <CarpetField />
         <TurntableRing />
-        <ProfileLines months={months} normalized={normalized} signals={signals} globalMeanLine={globalMeanLine} regions={regions} />
-        <ThicketField months={months} normalized={normalized} regions={regions} />
+        <ProfileLines months={months} normalized={normalized} signals={signals} globalMeanLine={globalMeanLine} zones={zones} />
+        <MassField months={months} normalized={normalized} globalMeanLine={globalMeanLine} signals={signals} zones={zones} />
         {seam != null && <SeamMarker x={seam} />}
       </TurntableAssembly>
     </>
