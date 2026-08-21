@@ -4,7 +4,6 @@ import { motion, AnimatePresence, animate, useMotionValue } from "framer-motion"
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { TagCount } from "@/lib/posts";
-import CryptoScramble from "@/app/components/CryptoScramble";
 
 interface PostMeta {
   slug:  string;
@@ -39,62 +38,6 @@ const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
 // bottom, plus its own text height) — shared by initial placement and by
 // where a flung tag comes to rest, so neither can land under the nav.
 const NAV_CLEARANCE = 110; // px
-
-// ── The core: a permanently-scrambling, fixed, unlabelled centre-point ─────────
-// Same glyph pool as /writing's take-me-somewhere effect, same tick rate as
-// the kismet cards. Length is fixed and meaningless — it never resolves to a
-// target string, so there is none.
-//
-// Stacked 3-1-1: three near-equal "body" lines (differing by one or two
-// characters, so the block reads as a ragged mass rather than a rectangle),
-// then two shorter lines tapering to a point. ~35 characters total, split
-// across independent CryptoScramble instances — a single instance can't do
-// this, since infinite mode overwrites every position on every tick,
-// including any embedded newline, so a multi-line shape can't survive
-// inside one scrambling string.
-const CORE_LINE_LENGTHS = [9, 10, 8, 5, 3];
-const CORE_LINES        = CORE_LINE_LENGTHS.map(n => "•".repeat(n)); // content is irrelevant — infinite mode never reveals it
-const CORE_CHARS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
-const CORE_RESTITUTION  = 0.28; // vs ~0.7 tag-on-tag — noticeably more resistance, it has mass
-
-// Each line's glyph-tick interval (ms) at rest and at contact (cursor right
-// on the block) — same proportional spread across the five at both ends, so
-// they stay out of phase with each other the whole way through the ramp.
-// ~3 cycles/sec at rest is slow enough to register as individual characters
-// rather than a blur; ~3.5x faster at contact.
-const CORE_TICK_RESTING = [195, 218, 204, 229, 190];
-const CORE_TICK_CONTACT = [55, 61, 57, 64, 53];
-
-// How many of that line's own characters re-roll per tick — the rest hold.
-// At rest this is 1 everywhere (barely-there activity, never a full-line
-// flicker); at contact it opens up to roughly a third of the line, per line
-// length, so approaching makes the block visibly more agitated, not just
-// faster. Which positions get chosen is decided inside CryptoScramble
-// (neighbour-biased), not here — this only sets how many.
-const CORE_CHURN_RESTING = CORE_LINE_LENGTHS.map(() => 1);
-const CORE_CHURN_CONTACT = CORE_LINE_LENGTHS.map(n => Math.max(2, Math.round(n * 0.4)));
-
-// The core's own small motion: each line nudges to a new random point every
-// time its own glyphs jump — the scramble's "attack" is what moves it, not
-// an independent clock. Amplitude ramps on the same proximity curve as the
-// tick interval (below), continuously — not a hover on/off switch.
-const CORE_VIBRATE_AMP         = 1.4; // px, at rest
-const CORE_VIBRATE_AMP_CONTACT = 4.5; // px, at the cursor
-// Distance (px, cursor to block centre) beyond which the core is fully at
-// rest; interpolated linearly down to 0px (full contact values).
-const CORE_PROXIMITY_RADIUS    = 320;
-// Scale on hover is separate and discrete — a contact response, not a ramp.
-const CORE_HOVER_SCALE         = 1.22;
-
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-// Shared by buildLayout (keeps tags out) and the fling physics (bounces off
-// it) so the exclusion zone is identical in both places.
-function coreClearanceFor(vw: number): number {
-  const isMobile = vw < 500;
-  const isTablet = vw < 900;
-  return isMobile ? 150 : isTablet ? 190 : 230;
-}
 
 const NAV = [
   { label: "WRITING", href: "/writing"  },
@@ -140,13 +83,6 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
 
-  // No tag's own bounding box may cross into the core's clearance disc —
-  // the field reads as thinning toward an empty centre rather than a
-  // drawn boundary, since it's the same stochastic first-fit placement
-  // as tag-tag spacing, just against one more (fixed, central) obstacle.
-  const coreClearance = coreClearanceFor(vw);
-  const cx = vw / 2, cy = vh / 2;
-
   selected.forEach(({ tag, count }, i) => {
     const weight   = (Math.sqrt(count) - sqrtMin) / sqrtSpan;  // 0..1, frequency-normalised
     const fontSize = FONT_MIN + weight * (FONT_MAX - FONT_MIN);
@@ -161,8 +97,7 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
     for (let attempt = 0; attempt < 200; attempt++) {
       const x  = marginX + Math.random() * (vw - marginX * 2);
       const y  = marginTop + Math.random() * (vh - marginTop - marginBottom);
-      const clearsCore = Math.hypot(x - cx, y - cy) > coreClearance + Math.max(hw, hh);
-      const ok = clearsCore && placed.every(
+      const ok = placed.every(
         p => Math.abs(x - p.x) > hw + p.hw + gap ||
              Math.abs(y - p.y) > hh + p.hh + gap
       );
@@ -284,23 +219,6 @@ function TagWord({
       if (ny < l.hh)         { ny = l.hh;          vy =  Math.abs(vy) * 0.75; }
       if (ny > bottomBound)  { ny = bottomBound;   vy = -Math.abs(vy) * 0.75; }
 
-      // The core has mass and never moves — a flung tag hitting it loses far
-      // more energy than a tag-tag collision (CORE_RESTITUTION vs ~0.7), and
-      // its position is corrected the same frame so it never visibly overlaps.
-      const coreBound = coreClearanceFor(vw) + Math.max(l.hw, l.hh);
-      const dcx = nx - vw / 2, dcy = ny - vh / 2;
-      const distCore = Math.hypot(dcx, dcy) || 1;
-      if (distCore < coreBound) {
-        const ux = dcx / distCore, uy = dcy / distCore;
-        nx = vw / 2 + ux * coreBound;
-        ny = vh / 2 + uy * coreBound;
-        const vn = vx * ux + vy * uy;
-        if (vn < 0) {
-          vx -= (1 + CORE_RESTITUTION) * vn * ux;
-          vy -= (1 + CORE_RESTITUTION) * vn * uy;
-        }
-      }
-
       posX.set(nx); posY.set(ny);
 
       positions.current.forEach((other, otherTag) => {
@@ -414,143 +332,6 @@ function TagWord({
   );
 }
 
-// One line of the core — its own CryptoScramble instance (so its tick timing
-// is naturally independent of the other four), nudged to a new small random
-// point every time its own glyphs actually jump. proximityRef is shared
-// across all five lines (0 = cursor beyond CORE_PROXIMITY_RADIUS, 1 = right
-// on the block) so approaching the core anywhere speeds all five up,
-// widens their vibration, and opens up how many characters change per
-// tick — together, continuously, not a per-line or on/off state. tickMsRef
-// / churnCountRef are what actually carry those live values into
-// CryptoScramble; recomputing them here each tick (rather than every
-// frame) is enough — even the slowest resting tick is ~200ms, so it still
-// tracks the cursor smoothly.
-function CoreLine({
-  text, restTick, contactTick, restChurn, contactChurn, proximityRef,
-}: {
-  text:         string;
-  restTick:     number;
-  contactTick:  number;
-  restChurn:    number;
-  contactChurn: number;
-  proximityRef: React.MutableRefObject<number>;
-}) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const tickMsRef    = useRef(restTick);
-  const churnCountRef = useRef(restChurn);
-
-  const onTick = useCallback(() => {
-    const t = proximityRef.current;
-    const nextTick = lerp(restTick, contactTick, t);
-    const amp      = lerp(CORE_VIBRATE_AMP, CORE_VIBRATE_AMP_CONTACT, t);
-    tickMsRef.current    = nextTick;
-    churnCountRef.current = lerp(restChurn, contactChurn, t);
-    animate(x, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
-    animate(y, (Math.random() - 0.5) * amp, { duration: nextTick / 1000, ease: "easeOut" });
-  }, [x, y, restTick, contactTick, restChurn, contactChurn, proximityRef]);
-
-  return (
-    <motion.span style={{ display: "block", x, y }}>
-      <CryptoScramble
-        text={text}
-        tickMs={restTick}
-        tickMsRef={tickMsRef}
-        churnCount={restChurn}
-        churnCountRef={churnCountRef}
-        chars={CORE_CHARS}
-        infinite
-        onTick={onTick}
-        style={{
-          display:       "block",
-          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-          fontSize:      "clamp(0.95rem, 2.3vw, 1.4rem)",
-          fontWeight:    800,
-          color:         "#0a0a0a",
-          letterSpacing: "-0.02em",
-          textAlign:     "center",
-          // Well below normal (this site's prose runs 1.6-1.8) — the five
-          // lines sit close enough to read as one dense body, not a stack
-          // of separate strings.
-          lineHeight:    0.82,
-        }}
-      />
-    </motion.span>
-  );
-}
-
-// ── The core — fixed, unlabelled, permanently scrambling. Not a TagWord: no
-// drag, no fling, no fade when a tag panel is open, no label or tooltip.
-// It does move, in the sense that each line nudges itself on its own
-// scramble ticks (CoreLine, above) — the field's one exception to "no
-// ambient motion," since the motion isn't decorative drift, it's the same
-// jump the text itself is already doing. It reacts to approach, not arrival
-// — speed and vibration ramp continuously with cursor distance, so the
-// acceleration is what draws you in rather than a reward for reaching it.
-// Scale-on-hover is a separate, discrete contact response. Nothing else
-// marks it as clickable. ──
-function ScrambleCore() {
-  const proximityRef = useRef(0);
-  const [hover, setHover] = useState(false);
-
-  // Global, not scoped to the element — the core should start responding
-  // before the cursor is anywhere near its own (small) hit area.
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const dx = e.clientX - window.innerWidth / 2;
-      const dy = e.clientY - window.innerHeight / 2;
-      const dist = Math.hypot(dx, dy);
-      proximityRef.current = 1 - Math.min(dist, CORE_PROXIMITY_RADIUS) / CORE_PROXIMITY_RADIUS;
-    };
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-
-  return (
-    <Link
-      href="/writing"
-      onClick={(e) => e.stopPropagation()}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        position:       "absolute",
-        left:           "50%",
-        top:            "50%",
-        textDecoration: "none",
-        cursor:         "pointer",
-        userSelect:     "none",
-        zIndex:         2,
-      }}
-    >
-      <motion.div
-        animate={{ scale: hover ? CORE_HOVER_SCALE : 1 }}
-        transition={{ duration: 0.12 }}
-        style={{
-          x: "-50%",
-          y: "-50%",
-          // Shrink-wraps to the widest ("body") line, so every shorter line
-          // below centres symmetrically within that same width — that's what
-          // makes the taper read as pointed rather than lopsided.
-          display:   "inline-block",
-          textAlign: "center",
-        }}
-      >
-        {CORE_LINES.map((line, i) => (
-          <CoreLine
-            key={i}
-            text={line}
-            restTick={CORE_TICK_RESTING[i]}
-            contactTick={CORE_TICK_CONTACT[i]}
-            restChurn={CORE_CHURN_RESTING[i]}
-            contactChurn={CORE_CHURN_CONTACT[i]}
-            proximityRef={proximityRef}
-          />
-        ))}
-      </motion.div>
-    </Link>
-  );
-}
-
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function Home() {
   const [layout,      setLayout]      = useState<TagLayout[]>([]);
@@ -649,9 +430,6 @@ export default function Home() {
           positions={positions}
         />
       ))}
-
-      {/* ── the core ── */}
-      <ScrambleCore />
 
       {/* ── posts panel ── */}
       <AnimatePresence>
