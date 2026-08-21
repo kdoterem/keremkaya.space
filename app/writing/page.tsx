@@ -18,8 +18,7 @@ import BrowseView from "@/app/components/BrowseView";
 // left wired up and untouched below — dormant without their entry point,
 // ready to reconnect the instant the button returns in a later pass. ──
 
-interface PoemTextProfile { words: number; lineLens: number[]; punctDensity: number; capsRatio: number; repetition: number }
-interface TerrainMonth { month: string; count: number; words: number; poems: PoemTextProfile[] }
+interface TerrainMonth { month: string; count: number; words: number }
 interface SearchDoc { slug: string; title: string; date: string; tags: string[]; body: string }
 
 type Mode = "landing" | "choice" | "play" | "browse-range" | "browse-month";
