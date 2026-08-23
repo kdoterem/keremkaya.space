@@ -6,6 +6,9 @@ import {
   computeWeights,
   bodyWeightStyle,
   titleWeightStyle,
+  aliveScaleFor,
+  seededPhase,
+  ALIVE_REST_COLOR,
 } from '@/lib/tagProvenance';
 
 interface Props {
@@ -36,6 +39,55 @@ const CONT_TITLE_LINE_H = 50;
 
 const MAX_FONT = 46;
 const MIN_FONT = 28;
+
+// ── the moving cover — page 1 only, exported as a short looping video ──────────
+// Continuation pages (2+, long poems only) stay static PNGs as before — a
+// carousel of one moving cover + N stills works fine on Instagram, and
+// re-recording every page would multiply generation time for little gain
+// (only the first file is what a direct share/post actually shows).
+const RECORD_SCALE = 1;   // video compresses anyway — the PNG's 3x supersampling would just be slower to draw per-frame for nothing
+const RECORD_FPS   = 24;
+const LOOP_S        = 3.5; // seconds per loop — long enough to read as a full "breath," short enough to stay light
+
+// Preference order: real .mp4 first (posts directly as an Instagram-native
+// video; Safari/iOS supports MediaRecorder→mp4 natively), then webm variants
+// as a fallback for browsers that can record but not to mp4. If none of
+// these are supported, pickVideoMimeType() returns null and the caller
+// falls back to the original static PNG path untouched.
+const VIDEO_MIME_CANDIDATES = [
+  'video/mp4;codecs=avc1.42E01E',
+  'video/mp4',
+  'video/webm;codecs=vp9',
+  'video/webm;codecs=vp8',
+  'video/webm',
+];
+
+function pickVideoMimeType(): string | null {
+  if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return null;
+  for (const type of VIDEO_MIME_CANDIDATES) {
+    try { if (MediaRecorder.isTypeSupported(type)) return type; } catch { /* unsupported string — keep trying */ }
+  }
+  return null;
+}
+
+function supportsCaptureStream(): boolean {
+  return typeof document !== 'undefined' &&
+    typeof (document.createElement('canvas') as unknown as { captureStream?: unknown }).captureStream === 'function';
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function lerpColor(aHex: string, bHex: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(aHex);
+  const [br, bg, bb] = hexToRgb(bHex);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const b = Math.round(ab + (bb - ab) * t);
+  return `rgb(${r},${g},${b})`;
+}
 
 // A word plus its offset within the full stripped-content string — carried
 // through wrapping so a per-character provenance weight array (computed
@@ -183,6 +235,77 @@ function drawWeightedLineCentered(
     ctx.font = wordFonts[i];
     ctx.fillText(w.word, x, y);
     x += ctx.measureText(w.word).width + (i < words.length - 1 ? spaceWidth : 0);
+  });
+}
+
+// Animated variant of drawWeightedLineCentered — same static layout pass
+// (word widths/positions are computed once, at base font size, and never
+// change frame to frame; only each weighted word's transform does), but
+// weighted words get a small drift + scale-breathe + color-pulse applied
+// around their own center each frame, using the exact same amplitude/color
+// vocabulary as the live page's AliveWeightedText (lib/tagProvenance.tsx's
+// aliveScaleFor/seededPhase) — the export looks like the page it came from.
+//
+// loopT is a 0..1 fraction of one LOOP_S-second loop. Every oscillation
+// below runs an INTEGER number of cycles per loop (1 for drift/color, 2 for
+// the scale breath), so sin/cos at loopT=1 always equals their value at
+// loopT=0 regardless of a word's own phase offset — the recording loops
+// seamlessly with no jump when Instagram (or anything else) auto-replays it.
+function drawWeightedLineCenteredAnimated(
+  ctx: CanvasRenderingContext2D,
+  words: WordTok[],
+  weights: number[],
+  y: number,
+  baseFontSize: number,
+  baseFontWeight: string,
+  weightStyleFn: (level: number) => React.CSSProperties,
+  loopT: number,
+) {
+  const levels = words.map(w => wordWeightLevel(weights, w));
+  const wordFonts = words.map((w, i) => {
+    const level = levels[i];
+    const style = level > 0 ? weightStyleFn(level) : {};
+    return canvasFontForWeightStyle(baseFontSize, baseFontWeight, style);
+  });
+
+  ctx.font = `${baseFontWeight} ${baseFontSize}px ${FONT}`;
+  const spaceWidth = ctx.measureText(' ').width;
+
+  let totalWidth = 0;
+  words.forEach((w, i) => {
+    ctx.font = wordFonts[i];
+    totalWidth += ctx.measureText(w.word).width;
+    if (i < words.length - 1) totalWidth += spaceWidth;
+  });
+
+  let x = (W - totalWidth) / 2;
+  words.forEach((w, i) => {
+    ctx.font = wordFonts[i];
+    const wordWidth = ctx.measureText(w.word).width;
+    const level = levels[i];
+
+    if (level === 0) {
+      ctx.fillStyle = ALIVE_REST_COLOR;
+      ctx.fillText(w.word, x, y);
+    } else {
+      const { driftAmpX, driftAmpY, scaleAmp, peakColor } = aliveScaleFor(level);
+      const phase1 = seededPhase(w.start);
+      const phase2 = seededPhase(w.start * 7 + 3);
+      const dx = driftAmpX * Math.sin(2 * Math.PI * (loopT + phase1));
+      const dy = driftAmpY * Math.sin(2 * Math.PI * (loopT + phase2 + 0.25));
+      const scaleEnv = 0.5 - 0.5 * Math.cos(2 * Math.PI * (loopT * 2 + phase1)); // 0..1, 2 cycles/loop
+      const colorEnv = 0.5 - 0.5 * Math.cos(2 * Math.PI * (loopT     + phase2)); // 0..1, 1 cycle/loop
+      const s  = 1 + scaleAmp * scaleEnv;
+      const cx = x + wordWidth / 2, cy = y + baseFontSize * 0.42;
+
+      ctx.save();
+      ctx.translate(cx + dx, cy + dy);
+      ctx.scale(s, s);
+      ctx.fillStyle = lerpColor(ALIVE_REST_COLOR, peakColor, colorEnv);
+      ctx.fillText(w.word, -wordWidth / 2, -baseFontSize * 0.42);
+      ctx.restore();
+    }
+    x += wordWidth + (i < words.length - 1 ? spaceWidth : 0);
   });
 }
 
@@ -397,6 +520,144 @@ function renderPage(
   });
 }
 
+// ── the moving cover — same layout math as renderPage above (title
+// position, rule, content lines, footer), duplicated rather than shared so
+// the proven static PNG path above is never at risk of being disturbed by
+// the animated path. The only real difference: weighted lines go through
+// drawWeightedLineCenteredAnimated (loopT-driven) instead of the static
+// drawWeightedLineCentered, and the title is always drawn through the
+// static function — never animated, on purpose (see AliveWeightedText's
+// header comment). ──
+
+function paintAnimatedFrame(
+  ctx: CanvasRenderingContext2D,
+  titleWrapped: TitleLine[],
+  contentLines: Line[],
+  title: string,
+  pageNum: number,
+  totalPages: number,
+  fontSize: number,
+  lineH: number,
+  gapH: number,
+  titleWeights: number[] | undefined,
+  bodyWeights: number[] | undefined,
+  loopT: number,
+) {
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = '#aaff00';
+  ctx.fillRect(0, 0, W, H);
+
+  const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
+  const available     = H - TOP_RESERVE - FOOTER_RESERVE;
+  let y: number;
+
+  if (pageNum === 1) {
+    const titleBlockH = titleWrapped.length * TITLE_LINE_H;
+    const totalBlock  = titleBlockH + GAP + contentBlockH;
+    y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
+
+    ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
+    for (const line of titleWrapped) {
+      if (Array.isArray(line)) {
+        drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
+      } else {
+        drawCentered(ctx, line, y, '#0a0a0a');
+      }
+      y += TITLE_LINE_H;
+    }
+  } else {
+    const totalBlock = CONT_TITLE_LINE_H + GAP + contentBlockH;
+    y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
+
+    ctx.font = `${CONT_TITLE_SIZE}px ${FONT}`;
+    let display = title;
+    while (ctx.measureText(display).width > CW && display.length > 1)
+      display = display.slice(0, -1);
+    if (display !== title) display = display.trimEnd() + '…';
+    drawCentered(ctx, display, y, 'rgba(10,10,10,0.28)');
+    y += CONT_TITLE_LINE_H;
+  }
+
+  drawRule(ctx, y + Math.round(GAP / 2) - 1);
+  y += GAP;
+
+  ctx.font = `${fontSize}px ${FONT}`;
+  for (const line of contentLines) {
+    if (line === null) { y += gapH; continue; }
+    if (Array.isArray(line)) {
+      drawWeightedLineCenteredAnimated(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle, loopT);
+    } else {
+      drawCentered(ctx, line, y, '#0a0a0a');
+    }
+    y += lineH;
+  }
+
+  const footerY = H - 130;
+  ctx.font = `26px ${FONT}`;
+  drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.32)');
+  if (totalPages > 1) {
+    ctx.font = `22px ${FONT}`;
+    drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.22)');
+  }
+}
+
+// Records one LOOP_S-second loop of paintAnimatedFrame into a short video
+// file via canvas.captureStream() + MediaRecorder — no server, no encoding
+// dependency. Rejects on any unsupported-API/recorder error; the caller
+// catches that and falls back to the static PNG renderPage above, so a
+// browser that can't do this never ends up with nothing.
+function recordAnimatedPage(
+  titleWrapped: TitleLine[],
+  contentLines: Line[],
+  title: string,
+  pageNum: number,
+  totalPages: number,
+  fontSize: number,
+  lineH: number,
+  gapH: number,
+  baseFilename: string,
+  titleWeights: number[] | undefined,
+  bodyWeights: number[] | undefined,
+  mimeType: string,
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const canvas  = document.createElement('canvas');
+    canvas.width  = W * RECORD_SCALE;
+    canvas.height = H * RECORD_SCALE;
+    const ctx = canvas.getContext('2d')!;
+    ctx.scale(RECORD_SCALE, RECORD_SCALE);
+
+    let recorder: MediaRecorder;
+    try {
+      const stream = (canvas as HTMLCanvasElement & { captureStream: (fps?: number) => MediaStream })
+        .captureStream(RECORD_FPS);
+      recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6_000_000 });
+    } catch (err) { reject(err); return; }
+
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    recorder.onerror = (e) => reject(e);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const ext  = mimeType.includes('mp4') ? 'mp4' : 'webm';
+      const filename = totalPages > 1 ? `${baseFilename}-${pageNum}.${ext}` : `${baseFilename}.${ext}`;
+      resolve(new File([blob], filename, { type: mimeType }));
+    };
+
+    let start: number | null = null;
+    function tick(ts: number) {
+      if (start === null) start = ts;
+      const elapsed = (ts - start) / 1000;
+      const loopT   = (elapsed % LOOP_S) / LOOP_S;
+      paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT);
+      if (elapsed < LOOP_S) requestAnimationFrame(tick);
+      else recorder.stop();
+    }
+    recorder.start();
+    requestAnimationFrame(tick);
+  });
+}
+
 // ── component ────────────────────────────────────────────────────────────────
 
 export default function SaveImageButton({ title, content, slug }: Props) {
@@ -421,11 +682,40 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         const totalPages   = pages.length;
         const baseFilename = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-        const files = await Promise.all(
-          pages.map((lines, i) =>
-            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
-          )
-        );
+        // The cover (page 1) is only worth animating when it actually has
+        // weighted words to animate — plain posts (no provenance entry) and
+        // browsers that can't record both fall straight through to the
+        // original static path below, untouched.
+        const mimeType = bodyWeights && supportsCaptureStream() ? pickVideoMimeType() : null;
+
+        let files: File[];
+        if (mimeType) {
+          try {
+            const cover = await recordAnimatedPage(
+              titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
+              baseFilename, titleWeights, bodyWeights, mimeType,
+            );
+            const rest = await Promise.all(
+              pages.slice(1).map((lines, i) =>
+                renderPage(titleWrapped, lines, title, i + 2, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+              )
+            );
+            files = [cover, ...rest];
+          } catch (err) {
+            console.error('animated cover failed, falling back to a static image', err);
+            files = await Promise.all(
+              pages.map((lines, i) =>
+                renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+              )
+            );
+          }
+        } else {
+          files = await Promise.all(
+            pages.map((lines, i) =>
+              renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+            )
+          );
+        }
 
         // Both the mobile Photos library (via the share sheet's "Save Images")
         // and desktop downloads shelves/folders commonly sort newest-first —
@@ -445,9 +735,14 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         if (navigator.canShare?.({ files: orderedFiles })) {
           if (files.length > 1) {
             setHint(
-              `long poem — ${files.length} images. in the share sheet choose ` +
-              `“save ${files.length} images”, then post them as a carousel in instagram. ` +
-              `(sharing straight to instagram only sends one image, not the whole poem.)`
+              mimeType
+                ? `long poem — ${files.length} files: a moving cover + ${files.length - 1} ` +
+                  `image${files.length - 1 === 1 ? '' : 's'}. in the share sheet choose ` +
+                  `“save ${files.length} items”, then post them as a carousel in instagram. ` +
+                  `(sharing straight to instagram only sends the first file, not the whole poem.)`
+                : `long poem — ${files.length} images. in the share sheet choose ` +
+                  `“save ${files.length} images”, then post them as a carousel in instagram. ` +
+                  `(sharing straight to instagram only sends one image, not the whole poem.)`
             );
           }
           try {
@@ -508,7 +803,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         el.style.borderColor     = 'rgba(10,10,10,0.22)';
       }}
     >
-      {generating ? 'generating…' : '↑ share / save image'}
+      {generating ? 'generating…' : '↑ share / save'}
     </button>
 
     {hint && (

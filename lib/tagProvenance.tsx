@@ -111,9 +111,59 @@ export function bodyWeightStyle(level: number): React.CSSProperties {
 // goes blacker/heavier from here, no further size change, so it reads as
 // one continuous gradient of intensity rather than a second, different kind
 // of emphasis competing with the first. Capped at 2.
+//
+// Deliberately never animated (see aliveScaleFor below) — the title staying
+// completely still is what makes the body's motion read as a different,
+// more alive register, rather than the same trick playing twice.
 export function titleWeightStyle(level: number): React.CSSProperties {
   const l = Math.min(level, 2);
   return [{}, { fontWeight: 800 }, { fontWeight: 900 }][l];
+}
+
+// ── Alive motion — shared by the live body text (AliveWeightedText, DOM/
+// framer-motion) and the share-image video export (SaveImageButton, canvas),
+// so both draw from the same amplitude/color vocabulary rather than two
+// hand-tuned approximations of "moving."
+//
+// seededPhase is a deterministic 0..1 hash keyed off a run's own character
+// offset — not Math.random(). Two reasons: a run's phase must survive a
+// client re-render without reshuffling (Math.random() would restart the
+// drift/pulse from a new position every time), and the canvas export needs
+// to reproduce the same per-word phase without sharing any runtime state
+// with the DOM component that rendered it.
+function hash01(n: number): number {
+  const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+export function seededPhase(seed: number): number {
+  return hash01(seed);
+}
+
+// Peak tint per weight level, for the body's color pulse — a whisper of the
+// site's own accent (#aaff00) blended into the resting near-black, not a
+// foreign color. Rest state is always plain #0a0a0a; these are only the far
+// end of the breath. Kept subtle on purpose (max ~26% blend at level 3).
+export const ALIVE_REST_COLOR = "#0a0a0a";
+const PEAK_COLOR_BY_LEVEL = ["#0a0a0a", "#171e09", "#243108", "#344a07"];
+
+export interface AliveScale {
+  driftAmpX: number;
+  driftAmpY: number;
+  scaleAmp:  number;
+  peakColor: string;
+}
+
+// Amplitude/color envelope for a given weight level — pure function of the
+// level, no randomness. Position/timing variance comes from seededPhase
+// applied on top of this by each caller.
+export function aliveScaleFor(level: number): AliveScale {
+  const l = Math.min(level, 3);
+  return {
+    driftAmpX: 1   + l * 1.1,  // px
+    driftAmpY: 0.8 + l * 0.8,  // px
+    scaleAmp:  0.012 + l * 0.009, // fraction — e.g. level 3 breathes up to ~1.04x
+    peakColor: PEAK_COLOR_BY_LEVEL[l],
+  };
 }
 
 // A plain, non-animated styled-runs renderer — for surfaces (/writing) that

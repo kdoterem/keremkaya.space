@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
+import AliveWeightedText from "@/app/components/AliveWeightedText";
 import {
   hasProvenance,
   getProvenanceTags,
@@ -274,7 +275,7 @@ export default async function PostPage({
             // with weighted runs, not markdown-rendered. Matches it exactly
             // rather than approximating it through MDXRemote.
             <div style={{ whiteSpace: "pre-wrap" }}>
-              <WeightedText text={bodyText} weights={bodyWeights} weightStyle={bodyWeightStyle} />
+              <AliveWeightedText text={bodyText} weights={bodyWeights} weightStyle={bodyWeightStyle} />
             </div>
           ) : (
             <MDXRemote
