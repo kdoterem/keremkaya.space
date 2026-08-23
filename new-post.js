@@ -155,3 +155,16 @@ if (fs.existsSync(outputPath)) {
 
 fs.writeFileSync(outputPath, finalContent);
 console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
+
+// This post has no tag-provenance.json entry yet (a brand-new file never
+// does) — its tag-carrying words won't get the "alive" highlight
+// treatment on /writing or in the share/save video until one exists.
+// Can't generate that here: it's a close-reading judgment call (what
+// phrase actually carries a given tag), not a keyword match — see
+// check-provenance.js and tag-provenance.json's own entries for why.
+console.log(
+  `This post doesn't have tag-provenance.json data yet, so it'll render\n` +
+  `plain (no alive highlighting) until it does.\n\n` +
+  `Ask Claude: "do the provenance pass on the pending posts"\n` +
+  `(or run \`node check-provenance.js\` any time to see what's pending)\n`
+);
