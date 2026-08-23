@@ -10,7 +10,6 @@ import {
   hasProvenance,
   getProvenanceTags,
   computeWeights,
-  bodyWeightStyle,
   titleWeightStyle,
   WeightedText,
 } from "@/lib/tagProvenance";
@@ -275,7 +274,7 @@ export default async function PostPage({
             // with weighted runs, not markdown-rendered. Matches it exactly
             // rather than approximating it through MDXRemote.
             <div style={{ whiteSpace: "pre-wrap" }}>
-              <AliveWeightedText text={bodyText} weights={bodyWeights} weightStyle={bodyWeightStyle} />
+              <AliveWeightedText text={bodyText} weights={bodyWeights} />
             </div>
           ) : (
             <MDXRemote

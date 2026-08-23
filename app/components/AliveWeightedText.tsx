@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { buildRuns, aliveScaleFor, seededPhase, ALIVE_REST_COLOR } from "@/lib/tagProvenance";
+import { buildRuns, aliveScaleFor, seededPhase, bodyWeightStyle, ALIVE_REST_COLOR } from "@/lib/tagProvenance";
 
 // ── The living body text — every tag-carrying run drifts, breathes (scale),
 // and pulses color, continuously and out of phase with its neighbours, so
@@ -16,16 +16,23 @@ import { buildRuns, aliveScaleFor, seededPhase, ALIVE_REST_COLOR } from "@/lib/t
 // the same visual vocabulary they were just reading, not an approximation
 // of it. seededPhase is deterministic (keyed off each run's own text
 // offset), so re-renders never reshuffle a run's phase mid-read.
+//
+// weightStyle is hardcoded to bodyWeightStyle (imported directly, not
+// accepted as a prop) rather than passed in from the caller — the caller,
+// app/writing/[slug]/page.tsx, is a Server Component, and this is a Client
+// Component ("use client" above); a function prop can't cross that
+// boundary — Next.js can't serialize it, and rendering this page threw a
+// server-side exception on every post that has provenance data until this
+// was caught. Since this component is body-only by design (see above),
+// hardcoding it isn't a real loss of flexibility.
 export default function AliveWeightedText({
   text,
   weights,
-  weightStyle,
   style,
   className,
 }: {
   text: string;
   weights: number[] | undefined;
-  weightStyle: (level: number) => React.CSSProperties | undefined;
   style?: React.CSSProperties;
   className?: string;
 }) {
@@ -40,7 +47,7 @@ export default function AliveWeightedText({
         const slice = text.slice(r.start, r.end);
         if (r.weight <= 0) return <span key={i}>{slice}</span>;
 
-        const base = weightStyle(r.weight) ?? {};
+        const base = bodyWeightStyle(r.weight) ?? {};
         if (reduceMotion) return <span key={i} style={base}>{slice}</span>;
 
         const { driftAmpX, driftAmpY, scaleAmp, peakColor } = aliveScaleFor(r.weight);
