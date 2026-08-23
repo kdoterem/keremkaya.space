@@ -10,6 +10,14 @@ import {
   seededPhase,
   ALIVE_REST_COLOR,
 } from '@/lib/tagProvenance';
+import {
+  Output as MbOutput,
+  Mp4OutputFormat,
+  BufferTarget,
+  CanvasSource,
+  Quality as MbQuality,
+  canEncodeVideo,
+} from 'mediabunny';
 
 interface Props {
   title: string;
@@ -40,20 +48,42 @@ const CONT_TITLE_LINE_H = 50;
 const MAX_FONT = 46;
 const MIN_FONT = 28;
 
-// ── the moving cover — page 1 only, exported as a short looping video ──────────
+// ── the moving cover — page 1 only, exported as a video ────────────────────────
 // Continuation pages (2+, long poems only) stay static PNGs as before — a
 // carousel of one moving cover + N stills works fine on Instagram, and
-// re-recording every page would multiply generation time for little gain
+// re-encoding every page would multiply generation time for little gain
 // (only the first file is what a direct share/post actually shows).
+//
+// Three tiers, tried in order, each a graceful fallback for the last:
+//   1. fastRecordAnimatedPage (mediabunny + WebCodecs) — offline encoding,
+//      NOT bound to real time, so a 45s clip still takes only a couple of
+//      real seconds to generate. This is the one that actually matters —
+//      Instagram Stories/feed play a shared video at its own native length,
+//      so a 3.5s source clip was giving a 3.5s story regardless of how the
+//      export got made. Needs WebCodecs (Safari 16.4+/iOS 16.4+, current
+//      Chrome/Edge; older Firefox falls through).
+//   2. recordAnimatedPage (MediaRecorder + captureStream) — the original
+//      real-time recorder, kept as a fallback for browsers without
+//      WebCodecs. Bound to real time (a 3.5s clip takes ~3.5 real seconds),
+//      so it stays short on purpose — it's the rare path now, not the
+//      common one.
+//   3. renderPage (static PNG) — the universal fallback, works everywhere.
+
+// Tier 1 — fast, offline, real duration.
+const FAST_VIDEO_SCALE     = 1;    // same reasoning as RECORD_SCALE below — no need for the PNG's 3x supersampling
+const FAST_VIDEO_FPS       = 24;
+const FAST_VIDEO_DURATION_S = 45;  // the actual on-screen length once shared — matches what worked before this whole video system existed
+const FAST_ANIM_CYCLE_S    = 3.5;  // the breath's own pacing — same seamless loop as before, just replayed ~13x to fill the export instead of being the export
+
+// Tier 2 — real-time fallback, deliberately short (see header comment).
 const RECORD_SCALE = 1;   // video compresses anyway — the PNG's 3x supersampling would just be slower to draw per-frame for nothing
 const RECORD_FPS   = 24;
-const LOOP_S        = 3.5; // seconds per loop — long enough to read as a full "breath," short enough to stay light
+const LOOP_S        = 3.5; // seconds per loop — long enough to read as a full "breath," short enough to stay light while real-time-bound
 
-// Preference order: real .mp4 first (posts directly as an Instagram-native
-// video; Safari/iOS supports MediaRecorder→mp4 natively), then webm variants
-// as a fallback for browsers that can record but not to mp4. If none of
-// these are supported, pickVideoMimeType() returns null and the caller
-// falls back to the original static PNG path untouched.
+// Preference order for tier 2: real .mp4 first (posts directly as an
+// Instagram-native video; Safari/iOS supports MediaRecorder→mp4 natively),
+// then webm variants for browsers that can record but not to mp4. If none
+// of these are supported either, the caller falls back to tier 3.
 const VIDEO_MIME_CANDIDATES = [
   'video/mp4;codecs=avc1.42E01E',
   'video/mp4',
@@ -68,6 +98,19 @@ function pickVideoMimeType(): string | null {
     try { if (MediaRecorder.isTypeSupported(type)) return type; } catch { /* unsupported string — keep trying */ }
   }
   return null;
+}
+
+// Feature-detects tier 1 — real capability check (asks the browser whether
+// it can actually encode 'avc'/H.264 at this resolution), not just an
+// API-presence check, since mediabunny's canEncodeVideo does the real work
+// of probing VideoEncoder.isConfigSupported under the hood.
+async function supportsFastVideo(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  try {
+    return await canEncodeVideo('avc', { width: W, height: H });
+  } catch {
+    return false;
+  }
 }
 
 function supportsCaptureStream(): boolean {
@@ -658,121 +701,79 @@ function recordAnimatedPage(
   });
 }
 
+// Tier 1 — offline encoding via mediabunny (WebCodecs under the hood).
+// Draws and encodes FAST_VIDEO_DURATION_S * FAST_VIDEO_FPS frames in a
+// tight loop; each call to videoSource.add() encodes one frame and is NOT
+// bound to real time (per mediabunny's own docs — encoding runs as fast as
+// the browser's encoder can go, so a 45-second export still takes only a
+// couple of real seconds, not 45). Reuses paintAnimatedFrame exactly as
+// tier 2 does — same drawing code, same loopT-driven seamless-loop math —
+// just called many more times to fill a much longer timeline.
+async function fastRecordAnimatedPage(
+  titleWrapped: TitleLine[],
+  contentLines: Line[],
+  title: string,
+  pageNum: number,
+  totalPages: number,
+  fontSize: number,
+  lineH: number,
+  gapH: number,
+  baseFilename: string,
+  titleWeights: number[] | undefined,
+  bodyWeights: number[] | undefined,
+): Promise<File> {
+  const canvas  = document.createElement('canvas');
+  canvas.width  = W * FAST_VIDEO_SCALE;
+  canvas.height = H * FAST_VIDEO_SCALE;
+  const ctx = canvas.getContext('2d')!;
+  if (FAST_VIDEO_SCALE !== 1) ctx.scale(FAST_VIDEO_SCALE, FAST_VIDEO_SCALE);
+
+  const output = new MbOutput({
+    format: new Mp4OutputFormat(),
+    target: new BufferTarget(),
+  });
+  const videoSource = new CanvasSource(canvas, {
+    codec: 'avc',
+    quality: new MbQuality('high'),
+  });
+  output.addVideoTrack(videoSource);
+
+  await output.start();
+
+  const totalFrames = Math.round(FAST_VIDEO_DURATION_S * FAST_VIDEO_FPS);
+  const frameDur     = 1 / FAST_VIDEO_FPS;
+  for (let i = 0; i < totalFrames; i++) {
+    const t     = i * frameDur;
+    const loopT = (t % FAST_ANIM_CYCLE_S) / FAST_ANIM_CYCLE_S;
+    paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT);
+    await videoSource.add(t, frameDur);
+  }
+
+  await output.finalize();
+
+  const buffer = (output.target as BufferTarget).buffer;
+  if (!buffer) throw new Error('mediabunny produced no output buffer');
+
+  const filename = totalPages > 1 ? `${baseFilename}-${pageNum}.mp4` : `${baseFilename}.mp4`;
+  return new File([buffer], filename, { type: 'video/mp4' });
+}
+
 // ── component ────────────────────────────────────────────────────────────────
 
-export default function SaveImageButton({ title, content, slug }: Props) {
-  const [generating, setGenerating] = useState(false);
-  const [hint,       setHint]       = useState<string | null>(null);
+type ExportMode = 'image' | 'video';
 
-  const handleSave = () => {
-    setGenerating(true);
-    setHint(null);
-
-    setTimeout(async () => {
-      try {
-        // Same data, same weighting functions as /terrain and /writing
-        // (lib/tagProvenance.tsx) — posts with no provenance entry get
-        // undefined here and buildPages/renderPage fall back to the
-        // original flat, unweighted render untouched.
-        const tags = slug ? getProvenanceTags(slug) : undefined;
-        const titleWeights = computeWeights(title, tags);
-        const bodyWeights  = computeWeights(stripMarkdown(content), tags);
-
-        const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content, titleWeights, bodyWeights);
-        const totalPages   = pages.length;
-        const baseFilename = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-        // The cover (page 1) is only worth animating when it actually has
-        // weighted words to animate — plain posts (no provenance entry) and
-        // browsers that can't record both fall straight through to the
-        // original static path below, untouched.
-        const mimeType = bodyWeights && supportsCaptureStream() ? pickVideoMimeType() : null;
-
-        let files: File[];
-        if (mimeType) {
-          try {
-            const cover = await recordAnimatedPage(
-              titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
-              baseFilename, titleWeights, bodyWeights, mimeType,
-            );
-            const rest = await Promise.all(
-              pages.slice(1).map((lines, i) =>
-                renderPage(titleWrapped, lines, title, i + 2, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
-              )
-            );
-            files = [cover, ...rest];
-          } catch (err) {
-            console.error('animated cover failed, falling back to a static image', err);
-            files = await Promise.all(
-              pages.map((lines, i) =>
-                renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
-              )
-            );
-          }
-        } else {
-          files = await Promise.all(
-            pages.map((lines, i) =>
-              renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
-            )
-          );
-        }
-
-        // Both the mobile Photos library (via the share sheet's "Save Images")
-        // and desktop downloads shelves/folders commonly sort newest-first —
-        // so saving/downloading in page order (1, 2, 3…) makes page 2 the
-        // most recent, and it displays *above* page 1. Reversed to last-page-
-        // first / page-1-last, whichever one lands most recently — page 1 —
-        // is the one that sorts first, so the saved/downloaded order matches
-        // reading order. Filenames are unaffected: they still read "-1", "-2"…
-        // regardless of save order, self-documenting the intended order too.
-        const orderedFiles = files.length > 1 ? [...files].reverse() : files;
-
-        // Mobile: share sheet. Instagram (and most apps) only accept the FIRST
-        // file from a web share — it can't receive a multi-image carousel — so
-        // for long, multi-page poems steer the reader to "Save N Images" and let
-        // them build the carousel in the Instagram app from their photos.
-        // Only return on success — cancellation falls through to desktop download.
-        if (navigator.canShare?.({ files: orderedFiles })) {
-          if (files.length > 1) {
-            setHint(
-              mimeType
-                ? `long poem — ${files.length} files: a moving cover + ${files.length - 1} ` +
-                  `image${files.length - 1 === 1 ? '' : 's'}. in the share sheet choose ` +
-                  `“save ${files.length} items”, then post them as a carousel in instagram. ` +
-                  `(sharing straight to instagram only sends the first file, not the whole poem.)`
-                : `long poem — ${files.length} images. in the share sheet choose ` +
-                  `“save ${files.length} images”, then post them as a carousel in instagram. ` +
-                  `(sharing straight to instagram only sends one image, not the whole poem.)`
-            );
-          }
-          try {
-            await navigator.share({ files: orderedFiles, title });
-            setGenerating(false);
-            return;
-          } catch { /* cancelled — fall through to download */ }
-        }
-
-        // Desktop: sequential download
-        for (let i = 0; i < orderedFiles.length; i++) {
-          const url = URL.createObjectURL(orderedFiles[i]);
-          const a   = document.createElement('a');
-          a.href = url; a.download = orderedFiles[i].name;
-          document.body.appendChild(a); a.click();
-          document.body.removeChild(a); URL.revokeObjectURL(url);
-          if (i < orderedFiles.length - 1) await new Promise(r => setTimeout(r, 150));
-        }
-      } catch (err) {
-        console.error('image generation failed', err);
-      }
-      setGenerating(false);
-    }, 30);
-  };
-
+// The two buttons share this exact look (border swap on hover) — pulled out
+// so both stay pixel-identical instead of two hand-copied style blocks
+// drifting apart over time.
+function ExportButton({
+  label, busy, disabled, onClick,
+}: {
+  label: string; busy: boolean; disabled: boolean; onClick: () => void;
+}) {
   return (
-    <>
     <button
-      onClick={handleSave}
-      disabled={generating}
+      onClick={onClick}
+      disabled={disabled}
       style={{
         display:         'inline-block',
         fontSize:        '0.65rem',
@@ -780,17 +781,16 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         letterSpacing:   '0.12em',
         fontVariant:     'small-caps',
         fontFamily:      FONT,
-        color:           generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a',
+        color:           disabled ? 'rgba(10,10,10,0.35)' : '#0a0a0a',
         backgroundColor: 'transparent',
         border:          '1px solid rgba(10,10,10,0.22)',
         padding:         '0.55rem 1.2rem',
-        cursor:          generating ? 'default' : 'pointer',
+        cursor:          disabled ? 'default' : 'pointer',
         transition:      'background-color 0.15s, color 0.15s, border-color 0.15s',
-        marginTop:       '2.5rem',
         userSelect:      'none',
       }}
       onMouseEnter={e => {
-        if (generating) return;
+        if (disabled) return;
         const el = e.currentTarget as HTMLButtonElement;
         el.style.backgroundColor = '#0a0a0a';
         el.style.color           = '#aaff00';
@@ -799,12 +799,188 @@ export default function SaveImageButton({ title, content, slug }: Props) {
       onMouseLeave={e => {
         const el = e.currentTarget as HTMLButtonElement;
         el.style.backgroundColor = 'transparent';
-        el.style.color           = generating ? 'rgba(10,10,10,0.35)' : '#0a0a0a';
+        el.style.color           = disabled ? 'rgba(10,10,10,0.35)' : '#0a0a0a';
         el.style.borderColor     = 'rgba(10,10,10,0.22)';
       }}
     >
-      {generating ? 'generating…' : '↑ share / save'}
+      {busy ? 'generating…' : label}
     </button>
+  );
+}
+
+export default function SaveImageButton({ title, content, slug }: Props) {
+  const [generating, setGenerating] = useState<ExportMode | null>(null);
+  const [hint,       setHint]       = useState<string | null>(null);
+
+  // Shared prep for both modes — same data, same weighting functions as
+  // /terrain and /writing (lib/tagProvenance.tsx). Posts with no provenance
+  // entry get bodyWeights/titleWeights === undefined, and every render
+  // function below already falls back to its original flat, unweighted
+  // output when that's the case — untouched by any of this.
+  function prepare() {
+    const tags = slug ? getProvenanceTags(slug) : undefined;
+    const titleWeights = computeWeights(title, tags);
+    const bodyWeights  = computeWeights(stripMarkdown(content), tags);
+    const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content, titleWeights, bodyWeights);
+    return {
+      titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH,
+      totalPages: pages.length,
+      baseFilename: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+    };
+  }
+
+  // Shared by both modes: hand the finished files to the OS share sheet, or
+  // fall back to a sequential browser download. Identical mechanics either
+  // way — the only thing that differs between the two buttons is what's
+  // already inside `files` by the time this runs.
+  async function shareOrDownload(files: File[], multiPageHint: string | null) {
+    // Both the mobile Photos library (via the share sheet's "Save Images")
+    // and desktop downloads shelves/folders commonly sort newest-first —
+    // so saving/downloading in page order (1, 2, 3…) makes page 2 the most
+    // recent, and it displays *above* page 1. Reversed to last-page-first /
+    // page-1-last, whichever one lands most recently — page 1 — is the one
+    // that sorts first, so the saved/downloaded order matches reading
+    // order. Filenames are unaffected: they still read "-1", "-2"…
+    // regardless of save order, self-documenting the intended order too.
+    const orderedFiles = files.length > 1 ? [...files].reverse() : files;
+    if (multiPageHint) setHint(multiPageHint);
+
+    // Mobile: share sheet. Instagram (and most apps) only accept the FIRST
+    // file from a web share — it can't receive a multi-file carousel — so
+    // for long, multi-page poems the hint steers the reader to "Save N
+    // Items" and building the carousel in the Instagram app from Photos.
+    // Only return on success — cancellation falls through to desktop download.
+    if (navigator.canShare?.({ files: orderedFiles })) {
+      try {
+        await navigator.share({ files: orderedFiles, title });
+        return;
+      } catch { /* cancelled — fall through to download */ }
+    }
+
+    // Desktop (or a mobile browser without Web Share): sequential download.
+    for (let i = 0; i < orderedFiles.length; i++) {
+      const url = URL.createObjectURL(orderedFiles[i]);
+      const a   = document.createElement('a');
+      a.href = url; a.download = orderedFiles[i].name;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      if (i < orderedFiles.length - 1) await new Promise(r => setTimeout(r, 150));
+    }
+  }
+
+  function multiPageImageHint(count: number): string {
+    return `long poem — ${count} images. in the share sheet choose ` +
+      `“save ${count} images”, then post them as a carousel in instagram. ` +
+      `(sharing straight to instagram only sends one image, not the whole poem.)`;
+  }
+
+  const handleSaveImage = () => {
+    setGenerating('image');
+    setHint(null);
+    setTimeout(async () => {
+      try {
+        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, totalPages, baseFilename } = prepare();
+        const files = await Promise.all(
+          pages.map((lines, i) =>
+            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+          )
+        );
+        await shareOrDownload(files, files.length > 1 ? multiPageImageHint(files.length) : null);
+      } catch (err) {
+        console.error('image generation failed', err);
+      }
+      setGenerating(null);
+    }, 30);
+  };
+
+  const handleSaveVideo = () => {
+    setGenerating('video');
+    setHint(null);
+    setTimeout(async () => {
+      try {
+        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, totalPages, baseFilename } = prepare();
+
+        // Nothing to animate — a video would just be a static frame with a
+        // misleading file extension. Same output the image button gives,
+        // with a note explaining why.
+        if (!bodyWeights) {
+          const files = await Promise.all(
+            pages.map((lines, i) =>
+              renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+            )
+          );
+          setHint(
+            'no highlight data for this poem yet, so there\'s nothing to animate — sharing a still image instead.' +
+            (files.length > 1 ? ' ' + multiPageImageHint(files.length) : '')
+          );
+          await shareOrDownload(files, null); // hint already set above — don't let this overwrite it
+          setGenerating(null);
+          return;
+        }
+
+        let cover: File;
+        try {
+          if (await supportsFastVideo()) {
+            cover = await fastRecordAnimatedPage(
+              titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
+              baseFilename, titleWeights, bodyWeights,
+            );
+          } else {
+            const mimeType = supportsCaptureStream() ? pickVideoMimeType() : null;
+            if (!mimeType) throw new Error('no video recording path available in this browser');
+            cover = await recordAnimatedPage(
+              titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
+              baseFilename, titleWeights, bodyWeights, mimeType,
+            );
+          }
+        } catch (err) {
+          console.error('animated cover failed, falling back to a static image', err);
+          cover = await renderPage(
+            titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
+            baseFilename, titleWeights, bodyWeights,
+          );
+        }
+
+        const rest = await Promise.all(
+          pages.slice(1).map((lines, i) =>
+            renderPage(titleWrapped, lines, title, i + 2, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+          )
+        );
+        const files   = [cover, ...rest];
+        const isVideo = cover.type === 'video/mp4';
+
+        await shareOrDownload(
+          files,
+          files.length <= 1 ? null : isVideo
+            ? `long poem — ${files.length} files: a moving cover + ${files.length - 1} ` +
+              `image${files.length - 1 === 1 ? '' : 's'}. in the share sheet choose ` +
+              `“save ${files.length} items”, then post them as a carousel in instagram. ` +
+              `(sharing straight to instagram only sends the first file, not the whole poem.)`
+            : multiPageImageHint(files.length) // the cover itself fell back to a still too
+        );
+      } catch (err) {
+        console.error('video generation failed', err);
+      }
+      setGenerating(null);
+    }, 30);
+  };
+
+  return (
+    <>
+    <div style={{ display: 'flex', gap: '0.6rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
+      <ExportButton
+        label="↑ save image"
+        busy={generating === 'image'}
+        disabled={generating !== null}
+        onClick={handleSaveImage}
+      />
+      <ExportButton
+        label="↑ share video"
+        busy={generating === 'video'}
+        disabled={generating !== null}
+        onClick={handleSaveVideo}
+      />
+    </div>
 
     {hint && (
       <p
