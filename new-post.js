@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const POSTS_DIR = path.join(__dirname, "content", "posts");
+const PROVENANCE_PATH = path.join(__dirname, "tag-provenance.json");
 
 // Read one line from the terminal, draining any buffered input first
 function prompt(label, defaultVal) {
@@ -112,6 +113,95 @@ function promptTags(suggestedTags, allTags) {
   return selected;
 }
 
+// ── provenance (the "alive" highlight data) ────────────
+// You (the author) know what phrase carries a tag better than anyone
+// close-reading it after the fact — so this asks at write time instead
+// of needing a separate pass later. Every span gets checked against
+// what you actually pasted before it's accepted: computeWeights()
+// (lib/tagProvenance.tsx) does an exact substring match, so a phrase
+// that's off by a comma or a typo would silently do nothing.
+
+// One tag's worth of spans. Blank on the first prompt = "none" — that's
+// a real, honest answer here (see tag-provenance.json's existing "none"
+// entries), not a failure to fill something in.
+function promptSpansForTag(tag, title, body) {
+  const spans = [];
+  console.log(`\n  "${tag}" — paste the exact phrase/line(s) that carry it (copy from`);
+  console.log(`  above, don't retype, so punctuation/spacing match exactly).`);
+  console.log(`  Blank line to move to the next tag. Blank on the first = "none".`);
+  while (true) {
+    const line = prompt(`  [${tag}] phrase ${spans.length + 1}`, "");
+    if (!line) break;
+    if (!title.includes(line) && !body.includes(line)) {
+      console.log(`  ⚠ not found verbatim in the title or body — check spelling/punctuation. Not added.`);
+      continue;
+    }
+    spans.push(line);
+    console.log(`  + added`);
+  }
+  return spans;
+}
+
+// { "type": "phrase"/"lines"/"none", "spans"?: [...] } — inline-formatted
+// to match tag-provenance.json's existing hand-tuned compact style
+// ({ "type": ..., "spans": [...] } on one line), not JSON.stringify's
+// default multi-line output, so adding one entry doesn't reformat the
+// whole file.
+function formatEntryObject(entry) {
+  const parts = [`"type": ${JSON.stringify(entry.type)}`];
+  if (entry.spans) parts.push(`"spans": [${entry.spans.map((s) => JSON.stringify(s)).join(", ")}]`);
+  return `{ ${parts.join(", ")} }`;
+}
+
+function formatProvenanceEntry(slug, dateOnly, tagsObj) {
+  const tagKeys = Object.keys(tagsObj);
+  const maxLen = Math.max(...tagKeys.map((k) => JSON.stringify(k).length));
+  const lines = tagKeys.map((tag) => {
+    const keyStr = JSON.stringify(tag);
+    const pad = " ".repeat(maxLen - keyStr.length);
+    return `      ${keyStr}${pad}: ${formatEntryObject(tagsObj[tag])}`;
+  });
+  return (
+    `  {\n` +
+    `    "slug": ${JSON.stringify(slug)},\n` +
+    `    "date": ${JSON.stringify(dateOnly)},\n` +
+    `    "tags": {\n${lines.join(",\n")}\n    }\n` +
+    `  }`
+  );
+}
+
+// Splices the new entry in before the array's closing "]" — string
+// surgery on the raw file text, not a parse-and-JSON.stringify
+// round-trip, which would blow the whole file's hand-aligned formatting
+// out into standard multi-line JSON and turn a one-post diff into a
+// file-wide one. Validates the result actually parses before writing;
+// leaves the file untouched and prints the entry for manual pasting if
+// anything looks off.
+function appendProvenanceEntry(entryStr) {
+  const raw = fs.readFileSync(PROVENANCE_PATH, "utf-8");
+  const trimmed = raw.replace(/\s+$/, "");
+  if (!trimmed.endsWith("]")) {
+    console.log("\n⚠ tag-provenance.json doesn't end with ']' as expected — not touching it. Add this entry manually:\n");
+    console.log(entryStr + "\n");
+    return false;
+  }
+  const withoutBracket = trimmed.slice(0, -1).replace(/\s+$/, "");
+  const isEmpty = withoutBracket.trim() === "[";
+  const updated = withoutBracket + (isEmpty ? "\n" : ",\n") + entryStr + "\n]\n";
+
+  try {
+    JSON.parse(updated);
+  } catch (err) {
+    console.log("\n⚠ generated entry didn't produce valid JSON — not touching tag-provenance.json. Add this manually:\n");
+    console.log(entryStr + "\n");
+    console.log("Error:", err.message, "\n");
+    return false;
+  }
+
+  fs.writeFileSync(PROVENANCE_PATH, updated);
+  return true;
+}
+
 // ── main ──────────────────────────────────────────────
 
 console.log("\n── New Post ──────────────────────────");
@@ -131,6 +221,30 @@ const suggested = suggestTags(body + " " + title + " " + excerpt, allTags);
 
 const tags = promptTags(suggested, allTags);
 
+// Optional — the highlight/provenance data. null = skipped entirely,
+// {} or all-"none" = attempted but nothing to write (handled the same
+// way at save time, so a post with nothing real never gets a dead
+// entry — see the save-time check below for why that matters).
+let provenanceTags = null;
+if (tags.length > 0) {
+  const wantProvenance = prompt(
+    `Add highlight phrases now? For each tag, paste the exact phrase from\n` +
+    `the poem that carries it — those get the "alive" highlight treatment\n` +
+    `on /writing and in the share video. Blank = "none" for that tag\n` +
+    `(honest and normal — not every tag has to anchor to specific text).`,
+    "y"
+  );
+  if (wantProvenance.toLowerCase() === "y") {
+    provenanceTags = {};
+    for (const tag of tags) {
+      const spans = promptSpansForTag(tag, title, body);
+      provenanceTags[tag] = spans.length
+        ? { type: spans.length === 1 ? "phrase" : "lines", spans }
+        : { type: "none" };
+    }
+  }
+}
+
 const tagsYaml = tags.map((t) => `"${t}"`).join(", ");
 
 console.log("\n──────────────────────────────────────");
@@ -138,6 +252,10 @@ console.log(`  title:   ${title}`);
 console.log(`  date:    ${date}`);
 console.log(`  excerpt: ${excerpt || "(none)"}`);
 console.log(`  tags:    ${tags.length ? tags.join(", ") : "(none)"}`);
+if (provenanceTags) {
+  const withSpans = Object.values(provenanceTags).filter((e) => e.type !== "none").length;
+  console.log(`  provenance: ${withSpans}/${tags.length} tags have highlight phrases`);
+}
 console.log(`  file:    content/posts/${slug}.mdx`);
 console.log("──────────────────────────────────────");
 
@@ -156,15 +274,26 @@ if (fs.existsSync(outputPath)) {
 fs.writeFileSync(outputPath, finalContent);
 console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
 
-// This post has no tag-provenance.json entry yet (a brand-new file never
-// does) — its tag-carrying words won't get the "alive" highlight
-// treatment on /writing or in the share/save video until one exists.
-// Can't generate that here: it's a close-reading judgment call (what
-// phrase actually carries a given tag), not a keyword match — see
-// check-provenance.js and tag-provenance.json's own entries for why.
-console.log(
-  `This post doesn't have tag-provenance.json data yet, so it'll render\n` +
-  `plain (no alive highlighting) until it does.\n\n` +
-  `Ask Claude: "do the provenance pass on the pending posts"\n` +
-  `(or run \`node check-provenance.js\` any time to see what's pending)\n`
-);
+// Only write an entry if at least one tag actually got a real span. An
+// entry where every tag is "none" wouldn't add any highlighting — but
+// hasProvenance(slug) (lib/tagProvenance.tsx) would still flip this post
+// onto the plain-pre-wrap weighted-text render path instead of MDXRemote,
+// silently dropping markdown formatting for zero benefit. So "attempted
+// but nothing real" and "skipped entirely" both fall through to the same
+// plain, un-flagged post below.
+const hasAnySpans = provenanceTags && Object.values(provenanceTags).some((e) => e.type !== "none");
+
+if (hasAnySpans) {
+  const entryStr = formatProvenanceEntry(slug, date.slice(0, 10), provenanceTags);
+  if (appendProvenanceEntry(entryStr)) {
+    const withSpans = Object.values(provenanceTags).filter((e) => e.type !== "none").length;
+    console.log(`Provenance data saved → tag-provenance.json (${withSpans}/${tags.length} tags highlighted)\n`);
+  }
+} else {
+  console.log(
+    `This post doesn't have tag-provenance.json data yet, so it'll render\n` +
+    `plain (no alive highlighting) until it does.\n\n` +
+    `Ask Claude: "do the provenance pass on the pending posts"\n` +
+    `(or run \`node check-provenance.js\` any time to see what's pending)\n`
+  );
+}
