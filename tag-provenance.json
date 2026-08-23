@@ -36,8 +36,16 @@
     "slug": "this-message-is-broadcasted-from-a-primal-place",
     "date": "2026-08-17",
     "tags": {
-      "love":     { "type": "line", "spans": ["JUST LOVE I LOVE MYSELF LIKE I LOVE THE SUN AND ALL THAT IT TOUCH."] },
-      "wordplay": { "type": "lines", "spans": ["hole, is it glory hole? when i go in become all holy?", "red or flag, which invokes a hole farther?", "what molly shows, what red flag takes away"], "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart" }
+      "doubt":           { "type": "lines", "spans": ["so if we formalize, is it the both end?", "do i need to hunt as what's in me requires a prey?"] },
+      "wordplay":        { "type": "lines", "spans": ["hole, is it glory hole? when i go in i become all holy?", "red or flag, which invokes a hole farther?", "what molly shows, what red flag takes away"], "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart" },
+      "sensual":         { "type": "lines", "spans": ["hole, is it glory hole? when i go in i become all holy?", "what molly shows, what red flag takes away"] },
+      "self-acceptance": { "type": "none", "note": "the earlier draft closed on a direct self-love line; this edit cuts that and just sits inside the primal urge without resolving it into shame or acceptance either way — no span left to point to" },
+      "presence":        { "type": "line", "spans": ["something's different, beast's no longer primal."] },
+      "existence":       { "type": "lines", "spans": ["something's different, beast's no longer primal.", "do i need to hunt as what's in me requires a prey?"], "note": "the beast/hunt/prey framing is the primal-survival register this tag is naming" },
+      "wonder":          { "type": "line", "spans": ["hole, is it glory hole? when i go in i become all holy?"], "note": "same line as wordplay/sensual — the marvel is at the crude-to-sacred turn itself" },
+      "clarity":         { "type": "none", "note": "the poem stays inside its own open questions and never resolves into a flat statement — no clarity beat to point to" },
+      "defiance":        { "type": "none", "note": "the earlier draft's \"WELL FUCK THIS POEM\" was the defiant beat; it's cut in this edit and nothing left reads as defiance rather than open questioning" },
+      "devotion":        { "type": "line", "spans": ["hole, is it glory hole? when i go in i become all holy?"], "note": "the pun is where devotion actually lives here — \"holy\" turning a crude act sacred, not a separate declaration" }
     }
   },
   {
