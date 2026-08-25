@@ -127,25 +127,58 @@ function promptTags(suggestedTags, allTags) {
 // (lib/tagProvenance.tsx) does an exact substring match, so a phrase
 // that's off by a comma or a typo would silently do nothing.
 
-// One tag's worth of spans. Blank on the first prompt = "none" — that's
-// a real, honest answer here (see tag-provenance.json's existing "none"
-// entries), not a failure to fill something in.
-function promptSpansForTag(tag, title, body) {
-  const spans = [];
-  console.log(`\n  "${tag}" — paste the exact phrase/line(s) that carry it (copy from`);
-  console.log(`  above, don't retype, so punctuation/spacing match exactly).`);
-  console.log(`  Blank line to move to the next tag. Blank on the first = "none".`);
+// Free-form, like promptTags's picker: type "tag: phrase", one per line,
+// running summary shown between prompts, blank line ends it. No walk
+// through a fixed tag list and no cross-check against the post's own
+// `tags` — any tag name is accepted, a tag can be skipped entirely, a
+// tag can get more than one phrase (just repeat the "tag:" prefix on a
+// later line, it accumulates). The only validation is that the phrase
+// itself is a real, exact substring of this post's title/body.
+function promptProvenanceFreeform(title, body) {
+  const byTag = {};   // tag -> string[] spans
+  const order = [];   // tags in first-seen order, for a stable summary/output order
+
+  console.log('\nType "tag: phrase" — paste the exact phrase from the poem');
+  console.log("(punctuation/spacing must match exactly, copy don't retype).");
+  console.log("Any tag name is fine, doesn't have to be one you picked above.");
+  console.log("A tag can get more than one phrase — just use its name again.");
+  console.log("Blank line when done.");
+
   while (true) {
-    const line = prompt(`  [${tag}] phrase ${spans.length + 1}`, "");
+    const summary = order.length
+      ? order.map((t) => `${t} (${byTag[t].length})`).join(", ")
+      : "none yet";
+    const line = prompt(`  [${summary}]`);
     if (!line) break;
-    if (!title.includes(line) && !body.includes(line)) {
+
+    const sep = line.indexOf(":");
+    if (sep === -1) {
+      console.log('  ⚠ format is "tag: phrase" — no ":" found, not added.');
+      continue;
+    }
+    const tag    = line.slice(0, sep).trim();
+    const phrase = line.slice(sep + 1).trim();
+    if (!tag || !phrase) {
+      console.log('  ⚠ need both a tag and a phrase — not added.');
+      continue;
+    }
+    if (!title.includes(phrase) && !body.includes(phrase)) {
       console.log(`  ⚠ not found verbatim in the title or body — check spelling/punctuation. Not added.`);
       continue;
     }
-    spans.push(line);
-    console.log(`  + added`);
+
+    if (!byTag[tag]) { byTag[tag] = []; order.push(tag); }
+    byTag[tag].push(phrase);
+    console.log(`  + added under "${tag}"`);
   }
-  return spans;
+
+  if (order.length === 0) return null;
+
+  const provenanceTags = {};
+  for (const tag of order) {
+    provenanceTags[tag] = { type: byTag[tag].length === 1 ? "phrase" : "lines", spans: byTag[tag] };
+  }
+  return provenanceTags;
 }
 
 // { "type": "phrase"/"lines"/"none", "spans"?: [...] } — inline-formatted
@@ -227,27 +260,19 @@ const suggested = suggestTags(body + " " + title + " " + excerpt, allTags);
 
 const tags = promptTags(suggested, allTags);
 
-// Optional — the highlight/provenance data. null = skipped entirely,
-// {} or all-"none" = attempted but nothing to write (handled the same
-// way at save time, so a post with nothing real never gets a dead
-// entry — see the save-time check below for why that matters).
+// Optional — the highlight/provenance data. null = skipped or nothing
+// entered; otherwise only the tags actually given a phrase are present
+// (no forced "none" filler, no requirement that a tag was even in the
+// tags list above — see promptProvenanceFreeform).
 let provenanceTags = null;
 if (tags.length > 0) {
   const wantProvenance = prompt(
-    `Add highlight phrases now? For each tag, paste the exact phrase from\n` +
-    `the poem that carries it — those get the "alive" highlight treatment\n` +
-    `on /writing and in the share video. Blank = "none" for that tag\n` +
-    `(honest and normal — not every tag has to anchor to specific text).`,
+    `Add highlight phrases now? These get the "alive" highlight treatment\n` +
+    `on /writing and in the share video.`,
     "y"
   );
   if (wantProvenance.toLowerCase() === "y") {
-    provenanceTags = {};
-    for (const tag of tags) {
-      const spans = promptSpansForTag(tag, title, body);
-      provenanceTags[tag] = spans.length
-        ? { type: spans.length === 1 ? "phrase" : "lines", spans }
-        : { type: "none" };
-    }
+    provenanceTags = promptProvenanceFreeform(title, body);
   }
 }
 
@@ -259,8 +284,9 @@ console.log(`  date:    ${date}`);
 console.log(`  excerpt: ${excerpt || "(none)"}`);
 console.log(`  tags:    ${tags.length ? tags.join(", ") : "(none)"}`);
 if (provenanceTags) {
-  const withSpans = Object.values(provenanceTags).filter((e) => e.type !== "none").length;
-  console.log(`  provenance: ${withSpans}/${tags.length} tags have highlight phrases`);
+  const tagCount = Object.keys(provenanceTags).length;
+  const spanCount = Object.values(provenanceTags).reduce((n, e) => n + e.spans.length, 0);
+  console.log(`  provenance: ${spanCount} phrase${spanCount === 1 ? "" : "s"} across ${tagCount} tag${tagCount === 1 ? "" : "s"}`);
 }
 console.log(`  file:    content/posts/${slug}.mdx`);
 console.log("──────────────────────────────────────");
@@ -280,20 +306,17 @@ if (fs.existsSync(outputPath)) {
 fs.writeFileSync(outputPath, finalContent);
 console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
 
-// Only write an entry if at least one tag actually got a real span. An
-// entry where every tag is "none" wouldn't add any highlighting — but
-// hasProvenance(slug) (lib/tagProvenance.tsx) would still flip this post
-// onto the plain-pre-wrap weighted-text render path instead of MDXRemote,
-// silently dropping markdown formatting for zero benefit. So "attempted
-// but nothing real" and "skipped entirely" both fall through to the same
-// plain, un-flagged post below.
-const hasAnySpans = provenanceTags && Object.values(provenanceTags).some((e) => e.type !== "none");
-
-if (hasAnySpans) {
+// Only write an entry if at least one phrase actually got entered — an
+// empty entry wouldn't add any highlighting, but hasProvenance(slug)
+// (lib/tagProvenance.tsx) would still flip this post onto the plain
+// pre-wrap weighted-text render path instead of MDXRemote, silently
+// dropping markdown formatting for zero benefit. So "attempted but
+// nothing entered" and "skipped entirely" both fall through the same way.
+if (provenanceTags) {
   const entryStr = formatProvenanceEntry(slug, date.slice(0, 10), provenanceTags);
   if (appendProvenanceEntry(entryStr)) {
-    const withSpans = Object.values(provenanceTags).filter((e) => e.type !== "none").length;
-    console.log(`Provenance data saved → tag-provenance.json (${withSpans}/${tags.length} tags highlighted)\n`);
+    const tagCount = Object.keys(provenanceTags).length;
+    console.log(`Provenance data saved → tag-provenance.json (${tagCount} tag${tagCount === 1 ? "" : "s"})\n`);
   }
 } else {
   console.log(
