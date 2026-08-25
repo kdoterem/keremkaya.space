@@ -137,13 +137,13 @@
     "tags": {
       "self-concealment": { "type": "lines", "spans": ["all that i don't give you", "i don't give you because it asks you to reveal yourself", "pull me out of the rug i hide under,"], "note": "withholding as the poem's entire opening mechanism" },
       "vulnerability":    { "type": "lines", "spans": ["could you comprehend something so raw?", "and if you look at me i'll be forged,", "turned into a weapon, wielded in your will,"], "note": "being seen as danger, not relief" },
-      "doubt":            { "type": "lines", "spans": ["i doubt you could.", "could your eyes realize", "is it because past is the source of sorrow", "how hurt you gotta be to wanna transform"], "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking" },
+      "doubt":            { "type": "lines", "spans": ["i doubt you could.", "could your eyes realize", "is it because past is the source of sorrow?", "how hurt you gotta be to wanna transform?"], "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking" },
       "presence":         { "type": "lines", "spans": ["i like you better when you're not here.", "i don't even question if they reach you"], "note": "closeness maintained specifically through distance" },
       "existence":        { "type": "lines", "spans": ["its eternal beam would cut straight through the maze,", "the sand dunes are the collective power of yesterday,", "sun's rays gets here every day yes, but it has been so since yesterday"], "note": "the poem's one stretch of pure metaphysics, unattached to the you" },
       "wordplay":         { "type": "phrase", "spans": ["eye seems something unbeaten in i?"], "note": "eye/I doing double work, same move as elsewhere in the archive" },
-      "mortality":        { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform"], "note": "loosely — transformation read as evidence of damage rather than growth" },
+      "mortality":        { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform?"], "note": "loosely — transformation read as evidence of damage rather than growth" },
       "devotion":         { "type": "line", "spans": ["god, you need a god too."], "note": "lives almost entirely in the last line — nowhere else in the poem, care extended outward after nineteen lines of guardedness" },
-      "clarity":          { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform"], "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it" },
+      "clarity":          { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform?"], "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it" },
       "self-acceptance":  { "type": "none", "note": "not part of the close read given — the poem stays in guardedness/self-concealment throughout, no resolution into acceptance" }
     }
   }
