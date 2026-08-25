@@ -969,13 +969,13 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     <>
     <div style={{ display: 'flex', gap: '0.6rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
       <ExportButton
-        label="↑ save image"
+        label="↑ save / share image"
         busy={generating === 'image'}
         disabled={generating !== null}
         onClick={handleSaveImage}
       />
       <ExportButton
-        label="↑ share video"
+        label="↑ save / share video"
         busy={generating === 'video'}
         disabled={generating !== null}
         onClick={handleSaveVideo}
