@@ -127,58 +127,36 @@ function promptTags(suggestedTags, allTags) {
 // (lib/tagProvenance.tsx) does an exact substring match, so a phrase
 // that's off by a comma or a typo would silently do nothing.
 
-// Free-form, like promptTags's picker: type "tag: phrase", one per line,
-// running summary shown between prompts, blank line ends it. No walk
-// through a fixed tag list and no cross-check against the post's own
-// `tags` — any tag name is accepted, a tag can be skipped entirely, a
-// tag can get more than one phrase (just repeat the "tag:" prefix on a
-// later line, it accumulates). The only validation is that the phrase
-// itself is a real, exact substring of this post's title/body.
+// Flat list, like promptTags's picker but simpler: paste a phrase, blank
+// line when done. No tag name needed — computeWeights() (lib/tagProvenance.tsx)
+// only ever counts how many times a stretch of text got claimed; it
+// never reads back WHICH tag claimed it (nothing on the page surfaces
+// that), so asking for one was pure unused ceremony. Listing the same
+// phrase more than once is how you make it stand out more — each repeat
+// adds another point of weight, same mechanic as before, just without
+// needing a tag label to get there. Still validated against the actual
+// title/body before being accepted.
 function promptProvenanceFreeform(title, body) {
-  const byTag = {};   // tag -> string[] spans
-  const order = [];   // tags in first-seen order, for a stable summary/output order
+  const spans = [];
 
-  console.log('\nType "tag: phrase" — paste the exact phrase from the poem');
-  console.log("(punctuation/spacing must match exactly, copy don't retype).");
-  console.log("Any tag name is fine, doesn't have to be one you picked above.");
-  console.log("A tag can get more than one phrase — just use its name again.");
-  console.log("Blank line when done.");
+  console.log('\nPaste phrases that should be "alive" (highlighted, moving) —');
+  console.log("one per line, exact match required (copy, don't retype).");
+  console.log("List the same phrase again if you want it to stand out more");
+  console.log("(each repeat adds weight). Blank line when done.");
 
   while (true) {
-    const summary = order.length
-      ? order.map((t) => `${t} (${byTag[t].length})`).join(", ")
-      : "none yet";
-    const line = prompt(`  [${summary}]`);
+    const line = prompt(`  [${spans.length} phrase${spans.length === 1 ? "" : "s"}]`);
     if (!line) break;
-
-    const sep = line.indexOf(":");
-    if (sep === -1) {
-      console.log('  ⚠ format is "tag: phrase" — no ":" found, not added.');
-      continue;
-    }
-    const tag    = line.slice(0, sep).trim();
-    const phrase = line.slice(sep + 1).trim();
-    if (!tag || !phrase) {
-      console.log('  ⚠ need both a tag and a phrase — not added.');
-      continue;
-    }
-    if (!title.includes(phrase) && !body.includes(phrase)) {
+    if (!title.includes(line) && !body.includes(line)) {
       console.log(`  ⚠ not found verbatim in the title or body — check spelling/punctuation. Not added.`);
       continue;
     }
-
-    if (!byTag[tag]) { byTag[tag] = []; order.push(tag); }
-    byTag[tag].push(phrase);
-    console.log(`  + added under "${tag}"`);
+    spans.push(line);
+    console.log(`  + added`);
   }
 
-  if (order.length === 0) return null;
-
-  const provenanceTags = {};
-  for (const tag of order) {
-    provenanceTags[tag] = { type: byTag[tag].length === 1 ? "phrase" : "lines", spans: byTag[tag] };
-  }
-  return provenanceTags;
+  if (spans.length === 0) return null;
+  return { highlighted: { type: "lines", spans } };
 }
 
 // { "type": "phrase"/"lines"/"none", "spans"?: [...] } — inline-formatted
@@ -284,9 +262,8 @@ console.log(`  date:    ${date}`);
 console.log(`  excerpt: ${excerpt || "(none)"}`);
 console.log(`  tags:    ${tags.length ? tags.join(", ") : "(none)"}`);
 if (provenanceTags) {
-  const tagCount = Object.keys(provenanceTags).length;
-  const spanCount = Object.values(provenanceTags).reduce((n, e) => n + e.spans.length, 0);
-  console.log(`  provenance: ${spanCount} phrase${spanCount === 1 ? "" : "s"} across ${tagCount} tag${tagCount === 1 ? "" : "s"}`);
+  const spanCount = provenanceTags.highlighted.spans.length;
+  console.log(`  provenance: ${spanCount} phrase${spanCount === 1 ? "" : "s"} marked alive`);
 }
 console.log(`  file:    content/posts/${slug}.mdx`);
 console.log("──────────────────────────────────────");
@@ -315,8 +292,8 @@ console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
 if (provenanceTags) {
   const entryStr = formatProvenanceEntry(slug, date.slice(0, 10), provenanceTags);
   if (appendProvenanceEntry(entryStr)) {
-    const tagCount = Object.keys(provenanceTags).length;
-    console.log(`Provenance data saved → tag-provenance.json (${tagCount} tag${tagCount === 1 ? "" : "s"})\n`);
+    const spanCount = provenanceTags.highlighted.spans.length;
+    console.log(`Provenance data saved → tag-provenance.json (${spanCount} phrase${spanCount === 1 ? "" : "s"})\n`);
   }
 } else {
   console.log(
