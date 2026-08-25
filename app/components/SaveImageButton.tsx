@@ -812,6 +812,15 @@ export default function SaveImageButton({ title, content, slug }: Props) {
   const [generating, setGenerating] = useState<ExportMode | null>(null);
   const [hint,       setHint]       = useState<string | null>(null);
 
+  // Whether there's actually anything to animate — same check handleSaveVideo
+  // does at click time (getProvenanceTags + computeWeights), just run once at
+  // render time so the video button can be hidden entirely on posts with no
+  // provenance data instead of appearing and then falling back to a still
+  // image with an explanatory note. Works for every post automatically,
+  // past or future — it's a live check against tag-provenance.json, not a
+  // hardcoded list.
+  const hasVideo = !!computeWeights(stripMarkdown(content), slug ? getProvenanceTags(slug) : undefined);
+
   // Shared prep for both modes — same data, same weighting functions as
   // /terrain and /writing (lib/tagProvenance.tsx). Posts with no provenance
   // entry get bodyWeights/titleWeights === undefined, and every render
@@ -974,12 +983,14 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         disabled={generating !== null}
         onClick={handleSaveImage}
       />
-      <ExportButton
-        label="↑ save / share video"
-        busy={generating === 'video'}
-        disabled={generating !== null}
-        onClick={handleSaveVideo}
-      />
+      {hasVideo && (
+        <ExportButton
+          label="↑ save / share video"
+          busy={generating === 'video'}
+          disabled={generating !== null}
+          onClick={handleSaveVideo}
+        />
+      )}
     </div>
 
     {hint && (
