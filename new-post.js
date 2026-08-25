@@ -175,8 +175,8 @@ function formatProvenanceEntry(slug, dateOnly, tagsObj) {
   const maxLen = Math.max(...tagKeys.map((k) => JSON.stringify(k).length));
   const lines = tagKeys.map((tag) => {
     const keyStr = JSON.stringify(tag);
-    const pad = " ".repeat(maxLen - keyStr.length);
-    return `      ${keyStr}${pad}: ${formatEntryObject(tagsObj[tag])}`;
+    const pad = " ".repeat(maxLen - keyStr.length + 1);
+    return `      ${keyStr}:${pad}${formatEntryObject(tagsObj[tag])}`;
   });
   return (
     `  {\n` +
