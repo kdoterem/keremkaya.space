@@ -7,11 +7,23 @@ const path = require("path");
 const POSTS_DIR = path.join(__dirname, "content", "posts");
 const PROVENANCE_PATH = path.join(__dirname, "tag-provenance.json");
 
-// Read one line from the terminal, draining any buffered input first
+// Read one line from the terminal, draining any buffered input first — the
+// drain matters whenever a prompt might follow a paste that landed more
+// newlines in the tty's buffer than intended (a trailing blank line, a
+// second line pasted ahead of the prompt that printed it, etc.). Without
+// it, each stray buffered line silently satisfies the NEXT prompt's read
+// before the user ever sees it — which is exactly what broke
+// promptSpansForTag: pasting a two-line phrase, one line at a time, could
+// still leave a stray newline in the buffer that answered "blank" for
+// several prompts in a row, skipping straight past the remaining tags to
+// the final Save confirmation. promptTags had this drain inline already;
+// it just never got pulled into this shared function.
 function prompt(label, defaultVal) {
   const hint = defaultVal ? ` (default: ${defaultVal})` : "";
   process.stdout.write(`\n${label}${hint}\n> `);
-  const r = spawnSync("/bin/sh", ["-c", 'read -r val < /dev/tty; printf "%s" "$val"'], {
+  const drain = 'while IFS= read -r -t 0.05 _l < /dev/tty 2>/dev/null; do :; done';
+  const read  = 'read -r val < /dev/tty; printf "%s" "$val"';
+  const r = spawnSync("/bin/sh", ["-c", `${drain}; ${read}`], {
     stdio: ["inherit", "pipe", "inherit"],
   });
   const val = r.stdout ? r.stdout.toString().trim() : "";
@@ -91,13 +103,7 @@ function promptTags(suggestedTags, allTags) {
   console.log("Type 'done' or leave blank when finished. Aim for 3–6 tags, most important first.");
 
   while (true) {
-    process.stdout.write(`\n  [${selected.length ? selected.join(", ") : "none"}]\n> `);
-    const drain = 'while IFS= read -r -t 0.05 _l < /dev/tty 2>/dev/null; do :; done';
-    const read  = 'read -r val < /dev/tty; printf "%s" "$val"';
-    const r = spawnSync("/bin/sh", ["-c", `${drain}; ${read}`], {
-      stdio: ["inherit", "pipe", "inherit"],
-    });
-    const input = (r.stdout ? r.stdout.toString().trim() : "").toLowerCase();
+    const input = prompt(`  [${selected.length ? selected.join(", ") : "none"}]`).toLowerCase();
     if (!input || input === "done") break;
 
     const idx = selected.findIndex((t) => t.toLowerCase() === input);
