@@ -33,11 +33,14 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 // either way: there's nothing in storage to correct to, so mode stays
 // "unset" and the prompt just appears, same as before.
 // v2: switched from a raw words-per-minute number to a pace multiplier
-// (see PACE_OPTIONS, app/components/InvisibleInkText.tsx) when the reveal
-// itself moved from word-by-word to line-by-line — a different enough
-// shape that a stale v1-shaped value (a lone `wpm`) shouldn't silently
-// half-apply. Bumping the key just means anyone who chose a preference
-// under v1 sees the prompt again once, which is the right outcome here.
+// (see SUGGESTED_MULTIPLIER, app/components/InvisibleInkText.tsx) when the
+// reveal itself moved from word-by-word to line-by-line — a different
+// enough shape that a stale v1-shaped value (a lone `wpm`) shouldn't
+// silently half-apply. Bumping the key just means anyone who chose a
+// preference under v1 sees the prompt again once, which is the right
+// outcome here. (The shape hasn't changed again since — later versions
+// dropped the multiple speed presets down to one suggested pace, but a
+// preference is still just { mode, multiplier }, so no v3 was needed.)
 const STORAGE_KEY = "kk-reading-preference-v2";
 
 export type ReadingMode = "unset" | "normal" | "paced";

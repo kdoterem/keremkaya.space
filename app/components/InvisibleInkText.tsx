@@ -87,27 +87,30 @@ function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSPrope
   };
 }
 
-// Reveal cadence — a line arrives once you're roughly this many words into
-// the line before it, not once that whole prior line's own reading time has
-// fully elapsed. That's the felt difference between "wait for this line to
-// finish, then the next one starts" and "the next line is already there,
-// waiting for you" — the latter is what was asked for.
-//
-// A fixed word-count lookahead, not scaled by each line's own length, also
-// fixes short lines: under the old full-duration model a 3-word line had
-// hardly any duration of its own, so the line after it fired almost
-// instantly. Now every line — three words or thirteen — waits the same
-// beat before the next one lands.
-const LOOKAHEAD_WORDS = 3.5;
+// Reveal cadence — a line arrives once you've had time to actually finish
+// the one before it, gated to that PREVIOUS line's own length. Went through
+// an in-between version that revealed the next line partway into the
+// current one (a fixed ~3.5-word lookahead, regardless of that line's real
+// length) — living with it said otherwise: seeing the next line arrive
+// before you'd actually finished reading the current one was distracting,
+// not inviting. The wait itself, sized to how much there really was to
+// read, is what makes each line's arrival feel considered. A short line is
+// read quickly and its successor follows quickly; a long line earns a
+// longer wait before the next one lands — proportionate either way, never
+// a flat interval that's wrong for most line lengths.
+const BASE_SEC_PER_LINE = 0.55;
 const SEC_PER_WORD = 0.32;
 
-export const PACE_OPTIONS: { label: string; multiplier: number; hint: string }[] = [
-  { label: "unhurried", multiplier: 1.35, hint: "more time per line" },
-  { label: "brisk",     multiplier: 0.7,  hint: "less time per line" },
-];
+// One suggested pace, calibrated by the constants above — not a user-facing
+// dial. Earlier versions offered a couple of speed presets ("unhurried" /
+// "brisk") to choose between; simplified to a single well-tuned default
+// alongside the separate "read normally" (fully visible, unpaced) choice —
+// see ReadingExperience.tsx. What people wanted was one reveal that felt
+// right, not a knob to tune themselves.
+export const SUGGESTED_MULTIPLIER = 1;
 
-function lineIntervalMs(multiplier: number): number {
-  return LOOKAHEAD_WORDS * SEC_PER_WORD * multiplier * 1000;
+function lineDurationMs(wordCount: number, multiplier: number): number {
+  return (BASE_SEC_PER_LINE + wordCount * SEC_PER_WORD) * multiplier * 1000;
 }
 
 // A short pause before the cascade starts — a beat to take in the whole
@@ -226,11 +229,16 @@ export default function InvisibleInkText({
   }, [text]);
 
   const thresholds = useMemo(() => {
-    const interval = lineIntervalMs(multiplier);
     let cumulative = START_DELAY_MS;
+    let prevWordCount: number | null = null;
     return lineInfos.map((info) => {
       if (info.isBlank) return 0;
-      cumulative += interval;
+      // Gap before THIS line reveals is sized to the line before it — the
+      // one the reader's actually reading right now. Blank stanza gaps
+      // don't touch prevWordCount, so a break between verses doesn't erase
+      // how long the last real line was.
+      if (prevWordCount !== null) cumulative += lineDurationMs(prevWordCount, multiplier);
+      prevWordCount = info.wordCount;
       return cumulative;
     });
   }, [lineInfos, multiplier]);

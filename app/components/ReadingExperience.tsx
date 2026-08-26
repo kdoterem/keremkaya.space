@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useReadingPreference, type ReadingPreference } from "@/lib/useReadingPreference";
-import InvisibleInkText, { PACE_OPTIONS } from "./InvisibleInkText";
+import InvisibleInkText, { SUGGESTED_MULTIPLIER } from "./InvisibleInkText";
 import AliveWeightedText from "./AliveWeightedText";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
@@ -69,30 +69,28 @@ function ReadingModeModal({
           how do you want to read?
         </h2>
         <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(10,10,10,0.6)", marginBottom: "1.5rem" }}>
-          poems can unravel themselves as you read, line by line, at a pace you pick —
+          poems can unravel themselves as you read, line by line, at a considered pace —
           or just sit there, fully visible, like normal.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          {PACE_OPTIONS.map(({ label, multiplier, hint }) => (
-            <button
-              key={multiplier}
-              onClick={() => onChoose({ mode: "paced", multiplier })}
-              style={optionButtonStyle}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
-            >
-              <span style={{ display: "block", fontWeight: 500 }}>{label}</span>
-              <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>{hint}</span>
-            </button>
-          ))}
+          <button
+            onClick={() => onChoose({ mode: "paced", multiplier: SUGGESTED_MULTIPLIER })}
+            style={optionButtonStyle}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
+          >
+            <span style={{ display: "block", fontWeight: 500 }}>read how it&rsquo;s suggested</span>
+            <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>unravels line by line, one at a time</span>
+          </button>
           <button
             onClick={() => onChoose({ mode: "normal" })}
             style={optionButtonStyle}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
           >
-            <span style={{ display: "block", fontWeight: 500 }}>read normally</span>
+            <span style={{ display: "block", fontWeight: 500 }}>read how you want to</span>
+            <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>fully visible, like normal</span>
           </button>
         </div>
 
@@ -117,9 +115,8 @@ const optionButtonStyle: React.CSSProperties = {
 };
 
 function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen: () => void }) {
-  const paceLabel = PACE_OPTIONS.find((p) => p.multiplier === pref.multiplier)?.label;
   const label =
-    pref.mode === "paced" ? `reading: paced${paceLabel ? ` (${paceLabel})` : ""}` :
+    pref.mode === "paced" ? "reading: paced" :
     pref.mode === "normal" ? "reading: normal" :
     "reading: choose";
 
