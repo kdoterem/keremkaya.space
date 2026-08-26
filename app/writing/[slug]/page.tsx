@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
-import AliveWeightedText from "@/app/components/AliveWeightedText";
+import ReadingExperience from "@/app/components/ReadingExperience";
 import {
   hasProvenance,
   getProvenanceTags,
@@ -269,19 +269,17 @@ export default async function PostPage({
           }}
           className="prose-content"
         >
-          {showProvenance ? (
-            // Same technique as /terrain's poem body — plain pre-wrap text
-            // with weighted runs, not markdown-rendered. Matches it exactly
-            // rather than approximating it through MDXRemote.
-            <div style={{ whiteSpace: "pre-wrap" }}>
-              <AliveWeightedText text={bodyText} weights={bodyWeights} />
-            </div>
-          ) : (
-            <MDXRemote
-              source={post.content}
-              options={{ mdxOptions: { remarkPlugins: [remarkBreaks], rehypePlugins: [rehypeBlockLines] } }}
-            />
-          )}
+          <ReadingExperience
+            bodyText={bodyText}
+            bodyWeights={bodyWeights}
+            showProvenance={showProvenance}
+            mdxContent={
+              <MDXRemote
+                source={post.content}
+                options={{ mdxOptions: { remarkPlugins: [remarkBreaks], rehypePlugins: [rehypeBlockLines] } }}
+              />
+            }
+          />
         </div>
 
         {/* Save as image */}

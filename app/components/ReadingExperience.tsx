@@ -1,0 +1,211 @@
+"use client";
+
+import { useState } from "react";
+import { useReadingPreference, type ReadingPreference } from "@/lib/useReadingPreference";
+import InvisibleInkText from "./InvisibleInkText";
+import AliveWeightedText from "./AliveWeightedText";
+
+const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+
+// Reading-speed presets, grounded in real reading-speed research rather
+// than arbitrary numbers: average adult silent reading of ordinary prose
+// sits around 200–250 wpm, but poetry is read slower than that pretty
+// consistently — denser imagery, line breaks demanding their own beat, the
+// instinct to re-read a line — closer to 90–150 wpm for someone actually
+// paying attention rather than skimming.
+const PACE_OPTIONS: { label: string; wpm: number; hint: string }[] = [
+  { label: "slow — savoring", wpm: 90,  hint: "~90 words/min" },
+  { label: "natural pace",    wpm: 140, hint: "~140 words/min" },
+  { label: "quick — skimming", wpm: 220, hint: "~220 words/min" },
+];
+
+function ReadingModeModal({
+  onChoose,
+  onDismiss,
+}: {
+  onChoose: (pref: ReadingPreference) => void;
+  onDismiss?: () => void;
+}) {
+  return (
+    <div
+      onClick={onDismiss}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 200,
+        background: "rgba(10,10,10,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1.5rem",
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reading-mode-heading"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          background: "#0a0a0a",
+          color: "#fff",
+          maxWidth: "26rem",
+          width: "100%",
+          padding: "2rem 1.75rem",
+          fontFamily: FONT,
+        }}
+      >
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            aria-label="Close"
+            style={{
+              position: "absolute", top: "0.9rem", right: "0.9rem",
+              background: "none", border: "none", cursor: "pointer",
+              color: "rgba(255,255,255,0.4)", fontSize: "0.9rem", padding: "0.25rem",
+            }}
+          >
+            ×
+          </button>
+        )}
+
+        <h2 id="reading-mode-heading" style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", color: "#aaff00", letterSpacing: "-0.01em" }}>
+          how do you want to read?
+        </h2>
+        <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,255,255,0.6)", marginBottom: "1.5rem" }}>
+          poems can unravel themselves as you read, word by word, at a pace you pick —
+          or just sit there, fully visible, like normal.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+          {PACE_OPTIONS.map(({ label, wpm, hint }) => (
+            <button
+              key={wpm}
+              onClick={() => onChoose({ mode: "paced", wpm })}
+              style={optionButtonStyle}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#aaff00"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
+            >
+              <span style={{ display: "block", fontWeight: 500 }}>{label}</span>
+              <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.5, marginTop: "0.15rem" }}>{hint}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => onChoose({ mode: "normal" })}
+            style={optionButtonStyle}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#aaff00"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
+          >
+            <span style={{ display: "block", fontWeight: 500 }}>read normally</span>
+          </button>
+        </div>
+
+        <p style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.32)", lineHeight: 1.5 }}>
+          change this anytime — look for &ldquo;reading: &hellip;&rdquo; near the top of any poem.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const optionButtonStyle: React.CSSProperties = {
+  textAlign: "left",
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.18)",
+  color: "#fff",
+  padding: "0.65rem 0.85rem",
+  fontFamily: FONT,
+  fontSize: "0.82rem",
+  cursor: "pointer",
+  transition: "border-color 0.15s",
+};
+
+function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen: () => void }) {
+  const label =
+    pref.mode === "paced" ? `reading: paced (${pref.wpm} wpm)` :
+    pref.mode === "normal" ? "reading: normal" :
+    "reading: choose";
+
+  return (
+    <button
+      onClick={onOpen}
+      style={{
+        fontSize: "0.65rem",
+        fontWeight: 500,
+        letterSpacing: "0.08em",
+        fontVariant: "small-caps",
+        color: "rgba(10,10,10,0.4)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: 0,
+        fontFamily: FONT,
+        textDecoration: "underline",
+        textUnderlineOffset: "3px",
+      }}
+    >
+      {label} ↻
+    </button>
+  );
+}
+
+// ── The client-side wrapper for a poem's body — owns the reading
+// preference, shows the first-visit prompt, renders the "change reading
+// mode" control, and switches between the three possible renderings:
+//
+//   paced   → InvisibleInkText, works on ANY post (provenance optional)
+//   normal  → exactly what existed before this feature: AliveWeightedText
+//             for the posts with provenance data, plain MDXRemote otherwise
+//   unset   → same as normal, until (or unless) the visitor makes a choice
+//             — the safe, always-fully-visible default, so a first-time
+//             visitor's first paint (and anyone with JS disabled, since
+//             mdxContent/the alive fallback are both server-rendered)
+//             never depends on this feature working at all.
+export default function ReadingExperience({
+  bodyText,
+  bodyWeights,
+  showProvenance,
+  mdxContent,
+}: {
+  bodyText: string;
+  bodyWeights: number[] | undefined;
+  showProvenance: boolean;
+  mdxContent: React.ReactNode;
+}) {
+  const [pref, setPref] = useReadingPreference();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const showOnboarding = pref.mode === "unset";
+
+  const handleChoose = (next: ReadingPreference) => {
+    setPref(next);
+    setModalOpen(false);
+  };
+
+  return (
+    <>
+      <div style={{ marginBottom: "1.25rem" }}>
+        <ReadingModeControl pref={pref} onOpen={() => setModalOpen(true)} />
+      </div>
+
+      {pref.mode === "paced" && pref.wpm ? (
+        <div style={{ whiteSpace: "pre-wrap" }}>
+          <InvisibleInkText text={bodyText} weights={bodyWeights} wpm={pref.wpm} />
+        </div>
+      ) : showProvenance ? (
+        <div style={{ whiteSpace: "pre-wrap" }}>
+          <AliveWeightedText text={bodyText} weights={bodyWeights} />
+        </div>
+      ) : (
+        mdxContent
+      )}
+
+      {(showOnboarding || modalOpen) && (
+        <ReadingModeModal
+          onChoose={handleChoose}
+          onDismiss={showOnboarding ? undefined : () => setModalOpen(false)}
+        />
+      )}
+    </>
+  );
+}

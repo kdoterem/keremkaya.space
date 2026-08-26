@@ -243,3 +243,10 @@ a:hover .post-nav-title {
 .prose-content .poem-stanza:last-child {
   margin-bottom: 0;
 }
+
+/* Invisible-ink reveal (InvisibleInkText) — the moving shimmer sweep
+   clipped to each not-yet-revealed word's own letterforms. */
+@keyframes ink-shimmer-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
