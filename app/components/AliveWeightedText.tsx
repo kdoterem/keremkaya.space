@@ -10,8 +10,13 @@ import { buildRuns, aliveScaleFor, seededPhase, bodyWeightStyle } from "@/lib/ta
 // Deliberately used for the BODY only; the title stays on the plain,
 // static WeightedText (lib/tagProvenance.tsx) so the two kinds of emphasis
 // read as genuinely different registers rather than the same trick twice.
-// No color change — the motion alone is the "alive" signal; a color pulse
-// on top of it was a second, redundant one.
+// No color change and, when motion is actually playing, no font-weight/
+// size bump either — the drift+breathe alone is the "alive" signal now;
+// a static heavier/bigger look on top of it read as visually "as black
+// as the title" even with color removed, which was the same redundant-
+// signal problem one layer down. bodyWeightStyle only still applies as
+// the prefers-reduced-motion fallback below, so those readers still get
+// *some* indication when there's no motion to carry it.
 //
 // Motion is driven by aliveScaleFor/seededPhase — the same functions the
 // share-image video export uses — so a reader who saves a poem gets back
@@ -49,8 +54,9 @@ export default function AliveWeightedText({
         const slice = text.slice(r.start, r.end);
         if (r.weight <= 0) return <span key={i}>{slice}</span>;
 
-        const base = bodyWeightStyle(r.weight) ?? {};
-        if (reduceMotion) return <span key={i} style={base}>{slice}</span>;
+        if (reduceMotion) {
+          return <span key={i} style={bodyWeightStyle(r.weight) ?? {}}>{slice}</span>;
+        }
 
         const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(r.weight);
         const phase1 = seededPhase(r.start);
@@ -61,7 +67,7 @@ export default function AliveWeightedText({
         return (
           <motion.span
             key={i}
-            style={{ display: "inline-block", ...base }}
+            style={{ display: "inline-block" }}
             animate={{
               x:     [0, driftAmpX, 0, -driftAmpX, 0],
               y:     [0, -driftAmpY, 0, driftAmpY, 0],

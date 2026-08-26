@@ -289,29 +289,24 @@ function drawWeightedLineCenteredAnimated(
   y: number,
   baseFontSize: number,
   baseFontWeight: string,
-  weightStyleFn: (level: number) => React.CSSProperties,
   loopT: number,
 ) {
   const levels = words.map(w => wordWeightLevel(weights, w));
-  const wordFonts = words.map((w, i) => {
-    const level = levels[i];
-    const style = level > 0 ? weightStyleFn(level) : {};
-    return canvasFontForWeightStyle(baseFontSize, baseFontWeight, style);
-  });
 
+  // Every word draws in the same base font — no weight/size bump. The
+  // motion is the only distinguishing signal here (see AliveWeightedText,
+  // which this mirrors); a heavier/bigger look on top of it was redundant.
   ctx.font = `${baseFontWeight} ${baseFontSize}px ${FONT}`;
   const spaceWidth = ctx.measureText(' ').width;
 
   let totalWidth = 0;
   words.forEach((w, i) => {
-    ctx.font = wordFonts[i];
     totalWidth += ctx.measureText(w.word).width;
     if (i < words.length - 1) totalWidth += spaceWidth;
   });
 
   let x = (W - totalWidth) / 2;
   words.forEach((w, i) => {
-    ctx.font = wordFonts[i];
     const wordWidth = ctx.measureText(w.word).width;
     const level = levels[i];
 
@@ -615,7 +610,7 @@ function paintAnimatedFrame(
   for (const line of contentLines) {
     if (line === null) { y += gapH; continue; }
     if (Array.isArray(line)) {
-      drawWeightedLineCenteredAnimated(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle, loopT);
+      drawWeightedLineCenteredAnimated(ctx, line, bodyWeights!, y, fontSize, '400', loopT);
     } else {
       drawCentered(ctx, line, y, '#0a0a0a');
     }
