@@ -139,10 +139,28 @@ export function seededPhase(seed: number): number {
   return hash01(seed);
 }
 
-// The rest/plain text color — weighted runs stay this color always. No
-// color pulse: the drift+breathe motion already reads as "alive" on its
-// own, a color shift on top of it was redundant, not a second signal.
+// The rest/plain text color — everything not carrying a tag stays this
+// color always.
 export const ALIVE_REST_COLOR = "#0a0a0a";
+
+// Static tint for weighted text — a fixed color, not animated (the removed
+// color pulse was a redundant second "alive" signal on top of the motion;
+// this is a different thing: a quiet, permanent marker of "this phrase
+// carries a tag," independent of whether motion is even playing). The
+// site's whole palette is two colors — near-black and the accent #aaff00
+// (already the "this is significant" color elsewhere, e.g. the homepage's
+// selected-tag panel) — so this blends increasing amounts of that same
+// accent into near-black rather than introducing a third color. Kept
+// short of a strong blend on purpose: the /writing reading page's own
+// background IS #aaff00, so pushing the blend too far would converge
+// weighted text toward the background color and hurt legibility, not
+// help it. Scales with weight level, same as the site's other emphasis
+// mechanisms (bodyWeightStyle, titleWeightStyle) — more tags claiming a
+// phrase reads as a deeper, more present green.
+const WEIGHTED_TINT_BY_LEVEL = ["#0a0a0a", "#273608", "#3a5407", "#4d7106"];
+export function weightedTintFor(level: number): string {
+  return WEIGHTED_TINT_BY_LEVEL[Math.min(level, 3)];
+}
 
 export interface AliveScale {
   driftAmpX: number;

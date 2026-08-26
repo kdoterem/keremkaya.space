@@ -9,6 +9,7 @@ import {
   aliveScaleFor,
   seededPhase,
   ALIVE_REST_COLOR,
+  weightedTintFor,
 } from '@/lib/tagProvenance';
 import {
   Output as MbOutput,
@@ -233,6 +234,12 @@ function canvasFontForWeightStyle(
 // Draws one line word-by-word, each in its own weight-appropriate font,
 // manually positioned (canvas has no inline flow) and centered as a whole —
 // the direct canvas equivalent of CryptoScramble/WeightedText's styled runs.
+//
+// tint (default off) applies weightedTintFor per weighted word instead of
+// flat ALIVE_REST_COLOR everywhere — only ever turned on for body content.
+// This function also draws the title (with titleWeightStyle), which stays
+// on flat ALIVE_REST_COLOR always — the title's own weight-only emphasis
+// is a deliberately different, untinted register from the body's.
 function drawWeightedLineCentered(
   ctx: CanvasRenderingContext2D,
   words: WordTok[],
@@ -241,9 +248,11 @@ function drawWeightedLineCentered(
   baseFontSize: number,
   baseFontWeight: string,
   weightStyleFn: (level: number) => React.CSSProperties,
+  tint = false,
 ) {
-  const wordFonts = words.map(w => {
-    const level = wordWeightLevel(weights, w);
+  const levels = words.map(w => wordWeightLevel(weights, w));
+  const wordFonts = words.map((w, i) => {
+    const level = levels[i];
     const style = level > 0 ? weightStyleFn(level) : {};
     return canvasFontForWeightStyle(baseFontSize, baseFontWeight, style);
   });
@@ -259,9 +268,9 @@ function drawWeightedLineCentered(
   });
 
   let x = (W - totalWidth) / 2;
-  ctx.fillStyle = '#0a0a0a';
   words.forEach((w, i) => {
     ctx.font = wordFonts[i];
+    ctx.fillStyle = tint && levels[i] > 0 ? weightedTintFor(levels[i]) : ALIVE_REST_COLOR;
     ctx.fillText(w.word, x, y);
     x += ctx.measureText(w.word).width + (i < words.length - 1 ? spaceWidth : 0);
   });
@@ -326,7 +335,7 @@ function drawWeightedLineCenteredAnimated(
       ctx.save();
       ctx.translate(cx + dx, cy + dy);
       ctx.scale(s, s);
-      ctx.fillStyle = ALIVE_REST_COLOR;
+      ctx.fillStyle = weightedTintFor(level);
       ctx.fillText(w.word, -wordWidth / 2, -baseFontSize * 0.42);
       ctx.restore();
     }
@@ -516,7 +525,7 @@ function renderPage(
     for (const line of contentLines) {
       if (line === null) { y += gapH; continue; }
       if (Array.isArray(line)) {
-        drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle);
+        drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle, true);
       } else {
         drawCentered(ctx, line, y, '#0a0a0a');
       }
