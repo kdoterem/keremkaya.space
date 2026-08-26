@@ -2,22 +2,10 @@
 
 import { useState } from "react";
 import { useReadingPreference, type ReadingPreference } from "@/lib/useReadingPreference";
-import InvisibleInkText from "./InvisibleInkText";
+import InvisibleInkText, { PACE_OPTIONS } from "./InvisibleInkText";
 import AliveWeightedText from "./AliveWeightedText";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
-
-// Reading-speed presets, grounded in real reading-speed research rather
-// than arbitrary numbers: average adult silent reading of ordinary prose
-// sits around 200–250 wpm, but poetry is read slower than that pretty
-// consistently — denser imagery, line breaks demanding their own beat, the
-// instinct to re-read a line — closer to 90–150 wpm for someone actually
-// paying attention rather than skimming.
-const PACE_OPTIONS: { label: string; wpm: number; hint: string }[] = [
-  { label: "slow — savoring", wpm: 90,  hint: "~90 words/min" },
-  { label: "natural pace",    wpm: 140, hint: "~140 words/min" },
-  { label: "quick — skimming", wpm: 220, hint: "~220 words/min" },
-];
 
 function ReadingModeModal({
   onChoose,
@@ -73,15 +61,15 @@ function ReadingModeModal({
           how do you want to read?
         </h2>
         <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,255,255,0.6)", marginBottom: "1.5rem" }}>
-          poems can unravel themselves as you read, word by word, at a pace you pick —
+          poems can unravel themselves as you read, line by line, at a pace you pick —
           or just sit there, fully visible, like normal.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          {PACE_OPTIONS.map(({ label, wpm, hint }) => (
+          {PACE_OPTIONS.map(({ label, multiplier, hint }) => (
             <button
-              key={wpm}
-              onClick={() => onChoose({ mode: "paced", wpm })}
+              key={multiplier}
+              onClick={() => onChoose({ mode: "paced", multiplier })}
               style={optionButtonStyle}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#aaff00"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
@@ -121,8 +109,9 @@ const optionButtonStyle: React.CSSProperties = {
 };
 
 function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen: () => void }) {
+  const paceLabel = PACE_OPTIONS.find((p) => p.multiplier === pref.multiplier)?.label;
   const label =
-    pref.mode === "paced" ? `reading: paced (${pref.wpm} wpm)` :
+    pref.mode === "paced" ? `reading: paced${paceLabel ? ` (${paceLabel})` : ""}` :
     pref.mode === "normal" ? "reading: normal" :
     "reading: choose";
 
@@ -188,10 +177,8 @@ export default function ReadingExperience({
         <ReadingModeControl pref={pref} onOpen={() => setModalOpen(true)} />
       </div>
 
-      {pref.mode === "paced" && pref.wpm ? (
-        <div style={{ whiteSpace: "pre-wrap" }}>
-          <InvisibleInkText text={bodyText} weights={bodyWeights} wpm={pref.wpm} />
-        </div>
+      {pref.mode === "paced" && pref.multiplier ? (
+        <InvisibleInkText text={bodyText} weights={bodyWeights} multiplier={pref.multiplier} />
       ) : showProvenance ? (
         <div style={{ whiteSpace: "pre-wrap" }}>
           <AliveWeightedText text={bodyText} weights={bodyWeights} />

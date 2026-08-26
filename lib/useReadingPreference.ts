@@ -14,13 +14,19 @@ import { useState, useEffect, useCallback } from "react";
 // mismatch) and a first-time visitor's very first paint is always the
 // plain, safe default reading experience for a brief moment before their
 // stored preference (or the prompt, if there isn't one yet) appears.
-const STORAGE_KEY = "kk-reading-preference-v1";
+// v2: switched from a raw words-per-minute number to a pace multiplier
+// (see PACE_OPTIONS, app/components/InvisibleInkText.tsx) when the reveal
+// itself moved from word-by-word to line-by-line — a different enough
+// shape that a stale v1-shaped value (a lone `wpm`) shouldn't silently
+// half-apply. Bumping the key just means anyone who chose a preference
+// under v1 sees the prompt again once, which is the right outcome here.
+const STORAGE_KEY = "kk-reading-preference-v2";
 
 export type ReadingMode = "unset" | "normal" | "paced";
 
 export interface ReadingPreference {
   mode: ReadingMode;
-  wpm?: number; // only meaningful when mode === "paced"
+  multiplier?: number; // only meaningful when mode === "paced"
 }
 
 const DEFAULT_PREFERENCE: ReadingPreference = { mode: "unset" };

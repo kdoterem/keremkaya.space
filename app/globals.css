@@ -244,9 +244,19 @@ a:hover .post-nav-title {
   margin-bottom: 0;
 }
 
-/* Invisible-ink reveal (InvisibleInkText) — the moving shimmer sweep
-   clipped to each not-yet-revealed word's own letterforms. */
-@keyframes ink-shimmer-sweep {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+/* Invisible-ink reveal (InvisibleInkText) — a fine dot-noise texture,
+   clipped to each not-yet-revealed line's own letterforms, that jumps
+   between offsets in discrete steps rather than sliding smoothly. A
+   smooth linear sweep reads as a loading-skeleton placeholder (the same
+   visual language as Facebook/LinkedIn's "content is loading" shimmer) —
+   this is deliberately jumpy/twinkling instead, closer to static or
+   sparkle than to a progress indicator. steps(1, end) on each keyframe
+   segment makes every transition an instant jump, never a glide. */
+@keyframes ink-twinkle {
+  0%   { background-position: 0px 0px,  3px 2px; }
+  20%  { background-position: 2px 4px,  0px 3px; }
+  40%  { background-position: 4px 1px,  2px 0px; }
+  60%  { background-position: 1px 3px,  4px 2px; }
+  80%  { background-position: 3px 0px,  1px 4px; }
+  100% { background-position: 0px 0px,  3px 2px; }
 }
