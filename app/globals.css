@@ -244,26 +244,37 @@ a:hover .post-nav-title {
   margin-bottom: 0;
 }
 
-/* Invisible-ink reveal (InvisibleInkText) — a fine dot-noise texture,
-   clipped to each not-yet-revealed line's own letterforms, that jumps
-   between offsets in discrete steps rather than sliding smoothly. A
-   smooth linear sweep reads as a loading-skeleton placeholder (the same
-   visual language as Facebook/LinkedIn's "content is loading" shimmer) —
-   this is deliberately jumpy/twinkling instead, closer to static or
-   sparkle than to a progress indicator. steps(1, end) on each keyframe
-   segment makes every transition an instant jump, never a glide.
+/* Invisible-ink reveal (InvisibleInkText) — a dot-noise texture, clipped to
+   each not-yet-revealed line's own letterforms, that drifts slowly and
+   smoothly between offsets rather than jump-cutting between them.
 
-   This one keyframe is shared by three stacked sparkle layers per line
-   (see sparkleLayerStyle, InvisibleInkText.tsx), each running it at its
-   own duration and a negative delay so they land on different steps at
-   any given moment — the asynchrony between layers is what reads as many
-   small things twinkling independently, rather than one pattern jumping
-   as a block. */
+   Went through two wrong turns before landing here. First was a smooth
+   linear sweep — that read as a loading-skeleton placeholder (the same
+   visual language as Facebook/LinkedIn's "content is loading" shimmer).
+   Fixed by making it jumpy (steps(1,end)) instead of a sliding sweep — but
+   fast discrete jumps between offsets turned out to read as its own wrong
+   thing: text visibly scrambling/glitching, the same character-jitter
+   language as this site's own CryptoScramble effect, not as glitter sitting
+   still. What glitter actually looks like is what this site's OWN alive
+   motion already looks like elsewhere (the homepage tag cloud, the
+   drift+breathe on tagged body text in AliveWeightedText.tsx): slow,
+   continuous, easeInOut movement, not a sweep and not a jump-cut. So: this
+   keyframe still moves the dot pattern through the same handful of offset
+   points as before, but ease-in-out now glides smoothly between them
+   instead of steps(1,end) snapping between them, and each sparkle layer
+   (see sparkleLayerStyle, InvisibleInkText.tsx) runs it at a slow 4-8s
+   duration — the same ambient cadence as that other drift — instead of the
+   old ~1-2s jump cycle.
+
+   This one keyframe is shared by three stacked sparkle layers per line,
+   each at its own duration and a negative delay so they're never in
+   lockstep — the asynchrony between layers is what reads as many small
+   dots drifting independently, rather than one pattern moving as a block. */
 @keyframes ink-twinkle {
-  0%   { background-position: 0px 0px,  3px 2px; }
-  20%  { background-position: 2px 4px,  0px 3px; }
-  40%  { background-position: 4px 1px,  2px 0px; }
-  60%  { background-position: 1px 3px,  4px 2px; }
-  80%  { background-position: 3px 0px,  1px 4px; }
-  100% { background-position: 0px 0px,  3px 2px; }
+  0%   { background-position: 0px 0px,  4px 3px; }
+  20%  { background-position: 3px 5px,  0px 4px; }
+  40%  { background-position: 5px 1px,  3px 0px; }
+  60%  { background-position: 1px 4px,  5px 3px; }
+  80%  { background-position: 4px 0px,  1px 5px; }
+  100% { background-position: 0px 0px,  4px 3px; }
 }

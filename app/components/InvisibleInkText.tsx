@@ -27,48 +27,54 @@ import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
 // Three independently-phased sparkle layers, stacked — real invisible ink
 // (see iMessage's own effect, the reference for this) isn't one dot-noise
 // pattern jumping around as a single block, it's many small points of light
-// twinkling out of sync with each other. A single animated background layer
-// can never look like that, however jumpy its own steps are: every dot in
-// it moves in lockstep because they're all one layer with one position.
-// So: three layers, each its own dot pattern at its own scale, each on its
-// own animation clock — same principle as the homepage tag cloud and
-// AliveWeightedText's per-word drift elsewhere on this site, where every
-// "alive" element gets its own seededPhase rather than sharing one timer.
+// drifting out of sync with each other. A single animated background layer
+// can never look like that, however it moves: every dot in it travels in
+// lockstep because they're all one layer with one position. So: three
+// layers, each its own dot pattern at its own scale, each on its own clock
+// — same principle as the homepage tag cloud and AliveWeightedText's
+// per-word drift elsewhere on this site, where every "alive" element gets
+// its own seededPhase rather than sharing one timer.
+//
+// Sized and darkened to actually read as dots at a glance, not a faint
+// haze — the reference invisible-ink effect is clearly visible texture,
+// not a barely-there tint.
 const SPARKLE_LAYERS: { image: string; size: string }[] = [
   {
     image:
-      "radial-gradient(circle, rgba(10,10,10,0.55) 0.8px, transparent 0.9px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.30) 0.6px, transparent 0.7px)",
-    size: "5px 5px, 7px 7px",
+      "radial-gradient(circle, rgba(10,10,10,0.78) 1.1px, transparent 1.3px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.48) 0.85px, transparent 1px)",
+    size: "7px 7px, 10px 9px",
   },
   {
     image:
-      "radial-gradient(circle, rgba(10,10,10,0.42) 0.7px, transparent 0.8px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.24) 0.55px, transparent 0.65px)",
-    size: "6px 8px, 4px 6px",
+      "radial-gradient(circle, rgba(10,10,10,0.62) 1px, transparent 1.15px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.36) 0.75px, transparent 0.9px)",
+    size: "9px 11px, 6px 8px",
   },
   {
     image:
-      "radial-gradient(circle, rgba(10,10,10,0.34) 0.65px, transparent 0.75px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.20) 0.5px, transparent 0.6px)",
-    size: "4px 6px, 8px 5px",
+      "radial-gradient(circle, rgba(10,10,10,0.50) 0.9px, transparent 1.05px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.28) 0.65px, transparent 0.8px)",
+    size: "6px 9px, 11px 7px",
   },
 ];
 
-// steps(1, end) keeps every transition an instant jump rather than a slide —
-// a smooth sweep is the exact visual language of loading-skeleton
-// placeholders (Facebook/LinkedIn's "content is loading" shimmer), which is
-// what this is deliberately avoiding (see @keyframes ink-twinkle,
-// app/globals.css). Each layer gets its own duration (seeded off the line's
-// own position, so it's stable across re-renders, not random each time) and
-// a *negative* delay — a CSS trick that starts an animation as if it had
-// already been running for that long, so every layer looks mid-twinkle from
-// the very first frame instead of all three starting together at 0% and
-// only drifting apart later.
+// Slow and smooth (ease-in-out), not jumpy — see the long comment on
+// @keyframes ink-twinkle in app/globals.css for why: a fast discrete jump
+// read as text visibly scrambling, not as glitter sitting still. 4-8s per
+// cycle is deliberately the same ambient, barely-there-until-you-notice-it
+// cadence as AliveWeightedText's own drift (driftDurS = 4 + phase*4) — the
+// "up down left right slowly" quality that was asked for. Each layer's
+// duration is seeded off the line's own position (stable across
+// re-renders, not random each time) and given a *negative* delay — a CSS
+// trick that starts an animation as if it had already been running for
+// that long, so every layer looks mid-drift from the very first frame
+// instead of all three starting together at 0% and only drifting apart
+// later.
 function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSProperties {
   const layer = SPARKLE_LAYERS[layerIndex];
   const phase = seededPhase(lineSeed * 2.7 + layerIndex * 11.3 + 1);
-  const duration = 1.1 + phase * 1.1; // 1.1s – 2.2s, varies per line and per layer
+  const duration = 4 + phase * 4; // 4s – 8s, varies per line and per layer
   const delay = -phase * duration;
   return {
     backgroundImage: layer.image,
@@ -76,7 +82,7 @@ function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSPrope
     WebkitBackgroundClip: "text",
     backgroundClip: "text",
     color: "transparent",
-    animation: `ink-twinkle ${duration}s steps(1, end) infinite`,
+    animation: `ink-twinkle ${duration}s ease-in-out infinite`,
     animationDelay: `${delay}s`,
   };
 }

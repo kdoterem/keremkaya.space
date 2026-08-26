@@ -7,6 +7,14 @@ import AliveWeightedText from "./AliveWeightedText";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
+// Panel is the site's own lime green (#aaff00), not black — a stark black
+// box read as a separate thing dropped onto the page rather than part of
+// it. The backdrop behind it stays a dark scrim (dims the page, gives the
+// panel something to pop against); the panel itself and all its text now
+// use exactly the same palette as everything else on /writing (dark text
+// on the site's green, same secondary-text opacities as the tag links and
+// date stamp) so it reads as a continuation of the page, not an overlay
+// from somewhere else.
 function ReadingModeModal({
   onChoose,
   onDismiss,
@@ -35,8 +43,8 @@ function ReadingModeModal({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "relative",
-          background: "#0a0a0a",
-          color: "#fff",
+          background: "#aaff00",
+          color: "#0a0a0a",
           maxWidth: "26rem",
           width: "100%",
           padding: "2rem 1.75rem",
@@ -50,17 +58,17 @@ function ReadingModeModal({
             style={{
               position: "absolute", top: "0.9rem", right: "0.9rem",
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.4)", fontSize: "0.9rem", padding: "0.25rem",
+              color: "rgba(10,10,10,0.4)", fontSize: "0.9rem", padding: "0.25rem",
             }}
           >
             ×
           </button>
         )}
 
-        <h2 id="reading-mode-heading" style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", color: "#aaff00", letterSpacing: "-0.01em" }}>
+        <h2 id="reading-mode-heading" style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", color: "#0a0a0a", letterSpacing: "-0.01em" }}>
           how do you want to read?
         </h2>
-        <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,255,255,0.6)", marginBottom: "1.5rem" }}>
+        <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(10,10,10,0.6)", marginBottom: "1.5rem" }}>
           poems can unravel themselves as you read, line by line, at a pace you pick —
           or just sit there, fully visible, like normal.
         </p>
@@ -71,24 +79,24 @@ function ReadingModeModal({
               key={multiplier}
               onClick={() => onChoose({ mode: "paced", multiplier })}
               style={optionButtonStyle}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#aaff00"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
             >
               <span style={{ display: "block", fontWeight: 500 }}>{label}</span>
-              <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.5, marginTop: "0.15rem" }}>{hint}</span>
+              <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>{hint}</span>
             </button>
           ))}
           <button
             onClick={() => onChoose({ mode: "normal" })}
             style={optionButtonStyle}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#aaff00"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
           >
             <span style={{ display: "block", fontWeight: 500 }}>read normally</span>
           </button>
         </div>
 
-        <p style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.32)", lineHeight: 1.5 }}>
+        <p style={{ fontSize: "0.66rem", color: "rgba(10,10,10,0.45)", lineHeight: 1.5 }}>
           change this anytime — look for &ldquo;reading: &hellip;&rdquo; near the top of any poem.
         </p>
       </div>
@@ -99,8 +107,8 @@ function ReadingModeModal({
 const optionButtonStyle: React.CSSProperties = {
   textAlign: "left",
   background: "transparent",
-  border: "1px solid rgba(255,255,255,0.18)",
-  color: "#fff",
+  border: "1px solid rgba(10,10,10,0.25)",
+  color: "#0a0a0a",
   padding: "0.65rem 0.85rem",
   fontFamily: FONT,
   fontSize: "0.82rem",
