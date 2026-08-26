@@ -30,51 +30,50 @@ interface Piece {
   size: number;
   rotation: number; rotationSpeed: number;
   swayPhase: number; swayAmp: number;
-  shape: 0 | 1; // 0 = strand (paper streamer), 1 = circle (dot-like)
   opacity: number;
+  launchDelayMs: number; // staggered start, not everyone firing on frame one
 }
 
 const PIECE_COUNT = 200;
 const GRAVITY = 0.5;
 // How fast the initial burst's own velocity bleeds off each frame — this is
-// what turns "shot outward violently" into "now just lingering and
-// drifting," without a separate state machine: gravity keeps accumulating
-// underneath the whole time, so once the burst's own speed has decayed
-// near zero, gravity is what's left driving the fall.
-const BURST_DRAG = 0.93;
+// what turns "shot upward violently" into "now just lingering," without a
+// separate state machine: gravity keeps accumulating the whole time
+// underneath it, so once the burst's own speed has decayed near zero,
+// gravity is what's left — the piece has reached its peak and is now on
+// its way back down.
+const BURST_DRAG = 0.95;
 
-// A real burst, not an instant scatter — several origin points spread
-// across the width (like a row of confetti poppers, not one single
-// cannon, so the whole screen fills at once rather than spreading out from
-// a single spot) each fire their share of pieces outward in every
-// direction at real speed, with an extra upward kick so it reads as
-// thrown, not just released. BURST_DRAG in the tick loop below bleeds that
-// speed off quickly, so the violent part is genuinely over within the
-// first few frames — what's left after that is the slow lingering drift.
-const ORIGIN_COUNT = 7;
+// Fired from the bottom, straight up, not a symmetric burst radiating out
+// from fixed points — an even spread of fixed origins reads as designed
+// rather than thrown (a grid of little fountains, not a real pop), so
+// every piece gets its own independent random x along the bottom edge
+// instead of clustering into a handful of columns. The launch angle is a
+// cone centered on straight up, not a full circle, so the shape of the
+// whole burst is "reaching upward," and each piece's start is staggered by
+// a few hundred ms so the pop doesn't read as one perfectly synchronized
+// frame either.
+const UP_ANGLE = -Math.PI / 2;
+const CONE_SPREAD = Math.PI * 0.55; // ~99° total width, mostly upward
 
 function spawnPieces(width: number, height: number): Piece[] {
   const pieces: Piece[] = [];
   for (let i = 0; i < PIECE_COUNT; i++) {
-    const originIndex = i % ORIGIN_COUNT;
-    const originX = ((originIndex + 0.5) / ORIGIN_COUNT) * width + (Math.random() - 0.5) * width * 0.08;
-    const originY = height * (0.18 + Math.random() * 0.14);
-
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 5 + Math.random() * 9;
+    const angle = UP_ANGLE + (Math.random() - 0.5) * CONE_SPREAD;
+    const speed = 9 + Math.random() * 12;
 
     pieces.push({
-      x: originX,
-      y: originY,
+      x: Math.random() * width,
+      y: height + Math.random() * 20,
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 4, // extra upward kick — thrown, not dropped
+      vy: Math.sin(angle) * speed,
       size: 10 + Math.random() * 15,
       rotation: Math.random() * Math.PI * 2,
       rotationSpeed: (Math.random() - 0.5) * 0.3,
       swayPhase: Math.random() * Math.PI * 2,
       swayAmp: 0.6 + Math.random() * 1.3,
-      shape: Math.random() < 0.5 ? 0 : 1,
       opacity: 0.75 + Math.random() * 0.25,
+      launchDelayMs: Math.random() * 350,
     });
   }
   return pieces;
@@ -108,11 +107,13 @@ function ConfettiCanvas() {
     const tick = (now: number) => {
       if (now - start > TOTAL_MS) return; // let the last frame sit — the overlay's own fade-out covers it
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const elapsed = now - start;
       for (const p of pieces) {
+        if (elapsed < p.launchDelayMs) continue; // hasn't fired yet
         // The burst's own velocity bleeds off fast (BURST_DRAG); gravity
-        // accumulates the whole time underneath it. Early frames: mostly
-        // burst, flying outward. Later frames: burst has decayed away,
-        // gravity is what's left — the lingering drift, then the fall.
+        // accumulates the whole time underneath it. Early frames: shooting
+        // upward. Once the burst has decayed away, gravity is what's left
+        // — the peak, then the fall back down.
         p.vx *= BURST_DRAG;
         p.vy = p.vy * BURST_DRAG + GRAVITY * 0.06;
         p.y += p.vy;
@@ -123,15 +124,9 @@ function ConfettiCanvas() {
         ctx.rotate(p.rotation);
         ctx.globalAlpha = p.opacity;
         ctx.fillStyle = "#0a0a0a";
-        if (p.shape === 0) {
-          // A streamer, not a square — long and narrow reads as paper
-          // confetti at a glance, a stubby rect just reads as a black dot.
-          ctx.fillRect(-p.size / 2, -p.size / 7, p.size, p.size / 3.5);
-        } else {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size / 2.6, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        // A streamer, not a square or a dot — long and narrow reads as
+        // paper confetti at a glance.
+        ctx.fillRect(-p.size / 2, -p.size / 7, p.size, p.size / 3.5);
         ctx.restore();
       }
       rafId = requestAnimationFrame(tick);
