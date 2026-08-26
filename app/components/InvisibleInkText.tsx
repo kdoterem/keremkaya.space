@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
 
@@ -23,6 +23,15 @@ import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
 // any post. Tag-carrying words (when there is provenance data) keep
 // weightedTintFor's color once their line is revealed, as a quiet bonus
 // layer within it — see lib/tagProvenance.tsx.
+//
+// The clock is the default, not the only way through: tapping anywhere
+// skips the rest of the current wait and reveals the next line right away
+// (handleAdvance, below). No formula can know how fast any one person
+// actually reads a given line, so rather than keep re-tuning the pace
+// itself, the reader gets to decide when a wait's gone on long enough —
+// deliberately undocumented on this page itself (no hint, no label), the
+// same trust-the-reader-to-find-it register as everything else here; it's
+// mentioned once, in passing, in the reading-mode picker's own copy.
 
 // Three independently-phased sparkle layers, stacked — real invisible ink
 // (see iMessage's own effect, the reference for this) isn't one dot-noise
@@ -270,23 +279,52 @@ export default function InvisibleInkText({
   const lastThreshold = thresholds.length ? thresholds[thresholds.length - 1] : 0;
   const [elapsed, setElapsed] = useState(reduceMotion ? Infinity : 0);
 
+  // The clock's "start" instant lives in a ref, not just a closure-local
+  // const, specifically so handleAdvance (below) can rewind it — moving
+  // start earlier makes every future tick compute a larger elapsed, i.e.
+  // fast-forwards the clock, without touching how the tick loop itself
+  // works.
+  const startRef = useRef(0);
+
   useEffect(() => {
     if (reduceMotion) {
       setElapsed(Infinity);
       return;
     }
     setElapsed(0);
-    const start = Date.now();
+    startRef.current = Date.now();
     const id = setInterval(() => {
-      const e = Date.now() - start;
+      const e = Date.now() - startRef.current;
       setElapsed(e);
       if (e >= lastThreshold) clearInterval(id);
     }, TICK_MS);
     return () => clearInterval(id);
   }, [multiplier, text, lastThreshold, reduceMotion]);
 
+  // Tap/click anywhere in the poem to skip whatever's left of the current
+  // wait and reveal the next pending line right away — the auto-timer
+  // alone can only ever approximate how fast any one person actually reads
+  // a given line, and being stuck waiting past when you've already
+  // finished is the thing that actually costs attention. Doesn't touch the
+  // clock's rate going forward, just fast-forwards it to the next
+  // threshold — the reveal after that still lands on its own normal pace.
+  // A no-op once nothing's left to reveal (nothing to advance to), and
+  // with reduced motion everything's already visible, so there's nothing
+  // to skip toward either.
+  const handleAdvance = useCallback(() => {
+    if (reduceMotion) return;
+    const nextThreshold = thresholds.find((t, i) => !lineInfos[i].isBlank && elapsed < t);
+    if (nextThreshold === undefined) return;
+    startRef.current = Date.now() - nextThreshold;
+    setElapsed(nextThreshold);
+  }, [thresholds, lineInfos, elapsed, reduceMotion]);
+
   return (
-    <div className={className} style={{ whiteSpace: "pre-wrap", ...style }}>
+    <div
+      className={className}
+      style={{ whiteSpace: "pre-wrap", ...style }}
+      onClick={handleAdvance}
+    >
       {lineInfos.map((info, i) => (
         <InkLine
           key={i}
