@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { weightedTintFor } from "@/lib/tagProvenance";
+import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
 
 // ── Invisible-ink reveal, line by line — the whole poem sits in its real
 // layout from the first frame (that's the point: you can SEE there's more,
@@ -24,30 +24,75 @@ import { weightedTintFor } from "@/lib/tagProvenance";
 // weightedTintFor's color once their line is revealed, as a quiet bonus
 // layer within it — see lib/tagProvenance.tsx.
 
-// A fine dot-noise texture, not a smooth sweep — a smooth linear gradient
-// sliding across text is the exact visual language of loading-skeleton
-// placeholders (Facebook/LinkedIn's "content is loading" shimmer); this
-// is deliberately jumpy/twinkling instead (see @keyframes ink-twinkle,
-// app/globals.css — steps(1, end) makes every transition an instant jump).
-const SPARKLE_STYLE: React.CSSProperties = {
-  backgroundImage:
-    "radial-gradient(circle, rgba(10,10,10,0.55) 0.8px, transparent 0.9px), " +
-    "radial-gradient(circle, rgba(10,10,10,0.32) 0.6px, transparent 0.7px)",
-  backgroundSize: "5px 5px, 7px 7px",
-  WebkitBackgroundClip: "text",
-  backgroundClip: "text",
-  color: "transparent",
-  animation: "ink-twinkle 1.4s steps(1, end) infinite",
-};
+// Three independently-phased sparkle layers, stacked — real invisible ink
+// (see iMessage's own effect, the reference for this) isn't one dot-noise
+// pattern jumping around as a single block, it's many small points of light
+// twinkling out of sync with each other. A single animated background layer
+// can never look like that, however jumpy its own steps are: every dot in
+// it moves in lockstep because they're all one layer with one position.
+// So: three layers, each its own dot pattern at its own scale, each on its
+// own animation clock — same principle as the homepage tag cloud and
+// AliveWeightedText's per-word drift elsewhere on this site, where every
+// "alive" element gets its own seededPhase rather than sharing one timer.
+const SPARKLE_LAYERS: { image: string; size: string }[] = [
+  {
+    image:
+      "radial-gradient(circle, rgba(10,10,10,0.55) 0.8px, transparent 0.9px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.30) 0.6px, transparent 0.7px)",
+    size: "5px 5px, 7px 7px",
+  },
+  {
+    image:
+      "radial-gradient(circle, rgba(10,10,10,0.42) 0.7px, transparent 0.8px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.24) 0.55px, transparent 0.65px)",
+    size: "6px 8px, 4px 6px",
+  },
+  {
+    image:
+      "radial-gradient(circle, rgba(10,10,10,0.34) 0.65px, transparent 0.75px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.20) 0.5px, transparent 0.6px)",
+    size: "4px 6px, 8px 5px",
+  },
+];
 
-// Reading-pace presets. The first version exposed raw words-per-minute
-// (90/140/220) — user feedback: "natural" (140) felt too slow, "quick"
-// (220) felt too fast, meaning their own comfortable pace sits somewhere
-// between the two. Recentered around that gap and simplified to two
-// options now that reveal is line-based (see header comment on why line
-// granularity is more forgiving of imprecise timing than word granularity
-// was) rather than three finicky wpm tiers.
-const BASE_SEC_PER_LINE = 0.55;
+// steps(1, end) keeps every transition an instant jump rather than a slide —
+// a smooth sweep is the exact visual language of loading-skeleton
+// placeholders (Facebook/LinkedIn's "content is loading" shimmer), which is
+// what this is deliberately avoiding (see @keyframes ink-twinkle,
+// app/globals.css). Each layer gets its own duration (seeded off the line's
+// own position, so it's stable across re-renders, not random each time) and
+// a *negative* delay — a CSS trick that starts an animation as if it had
+// already been running for that long, so every layer looks mid-twinkle from
+// the very first frame instead of all three starting together at 0% and
+// only drifting apart later.
+function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSProperties {
+  const layer = SPARKLE_LAYERS[layerIndex];
+  const phase = seededPhase(lineSeed * 2.7 + layerIndex * 11.3 + 1);
+  const duration = 1.1 + phase * 1.1; // 1.1s – 2.2s, varies per line and per layer
+  const delay = -phase * duration;
+  return {
+    backgroundImage: layer.image,
+    backgroundSize: layer.size,
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    color: "transparent",
+    animation: `ink-twinkle ${duration}s steps(1, end) infinite`,
+    animationDelay: `${delay}s`,
+  };
+}
+
+// Reveal cadence — a line arrives once you're roughly this many words into
+// the line before it, not once that whole prior line's own reading time has
+// fully elapsed. That's the felt difference between "wait for this line to
+// finish, then the next one starts" and "the next line is already there,
+// waiting for you" — the latter is what was asked for.
+//
+// A fixed word-count lookahead, not scaled by each line's own length, also
+// fixes short lines: under the old full-duration model a 3-word line had
+// hardly any duration of its own, so the line after it fired almost
+// instantly. Now every line — three words or thirteen — waits the same
+// beat before the next one lands.
+const LOOKAHEAD_WORDS = 3.5;
 const SEC_PER_WORD = 0.32;
 
 export const PACE_OPTIONS: { label: string; multiplier: number; hint: string }[] = [
@@ -55,8 +100,8 @@ export const PACE_OPTIONS: { label: string; multiplier: number; hint: string }[]
   { label: "brisk",     multiplier: 0.7,  hint: "less time per line" },
 ];
 
-function lineDurationMs(wordCount: number, multiplier: number): number {
-  return (BASE_SEC_PER_LINE + wordCount * SEC_PER_WORD) * multiplier * 1000;
+function lineIntervalMs(multiplier: number): number {
+  return LOOKAHEAD_WORDS * SEC_PER_WORD * multiplier * 1000;
 }
 
 // A short pause before the cascade starts — a beat to take in the whole
@@ -99,10 +144,11 @@ function LineContent({ text, weights, lineStart }: { text: string; weights: numb
 // always accessible; only its opacity/position animate, so screen
 // readers/Ctrl+F/copy-paste see the whole poem immediately regardless of
 // the visual pacing — the reveal is a sighted-reading flourish, not a
-// content gate) and a decorative, aria-hidden sparkle overlay on top that
-// fades out when the line's moment arrives. The real layer drops in from
-// just above its resting position and settles with a soft spring bounce —
-// the "gravity" landing feel — rather than a flat fade.
+// content gate) and, on top, three decorative aria-hidden sparkle layers
+// (see sparkleLayerStyle above) that fade out together when the line's
+// moment arrives. The real layer drops in from just above its resting
+// position and settles with a soft spring bounce — the "gravity" landing
+// feel — rather than a flat fade.
 function InkLine({
   text,
   weights,
@@ -127,16 +173,22 @@ function InkLine({
       >
         <LineContent text={text} weights={weights} lineStart={lineStart} />
       </motion.div>
-      {animate && (
+      {animate && [0, 1, 2].map((layerIndex) => (
         <motion.div
+          key={layerIndex}
           aria-hidden="true"
-          style={{ position: "absolute", inset: 0, pointerEvents: "none", ...SPARKLE_STYLE }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            ...sparkleLayerStyle(lineStart, layerIndex),
+          }}
           animate={{ opacity: revealed ? 0 : 1 }}
           transition={{ duration: 0.45 }}
         >
           {text}
         </motion.div>
-      )}
+      ))}
     </div>
   );
 }
@@ -168,10 +220,11 @@ export default function InvisibleInkText({
   }, [text]);
 
   const thresholds = useMemo(() => {
+    const interval = lineIntervalMs(multiplier);
     let cumulative = START_DELAY_MS;
     return lineInfos.map((info) => {
       if (info.isBlank) return 0;
-      cumulative += lineDurationMs(info.wordCount, multiplier);
+      cumulative += interval;
       return cumulative;
     });
   }, [lineInfos, multiplier]);

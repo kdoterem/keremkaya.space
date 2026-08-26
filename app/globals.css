@@ -251,7 +251,14 @@ a:hover .post-nav-title {
    visual language as Facebook/LinkedIn's "content is loading" shimmer) —
    this is deliberately jumpy/twinkling instead, closer to static or
    sparkle than to a progress indicator. steps(1, end) on each keyframe
-   segment makes every transition an instant jump, never a glide. */
+   segment makes every transition an instant jump, never a glide.
+
+   This one keyframe is shared by three stacked sparkle layers per line
+   (see sparkleLayerStyle, InvisibleInkText.tsx), each running it at its
+   own duration and a negative delay so they land on different steps at
+   any given moment — the asynchrony between layers is what reads as many
+   small things twinkling independently, rather than one pattern jumping
+   as a block. */
 @keyframes ink-twinkle {
   0%   { background-position: 0px 0px,  3px 2px; }
   20%  { background-position: 2px 4px,  0px 3px; }

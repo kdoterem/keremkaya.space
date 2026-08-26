@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
+
+// useLayoutEffect warns if it ever runs during actual server rendering
+// ("does nothing on the server") — harmless, but this sidesteps it: on the
+// client (the only place this hook's stored-value check needs to run) it's
+// a real layout effect; during SSR it quietly falls back to useEffect,
+// which never fires server-side anyway.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // ── Reading preference — localStorage-backed, no accounts on this site so
 // this is the only place a choice like this can live. "unset" is the real
@@ -9,11 +16,22 @@ import { useState, useEffect, useCallback } from "react";
 //
 // Starts as { mode: "unset" } on every render, including the very first
 // server-rendered paint — localStorage only exists client-side, so reading
-// it happens in an effect, after mount. This means the onboarding modal
-// never flashes into a server-rendered page (avoiding a hydration
-// mismatch) and a first-time visitor's very first paint is always the
-// plain, safe default reading experience for a brief moment before their
-// stored preference (or the prompt, if there isn't one yet) appears.
+// it can only ever happen client-side. That part's unavoidable and fine:
+// it's exactly what keeps the server-rendered HTML and the first client
+// render matching (no hydration mismatch).
+//
+// What used to run in a plain useEffect (a returning visitor's real,
+// already-chosen preference correcting in) now runs in a layout effect
+// instead — the difference is *when* relative to paint. A regular effect
+// runs after the browser has already painted the "unset" default, which on
+// a client-side navigation between poems (mount → paint "unset" → prompt
+// flashes on → effect corrects it → prompt flashes back off) is visible as
+// exactly that: a flash. A layout effect runs after the DOM commits but
+// before the browser paints, so the correction lands before anything is
+// ever shown on screen — a returning visitor's stored choice applies
+// silently, with nothing to flash. First-time visitors are unaffected
+// either way: there's nothing in storage to correct to, so mode stays
+// "unset" and the prompt just appears, same as before.
 // v2: switched from a raw words-per-minute number to a pace multiplier
 // (see PACE_OPTIONS, app/components/InvisibleInkText.tsx) when the reveal
 // itself moved from word-by-word to line-by-line — a different enough
@@ -34,7 +52,7 @@ const DEFAULT_PREFERENCE: ReadingPreference = { mode: "unset" };
 export function useReadingPreference(): [ReadingPreference, (next: ReadingPreference) => void] {
   const [pref, setPref] = useState<ReadingPreference>(DEFAULT_PREFERENCE);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setPref(JSON.parse(raw));
