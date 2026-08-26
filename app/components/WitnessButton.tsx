@@ -26,48 +26,66 @@ const REDUCED_MS = 2200;
 
 interface Piece {
   x: number; y: number;
-  vx: number; vy: number;
+  kickVx: number; kickVy: number;      // a sharp initial punch, decays fast — the pop itself
+  flutterAmpX: number; flutterAmpY: number;
+  flutterFreqX: number; flutterFreqY: number;
+  flutterPhaseX: number; flutterPhaseY: number;
+  fallSpeed: number;                   // starts near zero, accumulates slowly — net drift down
   size: number;
   rotation: number; rotationSpeed: number;
-  swayPhase: number; swayAmp: number;
   opacity: number;
+  appearDelayMs: number;               // staggered fast fill, not everyone visible at once
 }
 
-// Real "confetti cannon green screen" overlay footage doesn't show pieces
-// travelling to fill the frame — by the time there's a first frame worth
-// looking at, the whole screen is already wall-to-wall confetti, and what
-// you actually watch over the next few seconds is that density thinning
-// out as pieces fall past frame or their motion settles. So: every piece
-// spawns already scattered across the ENTIRE canvas at t=0 (not clustered
-// near an origin), each with its own fast, independently-random direction
-// of motion — the churn of all those independent vectors is what reads as
-// "mid-explosion," not a journey across the screen. CHURN_DRAG bleeds that
-// energy off over about a second, then GRAVITY (accumulating the whole
-// time underneath it) is what's left, carrying everything into an
-// ordinary fall — which is also what thins the field out over time, since
-// pieces exit past the bottom edge and no new ones replace them.
-const PIECE_COUNT = 560;
-const GRAVITY = 0.55;
-const CHURN_DRAG = 0.965;
-const CHURN_SPEED_MIN = 3;
-const CHURN_SPEED_RANGE = 8;
+// Two things a plain drag-to-gravity model gets physically wrong for
+// paper: (1) it doesn't show an actual pop — pieces either travel there
+// (takes visible time) or are just already there (reads as prefilled,
+// nothing happened); (2) it decays toward a calm, smooth fall, but real
+// confetti is light and flat — it flutters and tumbles continuously in
+// the air, it doesn't settle down the way a heavier object's motion would.
+//
+// So: every piece gets a real pop — a sharp KICK in a random direction
+// that fades out fast (within a few hundred ms), stacked with a
+// continuous, NON-decaying FLUTTER (independent sine oscillation on both
+// axes, its own frequency/phase per piece so five hundred pieces never
+// move in unison) that keeps driving real motion for the entire four
+// seconds — nothing ever goes still or graceful. A slowly-accumulating
+// fallSpeed is the only thing that trends pieces downward and off frame
+// over time, which is what thins the field out, without ever damping the
+// flutter itself. And the fill itself is staggered over a short, fast
+// window (appearDelayMs) so there's a real burst to see, not a screen
+// that's already full when the button lands.
+const PIECE_COUNT = 500;
+const KICK_SPEED_MIN = 8;
+const KICK_SPEED_RANGE = 9;
+const KICK_DRAG = 0.88;
+const FLUTTER_AMP_MIN = 2.2;
+const FLUTTER_AMP_RANGE = 3.6;
+const FALL_ACCEL = 0.028;
+const POP_WINDOW_MS = 260;
 
 function spawnPieces(width: number, height: number): Piece[] {
   const pieces: Piece[] = [];
   for (let i = 0; i < PIECE_COUNT; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = CHURN_SPEED_MIN + Math.random() * CHURN_SPEED_RANGE;
+    const kickAngle = Math.random() * Math.PI * 2;
+    const kickSpeed = KICK_SPEED_MIN + Math.random() * KICK_SPEED_RANGE;
     pieces.push({
       x: Math.random() * width,
-      y: -height * 0.05 + Math.random() * height * 1.05,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
+      y: Math.random() * height,
+      kickVx: Math.cos(kickAngle) * kickSpeed,
+      kickVy: Math.sin(kickAngle) * kickSpeed,
+      flutterAmpX: FLUTTER_AMP_MIN + Math.random() * FLUTTER_AMP_RANGE,
+      flutterAmpY: FLUTTER_AMP_MIN + Math.random() * FLUTTER_AMP_RANGE,
+      flutterFreqX: 130 + Math.random() * 120,
+      flutterFreqY: 130 + Math.random() * 120,
+      flutterPhaseX: Math.random() * Math.PI * 2,
+      flutterPhaseY: Math.random() * Math.PI * 2,
+      fallSpeed: 0,
       size: 16 + Math.random() * 18,
       rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.35,
-      swayPhase: Math.random() * Math.PI * 2,
-      swayAmp: 0.6 + Math.random() * 1.3,
+      rotationSpeed: (Math.random() - 0.5) * 0.4,
       opacity: 0.78 + Math.random() * 0.22,
+      appearDelayMs: Math.random() * POP_WINDOW_MS,
     });
   }
   return pieces;
@@ -101,15 +119,16 @@ function ConfettiCanvas() {
     const tick = (now: number) => {
       if (now - start > TOTAL_MS) return; // let the last frame sit — the overlay's own fade-out covers it
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const elapsed = now - start;
       for (const p of pieces) {
-        // The initial churn bleeds off over about a second (CHURN_DRAG);
-        // gravity accumulates the whole time underneath it, so once the
-        // churn has decayed, gravity is what's left — an ordinary fall,
-        // which is also what thins the field out as pieces exit frame.
-        p.vx *= CHURN_DRAG;
-        p.vy = p.vy * CHURN_DRAG + GRAVITY * 0.06;
-        p.y += p.vy;
-        p.x += p.vx + Math.sin(now / 400 + p.swayPhase) * p.swayAmp * 0.05;
+        if (elapsed < p.appearDelayMs) continue; // hasn't popped in yet
+        p.kickVx *= KICK_DRAG;
+        p.kickVy *= KICK_DRAG;
+        p.fallSpeed += FALL_ACCEL * 0.06;
+        const flutterVx = Math.sin(now / p.flutterFreqX + p.flutterPhaseX) * p.flutterAmpX;
+        const flutterVy = Math.cos(now / p.flutterFreqY + p.flutterPhaseY) * p.flutterAmpY;
+        p.x += p.kickVx + flutterVx;
+        p.y += p.kickVy + flutterVy + p.fallSpeed;
         p.rotation += p.rotationSpeed;
         ctx.save();
         ctx.translate(p.x, p.y);
