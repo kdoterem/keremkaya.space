@@ -7,10 +7,10 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 // away what it does. Reward curiosity, don't announce it: the whole idea
 // only works if there's genuinely nothing to read here, just a small mark
 // someone might click because they wondered what it was, the same register
-// as the tag cloud or the dodge-then-commit PLAY button on /writing. Sits
-// quietly after save/share, in the "you've finished reading" zone — this
-// only means anything once you've actually read the poem, so it belongs
-// after it, not before or floating independently of it.
+// as the tag cloud or the dodge-then-commit PLAY button on /writing. Pinned
+// to the bottom-right corner of the viewport, not sitting inline with (or
+// stacked under) save/share — its own separate thing, findable in its own
+// corner rather than blending into the row of buttons at the end of a poem.
 //
 // What it does: the poem dissolves, the screen becomes a clean field of
 // the site's own green, black confetti pops and falls across the whole
@@ -27,41 +27,37 @@ const REDUCED_MS = 2200;
 interface Piece {
   x: number; y: number;
   kickVx: number; kickVy: number;      // a sharp initial punch, decays fast — the pop itself
-  flutterAmpX: number; flutterAmpY: number;
-  flutterFreqX: number; flutterFreqY: number;
-  flutterPhaseX: number; flutterPhaseY: number;
-  fallSpeed: number;                   // starts near zero, accumulates slowly — net drift down
+  flutterAmpX: number; flutterFreqX: number; flutterPhaseX: number; // side-to-side sway only
+  fallSpeed: number;                   // accelerates to a capped terminal speed — real gravity
   size: number;
   rotation: number; rotationSpeed: number;
   opacity: number;
   appearDelayMs: number;               // staggered fast fill, not everyone visible at once
 }
 
-// Two things a plain drag-to-gravity model gets physically wrong for
-// paper: (1) it doesn't show an actual pop — pieces either travel there
-// (takes visible time) or are just already there (reads as prefilled,
-// nothing happened); (2) it decays toward a calm, smooth fall, but real
-// confetti is light and flat — it flutters and tumbles continuously in
-// the air, it doesn't settle down the way a heavier object's motion would.
+// The pop itself was right: a sharp KICK in a random direction, decaying
+// fast, staggered over a short fill window so there's a real burst to
+// see. What was wrong was after — real gravity was almost an
+// afterthought (a tiny linear accumulation), and a full vertical flutter
+// on top of it meant pieces spent as much time drifting back up as they
+// did falling, so the whole field just hung there instead of clearing.
+// This isn't confetti in a sealed box; once the pop's energy is spent,
+// gravity should win, decisively, the way it actually would in open air.
 //
-// So: every piece gets a real pop — a sharp KICK in a random direction
-// that fades out fast (within a few hundred ms), stacked with a
-// continuous, NON-decaying FLUTTER (independent sine oscillation on both
-// axes, its own frequency/phase per piece so five hundred pieces never
-// move in unison) that keeps driving real motion for the entire four
-// seconds — nothing ever goes still or graceful. A slowly-accumulating
-// fallSpeed is the only thing that trends pieces downward and off frame
-// over time, which is what thins the field out, without ever damping the
-// flutter itself. And the fill itself is staggered over a short, fast
-// window (appearDelayMs) so there's a real burst to see, not a screen
-// that's already full when the button lands.
+// So: gravity now ACCELERATES (real free-fall shape, not a flat linear
+// creep) up to a capped terminal speed, reached well within the first
+// second post-pop. Flutter is horizontal-only now (the side-to-side sway
+// of a falling leaf/streamer) — no more vertical bobbing fighting the
+// fall. Net result: pop, then a real, visibly-clearing fall, with just
+// enough sway to keep it feeling alive rather than a straight plummet.
 const PIECE_COUNT = 500;
 const KICK_SPEED_MIN = 8;
 const KICK_SPEED_RANGE = 9;
 const KICK_DRAG = 0.88;
-const FLUTTER_AMP_MIN = 2.2;
-const FLUTTER_AMP_RANGE = 3.6;
-const FALL_ACCEL = 0.028;
+const FLUTTER_AMP_MIN = 1.2;
+const FLUTTER_AMP_RANGE = 2;
+const GRAVITY_ACCEL = 0.16;
+const MAX_FALL_SPEED = 8;
 const POP_WINDOW_MS = 260;
 
 function spawnPieces(width: number, height: number): Piece[] {
@@ -75,11 +71,8 @@ function spawnPieces(width: number, height: number): Piece[] {
       kickVx: Math.cos(kickAngle) * kickSpeed,
       kickVy: Math.sin(kickAngle) * kickSpeed,
       flutterAmpX: FLUTTER_AMP_MIN + Math.random() * FLUTTER_AMP_RANGE,
-      flutterAmpY: FLUTTER_AMP_MIN + Math.random() * FLUTTER_AMP_RANGE,
       flutterFreqX: 130 + Math.random() * 120,
-      flutterFreqY: 130 + Math.random() * 120,
       flutterPhaseX: Math.random() * Math.PI * 2,
-      flutterPhaseY: Math.random() * Math.PI * 2,
       fallSpeed: 0,
       size: 16 + Math.random() * 18,
       rotation: Math.random() * Math.PI * 2,
@@ -124,11 +117,10 @@ function ConfettiCanvas() {
         if (elapsed < p.appearDelayMs) continue; // hasn't popped in yet
         p.kickVx *= KICK_DRAG;
         p.kickVy *= KICK_DRAG;
-        p.fallSpeed += FALL_ACCEL * 0.06;
+        p.fallSpeed = Math.min(p.fallSpeed + GRAVITY_ACCEL, MAX_FALL_SPEED);
         const flutterVx = Math.sin(now / p.flutterFreqX + p.flutterPhaseX) * p.flutterAmpX;
-        const flutterVy = Math.cos(now / p.flutterFreqY + p.flutterPhaseY) * p.flutterAmpY;
         p.x += p.kickVx + flutterVx;
-        p.y += p.kickVy + flutterVy + p.fallSpeed;
+        p.y += p.kickVy + p.fallSpeed;
         p.rotation += p.rotationSpeed;
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -177,13 +169,16 @@ export default function WitnessButton() {
         onClick={trigger}
         aria-label="press if you're curious"
         style={{
+          position: "fixed",
+          bottom: "1.75rem",
+          right: "1.75rem",
+          zIndex: 50,
           width: "11px",
           height: "11px",
           border: "1px solid rgba(10,10,10,0.15)",
           background: "transparent",
           cursor: "pointer",
           padding: 0,
-          marginTop: "2.5rem",
           transition: "border-color 0.3s",
         }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.4)"; }}
