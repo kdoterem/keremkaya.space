@@ -150,14 +150,17 @@ export const ALIVE_REST_COLOR = "#0a0a0a";
 // site's whole palette is two colors — near-black and the accent #aaff00
 // (already the "this is significant" color elsewhere, e.g. the homepage's
 // selected-tag panel) — so this blends increasing amounts of that same
-// accent into near-black rather than introducing a third color. Kept
-// short of a strong blend on purpose: the /writing reading page's own
-// background IS #aaff00, so pushing the blend too far would converge
-// weighted text toward the background color and hurt legibility, not
-// help it. Scales with weight level, same as the site's other emphasis
-// mechanisms (bodyWeightStyle, titleWeightStyle) — more tags claiming a
-// phrase reads as a deeper, more present green.
-const WEIGHTED_TINT_BY_LEVEL = ["#0a0a0a", "#273608", "#3a5407", "#4d7106"];
+// accent into near-black rather than introducing a third color.
+//
+// First pass (8/16/26% blend) read as "no visible difference" on a real
+// device — too subtle to register as a distinct color next to plain
+// near-black at normal reading size, even though the raw RGB values did
+// differ. Bumped to 30/45/60%, which stays reasonably legible against the
+// /writing page's own #aaff00 background (a stronger blend than this
+// starts converging toward that exact background color and hurts
+// legibility rather than helping it — that ceiling, not the black/black
+// comparison, is what actually caps how far this can go).
+const WEIGHTED_TINT_BY_LEVEL = ["#0a0a0a", "#3a5407", "#527806", "#6a9d04"];
 export function weightedTintFor(level: number): string {
   return WEIGHTED_TINT_BY_LEVEL[Math.min(level, 3)];
 }
