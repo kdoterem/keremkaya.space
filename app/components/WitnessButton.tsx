@@ -31,49 +31,43 @@ interface Piece {
   rotation: number; rotationSpeed: number;
   swayPhase: number; swayAmp: number;
   opacity: number;
-  launchDelayMs: number;
 }
 
-// Two confetti cannons, not a general scatter — one held at the bottom-left
-// corner firing up-and-right at 45°, one at the bottom-right firing
-// up-and-left, crossing in the middle. A real cannon pop is a fast,
-// pressurized kick, not a gentle release: high launch speed, a tight
-// directional cone (not a wide fan or a full circle), and the burst's own
-// speed bleeds off hard within a handful of frames (BURST_DRAG) — violent
-// and over quickly, same as a real pop — before gravity takes over for the
-// fall. Every piece is the same long, narrow paper streamer (no circles —
-// real confetti strips don't look like dots), dense enough to read as a
-// real outburst rather than a sprinkle.
-const PIECE_COUNT = 360;
+// Real "confetti cannon green screen" overlay footage doesn't show pieces
+// travelling to fill the frame — by the time there's a first frame worth
+// looking at, the whole screen is already wall-to-wall confetti, and what
+// you actually watch over the next few seconds is that density thinning
+// out as pieces fall past frame or their motion settles. So: every piece
+// spawns already scattered across the ENTIRE canvas at t=0 (not clustered
+// near an origin), each with its own fast, independently-random direction
+// of motion — the churn of all those independent vectors is what reads as
+// "mid-explosion," not a journey across the screen. CHURN_DRAG bleeds that
+// energy off over about a second, then GRAVITY (accumulating the whole
+// time underneath it) is what's left, carrying everything into an
+// ordinary fall — which is also what thins the field out over time, since
+// pieces exit past the bottom edge and no new ones replace them.
+const PIECE_COUNT = 560;
 const GRAVITY = 0.55;
-const BURST_DRAG = 0.9;
-const CANNON_SPEED_MIN = 17;
-const CANNON_SPEED_RANGE = 15;
-const CANNON_CONE = Math.PI * 0.24; // ~43° spread around each cannon's own center angle — directed, not a fan
-const LAUNCH_STAGGER_MS = 90; // both cannons still read as one synchronized pop, not a trickle
+const CHURN_DRAG = 0.965;
+const CHURN_SPEED_MIN = 3;
+const CHURN_SPEED_RANGE = 8;
 
 function spawnPieces(width: number, height: number): Piece[] {
-  const cannons = [
-    { x: -width * 0.03, y: height * 0.97, angle: -Math.PI / 4 },           // bottom-left, firing up-right
-    { x: width * 1.03, y: height * 0.97, angle: (-Math.PI * 3) / 4 },       // bottom-right, firing up-left
-  ];
   const pieces: Piece[] = [];
   for (let i = 0; i < PIECE_COUNT; i++) {
-    const cannon = cannons[i % 2];
-    const angle = cannon.angle + (Math.random() - 0.5) * CANNON_CONE;
-    const speed = CANNON_SPEED_MIN + Math.random() * CANNON_SPEED_RANGE;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = CHURN_SPEED_MIN + Math.random() * CHURN_SPEED_RANGE;
     pieces.push({
-      x: cannon.x + (Math.random() - 0.5) * width * 0.04,
-      y: cannon.y + (Math.random() - 0.5) * height * 0.03,
+      x: Math.random() * width,
+      y: -height * 0.05 + Math.random() * height * 1.05,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      size: 20 + Math.random() * 22, // long strips
+      size: 16 + Math.random() * 18,
       rotation: Math.random() * Math.PI * 2,
       rotationSpeed: (Math.random() - 0.5) * 0.35,
       swayPhase: Math.random() * Math.PI * 2,
       swayAmp: 0.6 + Math.random() * 1.3,
-      opacity: 0.82 + Math.random() * 0.18,
-      launchDelayMs: Math.random() * LAUNCH_STAGGER_MS,
+      opacity: 0.78 + Math.random() * 0.22,
     });
   }
   return pieces;
@@ -107,15 +101,13 @@ function ConfettiCanvas() {
     const tick = (now: number) => {
       if (now - start > TOTAL_MS) return; // let the last frame sit — the overlay's own fade-out covers it
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const elapsed = now - start;
       for (const p of pieces) {
-        if (elapsed < p.launchDelayMs) continue; // hasn't fired yet
-        // The cannon's own kick bleeds off hard (BURST_DRAG) — violent for
-        // a handful of frames, then gone. Gravity accumulates the whole
-        // time underneath it, so once the kick has decayed, gravity is
-        // what's left driving the fall.
-        p.vx *= BURST_DRAG;
-        p.vy = p.vy * BURST_DRAG + GRAVITY * 0.06;
+        // The initial churn bleeds off over about a second (CHURN_DRAG);
+        // gravity accumulates the whole time underneath it, so once the
+        // churn has decayed, gravity is what's left — an ordinary fall,
+        // which is also what thins the field out as pieces exit frame.
+        p.vx *= CHURN_DRAG;
+        p.vy = p.vy * CHURN_DRAG + GRAVITY * 0.06;
         p.y += p.vy;
         p.x += p.vx + Math.sin(now / 400 + p.swayPhase) * p.swayAmp * 0.05;
         p.rotation += p.rotationSpeed;
