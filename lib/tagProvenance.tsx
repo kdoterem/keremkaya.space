@@ -139,21 +139,18 @@ export function seededPhase(seed: number): number {
   return hash01(seed);
 }
 
-// Peak tint per weight level, for the body's color pulse — a whisper of the
-// site's own accent (#aaff00) blended into the resting near-black, not a
-// foreign color. Rest state is always plain #0a0a0a; these are only the far
-// end of the breath. Kept subtle on purpose (max ~26% blend at level 3).
+// The rest/plain text color — weighted runs stay this color always. No
+// color pulse: the drift+breathe motion already reads as "alive" on its
+// own, a color shift on top of it was redundant, not a second signal.
 export const ALIVE_REST_COLOR = "#0a0a0a";
-const PEAK_COLOR_BY_LEVEL = ["#0a0a0a", "#171e09", "#243108", "#344a07"];
 
 export interface AliveScale {
   driftAmpX: number;
   driftAmpY: number;
   scaleAmp:  number;
-  peakColor: string;
 }
 
-// Amplitude/color envelope for a given weight level — pure function of the
+// Amplitude envelope for a given weight level — pure function of the
 // level, no randomness. Position/timing variance comes from seededPhase
 // applied on top of this by each caller.
 export function aliveScaleFor(level: number): AliveScale {
@@ -162,7 +159,6 @@ export function aliveScaleFor(level: number): AliveScale {
     driftAmpX: 1   + l * 1.1,  // px
     driftAmpY: 0.8 + l * 0.8,  // px
     scaleAmp:  0.012 + l * 0.009, // fraction — e.g. level 3 breathes up to ~1.04x
-    peakColor: PEAK_COLOR_BY_LEVEL[l],
   };
 }
 

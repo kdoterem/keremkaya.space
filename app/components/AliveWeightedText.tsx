@@ -1,15 +1,17 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { buildRuns, aliveScaleFor, seededPhase, bodyWeightStyle, ALIVE_REST_COLOR } from "@/lib/tagProvenance";
+import { buildRuns, aliveScaleFor, seededPhase, bodyWeightStyle } from "@/lib/tagProvenance";
 
-// ── The living body text — every tag-carrying run drifts, breathes (scale),
-// and pulses color, continuously and out of phase with its neighbours, so
-// glancing down the poem catches motion ahead of where you're actually
-// reading — the lines still to come are visibly alive, not just sitting
-// there. Deliberately used for the BODY only; the title stays on the plain,
+// ── The living body text — every tag-carrying run drifts and breathes
+// (scale), continuously and out of phase with its neighbours, so glancing
+// down the poem catches motion ahead of where you're actually reading —
+// the lines still to come are visibly alive, not just sitting there.
+// Deliberately used for the BODY only; the title stays on the plain,
 // static WeightedText (lib/tagProvenance.tsx) so the two kinds of emphasis
 // read as genuinely different registers rather than the same trick twice.
+// No color change — the motion alone is the "alive" signal; a color pulse
+// on top of it was a second, redundant one.
 //
 // Motion is driven by aliveScaleFor/seededPhase — the same functions the
 // share-image video export uses — so a reader who saves a poem gets back
@@ -50,12 +52,11 @@ export default function AliveWeightedText({
         const base = bodyWeightStyle(r.weight) ?? {};
         if (reduceMotion) return <span key={i} style={base}>{slice}</span>;
 
-        const { driftAmpX, driftAmpY, scaleAmp, peakColor } = aliveScaleFor(r.weight);
+        const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(r.weight);
         const phase1 = seededPhase(r.start);
         const phase2 = seededPhase(r.start * 7 + 3);
-        const driftDurS = 4   + phase1 * 4;
-        const scaleDurS = 3   + phase2 * 3;
-        const pulseDurS = 3.5 + phase1 * 3;
+        const driftDurS = 4 + phase1 * 4;
+        const scaleDurS = 3 + phase2 * 3;
 
         return (
           <motion.span
@@ -65,13 +66,11 @@ export default function AliveWeightedText({
               x:     [0, driftAmpX, 0, -driftAmpX, 0],
               y:     [0, -driftAmpY, 0, driftAmpY, 0],
               scale: [1, 1 + scaleAmp, 1],
-              color: [ALIVE_REST_COLOR, peakColor, ALIVE_REST_COLOR],
             }}
             transition={{
-              x:     { duration: driftDurS,        repeat: Infinity, ease: "easeInOut", delay: phase2 * driftDurS },
-              y:     { duration: driftDurS * 1.3,   repeat: Infinity, ease: "easeInOut", delay: phase1 * driftDurS },
-              scale: { duration: scaleDurS,         repeat: Infinity, ease: "easeInOut", delay: phase1 * scaleDurS },
-              color: { duration: pulseDurS,         repeat: Infinity, ease: "easeInOut", delay: phase2 * pulseDurS },
+              x:     { duration: driftDurS,      repeat: Infinity, ease: "easeInOut", delay: phase2 * driftDurS },
+              y:     { duration: driftDurS * 1.3, repeat: Infinity, ease: "easeInOut", delay: phase1 * driftDurS },
+              scale: { duration: scaleDurS,       repeat: Infinity, ease: "easeInOut", delay: phase1 * scaleDurS },
             }}
           >
             {slice}

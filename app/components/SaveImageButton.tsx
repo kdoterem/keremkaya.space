@@ -118,20 +118,6 @@ function supportsCaptureStream(): boolean {
     typeof (document.createElement('canvas') as unknown as { captureStream?: unknown }).captureStream === 'function';
 }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-
-function lerpColor(aHex: string, bHex: string, t: number): string {
-  const [ar, ag, ab] = hexToRgb(aHex);
-  const [br, bg, bb] = hexToRgb(bHex);
-  const r = Math.round(ar + (br - ar) * t);
-  const g = Math.round(ag + (bg - ag) * t);
-  const b = Math.round(ab + (bb - ab) * t);
-  return `rgb(${r},${g},${b})`;
-}
-
 // A word plus its offset within the full stripped-content string — carried
 // through wrapping so a per-character provenance weight array (computed
 // against that same stripped string) can be sliced back out per word once
@@ -284,14 +270,16 @@ function drawWeightedLineCentered(
 // Animated variant of drawWeightedLineCentered — same static layout pass
 // (word widths/positions are computed once, at base font size, and never
 // change frame to frame; only each weighted word's transform does), but
-// weighted words get a small drift + scale-breathe + color-pulse applied
-// around their own center each frame, using the exact same amplitude/color
-// vocabulary as the live page's AliveWeightedText (lib/tagProvenance.tsx's
-// aliveScaleFor/seededPhase) — the export looks like the page it came from.
+// weighted words get a small drift + scale-breathe applied around their
+// own center each frame, using the exact same amplitude vocabulary as the
+// live page's AliveWeightedText (lib/tagProvenance.tsx's aliveScaleFor/
+// seededPhase) — the export moves like the page it came from. No color
+// change, same reasoning as AliveWeightedText: the motion alone is the
+// "alive" signal.
 //
 // loopT is a 0..1 fraction of one LOOP_S-second loop. Every oscillation
-// below runs an INTEGER number of cycles per loop (1 for drift/color, 2 for
-// the scale breath), so sin/cos at loopT=1 always equals their value at
+// below runs an INTEGER number of cycles per loop (1 for drift, 2 for the
+// scale breath), so sin/cos at loopT=1 always equals their value at
 // loopT=0 regardless of a word's own phase offset — the recording loops
 // seamlessly with no jump when Instagram (or anything else) auto-replays it.
 function drawWeightedLineCenteredAnimated(
@@ -331,20 +319,19 @@ function drawWeightedLineCenteredAnimated(
       ctx.fillStyle = ALIVE_REST_COLOR;
       ctx.fillText(w.word, x, y);
     } else {
-      const { driftAmpX, driftAmpY, scaleAmp, peakColor } = aliveScaleFor(level);
+      const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(level);
       const phase1 = seededPhase(w.start);
       const phase2 = seededPhase(w.start * 7 + 3);
       const dx = driftAmpX * Math.sin(2 * Math.PI * (loopT + phase1));
       const dy = driftAmpY * Math.sin(2 * Math.PI * (loopT + phase2 + 0.25));
       const scaleEnv = 0.5 - 0.5 * Math.cos(2 * Math.PI * (loopT * 2 + phase1)); // 0..1, 2 cycles/loop
-      const colorEnv = 0.5 - 0.5 * Math.cos(2 * Math.PI * (loopT     + phase2)); // 0..1, 1 cycle/loop
       const s  = 1 + scaleAmp * scaleEnv;
       const cx = x + wordWidth / 2, cy = y + baseFontSize * 0.42;
 
       ctx.save();
       ctx.translate(cx + dx, cy + dy);
       ctx.scale(s, s);
-      ctx.fillStyle = lerpColor(ALIVE_REST_COLOR, peakColor, colorEnv);
+      ctx.fillStyle = ALIVE_REST_COLOR;
       ctx.fillText(w.word, -wordWidth / 2, -baseFontSize * 0.42);
       ctx.restore();
     }
