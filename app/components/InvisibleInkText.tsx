@@ -107,10 +107,31 @@ const SEC_PER_WORD = 0.32;
 // alongside the separate "read normally" (fully visible, unpaced) choice —
 // see ReadingExperience.tsx. What people wanted was one reveal that felt
 // right, not a knob to tune themselves.
-export const SUGGESTED_MULTIPLIER = 1;
+//
+// 1 read as a little slow on a real device once the reveal was gated to
+// each line's own full length (see the comment above) — every line's wait
+// got noticeably longer than under the earlier fixed-lookahead version, and
+// the overall pace needed to come down a step to compensate. 0.8 rather
+// than a bigger cut: the complaint was "a little too slow," not "much too
+// slow" — this is a trim, not a rebalance.
+export const SUGGESTED_MULTIPLIER = 0.8;
 
 function lineDurationMs(wordCount: number, multiplier: number): number {
   return (BASE_SEC_PER_LINE + wordCount * SEC_PER_WORD) * multiplier * 1000;
+}
+
+// How a line ends changes how long its wait should feel. A trailing comma
+// is mid-thought — the sentence keeps going onto the next line, so hold the
+// reader less; a trailing period is a completed thought — worth an actual
+// beat before moving on. Everything else (no punctuation, a line break
+// mid-clause, ?, !, etc.) stays at the plain per-word rate above; only
+// comma/period were asked for, and guessing at more risks being wrong in
+// either direction where nothing was said.
+function trailingPunctuationFactor(lineText: string): number {
+  const lastChar = lineText.trimEnd().slice(-1);
+  if (lastChar === ",") return 0.65;
+  if (lastChar === ".") return 1.2;
+  return 1;
 }
 
 // A short pause before the cascade starts — a beat to take in the whole
@@ -230,15 +251,18 @@ export default function InvisibleInkText({
 
   const thresholds = useMemo(() => {
     let cumulative = START_DELAY_MS;
-    let prevWordCount: number | null = null;
+    let prev: { wordCount: number; text: string } | null = null;
     return lineInfos.map((info) => {
       if (info.isBlank) return 0;
       // Gap before THIS line reveals is sized to the line before it — the
-      // one the reader's actually reading right now. Blank stanza gaps
-      // don't touch prevWordCount, so a break between verses doesn't erase
-      // how long the last real line was.
-      if (prevWordCount !== null) cumulative += lineDurationMs(prevWordCount, multiplier);
-      prevWordCount = info.wordCount;
+      // one the reader's actually reading right now — and nudged by how
+      // that line ends (see trailingPunctuationFactor above). Blank stanza
+      // gaps don't touch prev, so a break between verses doesn't erase how
+      // long (or how it ended) the last real line was.
+      if (prev !== null) {
+        cumulative += lineDurationMs(prev.wordCount, multiplier) * trailingPunctuationFactor(prev.text);
+      }
+      prev = { wordCount: info.wordCount, text: info.text };
       return cumulative;
     });
   }, [lineInfos, multiplier]);

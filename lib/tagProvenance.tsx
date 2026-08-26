@@ -143,26 +143,18 @@ export function seededPhase(seed: number): number {
 // color always.
 export const ALIVE_REST_COLOR = "#0a0a0a";
 
-// Static tint for weighted text — a fixed color, not animated (the removed
-// color pulse was a redundant second "alive" signal on top of the motion;
-// this is a different thing: a quiet, permanent marker of "this phrase
-// carries a tag," independent of whether motion is even playing). The
-// site's whole palette is two colors — near-black and the accent #aaff00
-// (already the "this is significant" color elsewhere, e.g. the homepage's
-// selected-tag panel) — so this blends increasing amounts of that same
-// accent into near-black rather than introducing a third color.
-//
-// First pass (8/16/26% blend) read as "no visible difference" on a real
-// device — too subtle to register as a distinct color next to plain
-// near-black at normal reading size, even though the raw RGB values did
-// differ. Bumped to 30/45/60%, which stays reasonably legible against the
-// /writing page's own #aaff00 background (a stronger blend than this
-// starts converging toward that exact background color and hurts
-// legibility rather than helping it — that ceiling, not the black/black
-// comparison, is what actually caps how far this can go).
-const WEIGHTED_TINT_BY_LEVEL = ["#0a0a0a", "#3a5407", "#527806", "#6a9d04"];
-export function weightedTintFor(level: number): string {
-  return WEIGHTED_TINT_BY_LEVEL[Math.min(level, 3)];
+// Static tint for weighted text — reverted back to plain near-black after
+// two attempts at a green-blended tint (8/16/26%, then 30/45/60%) neither
+// landed on a real device: the first read as no visible difference at all,
+// the second still didn't read as intentional. Tag-carrying text just being
+// as black as the title turned out to be the right call after all — the
+// motion (drift+breathe, AliveWeightedText.tsx) is the actual "this is
+// alive" signal; color doesn't need to carry a second one on top of it.
+// Kept as a function (not a bare constant) so every caller — the live page,
+// the video export, InvisibleInkText — still shares one source of truth,
+// same as before.
+export function weightedTintFor(_level: number): string {
+  return ALIVE_REST_COLOR;
 }
 
 export interface AliveScale {
