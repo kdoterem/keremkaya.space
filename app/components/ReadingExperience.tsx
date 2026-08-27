@@ -75,7 +75,7 @@ function ReadingModeModal({
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
           <button
-            onClick={() => onChoose({ mode: "paced", multiplier: SUGGESTED_MULTIPLIER })}
+            onClick={() => onChoose({ mode: "unraveling", multiplier: SUGGESTED_MULTIPLIER })}
             style={optionButtonStyle}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
@@ -116,7 +116,7 @@ const optionButtonStyle: React.CSSProperties = {
 
 function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen: () => void }) {
   const label =
-    pref.mode === "paced" ? "reading: paced" :
+    pref.mode === "unraveling" ? "reading: unraveling" :
     pref.mode === "normal" ? "reading: normal" :
     "reading: choose";
 
@@ -147,14 +147,14 @@ function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen:
 // preference, shows the first-visit prompt, renders the "change reading
 // mode" control, and switches between the three possible renderings:
 //
-//   paced   → InvisibleInkText, works on ANY post (provenance optional)
-//   normal  → exactly what existed before this feature: AliveWeightedText
-//             for the posts with provenance data, plain MDXRemote otherwise
-//   unset   → same as normal, until (or unless) the visitor makes a choice
-//             — the safe, always-fully-visible default, so a first-time
-//             visitor's first paint (and anyone with JS disabled, since
-//             mdxContent/the alive fallback are both server-rendered)
-//             never depends on this feature working at all.
+//   unraveling → InvisibleInkText, works on ANY post (provenance optional)
+//   normal     → exactly what existed before this feature: AliveWeightedText
+//                for the posts with provenance data, plain MDXRemote otherwise
+//   unset      → same as normal, until (or unless) the visitor makes a choice
+//                — the safe, always-fully-visible default, so a first-time
+//                visitor's first paint (and anyone with JS disabled, since
+//                mdxContent/the alive fallback are both server-rendered)
+//                never depends on this feature working at all.
 export default function ReadingExperience({
   bodyText,
   bodyWeights,
@@ -182,7 +182,7 @@ export default function ReadingExperience({
         <ReadingModeControl pref={pref} onOpen={() => setModalOpen(true)} />
       </div>
 
-      {pref.mode === "paced" && pref.multiplier ? (
+      {pref.mode === "unraveling" && pref.multiplier ? (
         <InvisibleInkText text={bodyText} weights={bodyWeights} multiplier={pref.multiplier} />
       ) : showProvenance ? (
         <div style={{ whiteSpace: "pre-wrap" }}>

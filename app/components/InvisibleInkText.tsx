@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
+import { weightedTintFor, seededPhase, aliveScaleFor, bodyWeightStyle } from "@/lib/tagProvenance";
 
 // ── Invisible-ink reveal, line by line — the whole poem sits in its real
 // layout from the first frame (that's the point: you can SEE there's more,
@@ -20,9 +20,15 @@ import { weightedTintFor, seededPhase } from "@/lib/tagProvenance";
 //
 // Doesn't need provenance data to work at all — every line goes through
 // the same shimmer→reveal timeline regardless of tags, so this works on
-// any post. Tag-carrying words (when there is provenance data) keep
-// weightedTintFor's color once their line is revealed, as a quiet bonus
-// layer within it — see lib/tagProvenance.tsx.
+// any post. Tag-carrying words (when there is provenance data) get the
+// exact same drift+breathe motion as AliveWeightedText once their line is
+// revealed — same aliveScaleFor/seededPhase vocabulary, same shared
+// weightedTintFor color (currently always plain black, see
+// lib/tagProvenance.tsx) — so a post with provenance carries identical
+// emphasis whether you're reading it normally or watching it unravel.
+// Motion is the only signal now (color is deliberately flat), which is
+// exactly why this needed wiring in here too: without it, provenance data
+// in this mode did nothing visible at all.
 //
 // The clock is the default, not the only way through: tapping anywhere
 // skips the rest of the current wait and reveals the next line right away
@@ -156,10 +162,26 @@ function wordWeightLevel(weights: number[], start: number, len: number): number 
   return max;
 }
 
-// Renders one line's real text with per-word provenance tint — no reveal
-// logic of its own, the whole line reveals or doesn't as a unit; this only
-// decides each word's color once the line is visible.
-function LineContent({ text, weights, lineStart }: { text: string; weights: number[] | undefined; lineStart: number }) {
+// Renders one line's real text — no reveal logic of its own, the whole
+// line reveals or doesn't as a unit; this only decides each word's
+// treatment once the line is visible. A tag-carrying word gets the exact
+// same drift+breathe motion AliveWeightedText gives it (same
+// aliveScaleFor/seededPhase inputs, seeded off the word's own character
+// offset so it's stable across re-renders and matches what that same word
+// would do if you were reading this post in normal mode instead). With
+// reduced motion, falls back to the same static tint+weight bump
+// AliveWeightedText uses in its own reduced-motion path.
+function LineContent({
+  text,
+  weights,
+  lineStart,
+  reduceMotion,
+}: {
+  text: string;
+  weights: number[] | undefined;
+  lineStart: number;
+  reduceMotion: boolean;
+}) {
   if (!weights) return <>{text}</>;
   const tokens = text.split(/(\s+)/);
   let offset = lineStart;
@@ -171,7 +193,36 @@ function LineContent({ text, weights, lineStart }: { text: string; weights: numb
         if (!tok || /^\s+$/.test(tok)) return <span key={i}>{tok}</span>;
         const level = wordWeightLevel(weights, start, tok.length);
         if (level <= 0) return <span key={i}>{tok}</span>;
-        return <span key={i} style={{ color: weightedTintFor(level) }}>{tok}</span>;
+
+        const tint = weightedTintFor(level);
+        if (reduceMotion) {
+          return <span key={i} style={{ color: tint, ...(bodyWeightStyle(level) ?? {}) }}>{tok}</span>;
+        }
+
+        const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(level);
+        const phase1 = seededPhase(start);
+        const phase2 = seededPhase(start * 7 + 3);
+        const driftDurS = 4 + phase1 * 4;
+        const scaleDurS = 3 + phase2 * 3;
+
+        return (
+          <motion.span
+            key={i}
+            style={{ display: "inline-block", color: tint }}
+            animate={{
+              x:     [0, driftAmpX, 0, -driftAmpX, 0],
+              y:     [0, -driftAmpY, 0, driftAmpY, 0],
+              scale: [1, 1 + scaleAmp, 1],
+            }}
+            transition={{
+              x:     { duration: driftDurS,      repeat: Infinity, ease: "easeInOut", delay: phase2 * driftDurS },
+              y:     { duration: driftDurS * 1.3, repeat: Infinity, ease: "easeInOut", delay: phase1 * driftDurS },
+              scale: { duration: scaleDurS,       repeat: Infinity, ease: "easeInOut", delay: phase1 * scaleDurS },
+            }}
+          >
+            {tok}
+          </motion.span>
+        );
       })}
     </>
   );
@@ -194,12 +245,14 @@ function InkLine({
   lineStart,
   revealed,
   animate,
+  reduceMotion,
 }: {
   text: string;
   weights: number[] | undefined;
   lineStart: number;
   revealed: boolean;
   animate: boolean;
+  reduceMotion: boolean;
 }) {
   if (!text.trim()) return <div style={{ minHeight: "1em" }}>&nbsp;</div>;
 
@@ -210,7 +263,7 @@ function InkLine({
         animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : -8 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}
       >
-        <LineContent text={text} weights={weights} lineStart={lineStart} />
+        <LineContent text={text} weights={weights} lineStart={lineStart} reduceMotion={reduceMotion} />
       </motion.div>
       {animate && [0, 1, 2].map((layerIndex) => (
         <motion.div
@@ -333,6 +386,7 @@ export default function InvisibleInkText({
           lineStart={info.start}
           revealed={info.isBlank || elapsed >= thresholds[i]}
           animate={!reduceMotion}
+          reduceMotion={!!reduceMotion}
         />
       ))}
     </div>

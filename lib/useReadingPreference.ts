@@ -12,7 +12,7 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 // ── Reading preference — localStorage-backed, no accounts on this site so
 // this is the only place a choice like this can live. "unset" is the real
 // first-visit state (nothing chosen yet, show the onboarding prompt);
-// "normal" and "paced" are both explicit choices someone made.
+// "normal" and "unraveling" are both explicit choices someone made.
 //
 // Starts as { mode: "unset" } on every render, including the very first
 // server-rendered paint — localStorage only exists client-side, so reading
@@ -36,18 +36,22 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 // (see SUGGESTED_MULTIPLIER, app/components/InvisibleInkText.tsx) when the
 // reveal itself moved from word-by-word to line-by-line — a different
 // enough shape that a stale v1-shaped value (a lone `wpm`) shouldn't
-// silently half-apply. Bumping the key just means anyone who chose a
-// preference under v1 sees the prompt again once, which is the right
-// outcome here. (The shape hasn't changed again since — later versions
-// dropped the multiple speed presets down to one suggested pace, but a
-// preference is still just { mode, multiplier }, so no v3 was needed.)
-const STORAGE_KEY = "kk-reading-preference-v2";
+// silently half-apply.
+// v3: the mode itself got renamed from "paced" to "unraveling" — "paced"
+// described speed, not what the mode actually does (a poem revealing
+// itself line by line). The stored *shape* is unchanged ({ mode,
+// multiplier }), only the mode string, but a stale "paced" value
+// wouldn't match any branch anywhere it's checked and would silently
+// fall through to "unset"/normal behavior rather than erroring — same
+// as every past bump, this just means anyone who'd already chosen it
+// sees the prompt again once, which is the right, honest outcome.
+const STORAGE_KEY = "kk-reading-preference-v3";
 
-export type ReadingMode = "unset" | "normal" | "paced";
+export type ReadingMode = "unset" | "normal" | "unraveling";
 
 export interface ReadingPreference {
   mode: ReadingMode;
-  multiplier?: number; // only meaningful when mode === "paced"
+  multiplier?: number; // only meaningful when mode === "unraveling"
 }
 
 const DEFAULT_PREFERENCE: ReadingPreference = { mode: "unset" };
