@@ -164,10 +164,11 @@ async function promptTags(suggestedTags, allTags) {
 async function promptProvenanceFreeform(title, body) {
   const spans = [];
 
-  console.log('\nPaste phrases that should be "alive" (highlighted, moving) —');
-  console.log("one per line, exact match required (copy, don't retype).");
-  console.log("List the same phrase again if you want it to stand out more");
-  console.log("(each repeat adds weight). Blank line when done.");
+  console.log('\nPaste phrases that should be "alive" (highlighted, moving) on');
+  console.log('/writing and in the share video — one per line, exact match');
+  console.log("required (copy, don't retype). List the same phrase again if");
+  console.log("you want it to stand out more (each repeat adds weight).");
+  console.log("Blank line when done — or right away to skip this entirely.");
 
   while (true) {
     const line = await prompt(`  [${spans.length} phrase${spans.length === 1 ? "" : "s"}]`);
@@ -268,16 +269,19 @@ console.log("(Copy your post to clipboard before filling this in)");
   // entered; otherwise only the tags actually given a phrase are present
   // (no forced "none" filler, no requirement that a tag was even in the
   // tags list above — see promptProvenanceFreeform).
+  //
+  // Used to gate this behind a separate "Add highlight phrases now?
+  // (default: y)" yes/no prompt before the loop — removed after it caused
+  // real confusion twice: pasting a phrase as the very first thing (a
+  // completely reasonable instinct — you're here to add phrases, not to
+  // answer a y/n question first) meant that phrase became the answer to
+  // "y or n", which isn't "y", so the whole loop got silently skipped.
+  // The loop's own "blank line" already means "skip" on its very first
+  // prompt too, so the separate gate was pure redundant surface area for
+  // exactly this mistake to happen on. One prompt now, not two.
   let provenanceTags = null;
   if (tags.length > 0) {
-    const wantProvenance = await prompt(
-      `Add highlight phrases now? These get the "alive" highlight treatment\n` +
-      `on /writing and in the share video.`,
-      "y"
-    );
-    if (wantProvenance.toLowerCase() === "y") {
-      provenanceTags = await promptProvenanceFreeform(title, body);
-    }
+    provenanceTags = await promptProvenanceFreeform(title, body);
   }
 
   const tagsYaml = tags.map((t) => `"${t}"`).join(", ");
