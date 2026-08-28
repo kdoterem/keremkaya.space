@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   getProvenanceTags,
   computeWeights,
-  bodyWeightStyle,
   titleWeightStyle,
   aliveScaleFor,
   seededPhase,
@@ -520,12 +519,22 @@ function renderPage(
     drawRule(ctx, y + Math.round(GAP / 2) - 1);
     y += GAP;
 
-    // Content lines
+    // Content lines — plain weight/color, no bodyWeightStyle bump and no
+    // tint. This is the one export path that still had that on: the
+    // animated cover (drawWeightedLineCenteredAnimated) already dropped it
+    // in favor of motion being the only "alive" signal, matching the live
+    // page's AliveWeightedText — but every static page (this button's own
+    // image export, and every non-cover page of a video export) kept
+    // bolding/tinting weighted words, so a saved/shared image read
+    // noticeably darker than the site ever does. A still frame genuinely
+    // has no motion to show, so the honest static equivalent is just: no
+    // visible difference at all, same as glancing at the live page between
+    // pulses of its own drift.
     ctx.font = `${fontSize}px ${FONT}`;
     for (const line of contentLines) {
       if (line === null) { y += gapH; continue; }
       if (Array.isArray(line)) {
-        drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', bodyWeightStyle, true);
+        drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', () => ({}));
       } else {
         drawCentered(ctx, line, y, '#0a0a0a');
       }

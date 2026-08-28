@@ -59,6 +59,10 @@ export function provenanceBoundaryDate(): string | null {
 // percept-and-define-intercept-the-divine never marks anything in the body,
 // and vice versa. Returns undefined (not an all-zero array) when nothing
 // matched, so callers can skip the styled-runs path entirely for plain text.
+// Trailing punctuation immediately after a span — see the extension pass
+// below for why this needs to exist at all.
+const TRAILING_PUNCT = /[,.;:!?—–]/;
+
 export function computeWeights(
   text: string,
   tags: Record<string, ProvenanceEntry> | undefined,
@@ -75,7 +79,34 @@ export function computeWeights(
       for (let i = idx; i < idx + span.length; i++) weights[i]++;
     }
   }
-  return any ? weights : undefined;
+  if (!any) return undefined;
+
+  // Extend every run's trailing edge through any immediately-following
+  // punctuation. A hand-copied span very often stops at the end of the
+  // actual words and leaves the comma/period right after it unweighted —
+  // that's just how spans get written, not a mistake to police. The
+  // problem is what that does downstream: the motion-enabled renderers
+  // (AliveWeightedText, InvisibleInkText) wrap a weighted run in a
+  // display:inline-block span so it can drift/breathe as one unit, and an
+  // inline-block box is atomic to the browser's line-wrapping — a lone
+  // unweighted punctuation mark sitting right after one is free to wrap
+  // onto its own line, visibly orphaned. This happened once before
+  // (put-god-in-the-doorstep, several trailing "?"s) and got fixed by
+  // hand-editing those specific spans in tag-provenance.json — which
+  // fixed that post and did nothing for the mechanism, so the identical
+  // shape of bug was always going to resurface on the next post whose
+  // span happened to end the same way. Fixing it here once, for every
+  // span, on every post, past and future, instead of chasing it post by
+  // post again. A forward single pass cascades correctly through more
+  // than one trailing mark ("?!", "...") since by the time a later index
+  // is checked, an earlier extension has already landed on it.
+  for (let i = 0; i < text.length - 1; i++) {
+    if (weights[i] > 0 && weights[i + 1] === 0 && TRAILING_PUNCT.test(text[i + 1])) {
+      weights[i + 1] = weights[i];
+    }
+  }
+
+  return weights;
 }
 
 // Collapses a per-character weight array into contiguous same-level runs.

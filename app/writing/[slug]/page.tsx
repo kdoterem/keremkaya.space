@@ -6,7 +6,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
 import ReadingExperience from "@/app/components/ReadingExperience";
-import WitnessButton from "@/app/components/WitnessButton";
+// WitnessButton (the unlabeled confetti/"thank you for witnessing" button)
+// is shelved, not deleted — the component still lives in
+// app/components/WitnessButton.tsx, just not mounted anywhere right now.
 import {
   hasProvenance,
   getProvenanceTags,
@@ -285,8 +287,6 @@ export default async function PostPage({
 
         {/* Save as image */}
         <SaveImageButton title={post.title} content={post.content} date={post.date} slug={slug} />
-
-        <WitnessButton />
 
         {/* Prev / Next */}
         {(prev || next) && (
