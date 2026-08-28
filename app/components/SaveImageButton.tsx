@@ -71,7 +71,15 @@ const MIN_FONT = 28;
 
 // Tier 1 — fast, offline, real duration.
 const FAST_VIDEO_SCALE     = 1;    // same reasoning as RECORD_SCALE below — no need for the PNG's 3x supersampling
-const FAST_VIDEO_FPS       = 24;
+// 24fps over the full 45s duration is 1080 individual frames, each a real
+// canvas paint + encode — genuinely slow on a phone, reported as the
+// export "taking too long." The motion itself is a slow ambient
+// drift/breathe, not fast action, so it doesn't need a high frame rate to
+// read as smooth — dropping to 12fps roughly halves the total work (540
+// frames instead of 1080) for the same 45s length and the same
+// resolution/quality, and should be close to imperceptible for this
+// specific kind of slow motion.
+const FAST_VIDEO_FPS       = 12;
 const FAST_VIDEO_DURATION_S = 45;  // the actual on-screen length once shared — matches what worked before this whole video system existed
 const FAST_ANIM_CYCLE_S    = 3.5;  // the breath's own pacing — same seamless loop as before, just replayed ~13x to fill the export instead of being the export
 
