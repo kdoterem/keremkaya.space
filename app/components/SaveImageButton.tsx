@@ -723,9 +723,21 @@ async function fastRecordAnimatedPage(
     format: new Mp4OutputFormat(),
     target: new BufferTarget(),
   });
+  // 'high' at 1080x1920 for the full 45s duration lands somewhere around
+  // 35-55MB (H.264 "high" typically runs 6-10Mbps at this resolution) —
+  // squarely in the range where mobile Web Share silently refuses to
+  // share a file at all (iOS Safari has an informal, undocumented ceiling
+  // widely reported around ~50MB). navigator.canShare() just returns
+  // false with no reason given, which is exactly what "save/share video
+  // only downloads, sharing menu never appears" looks like from the
+  // outside — a single PNG from the image button stays well under any
+  // such ceiling, which is why that button doesn't show the same symptom.
+  // 'medium' cuts the bitrate meaningfully while still looking fine for a
+  // looping social share (not a pristine master file) — same duration,
+  // same resolution, just a real shot at staying shareable-size.
   const videoSource = new CanvasSource(canvas, {
     codec: 'avc',
-    quality: new MbQuality('high'),
+    quality: new MbQuality('medium'),
   });
   output.addVideoTrack(videoSource);
 
@@ -850,11 +862,24 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     // for long, multi-page poems the hint steers the reader to "Save N
     // Items" and building the carousel in the Instagram app from Photos.
     // Only return on success — cancellation falls through to desktop download.
-    if (navigator.canShare?.({ files: orderedFiles })) {
+    const canShare = navigator.canShare?.({ files: orderedFiles });
+    if (canShare) {
       try {
         await navigator.share({ files: orderedFiles, title });
         return;
       } catch { /* cancelled — fall through to download */ }
+    } else if (!multiPageHint && orderedFiles.some(f => f.type.startsWith('video/'))) {
+      // canShare() gives no reason for a false — it's a plain boolean —
+      // so this can't say FOR SURE it's a size limit, but a video failing
+      // here while an image never does is the known shape of that
+      // problem, not a guess pulled from nowhere. Without this, sharing
+      // just silently downloads instead with zero indication anything
+      // was even attempted, let alone why.
+      setHint(
+        'this browser wouldn’t offer to share the video directly — likely too large for ' +
+        'its share limit — so it’s downloading instead. you can share it manually from ' +
+        'Photos/Files once it’s saved.'
+      );
     }
 
     // Desktop (or a mobile browser without Web Share): sequential download.
