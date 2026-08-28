@@ -3,30 +3,55 @@
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const readline = require("readline");
 
 const POSTS_DIR = path.join(__dirname, "content", "posts");
 const PROVENANCE_PATH = path.join(__dirname, "tag-provenance.json");
 
-// Read one line from the terminal, draining any buffered input first — the
-// drain matters whenever a prompt might follow a paste that landed more
-// newlines in the tty's buffer than intended (a trailing blank line, a
-// second line pasted ahead of the prompt that printed it, etc.). Without
-// it, each stray buffered line silently satisfies the NEXT prompt's read
-// before the user ever sees it — which is exactly what broke
-// promptSpansForTag: pasting a two-line phrase, one line at a time, could
-// still leave a stray newline in the buffer that answered "blank" for
-// several prompts in a row, skipping straight past the remaining tags to
-// the final Save confirmation. promptTags had this drain inline already;
-// it just never got pulled into this shared function.
-function prompt(label, defaultVal) {
+// One persistent readline interface for the script's whole run, feeding a
+// manual FIFO queue — replacing the old approach of spawning a fresh
+// `/bin/sh -c "read ... < /dev/tty"` subprocess for every single prompt.
+// That needed a heuristic "drain up to 50ms of buffered input" step before
+// every real read, to guard against a previous prompt's stray leftover
+// input silently answering the next one — but a fixed timeout is a guess,
+// not a guarantee, and on 2026-08-27 it guessed wrong: a real typed
+// provenance phrase got swallowed by the drain, read back as an empty
+// line, which the code correctly treats as "done" — silently skipping the
+// rest of provenance entry with no error shown.
+//
+// First replacement attempt used plain rl.question() in a loop and looked
+// right, but testing it against piped/fast input surfaced a DIFFERENT
+// flaw with the same shape: question() only attaches its listener for the
+// moment it's actively waiting, so lines that arrive in a burst (exactly
+// what a paste is) before the *next* question() call get silently
+// dropped, not queued — same class of bug, still real for the case that
+// mattered (pasting a multi-line phrase quickly).
+//
+// This is the actually-robust version: ONE 'line' listener lives for the
+// whole run and pushes every line into `lineQueue` the instant it fires,
+// no matter how many arrive in a single burst or how fast. `nextLine()`
+// hands back an already-queued line immediately, or registers a waiter to
+// be resolved the moment the next 'line' event fires if the queue's
+// currently empty. Every line the user (or a paste) ever produces ends up
+// in the queue in order — nothing can be lost to timing, because nothing
+// is ever thrown away between arrival and consumption.
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const lineQueue = [];
+const lineWaiters = [];
+rl.on("line", (line) => {
+  if (lineWaiters.length) lineWaiters.shift()(line);
+  else lineQueue.push(line);
+});
+
+function nextLine() {
+  if (lineQueue.length) return Promise.resolve(lineQueue.shift());
+  return new Promise((resolve) => lineWaiters.push(resolve));
+}
+
+async function prompt(label, defaultVal) {
   const hint = defaultVal ? ` (default: ${defaultVal})` : "";
   process.stdout.write(`\n${label}${hint}\n> `);
-  const drain = 'while IFS= read -r -t 0.05 _l < /dev/tty 2>/dev/null; do :; done';
-  const read  = 'read -r val < /dev/tty; printf "%s" "$val"';
-  const r = spawnSync("/bin/sh", ["-c", `${drain}; ${read}`], {
-    stdio: ["inherit", "pipe", "inherit"],
-  });
-  const val = r.stdout ? r.stdout.toString().trim() : "";
+  const val = (await nextLine()).trim();
   return val || defaultVal || "";
 }
 
@@ -84,7 +109,7 @@ function suggestTags(content, allTags) {
 }
 
 // Multi-select tag picker with suggestions
-function promptTags(suggestedTags, allTags) {
+async function promptTags(suggestedTags, allTags) {
   const selected = [...suggestedTags];
 
   console.log("\n── Tag selection ─────────────────────");
@@ -103,7 +128,7 @@ function promptTags(suggestedTags, allTags) {
   console.log("Type 'done' or leave blank when finished. Aim for 3–6 tags, most important first.");
 
   while (true) {
-    const input = prompt(`  [${selected.length ? selected.join(", ") : "none"}]`).toLowerCase();
+    const input = (await prompt(`  [${selected.length ? selected.join(", ") : "none"}]`)).toLowerCase();
     if (!input || input === "done") break;
 
     const idx = selected.findIndex((t) => t.toLowerCase() === input);
@@ -136,7 +161,7 @@ function promptTags(suggestedTags, allTags) {
 // adds another point of weight, same mechanic as before, just without
 // needing a tag label to get there. Still validated against the actual
 // title/body before being accepted.
-function promptProvenanceFreeform(title, body) {
+async function promptProvenanceFreeform(title, body) {
   const spans = [];
 
   console.log('\nPaste phrases that should be "alive" (highlighted, moving) —');
@@ -145,7 +170,7 @@ function promptProvenanceFreeform(title, body) {
   console.log("(each repeat adds weight). Blank line when done.");
 
   while (true) {
-    const line = prompt(`  [${spans.length} phrase${spans.length === 1 ? "" : "s"}]`);
+    const line = await prompt(`  [${spans.length} phrase${spans.length === 1 ? "" : "s"}]`);
     if (!line) break;
     if (!title.includes(line) && !body.includes(line)) {
       console.log(`  ⚠ not found verbatim in the title or body — check spelling/punctuation. Not added.`);
@@ -224,82 +249,90 @@ function appendProvenanceEntry(entryStr) {
 console.log("\n── New Post ──────────────────────────");
 console.log("(Copy your post to clipboard before filling this in)");
 
-const title = prompt("Title");
-if (!title) { console.log("\nTitle is required."); process.exit(1); }
+(async () => {
+  const title = await prompt("Title");
+  if (!title) { console.log("\nTitle is required."); rl.close(); process.exit(1); }
 
-const slug    = slugify(title);
-const date    = prompt("Date", today());
-const excerpt = prompt("Excerpt (one line)");
+  const slug    = slugify(title);
+  const date    = await prompt("Date", today());
+  const excerpt = await prompt("Excerpt (one line)");
 
-console.log("\nReading clipboard and existing tags...");
-const body    = clipboard();
-const allTags = getExistingTags();
-const suggested = suggestTags(body + " " + title + " " + excerpt, allTags);
+  console.log("\nReading clipboard and existing tags...");
+  const body    = clipboard();
+  const allTags = getExistingTags();
+  const suggested = suggestTags(body + " " + title + " " + excerpt, allTags);
 
-const tags = promptTags(suggested, allTags);
+  const tags = await promptTags(suggested, allTags);
 
-// Optional — the highlight/provenance data. null = skipped or nothing
-// entered; otherwise only the tags actually given a phrase are present
-// (no forced "none" filler, no requirement that a tag was even in the
-// tags list above — see promptProvenanceFreeform).
-let provenanceTags = null;
-if (tags.length > 0) {
-  const wantProvenance = prompt(
-    `Add highlight phrases now? These get the "alive" highlight treatment\n` +
-    `on /writing and in the share video.`,
-    "y"
-  );
-  if (wantProvenance.toLowerCase() === "y") {
-    provenanceTags = promptProvenanceFreeform(title, body);
+  // Optional — the highlight/provenance data. null = skipped or nothing
+  // entered; otherwise only the tags actually given a phrase are present
+  // (no forced "none" filler, no requirement that a tag was even in the
+  // tags list above — see promptProvenanceFreeform).
+  let provenanceTags = null;
+  if (tags.length > 0) {
+    const wantProvenance = await prompt(
+      `Add highlight phrases now? These get the "alive" highlight treatment\n` +
+      `on /writing and in the share video.`,
+      "y"
+    );
+    if (wantProvenance.toLowerCase() === "y") {
+      provenanceTags = await promptProvenanceFreeform(title, body);
+    }
   }
-}
 
-const tagsYaml = tags.map((t) => `"${t}"`).join(", ");
+  const tagsYaml = tags.map((t) => `"${t}"`).join(", ");
 
-console.log("\n──────────────────────────────────────");
-console.log(`  title:   ${title}`);
-console.log(`  date:    ${date}`);
-console.log(`  excerpt: ${excerpt || "(none)"}`);
-console.log(`  tags:    ${tags.length ? tags.join(", ") : "(none)"}`);
-if (provenanceTags) {
-  const spanCount = provenanceTags.highlighted.spans.length;
-  console.log(`  provenance: ${spanCount} phrase${spanCount === 1 ? "" : "s"} marked alive`);
-}
-console.log(`  file:    content/posts/${slug}.mdx`);
-console.log("──────────────────────────────────────");
-
-const confirm = prompt("Save? (y/n)", "y");
-if (confirm.toLowerCase() !== "y") { console.log("\nAborted.\n"); process.exit(0); }
-
-const frontmatter = `---\ntitle: "${title}"\ndate: "${date}"\nexcerpt: "${excerpt}"\ntags: [${tagsYaml}]\n---\n\n`;
-const finalContent = frontmatter + body;
-
-const outputPath = path.join(POSTS_DIR, `${slug}.mdx`);
-if (fs.existsSync(outputPath)) {
-  console.log(`\n"${slug}" already exists. Nothing saved.\n`);
-  process.exit(1);
-}
-
-fs.writeFileSync(outputPath, finalContent);
-console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
-
-// Only write an entry if at least one phrase actually got entered — an
-// empty entry wouldn't add any highlighting, but hasProvenance(slug)
-// (lib/tagProvenance.tsx) would still flip this post onto the plain
-// pre-wrap weighted-text render path instead of MDXRemote, silently
-// dropping markdown formatting for zero benefit. So "attempted but
-// nothing entered" and "skipped entirely" both fall through the same way.
-if (provenanceTags) {
-  const entryStr = formatProvenanceEntry(slug, date.slice(0, 10), provenanceTags);
-  if (appendProvenanceEntry(entryStr)) {
+  console.log("\n──────────────────────────────────────");
+  console.log(`  title:   ${title}`);
+  console.log(`  date:    ${date}`);
+  console.log(`  excerpt: ${excerpt || "(none)"}`);
+  console.log(`  tags:    ${tags.length ? tags.join(", ") : "(none)"}`);
+  if (provenanceTags) {
     const spanCount = provenanceTags.highlighted.spans.length;
-    console.log(`Provenance data saved → tag-provenance.json (${spanCount} phrase${spanCount === 1 ? "" : "s"})\n`);
+    console.log(`  provenance: ${spanCount} phrase${spanCount === 1 ? "" : "s"} marked alive`);
   }
-} else {
-  console.log(
-    `This post doesn't have tag-provenance.json data yet, so it'll render\n` +
-    `plain (no alive highlighting) until it does.\n\n` +
-    `Ask Claude: "do the provenance pass on the pending posts"\n` +
-    `(or run \`node check-provenance.js\` any time to see what's pending)\n`
-  );
-}
+  console.log(`  file:    content/posts/${slug}.mdx`);
+  console.log("──────────────────────────────────────");
+
+  const confirm = await prompt("Save? (y/n)", "y");
+  if (confirm.toLowerCase() !== "y") { console.log("\nAborted.\n"); rl.close(); process.exit(0); }
+
+  const frontmatter = `---\ntitle: "${title}"\ndate: "${date}"\nexcerpt: "${excerpt}"\ntags: [${tagsYaml}]\n---\n\n`;
+  const finalContent = frontmatter + body;
+
+  const outputPath = path.join(POSTS_DIR, `${slug}.mdx`);
+  if (fs.existsSync(outputPath)) {
+    console.log(`\n"${slug}" already exists. Nothing saved.\n`);
+    rl.close();
+    process.exit(1);
+  }
+
+  fs.writeFileSync(outputPath, finalContent);
+  console.log(`\nPost saved → content/posts/${slug}.mdx\n`);
+
+  // Only write an entry if at least one phrase actually got entered — an
+  // empty entry wouldn't add any highlighting, but hasProvenance(slug)
+  // (lib/tagProvenance.tsx) would still flip this post onto the plain
+  // pre-wrap weighted-text render path instead of MDXRemote, silently
+  // dropping markdown formatting for zero benefit. So "attempted but
+  // nothing entered" and "skipped entirely" both fall through the same way.
+  if (provenanceTags) {
+    const entryStr = formatProvenanceEntry(slug, date.slice(0, 10), provenanceTags);
+    if (appendProvenanceEntry(entryStr)) {
+      const spanCount = provenanceTags.highlighted.spans.length;
+      console.log(`Provenance data saved → tag-provenance.json (${spanCount} phrase${spanCount === 1 ? "" : "s"})\n`);
+    }
+  } else {
+    console.log(
+      `This post doesn't have tag-provenance.json data yet, so it'll render\n` +
+      `plain (no alive highlighting) until it does.\n\n` +
+      `Ask Claude: "do the provenance pass on the pending posts"\n` +
+      `(or run \`node check-provenance.js\` any time to see what's pending)\n`
+    );
+  }
+
+  rl.close();
+})().catch((err) => {
+  console.error("\nCRASHED:", err);
+  process.exit(1);
+});
