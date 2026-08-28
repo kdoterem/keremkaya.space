@@ -160,5 +160,21 @@
     "tags": {
       "highlighted": { "type": "lines", "spans": ["there are known knowns and known unknowns\nand unknown knowns and unknown unknowns", "one is all, everything in life is eggsactly the same", "one is all", "same exact breath, anew,\nbringing something new.", "new gets old, old gets new,", "same old story, same old story."] }
     }
+  },
+  {
+    "slug": "the-dictator",
+    "date": "2026-08-28",
+    "tags": {
+      "existence":  { "type": "lines", "spans": ["movements of the stars result us to do what we do", "the path to stars, lies through the stars,\nstarting point's also the stars,"], "note": "the poem's cosmological frame — origin, route, and destination collapsed into one term" },
+      "doubt":      { "type": "lines", "spans": ["it's a futile attempt to, try to figure,", "if we known our history, would we know our future?"], "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work" },
+      "control":    { "type": "lines", "spans": ["what you require is pre-dictated,\nwhat requires it is pre-formed,\nwhy you require it is because it's pre-owned."], "note": "the closing triple — agency removed at three levels: object, subject, motive. the tag's clearest carrier" },
+      "god":        { "type": "phrase", "spans": ["the dictator", "pre-owned"], "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating" },
+      "defiance":   { "type": "lines", "spans": ["is it in a star's nature to rebel?\nonly when you defend, against those that try to make you forget,"], "note": "rebellion redefined as defense of origin rather than as attack" },
+      "truth":      { "type": "line", "spans": ["there is nothing to know, nothing to predict,"], "note": "the poem's flat refusal, arriving after the question about history and future" },
+      "time":       { "type": "line", "spans": ["if we known our history, would we know our future?"], "note": "past and future held against each other, both dismissed in the following line" },
+      "wordplay":   { "type": "phrase", "spans": ["pre-dictated"], "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work" },
+      "lineage":    { "type": "lines", "spans": ["where you come from, isn't a debt,", "those that try to make you forget,"], "note": "origin as constitution rather than obligation — the thing being defended" },
+      "exhaustion": { "type": "phrase", "spans": ["it's a futile attempt to, try to figure,"], "note": "weary before it starts; the effort named as futile in the third line rather than discovered to be futile later" }
+    }
   }
 ]
