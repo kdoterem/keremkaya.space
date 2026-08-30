@@ -238,6 +238,29 @@ function canvasFontForWeightStyle(
   return `${fw} ${size}px ${FONT}`;
 }
 
+// ctx.measureText is one of the pricier canvas calls, and the animated
+// export was calling it for the SAME words at the SAME font/size on every
+// single frame — 540 of them for a full export — even though word widths
+// never actually change frame to frame; only each weighted word's own
+// drift/scale transform does. (drawWeightedLineCenteredAnimated's own
+// header comment already claimed this was "a static layout pass...
+// computed once" — the code just never actually did that.) A cache fixes
+// it without restructuring the paint pipeline: the key is the exact
+// (font, text) pair, so it's correct by construction — after the first
+// frame, every later call for the same word at the same size is a hit
+// instead of real measurement work. Cleared at the start of each export
+// (see fastRecordAnimatedPage/recordAnimatedPage) so it can't grow
+// unbounded across multiple saves in one page session.
+let measureCache = new Map<string, number>();
+function measureTextCached(ctx: CanvasRenderingContext2D, text: string): number {
+  const key = `${ctx.font}|${text}`;
+  const cached = measureCache.get(key);
+  if (cached !== undefined) return cached;
+  const width = ctx.measureText(text).width;
+  measureCache.set(key, width);
+  return width;
+}
+
 // Draws one line word-by-word, each in its own weight-appropriate font,
 // manually positioned (canvas has no inline flow) and centered as a whole —
 // the direct canvas equivalent of CryptoScramble/WeightedText's styled runs.
@@ -265,12 +288,12 @@ function drawWeightedLineCentered(
   });
 
   ctx.font = `${baseFontWeight} ${baseFontSize}px ${FONT}`;
-  const spaceWidth = ctx.measureText(' ').width;
+  const spaceWidth = measureTextCached(ctx, ' ');
 
   let totalWidth = 0;
   words.forEach((w, i) => {
     ctx.font = wordFonts[i];
-    totalWidth += ctx.measureText(w.word).width;
+    totalWidth += measureTextCached(ctx, w.word);
     if (i < words.length - 1) totalWidth += spaceWidth;
   });
 
@@ -279,7 +302,7 @@ function drawWeightedLineCentered(
     ctx.font = wordFonts[i];
     ctx.fillStyle = tint && levels[i] > 0 ? weightedTintFor(levels[i]) : ALIVE_REST_COLOR;
     ctx.fillText(w.word, x, y);
-    x += ctx.measureText(w.word).width + (i < words.length - 1 ? spaceWidth : 0);
+    x += measureTextCached(ctx, w.word) + (i < words.length - 1 ? spaceWidth : 0);
   });
 }
 
@@ -313,17 +336,21 @@ function drawWeightedLineCenteredAnimated(
   // motion is the only distinguishing signal here (see AliveWeightedText,
   // which this mirrors); a heavier/bigger look on top of it was redundant.
   ctx.font = `${baseFontWeight} ${baseFontSize}px ${FONT}`;
-  const spaceWidth = ctx.measureText(' ').width;
+  const spaceWidth = measureTextCached(ctx, ' ');
+  // One measurement per word, reused for both the total-width pass and
+  // the per-word draw pass below — was measuring every word twice per
+  // frame before, on top of the cross-frame cache.
+  const wordWidths = words.map(w => measureTextCached(ctx, w.word));
 
   let totalWidth = 0;
-  words.forEach((w, i) => {
-    totalWidth += ctx.measureText(w.word).width;
+  words.forEach((_, i) => {
+    totalWidth += wordWidths[i];
     if (i < words.length - 1) totalWidth += spaceWidth;
   });
 
   let x = (W - totalWidth) / 2;
   words.forEach((w, i) => {
-    const wordWidth = ctx.measureText(w.word).width;
+    const wordWidth = wordWidths[i];
     const level = levels[i];
 
     if (level === 0) {
@@ -671,6 +698,7 @@ function recordAnimatedPage(
   bodyWeights: number[] | undefined,
   mimeType: string,
 ): Promise<File> {
+  measureCache.clear(); // fresh export, no reason to carry another post's cached word widths
   return new Promise((resolve, reject) => {
     const canvas  = document.createElement('canvas');
     canvas.width  = W * RECORD_SCALE;
@@ -729,7 +757,9 @@ async function fastRecordAnimatedPage(
   baseFilename: string,
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
+  onProgress?: (frac: number) => void,
 ): Promise<File> {
+  measureCache.clear(); // fresh export, no reason to carry another post's cached word widths
   const canvas  = document.createElement('canvas');
   canvas.width  = W * FAST_VIDEO_SCALE;
   canvas.height = H * FAST_VIDEO_SCALE;
@@ -740,21 +770,14 @@ async function fastRecordAnimatedPage(
     format: new Mp4OutputFormat(),
     target: new BufferTarget(),
   });
-  // 'high' at 1080x1920 for the full 45s duration lands somewhere around
-  // 35-55MB (H.264 "high" typically runs 6-10Mbps at this resolution) —
-  // squarely in the range where mobile Web Share silently refuses to
-  // share a file at all (iOS Safari has an informal, undocumented ceiling
-  // widely reported around ~50MB). navigator.canShare() just returns
-  // false with no reason given, which is exactly what "save/share video
-  // only downloads, sharing menu never appears" looks like from the
-  // outside — a single PNG from the image button stays well under any
-  // such ceiling, which is why that button doesn't show the same symptom.
-  // 'medium' cuts the bitrate meaningfully while still looking fine for a
-  // looping social share (not a pristine master file) — same duration,
-  // same resolution, just a real shot at staying shareable-size.
+  // Was dropped to 'medium' chasing a file-size theory for the sharing
+  // bug that turned out to be wrong — the real cause was user-activation
+  // timing (see deferredShareOrDownload/attemptShare), not size. Nothing
+  // was actually protecting against by keeping quality down, so back to
+  // 'high' — sharper/less compressed, no known downside now.
   const videoSource = new CanvasSource(canvas, {
     codec: 'avc',
-    quality: new MbQuality('medium'),
+    quality: new MbQuality('high'),
   });
   output.addVideoTrack(videoSource);
 
@@ -762,12 +785,20 @@ async function fastRecordAnimatedPage(
 
   const totalFrames = Math.round(FAST_VIDEO_DURATION_S * FAST_VIDEO_FPS);
   const frameDur     = 1 / FAST_VIDEO_FPS;
+  let lastReportedPct = -1;
   for (let i = 0; i < totalFrames; i++) {
     const t     = i * frameDur;
     const loopT = (t % FAST_ANIM_CYCLE_S) / FAST_ANIM_CYCLE_S;
     paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT);
     await videoSource.add(t, frameDur);
+    // Only fire on an actual whole-percent change, not every one of the
+    // 540 frames — that'd be 540 React re-renders for one export.
+    if (onProgress) {
+      const pct = Math.round((i / totalFrames) * 100);
+      if (pct !== lastReportedPct) { lastReportedPct = pct; onProgress(pct / 100); }
+    }
   }
+  onProgress?.(1);
 
   await output.finalize();
 
@@ -786,9 +817,9 @@ type ExportMode = 'image' | 'video';
 // so both stay pixel-identical instead of two hand-copied style blocks
 // drifting apart over time.
 function ExportButton({
-  label, busy, disabled, onClick,
+  label, busy, disabled, onClick, busyLabel,
 }: {
-  label: string; busy: boolean; disabled: boolean; onClick: () => void;
+  label: string; busy: boolean; disabled: boolean; onClick: () => void; busyLabel?: string;
 }) {
   return (
     <button
@@ -823,7 +854,7 @@ function ExportButton({
         el.style.borderColor     = 'rgba(10,10,10,0.22)';
       }}
     >
-      {busy ? 'generating…' : label}
+      {busy ? (busyLabel ?? 'generating…') : label}
     </button>
   );
 }
@@ -831,6 +862,11 @@ function ExportButton({
 export default function SaveImageButton({ title, content, slug }: Props) {
   const [generating, setGenerating] = useState<ExportMode | null>(null);
   const [hint,       setHint]       = useState<string | null>(null);
+  // Real progress through the video export (0..1), not a made-up
+  // spinner — the frame loop in fastRecordAnimatedPage already knows
+  // exactly which of ~540 frames it's on, so the button can say so
+  // instead of just "generating…" for however long that takes.
+  const [videoProgress, setVideoProgress] = useState<number | null>(null);
   // A finished video (or its fallback) waiting on a fresh tap to actually
   // share — see deferredShareOrDownload's comment for why this can't just
   // happen automatically.
@@ -1008,6 +1044,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
   const handleSaveVideo = () => {
     setGenerating('video');
     setHint(null);
+    setVideoProgress(0);
     setTimeout(async () => {
       try {
         const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, totalPages, baseFilename } = prepare();
@@ -1027,6 +1064,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
           );
           await shareOrDownload(files, null); // hint already set above — don't let this overwrite it
           setGenerating(null);
+          setVideoProgress(null);
           return;
         }
 
@@ -1035,7 +1073,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
           if (await supportsFastVideo()) {
             cover = await fastRecordAnimatedPage(
               titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
-              baseFilename, titleWeights, bodyWeights,
+              baseFilename, titleWeights, bodyWeights, setVideoProgress,
             );
           } else {
             const mimeType = supportsCaptureStream() ? pickVideoMimeType() : null;
@@ -1074,6 +1112,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         console.error('video generation failed', err);
       }
       setGenerating(null);
+      setVideoProgress(null);
     }, 30);
   };
 
@@ -1104,6 +1143,11 @@ export default function SaveImageButton({ title, content, slug }: Props) {
             <ExportButton
               label="↑ save / share video"
               busy={generating === 'video'}
+              busyLabel={
+                videoProgress !== null
+                  ? `compiling… ${Math.round(videoProgress * 100)}%`
+                  : 'generating…'
+              }
               disabled={generating !== null}
               onClick={handleSaveVideo}
             />
