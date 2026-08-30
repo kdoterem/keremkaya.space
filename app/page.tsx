@@ -535,14 +535,18 @@ export default function Home() {
           subset (see buildLayout's guaranteed+rotating caps: 45 on mobile,
           out of however many actually exist), so most tags are never in
           the drift at all on a given load. This is the plain, complete
-          list underneath it — same bottom-right slot WitnessButton uses
-          on poem pages, a clear labeled utility rather than a hidden one,
-          since finding a specific tag is the whole point here. ── */}
+          list underneath it — a clear labeled utility rather than a
+          hidden one, since finding a specific tag is the whole point
+          here. Top-right, not bottom-right: the bottom row belongs to the
+          centered nav, and on narrow phones its rightmost link (FIND ME)
+          sits close enough to that edge that a bottom-right button landed
+          conjoined with it. Nothing else on this page uses the top at
+          all, so it's a genuinely free corner regardless of screen width. */}
       <button
         onClick={(e) => { e.stopPropagation(); setTagListOpen(true); }}
         style={{
           position:      "fixed",
-          bottom:        "1.75rem",
+          top:           "1.75rem",
           right:         "1.75rem",
           zIndex:        20,
           padding:       "0.5rem 0.9rem",
