@@ -47,8 +47,9 @@ const NAV = [
 ];
 
 // ── Session cache — survives client-side navigation without re-fetching ────────
-let _layoutCache:  TagLayout[]  | null = null;
-let _postsCache:   PostMeta[]   | null = null;
+let _layoutCache:     TagLayout[] | null = null;
+let _postsCache:      PostMeta[]  | null = null;
+let _tagCountsCache:  TagCount[]  | null = null; // full, uncapped list — buildLayout only ever sees a sampled subset of this
 let _cacheVw = 0, _cacheVh = 0;
 
 function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[] {
@@ -334,11 +335,19 @@ function TagWord({
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [layout,      setLayout]      = useState<TagLayout[]>([]);
-  const [posts,       setPosts]       = useState<PostMeta[]>([]);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [matching,    setMatching]    = useState<PostMeta[]>([]);
-  const [viewH,       setViewH]       = useState("100vh");
+  const [layout,       setLayout]       = useState<TagLayout[]>([]);
+  const [posts,        setPosts]        = useState<PostMeta[]>([]);
+  const [selectedTag,  setSelectedTag]  = useState<string | null>(null);
+  const [matching,     setMatching]     = useState<PostMeta[]>([]);
+  const [viewH,        setViewH]        = useState("100vh");
+  // The full, uncapped tag list — separate from `layout`, which is only
+  // ever a sampled/capped subset (see buildLayout's MOBILE/TABLET/DESKTOP
+  // guaranteed+rotating caps). Most tags never actually appear in the
+  // floating cloud at all on a given load, especially on mobile — this is
+  // the honest "everything, plainly" list for finding one that didn't
+  // happen to be in the sample, or wasn't drifted into view yet.
+  const [allTagCounts, setAllTagCounts] = useState<TagCount[]>([]);
+  const [tagListOpen,  setTagListOpen]  = useState(false);
 
   const positions = useRef<Map<string, PosEntry>>(new Map());
 
@@ -348,9 +357,10 @@ export default function Home() {
       Math.abs(_cacheVw - vw) < 50 && Math.abs(_cacheVh - vh) < 50;
 
     // Use cached data when returning from another page — no flicker, no re-randomise
-    if (_layoutCache && _postsCache && dimsMatch) {
+    if (_layoutCache && _postsCache && _tagCountsCache && dimsMatch) {
       setLayout(_layoutCache);
       setPosts(_postsCache);
+      setAllTagCounts(_tagCountsCache);
       const preselect = new URLSearchParams(window.location.search).get("tag");
       if (preselect) {
         setSelectedTag(preselect);
@@ -364,12 +374,14 @@ export default function Home() {
       fetch("/api/posts").then(r => r.json()),
     ]).then(([tagCounts, allPosts]: [TagCount[], PostMeta[]]) => {
       const layout = buildLayout(tagCounts, vw, vh);
-      _layoutCache = layout;
-      _postsCache  = allPosts;
-      _cacheVw     = vw;
-      _cacheVh     = vh;
+      _layoutCache    = layout;
+      _postsCache     = allPosts;
+      _tagCountsCache = tagCounts;
+      _cacheVw        = vw;
+      _cacheVh        = vh;
       setPosts(allPosts);
       setLayout(layout);
+      setAllTagCounts(tagCounts);
 
       // Auto-select tag when arriving from a reader page link (?tag=...)
       const preselect = new URLSearchParams(window.location.search).get("tag");
@@ -514,6 +526,130 @@ export default function Home() {
                   {post.date}
                 </span>
               </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── all tags — the floating cloud only ever shows a capped, sampled
+          subset (see buildLayout's guaranteed+rotating caps: 45 on mobile,
+          out of however many actually exist), so most tags are never in
+          the drift at all on a given load. This is the plain, complete
+          list underneath it — same bottom-right slot WitnessButton uses
+          on poem pages, a clear labeled utility rather than a hidden one,
+          since finding a specific tag is the whole point here. ── */}
+      <button
+        onClick={(e) => { e.stopPropagation(); setTagListOpen(true); }}
+        style={{
+          position:      "fixed",
+          bottom:        "1.75rem",
+          right:         "1.75rem",
+          zIndex:        20,
+          padding:       "0.5rem 0.9rem",
+          background:    "transparent",
+          border:        "1px solid rgba(10,10,10,0.22)",
+          color:         "rgba(10,10,10,0.5)",
+          fontSize:      "0.65rem",
+          fontWeight:    500,
+          fontVariant:   "small-caps",
+          letterSpacing: "0.12em",
+          fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
+          cursor:        "pointer",
+          transition:    "color 0.2s, border-color 0.2s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = "#0a0a0a";
+          e.currentTarget.style.borderColor = "#0a0a0a";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = "rgba(10,10,10,0.5)";
+          e.currentTarget.style.borderColor = "rgba(10,10,10,0.22)";
+        }}
+      >
+        all tags
+      </button>
+
+      <AnimatePresence>
+        {tagListOpen && (
+          <motion.div
+            key="all-tags-panel"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            style={{
+              position:   "fixed",
+              bottom:     0,
+              left:       0,
+              right:      0,
+              maxHeight:  "72vh",
+              overflowY:  "auto",
+              background: "#0a0a0a",
+              padding:    "1.8rem 5vw calc(1.8rem + env(safe-area-inset-bottom))",
+              zIndex:     110,
+            }}
+          >
+            <div style={{
+              display: "flex", alignItems: "baseline",
+              justifyContent: "space-between", marginBottom: "1.4rem",
+            }}>
+              <span style={{
+                fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                fontSize: "clamp(1rem, 3vw, 1.4rem)", fontWeight: 700,
+                color: "#aaff00", letterSpacing: "-0.01em",
+              }}>
+                all tags ({allTagCounts.length})
+              </span>
+              <button
+                onClick={() => setTagListOpen(false)}
+                style={{
+                  background: "none", border: "none",
+                  color: "rgba(255,255,255,0.35)", fontSize: "0.7rem",
+                  letterSpacing: "0.12em",
+                  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                  cursor: "pointer",
+                }}
+              >
+                CLOSE ×
+              </button>
+            </div>
+
+            {[...allTagCounts].sort((a, b) => b.count - a.count).map(({ tag, count }) => (
+              <button
+                key={tag}
+                onClick={() => { setTagListOpen(false); selectTag(tag); }}
+                style={{
+                  display:      "flex",
+                  alignItems:   "baseline",
+                  justifyContent: "space-between",
+                  width:        "100%",
+                  padding:      "0.75rem 0",
+                  background:   "none",
+                  border:       "none",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  textAlign:    "left",
+                  cursor:       "pointer",
+                  transition:   "opacity 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <span style={{
+                  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                  fontSize: "clamp(0.88rem, 2vw, 1.05rem)",
+                  fontWeight: 500, color: "#fff", letterSpacing: "-0.01em",
+                }}>
+                  {tag}
+                </span>
+                <span style={{
+                  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                  fontSize: "0.68rem", color: "rgba(255,255,255,0.3)",
+                  letterSpacing: "0.05em", flexShrink: 0, marginLeft: "2rem",
+                }}>
+                  {count} poem{count === 1 ? "" : "s"}
+                </span>
+              </button>
             ))}
           </motion.div>
         )}
