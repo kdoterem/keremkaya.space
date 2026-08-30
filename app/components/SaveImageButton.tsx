@@ -879,23 +879,40 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     // for long, multi-page poems the hint steers the reader to "Save N
     // Items" and building the carousel in the Instagram app from Photos.
     // Only return on success — cancellation falls through to desktop download.
+    const sizeMB = (orderedFiles[0].size / 1_000_000).toFixed(1);
     const canShare = navigator.canShare?.({ files: orderedFiles });
     if (canShare) {
       try {
         await navigator.share({ files: orderedFiles, title });
         return;
-      } catch { /* cancelled — fall through to download */ }
-    } else if (!multiPageHint && orderedFiles.some(f => f.type.startsWith('video/'))) {
-      // canShare() gives no reason for a false — it's a plain boolean —
-      // so this can't say FOR SURE it's a size limit, but a video failing
-      // here while an image never does is the known shape of that
-      // problem, not a guess pulled from nowhere. Without this, sharing
-      // just silently downloads instead with zero indication anything
-      // was even attempted, let alone why.
+      } catch (err) {
+        // AbortError is a real, ordinary cancellation — the user dismissed
+        // the share sheet themselves, falls through to download silently
+        // same as always. Anything else means canShare said yes but the
+        // actual share attempt failed or never opened — previously that
+        // vanished completely with zero trace, indistinguishable from a
+        // cancel. Surfaced now (with the real error name/message and the
+        // file's actual size/type) so a report of "still doesn't work"
+        // comes with something concrete to diagnose instead of guessing
+        // at file size again.
+        const isCancel = err instanceof DOMException && err.name === 'AbortError';
+        if (!isCancel) {
+          setHint(
+            `sharing failed — ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)} ` +
+            `(file was ${sizeMB}MB, ${orderedFiles[0].type}). downloading instead.`
+          );
+        }
+      }
+    } else if (!multiPageHint) {
+      // canShare() itself gives no reason for a false, just the boolean —
+      // this is the other half of the same diagnostic gap: previously a
+      // guess ("likely too large"), now the actual size/type is right on
+      // screen so a report of "still doesn't work" is grounded in real
+      // numbers instead of another theory.
       setHint(
-        'this browser wouldn’t offer to share the video directly — likely too large for ' +
-        'its share limit — so it’s downloading instead. you can share it manually from ' +
-        'Photos/Files once it’s saved.'
+        `this browser said it can’t share ${orderedFiles.length > 1 ? 'these files' : 'this file'} ` +
+        `directly (${sizeMB}MB, ${orderedFiles[0].type}) — downloading instead. ` +
+        `you can share manually from Photos/Files once it’s saved.`
       );
     }
 
