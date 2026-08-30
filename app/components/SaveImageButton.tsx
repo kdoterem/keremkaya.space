@@ -822,38 +822,7 @@ function ExportButton({
   label: string; busy: boolean; disabled: boolean; onClick: () => void; busyLabel?: string;
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display:         'inline-block',
-        fontSize:        '0.65rem',
-        fontWeight:      500,
-        letterSpacing:   '0.12em',
-        fontVariant:     'small-caps',
-        fontFamily:      FONT,
-        color:           disabled ? 'rgba(10,10,10,0.35)' : '#0a0a0a',
-        backgroundColor: 'transparent',
-        border:          '1px solid rgba(10,10,10,0.22)',
-        padding:         '0.55rem 1.2rem',
-        cursor:          disabled ? 'default' : 'pointer',
-        transition:      'background-color 0.15s, color 0.15s, border-color 0.15s',
-        userSelect:      'none',
-      }}
-      onMouseEnter={e => {
-        if (disabled) return;
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.backgroundColor = '#0a0a0a';
-        el.style.color           = '#aaff00';
-        el.style.borderColor     = '#0a0a0a';
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.backgroundColor = 'transparent';
-        el.style.color           = disabled ? 'rgba(10,10,10,0.35)' : '#0a0a0a';
-        el.style.borderColor     = 'rgba(10,10,10,0.22)';
-      }}
-    >
+    <button onClick={onClick} disabled={disabled} className="export-btn">
       {busy ? (busyLabel ?? 'generating…') : label}
     </button>
   );

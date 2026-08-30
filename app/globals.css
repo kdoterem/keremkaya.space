@@ -230,6 +230,41 @@ a:hover .post-nav-title {
   opacity: 1;
 }
 
+/* Save/share buttons (SaveImageButton) — real CSS :hover, not a JS
+   mouseenter/mouseleave pair mutating inline styles directly. That
+   approach could get visibly stuck inverted (black background) through
+   an entire video compile: touch devices fire something hover-like on
+   tap with no real "mouse leave" afterward to trigger the JS handler
+   that would undo it, so the button stayed black the whole time,
+   burying the "compiling… NN%" text against a background almost the
+   same color as the text meant to sit on top of it. :hover:not(:disabled)
+   can't get stuck this way — a disabled button structurally can't match
+   :hover in any real browser, no JS state to drift out of sync with. */
+.export-btn {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  font-variant: small-caps;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #0a0a0a;
+  background-color: transparent;
+  border: 1px solid rgba(10, 10, 10, 0.22);
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.export-btn:hover:not(:disabled) {
+  background-color: #0a0a0a;
+  color: #aaff00;
+  border-color: #0a0a0a;
+}
+.export-btn:disabled {
+  color: rgba(10, 10, 10, 0.35);
+  cursor: default;
+}
+
 /* Prose content (post reading view) */
 .prose-content p {
   margin-bottom: 1.4em;
