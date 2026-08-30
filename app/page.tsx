@@ -42,7 +42,7 @@ const NAV_CLEARANCE = 110; // px
 const NAV = [
   { label: "WRITING", href: "/writing"  },
   { label: "KISMET",  href: "/kismet"   },
-  { label: "Q&A",     href: "/answers"  },
+  { label: "SCANS",   href: "/answers"  },
   { label: "FIND ME", href: "/find-me"  },
 ];
 

@@ -2,23 +2,14 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-interface AnswerMeta {
-  slug:     string;
-  question: string;
-  answer:   string;
-  date:     string;
-}
-
+// ── SCANS — repurposed from the old Q&A listing. That page fetched and
+// rendered answers/[slug] entries via /api/answers; none of that data or
+// those routes were touched, just this listing no longer shows them (the
+// [slug] pages and API route still exist, just unreached from here now).
+// Paper scans are the new content for this section, not built yet — this
+// is the placeholder until they start coming in.
 export default function AnswersPage() {
-  const [answers, setAnswers] = useState<AnswerMeta[]>([]);
-  const [hovered, setHovered] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/answers").then(r => r.json()).then(setAnswers);
-  }, []);
-
   return (
     <main
       style={{
@@ -52,60 +43,25 @@ export default function AnswersPage() {
           letterSpacing: "-0.02em",
           color:         "#0a0a0a",
           marginTop:     "2.5rem",
-          marginBottom:  "3rem",
+          marginBottom:  "1rem",
         }}
       >
-        ANSWERS
+        SCANS
       </motion.h2>
 
-      <div style={{ display: "flex", flexDirection: "column", maxWidth: "720px" }}>
-        {answers.map((a) => {
-          const isHovered = hovered === a.slug;
-          return (
-            <Link
-              key={a.slug}
-              href={`/answers/${a.slug}`}
-              style={{ textDecoration: "none" }}
-              onMouseEnter={() => setHovered(a.slug)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <motion.div
-                animate={{ backgroundColor: isHovered ? "#0a0a0a" : "rgba(0,0,0,0)" }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  padding:      "1.1rem 1rem",
-                  cursor:       "pointer",
-                  borderBottom: "1px solid rgba(10,10,10,0.08)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize:      "clamp(0.95rem, 2.2vw, 1.1rem)",
-                    fontWeight:    500,
-                    color:         isHovered ? "#aaff00" : "#0a0a0a",
-                    letterSpacing: "-0.01em",
-                    transition:    "color 0.15s",
-                    marginBottom:  "0.3rem",
-                  }}
-                >
-                  {a.question}
-                </div>
-                <div
-                  style={{
-                    fontSize:      "0.82rem",
-                    color:         isHovered ? "rgba(170,255,0,0.7)" : "rgba(10,10,10,0.4)",
-                    letterSpacing: "0.01em",
-                    transition:    "color 0.15s",
-                    fontStyle:     "italic",
-                  }}
-                >
-                  {a.answer.length > 80 ? a.answer.slice(0, 80) + "…" : a.answer}
-                </div>
-              </motion.div>
-            </Link>
-          );
-        })}
-      </div>
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        style={{
+          fontSize:      "0.95rem",
+          fontStyle:     "italic",
+          color:         "rgba(10,10,10,0.4)",
+          letterSpacing: "0.01em",
+        }}
+      >
+        work in progress.
+      </motion.p>
     </main>
   );
 }
