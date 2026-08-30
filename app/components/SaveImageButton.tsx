@@ -831,6 +831,10 @@ function ExportButton({
 export default function SaveImageButton({ title, content, slug }: Props) {
   const [generating, setGenerating] = useState<ExportMode | null>(null);
   const [hint,       setHint]       = useState<string | null>(null);
+  // A finished video (or its fallback) waiting on a fresh tap to actually
+  // share — see deferredShareOrDownload's comment for why this can't just
+  // happen automatically.
+  const [pendingShare, setPendingShare] = useState<{ files: File[]; hint: string | null } | null>(null);
 
   // Whether there's actually anything to animate — same check handleSaveVideo
   // does at click time (getProvenanceTags + computeWeights), just run once at
@@ -858,43 +862,48 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     };
   }
 
-  // Shared by both modes: hand the finished files to the OS share sheet, or
-  // fall back to a sequential browser download. Identical mechanics either
-  // way — the only thing that differs between the two buttons is what's
-  // already inside `files` by the time this runs.
-  async function shareOrDownload(files: File[], multiPageHint: string | null) {
-    // Both the mobile Photos library (via the share sheet's "Save Images")
-    // and desktop downloads shelves/folders commonly sort newest-first —
-    // so saving/downloading in page order (1, 2, 3…) makes page 2 the most
-    // recent, and it displays *above* page 1. Reversed to last-page-first /
-    // page-1-last, whichever one lands most recently — page 1 — is the one
-    // that sorts first, so the saved/downloaded order matches reading
-    // order. Filenames are unaffected: they still read "-1", "-2"…
-    // regardless of save order, self-documenting the intended order too.
-    const orderedFiles = files.length > 1 ? [...files].reverse() : files;
-    if (multiPageHint) setHint(multiPageHint);
+  // Sequential browser download — desktop, or the fallback once sharing
+  // isn't available or fails.
+  async function downloadFiles(orderedFiles: File[]) {
+    for (let i = 0; i < orderedFiles.length; i++) {
+      const url = URL.createObjectURL(orderedFiles[i]);
+      const a   = document.createElement('a');
+      a.href = url; a.download = orderedFiles[i].name;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      if (i < orderedFiles.length - 1) await new Promise(r => setTimeout(r, 150));
+    }
+  }
 
-    // Mobile: share sheet. Instagram (and most apps) only accept the FIRST
-    // file from a web share — it can't receive a multi-file carousel — so
-    // for long, multi-page poems the hint steers the reader to "Save N
-    // Items" and building the carousel in the Instagram app from Photos.
-    // Only return on success — cancellation falls through to desktop download.
+  // The actual share attempt. MUST run inside a fresh, direct user
+  // gesture — navigator.share() enforces "transient activation": call it
+  // too long after the click/tap that led up to it and it throws
+  // NotAllowedError regardless of file size. Confirmed on a real device:
+  // a 9.7MB video, nowhere near any plausible share-size limit, still
+  // NotAllowedError. This is why the image button (near-instant PNG
+  // generation) has always worked while video hasn't — by the time
+  // share() finally runs after several real seconds of encoding,
+  // activation has already expired. See shareOrDownload vs
+  // deferredShareOrDownload below for how each button accounts for this.
+  //
+  // Returns whether the share actually went through, so the caller knows
+  // whether to fall back to a download.
+  async function attemptShare(orderedFiles: File[]): Promise<boolean> {
     const sizeMB = (orderedFiles[0].size / 1_000_000).toFixed(1);
     const canShare = navigator.canShare?.({ files: orderedFiles });
     if (canShare) {
       try {
         await navigator.share({ files: orderedFiles, title });
-        return;
+        return true;
       } catch (err) {
         // AbortError is a real, ordinary cancellation — the user dismissed
         // the share sheet themselves, falls through to download silently
         // same as always. Anything else means canShare said yes but the
-        // actual share attempt failed or never opened — previously that
-        // vanished completely with zero trace, indistinguishable from a
-        // cancel. Surfaced now (with the real error name/message and the
-        // file's actual size/type) so a report of "still doesn't work"
-        // comes with something concrete to diagnose instead of guessing
-        // at file size again.
+        // actual share attempt failed — previously that vanished
+        // completely with zero trace, indistinguishable from a cancel.
+        // Surfaced now (with the real error name/message and the file's
+        // actual size/type) so a report of "still doesn't work" comes
+        // with something concrete to diagnose instead of another guess.
         const isCancel = err instanceof DOMException && err.name === 'AbortError';
         if (!isCancel) {
           setHint(
@@ -903,7 +912,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
           );
         }
       }
-    } else if (!multiPageHint) {
+    } else {
       // canShare() itself gives no reason for a false, just the boolean —
       // this is the other half of the same diagnostic gap: previously a
       // guess ("likely too large"), now the actual size/type is right on
@@ -915,16 +924,60 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         `you can share manually from Photos/Files once it’s saved.`
       );
     }
+    return false;
+  }
 
-    // Desktop (or a mobile browser without Web Share): sequential download.
-    for (let i = 0; i < orderedFiles.length; i++) {
-      const url = URL.createObjectURL(orderedFiles[i]);
-      const a   = document.createElement('a');
-      a.href = url; a.download = orderedFiles[i].name;
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a); URL.revokeObjectURL(url);
-      if (i < orderedFiles.length - 1) await new Promise(r => setTimeout(r, 150));
+  // Both the mobile Photos library (via the share sheet's "Save Images")
+  // and desktop downloads shelves/folders commonly sort newest-first — so
+  // saving/downloading in page order (1, 2, 3…) makes page 2 the most
+  // recent, and it displays *above* page 1. Reversed to last-page-first /
+  // page-1-last, whichever one lands most recently — page 1 — is the one
+  // that sorts first, so the saved/downloaded order matches reading order.
+  // Filenames are unaffected: they still read "-1", "-2"… regardless of
+  // save order, self-documenting the intended order too.
+  function orderPages(files: File[]): File[] {
+    return files.length > 1 ? [...files].reverse() : files;
+  }
+
+  // Used by the image button, and the "nothing to animate" fallback in
+  // handleSaveVideo — both generate their file(s) fast enough (a
+  // near-instant PNG render) that the original click's user activation is
+  // still valid by the time this runs, so it's safe to try sharing
+  // immediately.
+  async function shareOrDownload(files: File[], multiPageHint: string | null) {
+    const orderedFiles = orderPages(files);
+    if (multiPageHint) setHint(multiPageHint);
+    const shared = await attemptShare(orderedFiles);
+    if (!shared) await downloadFiles(orderedFiles);
+  }
+
+  // Used by the real video-generation path — several real seconds of
+  // encoding stand between the click and this point, long enough that
+  // user activation is gone, so attemptShare() would just throw
+  // NotAllowedError no matter what. Instead: hold the finished file(s)
+  // and surface an explicit "tap to share" button (see confirmPendingShare
+  // and the render below) — that tap is itself a fresh gesture, so the
+  // share call made inside its own handler stays inside a valid
+  // activation window. On a browser with no Web Share support at all
+  // (most desktop browsers), there's nothing to defer to — download runs
+  // immediately, same as before.
+  function deferredShareOrDownload(files: File[], multiPageHint: string | null) {
+    const orderedFiles = orderPages(files);
+    if (typeof navigator.share !== 'function') {
+      if (multiPageHint) setHint(multiPageHint);
+      void downloadFiles(orderedFiles);
+      return;
     }
+    setPendingShare({ files: orderedFiles, hint: multiPageHint });
+  }
+
+  async function confirmPendingShare() {
+    if (!pendingShare) return;
+    const { files, hint: multiPageHint } = pendingShare;
+    setPendingShare(null);
+    if (multiPageHint) setHint(multiPageHint);
+    const shared = await attemptShare(files);
+    if (!shared) await downloadFiles(files);
   }
 
   function multiPageImageHint(count: number): string {
@@ -1008,7 +1061,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         const files   = [cover, ...rest];
         const isVideo = cover.type === 'video/mp4';
 
-        await shareOrDownload(
+        deferredShareOrDownload(
           files,
           files.length <= 1 ? null : isVideo
             ? `long poem — ${files.length} files: a moving cover + ${files.length - 1} ` +
@@ -1027,19 +1080,35 @@ export default function SaveImageButton({ title, content, slug }: Props) {
   return (
     <>
     <div style={{ display: 'flex', gap: '0.6rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
-      <ExportButton
-        label="↑ save / share image"
-        busy={generating === 'image'}
-        disabled={generating !== null}
-        onClick={handleSaveImage}
-      />
-      {hasVideo && (
+      {pendingShare ? (
+        // The video's done — this tap IS the fresh user gesture the share
+        // call needs (see deferredShareOrDownload's comment). Replaces
+        // both normal buttons while waiting so there's no ambiguity about
+        // which one to press, and so a stray tap on "save / share video"
+        // doesn't kick off a whole second generation for no reason.
         <ExportButton
-          label="↑ save / share video"
-          busy={generating === 'video'}
-          disabled={generating !== null}
-          onClick={handleSaveVideo}
+          label="→ tap to share the video"
+          busy={false}
+          disabled={false}
+          onClick={confirmPendingShare}
         />
+      ) : (
+        <>
+          <ExportButton
+            label="↑ save / share image"
+            busy={generating === 'image'}
+            disabled={generating !== null}
+            onClick={handleSaveImage}
+          />
+          {hasVideo && (
+            <ExportButton
+              label="↑ save / share video"
+              busy={generating === 'video'}
+              disabled={generating !== null}
+              onClick={handleSaveVideo}
+            />
+          )}
+        </>
       )}
     </div>
 
