@@ -3,178 +3,4717 @@
     "slug": "percept-and-define-intercept-the-divine",
     "date": "2026-08-13",
     "tags": {
-      "silence":       { "type": "lines", "spans": ["is your silences,", "silent?"] },
-      "death":         { "type": "line", "spans": ["until when? until death"] },
-      "absence":       { "type": "lines", "spans": ["do you know what absence of something means?", "absence of light brings shadow"] },
-      "consciousness": { "type": "none", "note": "the whole poem interrogates knowing/discovering, but that's already the carrier for wonder and existence below — no span distinct enough to call this one specifically" },
-      "god":           { "type": "phrase", "spans": ["intercept the divine"], "note": "only in the title — the body never touches divinity, god, or worship directly" },
-      "wonder":        { "type": "lines", "spans": ["have you ever had nothing?", "more you discover, more you discover, \nmore will come."] },
-      "clarity":       { "type": "lines", "spans": ["absence of light brings shadow", "light, takes it away."], "note": "the poem's one flat declarative couplet after four questions in a row — clarity as a shift in register, not a claim about content" },
-      "time":          { "type": "lines", "spans": ["until when? until death", "happening happens every day."] },
-      "truth":         { "type": "phrase", "spans": ["happening happens every day."] },
-      "existence":     { "type": "line", "spans": ["have you ever had nothing?"] },
-      "wordplay":      { "type": "lines", "spans": ["percept and define, intercept the divine", "is your silences,\nsilent?"], "note": "first span is the title (percept/intercept near-rhyme, \"define\" embedded); second is the body's noun-to-adjective turn on the same word" }
+      "silence": {
+        "type": "lines",
+        "spans": [
+          "is your silences,",
+          "silent?"
+        ]
+      },
+      "death": {
+        "type": "line",
+        "spans": [
+          "until when? until death"
+        ]
+      },
+      "absence": {
+        "type": "lines",
+        "spans": [
+          "do you know what absence of something means?",
+          "absence of light brings shadow"
+        ]
+      },
+      "consciousness": {
+        "type": "none",
+        "note": "the whole poem interrogates knowing/discovering, but that's already the carrier for wonder and existence below — no span distinct enough to call this one specifically"
+      },
+      "god": {
+        "type": "phrase",
+        "spans": [
+          "intercept the divine"
+        ],
+        "note": "only in the title — the body never touches divinity, god, or worship directly"
+      },
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "have you ever had nothing?",
+          "more you discover, more you discover, \nmore will come."
+        ]
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "absence of light brings shadow",
+          "light, takes it away."
+        ],
+        "note": "the poem's one flat declarative couplet after four questions in a row — clarity as a shift in register, not a claim about content"
+      },
+      "time": {
+        "type": "lines",
+        "spans": [
+          "until when? until death",
+          "happening happens every day."
+        ]
+      },
+      "truth": {
+        "type": "phrase",
+        "spans": [
+          "happening happens every day."
+        ]
+      },
+      "existence": {
+        "type": "line",
+        "spans": [
+          "have you ever had nothing?"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "percept and define, intercept the divine",
+          "is your silences,\nsilent?"
+        ],
+        "note": "first span is the title (percept/intercept near-rhyme, \"define\" embedded); second is the body's noun-to-adjective turn on the same word"
+      }
     }
   },
   {
     "slug": "want-want-me",
     "date": "2026-08-13",
     "tags": {
-      "conflict":  { "type": "lines", "spans": ["i wanna write on a wall,", "they want me writin off checks,", "i wanna watch the sun,", "they want me watchin the news,", "i wanna greet the bug in my home,", "they want me killin it,", "i wanna kill them,", "they wanna eviscerate me."], "note": "the whole poem is this one repeated opposition — it's the structure, not a single line" },
-      "defiance":  { "type": "lines", "spans": ["i wanna write on a wall,", "they want me writin off checks,"] },
-      "family":    { "type": "none", "note": "\"they\" is never named as family — could be read that way given the domestic details (checks, home, news), but the text doesn't say it" },
-      "contempt":  { "type": "phrase", "spans": ["i wanna kill them,"] },
-      "rage":      { "type": "lines", "spans": ["i wanna kill them,", "they wanna eviscerate me."] },
-      "control":   { "type": "lines", "spans": ["they want me writin off checks,", "they want me watchin the news,", "they want me killin it,"] },
-      "presence":  { "type": "none", "note": "not evident — the poem is about opposing demands, not about being present/attentive" },
-      "existence": { "type": "none", "note": "not evident beyond what's already carried by conflict/control" },
-      "wonder":    { "type": "none", "note": "diffuse, not localizable to specific text" },
-      "dark":      { "type": "lines", "spans": ["i wanna kill them,", "they wanna eviscerate me."] }
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "i wanna write on a wall,",
+          "they want me writin off checks,",
+          "i wanna watch the sun,",
+          "they want me watchin the news,",
+          "i wanna greet the bug in my home,",
+          "they want me killin it,",
+          "i wanna kill them,",
+          "they wanna eviscerate me."
+        ],
+        "note": "the whole poem is this one repeated opposition — it's the structure, not a single line"
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "i wanna write on a wall,",
+          "they want me writin off checks,"
+        ]
+      },
+      "family": {
+        "type": "none",
+        "note": "\"they\" is never named as family — could be read that way given the domestic details (checks, home, news), but the text doesn't say it"
+      },
+      "contempt": {
+        "type": "phrase",
+        "spans": [
+          "i wanna kill them,"
+        ]
+      },
+      "rage": {
+        "type": "lines",
+        "spans": [
+          "i wanna kill them,",
+          "they wanna eviscerate me."
+        ]
+      },
+      "control": {
+        "type": "lines",
+        "spans": [
+          "they want me writin off checks,",
+          "they want me watchin the news,",
+          "they want me killin it,"
+        ]
+      },
+      "presence": {
+        "type": "none",
+        "note": "not evident — the poem is about opposing demands, not about being present/attentive"
+      },
+      "existence": {
+        "type": "none",
+        "note": "not evident beyond what's already carried by conflict/control"
+      },
+      "wonder": {
+        "type": "none",
+        "note": "diffuse, not localizable to specific text"
+      },
+      "dark": {
+        "type": "lines",
+        "spans": [
+          "i wanna kill them,",
+          "they wanna eviscerate me."
+        ]
+      }
     }
   },
   {
     "slug": "this-message-is-broadcasted-from-a-primal-place",
     "date": "2026-08-17",
     "tags": {
-      "doubt":           { "type": "lines", "spans": ["so if we formalize, is it the both end?", "do i need to hunt as what's in me requires a prey?"] },
-      "wordplay":        { "type": "lines", "spans": ["hole, is it glory hole? when i go in i become all holy?", "red or flag, which invokes a hole farther?", "what molly shows, what red flag takes away"], "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart" },
-      "sensual":         { "type": "lines", "spans": ["hole, is it glory hole? when i go in i become all holy?", "what molly shows, what red flag takes away"] },
-      "self-acceptance": { "type": "none", "note": "the earlier draft closed on a direct self-love line; this edit cuts that and just sits inside the primal urge without resolving it into shame or acceptance either way — no span left to point to" },
-      "presence":        { "type": "line", "spans": ["something's different, beast's no longer primal."] },
-      "existence":       { "type": "lines", "spans": ["something's different, beast's no longer primal.", "do i need to hunt as what's in me requires a prey?"], "note": "the beast/hunt/prey framing is the primal-survival register this tag is naming" },
-      "wonder":          { "type": "line", "spans": ["hole, is it glory hole? when i go in i become all holy?"], "note": "same line as wordplay/sensual — the marvel is at the crude-to-sacred turn itself" },
-      "clarity":         { "type": "none", "note": "the poem stays inside its own open questions and never resolves into a flat statement — no clarity beat to point to" },
-      "defiance":        { "type": "none", "note": "the earlier draft's \"WELL FUCK THIS POEM\" was the defiant beat; it's cut in this edit and nothing left reads as defiance rather than open questioning" },
-      "devotion":        { "type": "line", "spans": ["hole, is it glory hole? when i go in i become all holy?"], "note": "the pun is where devotion actually lives here — \"holy\" turning a crude act sacred, not a separate declaration" }
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "so if we formalize, is it the both end?",
+          "do i need to hunt as what's in me requires a prey?"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "hole, is it glory hole? when i go in i become all holy?",
+          "red or flag, which invokes a hole farther?",
+          "what molly shows, what red flag takes away"
+        ],
+        "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart"
+      },
+      "sensual": {
+        "type": "lines",
+        "spans": [
+          "hole, is it glory hole? when i go in i become all holy?",
+          "what molly shows, what red flag takes away"
+        ]
+      },
+      "self-acceptance": {
+        "type": "none",
+        "note": "the earlier draft closed on a direct self-love line; this edit cuts that and just sits inside the primal urge without resolving it into shame or acceptance either way — no span left to point to"
+      },
+      "presence": {
+        "type": "line",
+        "spans": [
+          "something's different, beast's no longer primal."
+        ]
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "something's different, beast's no longer primal.",
+          "do i need to hunt as what's in me requires a prey?"
+        ],
+        "note": "the beast/hunt/prey framing is the primal-survival register this tag is naming"
+      },
+      "wonder": {
+        "type": "line",
+        "spans": [
+          "hole, is it glory hole? when i go in i become all holy?"
+        ],
+        "note": "same line as wordplay/sensual — the marvel is at the crude-to-sacred turn itself"
+      },
+      "clarity": {
+        "type": "none",
+        "note": "the poem stays inside its own open questions and never resolves into a flat statement — no clarity beat to point to"
+      },
+      "defiance": {
+        "type": "none",
+        "note": "the earlier draft's \"WELL FUCK THIS POEM\" was the defiant beat; it's cut in this edit and nothing left reads as defiance rather than open questioning"
+      },
+      "devotion": {
+        "type": "line",
+        "spans": [
+          "hole, is it glory hole? when i go in i become all holy?"
+        ],
+        "note": "the pun is where devotion actually lives here — \"holy\" turning a crude act sacred, not a separate declaration"
+      }
     }
   },
   {
     "slug": "hear-hear-were-here",
     "date": "2026-08-18",
     "tags": {
-      "doubt":            { "type": "phrase", "spans": ["no doubt. patience."] },
-      "absence":          { "type": "lines", "spans": ["i, i'm sorry", "for the absence"] },
-      "identity":         { "type": "lines", "spans": ["had to craft faces,", "sis didn't eye you into an i'ness, i see,", "your beef with seeing was not being seen."] },
-      "self-acceptance":  { "type": "lines", "spans": ["now i am finally able to let it go and", "join you"] },
-      "healing":          { "type": "lines", "spans": ["it's good to see you here, hear hear,", "you look like you been through hell, \nbut you're still alive so near miss,", "not needing what was left in a mess, and if she had you wouldn't know the mess gotta be sorted"] },
-      "presence":         { "type": "lines", "spans": ["now that you're here i see you.", "are we, connecting right now, eyely??"] },
-      "self-erosion":     { "type": "lines", "spans": ["had to craft faces,", "had to interpret the shadows of the wall,", "ever since your fall."] },
-      "clarity":          { "type": "line", "spans": ["now that you're here i see you."] },
-      "existence":        { "type": "lines", "spans": ["very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."] },
-      "devotion":         { "type": "none", "note": "the reconciliation between the two voices could be read as devotional, but I don't have a span for it distinct from self-acceptance/healing above" },
-      "wonder":           { "type": "line", "spans": ["very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."], "note": "same line as existence — it carries both: what's left is unknown and that's held open, not resolved" }
+      "doubt": {
+        "type": "phrase",
+        "spans": [
+          "no doubt. patience."
+        ]
+      },
+      "absence": {
+        "type": "lines",
+        "spans": [
+          "i, i'm sorry",
+          "for the absence"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "had to craft faces,",
+          "sis didn't eye you into an i'ness, i see,",
+          "your beef with seeing was not being seen."
+        ]
+      },
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "now i am finally able to let it go and",
+          "join you"
+        ]
+      },
+      "healing": {
+        "type": "lines",
+        "spans": [
+          "it's good to see you here, hear hear,",
+          "you look like you been through hell, \nbut you're still alive so near miss,",
+          "not needing what was left in a mess, and if she had you wouldn't know the mess gotta be sorted"
+        ]
+      },
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "now that you're here i see you.",
+          "are we, connecting right now, eyely??"
+        ]
+      },
+      "self-erosion": {
+        "type": "lines",
+        "spans": [
+          "had to craft faces,",
+          "had to interpret the shadows of the wall,",
+          "ever since your fall."
+        ]
+      },
+      "clarity": {
+        "type": "line",
+        "spans": [
+          "now that you're here i see you."
+        ]
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."
+        ]
+      },
+      "devotion": {
+        "type": "none",
+        "note": "the reconciliation between the two voices could be read as devotional, but I don't have a span for it distinct from self-acceptance/healing above"
+      },
+      "wonder": {
+        "type": "line",
+        "spans": [
+          "very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."
+        ],
+        "note": "same line as existence — it carries both: what's left is unknown and that's held open, not resolved"
+      }
     }
   },
   {
     "slug": "see-me-like-my-neighbour-does-i-eye-enacted-the-thrill-pain-gives",
     "date": "2026-08-18",
     "tags": {
-      "pain":          { "type": "line", "spans": ["pain is a sensation and sensations are to be enjoyed"] },
-      "existence":     { "type": "none", "note": "the arc from sensation to constructed self to ruin is existential in shape, but no span distinct from consciousness/self-erosion below" },
-      "wonder":        { "type": "lines", "spans": ["fire? burn and change you", "water? ocean womb cradles", "air? you send it back to it, the one who blows", "earth? shaping the tree, in accordance with three"], "note": "same four lines as ritual — the questioning-of-elements does both" },
-      "presence":      { "type": "phrase", "spans": ["in order to enjoy you have to get close"] },
-      "clarity":       { "type": "phrase", "spans": ["you understand, and you understand it's all constructed,"] },
-      "self-erosion":  { "type": "lines", "spans": ["tear it apart", "let the ruin tell a story."] },
-      "sensual":       { "type": "lines", "spans": ["pain is a sensation and sensations are to be enjoyed", "in order to enjoy you have to get close", "water? ocean womb cradles"] },
-      "creation":      { "type": "phrase", "spans": ["earth? shaping the tree, in accordance with three"] },
-      "truth":         { "type": "phrase", "spans": ["let the ruin tell a story."] },
-      "consciousness": { "type": "lines", "spans": ["you see, you hear,", "you hear, you try to understand,", "you understand, and you understand it's all constructed,"], "note": "the escalating perception chain is the clearest carrier in the whole set for this tag" },
-      "ritual":        { "type": "lines", "spans": ["fire? burn and change you", "water? ocean womb cradles", "air? you send it back to it, the one who blows", "earth? shaping the tree, in accordance with three"] }
+      "pain": {
+        "type": "line",
+        "spans": [
+          "pain is a sensation and sensations are to be enjoyed"
+        ]
+      },
+      "existence": {
+        "type": "none",
+        "note": "the arc from sensation to constructed self to ruin is existential in shape, but no span distinct from consciousness/self-erosion below"
+      },
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "fire? burn and change you",
+          "water? ocean womb cradles",
+          "air? you send it back to it, the one who blows",
+          "earth? shaping the tree, in accordance with three"
+        ],
+        "note": "same four lines as ritual — the questioning-of-elements does both"
+      },
+      "presence": {
+        "type": "phrase",
+        "spans": [
+          "in order to enjoy you have to get close"
+        ]
+      },
+      "clarity": {
+        "type": "phrase",
+        "spans": [
+          "you understand, and you understand it's all constructed,"
+        ]
+      },
+      "self-erosion": {
+        "type": "lines",
+        "spans": [
+          "tear it apart",
+          "let the ruin tell a story."
+        ]
+      },
+      "sensual": {
+        "type": "lines",
+        "spans": [
+          "pain is a sensation and sensations are to be enjoyed",
+          "in order to enjoy you have to get close",
+          "water? ocean womb cradles"
+        ]
+      },
+      "creation": {
+        "type": "phrase",
+        "spans": [
+          "earth? shaping the tree, in accordance with three"
+        ]
+      },
+      "truth": {
+        "type": "phrase",
+        "spans": [
+          "let the ruin tell a story."
+        ]
+      },
+      "consciousness": {
+        "type": "lines",
+        "spans": [
+          "you see, you hear,",
+          "you hear, you try to understand,",
+          "you understand, and you understand it's all constructed,"
+        ],
+        "note": "the escalating perception chain is the clearest carrier in the whole set for this tag"
+      },
+      "ritual": {
+        "type": "lines",
+        "spans": [
+          "fire? burn and change you",
+          "water? ocean womb cradles",
+          "air? you send it back to it, the one who blows",
+          "earth? shaping the tree, in accordance with three"
+        ]
+      }
     }
   },
   {
     "slug": "something-juicy",
     "date": "2026-08-18",
     "tags": {
-      "work":         { "type": "line", "spans": ["need a sustained mind to write"] },
-      "existence":    { "type": "lines", "spans": ["i'm what life blooms, tomato sapling small as fuck,", "i no longer am fucking universe,"] },
-      "impermanence": { "type": "lines", "spans": ["so only way things worked, doesn't work right now", "then gets big and tall and heavy,", "then green tomatoes form,", "then they get bigger and turn red", "all to be ate and enjoyed"] },
-      "creation":     { "type": "lines", "spans": ["i'm what life blooms, tomato sapling small as fuck,", "then gets big and tall and heavy,"] },
-      "wonder":       { "type": "lines", "spans": ["blow of the wind, celestial dance", "something much much much bigger than i ever anticipated"] },
-      "self-erosion": { "type": "line", "spans": ["devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] },
-      "mortality":    { "type": "lines", "spans": ["all to be ate and enjoyed", "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] },
-      "acceptance":   { "type": "phrase", "spans": ["today i am it."] },
-      "clarity":      { "type": "lines", "spans": ["i used to think i tasted the forbidden fruit,", "today i am it."] },
-      "presence":     { "type": "phrase", "spans": ["today i am it."], "note": "same line as acceptance/clarity — \"today\" is doing this work specifically" },
-      "dark":         { "type": "line", "spans": ["devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"] }
+      "work": {
+        "type": "line",
+        "spans": [
+          "need a sustained mind to write"
+        ]
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "i'm what life blooms, tomato sapling small as fuck,",
+          "i no longer am fucking universe,"
+        ]
+      },
+      "impermanence": {
+        "type": "lines",
+        "spans": [
+          "so only way things worked, doesn't work right now",
+          "then gets big and tall and heavy,",
+          "then green tomatoes form,",
+          "then they get bigger and turn red",
+          "all to be ate and enjoyed"
+        ]
+      },
+      "creation": {
+        "type": "lines",
+        "spans": [
+          "i'm what life blooms, tomato sapling small as fuck,",
+          "then gets big and tall and heavy,"
+        ]
+      },
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "blow of the wind, celestial dance",
+          "something much much much bigger than i ever anticipated"
+        ]
+      },
+      "self-erosion": {
+        "type": "line",
+        "spans": [
+          "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
+        ]
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "all to be ate and enjoyed",
+          "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
+        ]
+      },
+      "acceptance": {
+        "type": "phrase",
+        "spans": [
+          "today i am it."
+        ]
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "i used to think i tasted the forbidden fruit,",
+          "today i am it."
+        ]
+      },
+      "presence": {
+        "type": "phrase",
+        "spans": [
+          "today i am it."
+        ],
+        "note": "same line as acceptance/clarity — \"today\" is doing this work specifically"
+      },
+      "dark": {
+        "type": "line",
+        "spans": [
+          "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
+        ]
+      }
     }
   },
   {
     "slug": "thank-you",
     "date": "2026-08-18",
     "tags": {
-      "god":              { "type": "lines", "spans": ["you, the last and the first one to act", "you swept them away"], "note": "alpha/omega framing and a single decisive act — never named \"god\" outright, but this is what makes the addressee god-scaled" },
-      "gratitude":        { "type": "lines", "spans": ["thank you for teaching me", "thank you for never changing, while i did,", "thank you for asking me to put the bow and arrow down", "thank you for such swiftness,"], "note": "the refrain itself — the most direct tag-to-text match in this batch" },
-      "devotion":         { "type": "lines", "spans": ["well you did too, you just never have been away from you"] },
-      "clarity":          { "type": "lines", "spans": ["eye saw you", "and knew", "it was looking at i"] },
-      "self-acceptance":  { "type": "lines", "spans": ["it was looking at i", "thank you for asking me to put the bow and arrow down"] },
-      "consciousness":    { "type": "lines", "spans": ["eye picks up threat first,", "i do not", "i used to"] },
-      "presence":         { "type": "phrase", "spans": ["you just never have been away from you"] },
-      "wordplay":         { "type": "lines", "spans": ["eye picks up threat first,", "i do not", "i used to", "eye saw you", "and knew", "it was looking at i"], "note": "the eye/I homophone, sustained across the whole closing stretch" },
-      "existence":        { "type": "phrase", "spans": ["thank you for never changing, while i did,"] },
-      "healing":          { "type": "phrase", "spans": ["thank you for asking me to put the bow and arrow down"] }
+      "god": {
+        "type": "lines",
+        "spans": [
+          "you, the last and the first one to act",
+          "you swept them away"
+        ],
+        "note": "alpha/omega framing and a single decisive act — never named \"god\" outright, but this is what makes the addressee god-scaled"
+      },
+      "gratitude": {
+        "type": "lines",
+        "spans": [
+          "thank you for teaching me",
+          "thank you for never changing, while i did,",
+          "thank you for asking me to put the bow and arrow down",
+          "thank you for such swiftness,"
+        ],
+        "note": "the refrain itself — the most direct tag-to-text match in this batch"
+      },
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "well you did too, you just never have been away from you"
+        ]
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "eye saw you",
+          "and knew",
+          "it was looking at i"
+        ]
+      },
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "it was looking at i",
+          "thank you for asking me to put the bow and arrow down"
+        ]
+      },
+      "consciousness": {
+        "type": "lines",
+        "spans": [
+          "eye picks up threat first,",
+          "i do not",
+          "i used to"
+        ]
+      },
+      "presence": {
+        "type": "phrase",
+        "spans": [
+          "you just never have been away from you"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "eye picks up threat first,",
+          "i do not",
+          "i used to",
+          "eye saw you",
+          "and knew",
+          "it was looking at i"
+        ],
+        "note": "the eye/I homophone, sustained across the whole closing stretch"
+      },
+      "existence": {
+        "type": "phrase",
+        "spans": [
+          "thank you for never changing, while i did,"
+        ]
+      },
+      "healing": {
+        "type": "phrase",
+        "spans": [
+          "thank you for asking me to put the bow and arrow down"
+        ]
+      }
     }
   },
   {
     "slug": "to-the-first-comers",
     "date": "2026-08-18",
     "tags": {
-      "faith":           { "type": "lines", "spans": ["i did", "i believed"] },
-      "clarity":         { "type": "lines", "spans": ["today it's apparent", "today single revealed itself"] },
-      "time":            { "type": "lines", "spans": ["past me had anger, it'd go on with they didn't", "today it's apparent"] },
-      "self-acceptance": { "type": "line", "spans": ["no, i'm not too late. but i'm not the first comer either."] },
-      "existence":       { "type": "none", "note": "the poem's arc of belief and change is existential in shape, but I don't have a span distinct from faith/self-acceptance/acceptance above — citing the same closing line a third time would be padding, not a real match" },
-      "wonder":          { "type": "phrase", "spans": ["who could have believed it was gonna change like this but"] },
-      "presence":        { "type": "lines", "spans": ["today it's apparent", "today single revealed itself"], "note": "same lines as time/clarity — \"today\" is the carrier" },
-      "endurance":       { "type": "lines", "spans": ["past me had anger, it'd go on with they didn't", "but once the circulation completes and all wires get wired they'll say"] },
-      "truth":           { "type": "lines", "spans": ["and its signal is deafening for some", "the signal they cannot hear their navel can,"] },
-      "acceptance":       { "type": "line", "spans": ["no, i'm not too late. but i'm not the first comer either."] }
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "i did",
+          "i believed"
+        ]
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "today it's apparent",
+          "today single revealed itself"
+        ]
+      },
+      "time": {
+        "type": "lines",
+        "spans": [
+          "past me had anger, it'd go on with they didn't",
+          "today it's apparent"
+        ]
+      },
+      "self-acceptance": {
+        "type": "line",
+        "spans": [
+          "no, i'm not too late. but i'm not the first comer either."
+        ]
+      },
+      "existence": {
+        "type": "none",
+        "note": "the poem's arc of belief and change is existential in shape, but I don't have a span distinct from faith/self-acceptance/acceptance above — citing the same closing line a third time would be padding, not a real match"
+      },
+      "wonder": {
+        "type": "phrase",
+        "spans": [
+          "who could have believed it was gonna change like this but"
+        ]
+      },
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "today it's apparent",
+          "today single revealed itself"
+        ],
+        "note": "same lines as time/clarity — \"today\" is the carrier"
+      },
+      "endurance": {
+        "type": "lines",
+        "spans": [
+          "past me had anger, it'd go on with they didn't",
+          "but once the circulation completes and all wires get wired they'll say"
+        ]
+      },
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "and its signal is deafening for some",
+          "the signal they cannot hear their navel can,"
+        ]
+      },
+      "acceptance": {
+        "type": "line",
+        "spans": [
+          "no, i'm not too late. but i'm not the first comer either."
+        ]
+      }
     }
   },
   {
     "slug": "put-god-in-the-doorstep-he-wouldnt-eat-whats-in-my-fridge",
     "date": "2026-08-25",
     "tags": {
-      "self-concealment": { "type": "lines", "spans": ["all that i don't give you", "i don't give you because it asks you to reveal yourself", "pull me out of the rug i hide under,"], "note": "withholding as the poem's entire opening mechanism" },
-      "vulnerability":    { "type": "lines", "spans": ["could you comprehend something so raw?", "and if you look at me i'll be forged,", "turned into a weapon, wielded in your will,"], "note": "being seen as danger, not relief" },
-      "doubt":            { "type": "lines", "spans": ["i doubt you could.", "could your eyes realize", "is it because past is the source of sorrow?", "how hurt you gotta be to wanna transform?"], "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking" },
-      "presence":         { "type": "lines", "spans": ["i like you better when you're not here.", "i don't even question if they reach you"], "note": "closeness maintained specifically through distance" },
-      "existence":        { "type": "lines", "spans": ["its eternal beam would cut straight through the maze,", "the sand dunes are the collective power of yesterday,", "sun's rays gets here every day yes, but it has been so since yesterday"], "note": "the poem's one stretch of pure metaphysics, unattached to the you" },
-      "wordplay":         { "type": "phrase", "spans": ["eye sees something unbeaten in i?"], "note": "eye/I doing double work — \"eye sees\" reads straight through as \"I see\"" },
-      "mortality":        { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform?"], "note": "loosely — transformation read as evidence of damage rather than growth" },
-      "devotion":         { "type": "line", "spans": ["god, you need a god too."], "note": "lives almost entirely in the last line — nowhere else in the poem, care extended outward after nineteen lines of guardedness" },
-      "clarity":          { "type": "phrase", "spans": ["how hurt you gotta be to wanna transform?"], "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it" },
-      "self-acceptance":  { "type": "none", "note": "not part of the close read given — the poem stays in guardedness/self-concealment throughout, no resolution into acceptance" }
+      "self-concealment": {
+        "type": "lines",
+        "spans": [
+          "all that i don't give you",
+          "i don't give you because it asks you to reveal yourself",
+          "pull me out of the rug i hide under,"
+        ],
+        "note": "withholding as the poem's entire opening mechanism"
+      },
+      "vulnerability": {
+        "type": "lines",
+        "spans": [
+          "could you comprehend something so raw?",
+          "and if you look at me i'll be forged,",
+          "turned into a weapon, wielded in your will,"
+        ],
+        "note": "being seen as danger, not relief"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i doubt you could.",
+          "could your eyes realize",
+          "is it because past is the source of sorrow?",
+          "how hurt you gotta be to wanna transform?"
+        ],
+        "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking"
+      },
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "i like you better when you're not here.",
+          "i don't even question if they reach you"
+        ],
+        "note": "closeness maintained specifically through distance"
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "its eternal beam would cut straight through the maze,",
+          "the sand dunes are the collective power of yesterday,",
+          "sun's rays gets here every day yes, but it has been so since yesterday"
+        ],
+        "note": "the poem's one stretch of pure metaphysics, unattached to the you"
+      },
+      "wordplay": {
+        "type": "phrase",
+        "spans": [
+          "eye sees something unbeaten in i?"
+        ],
+        "note": "eye/I doing double work — \"eye sees\" reads straight through as \"I see\""
+      },
+      "mortality": {
+        "type": "phrase",
+        "spans": [
+          "how hurt you gotta be to wanna transform?"
+        ],
+        "note": "loosely — transformation read as evidence of damage rather than growth"
+      },
+      "devotion": {
+        "type": "line",
+        "spans": [
+          "god, you need a god too."
+        ],
+        "note": "lives almost entirely in the last line — nowhere else in the poem, care extended outward after nineteen lines of guardedness"
+      },
+      "clarity": {
+        "type": "phrase",
+        "spans": [
+          "how hurt you gotta be to wanna transform?"
+        ],
+        "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it"
+      },
+      "self-acceptance": {
+        "type": "none",
+        "note": "not part of the close read given — the poem stays in guardedness/self-concealment throughout, no resolution into acceptance"
+      }
     }
   },
   {
     "slug": "eye-moved-on-i-kept-dreaming",
     "date": "2026-08-25",
     "tags": {
-      "highlighted": { "type": "lines", "spans": ["i don't remember my past, i dream it", "every night, occurrences reoccurring,", "for a moment, past becoming present,", "the residue becoming golden.", "my hair, if sun wouldn't left, i know it would too", "cause it gets there, as sun kisses it", "but it leaves, like many things", "i wonder, how do i sound? does it traverse from belly up?", "how do i sound to myself?", "blood always bleeds red,", "orange met blue, then it became brown", "then for a while eye saw nothing, i asked for nothing", "what i needed wasn't down here, or up there", "all i needed was the absence of the thing i required", "what it'd give, in a breath,", "it did, it was green."] }
+      "highlighted": {
+        "type": "lines",
+        "spans": [
+          "i don't remember my past, i dream it",
+          "every night, occurrences reoccurring,",
+          "for a moment, past becoming present,",
+          "the residue becoming golden.",
+          "my hair, if sun wouldn't left, i know it would too",
+          "cause it gets there, as sun kisses it",
+          "but it leaves, like many things",
+          "i wonder, how do i sound? does it traverse from belly up?",
+          "how do i sound to myself?",
+          "blood always bleeds red,",
+          "orange met blue, then it became brown",
+          "then for a while eye saw nothing, i asked for nothing",
+          "what i needed wasn't down here, or up there",
+          "all i needed was the absence of the thing i required",
+          "what it'd give, in a breath,",
+          "it did, it was green."
+        ]
+      }
     }
   },
   {
     "slug": "everyting-in-life-is-eggsactly-the-same",
     "date": "2026-08-27",
     "tags": {
-      "highlighted": { "type": "lines", "spans": ["there are known knowns and known unknowns\nand unknown knowns and unknown unknowns", "one is all, everything in life is eggsactly the same", "one is all", "same exact breath, anew,\nbringing something new.", "new gets old, old gets new,", "same old story, same old story."] }
+      "highlighted": {
+        "type": "lines",
+        "spans": [
+          "there are known knowns and known unknowns\nand unknown knowns and unknown unknowns",
+          "one is all, everything in life is eggsactly the same",
+          "one is all",
+          "same exact breath, anew,\nbringing something new.",
+          "new gets old, old gets new,",
+          "same old story, same old story."
+        ]
+      }
     }
   },
   {
     "slug": "the-dictator",
     "date": "2026-08-28",
     "tags": {
-      "existence":  { "type": "lines", "spans": ["movements of the stars result us to do what we do", "the path to stars, lies through the stars,\nstarting point's also the stars,"], "note": "the poem's cosmological frame — origin, route, and destination collapsed into one term" },
-      "doubt":      { "type": "lines", "spans": ["it's a futile attempt to, try to figure,", "if we known our history, would we know our future?"], "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work" },
-      "control":    { "type": "lines", "spans": ["what you require is pre-dictated,\nwhat requires it is pre-formed,\nwhy you require it is because it's pre-owned."], "note": "the closing triple — agency removed at three levels: object, subject, motive. the tag's clearest carrier" },
-      "god":        { "type": "phrase", "spans": ["the dictator", "pre-owned"], "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating" },
-      "defiance":   { "type": "lines", "spans": ["is it in a star's nature to rebel?\nonly when you defend, against those that try to make you forget,"], "note": "rebellion redefined as defense of origin rather than as attack" },
-      "truth":      { "type": "line", "spans": ["there is nothing to know, nothing to predict,"], "note": "the poem's flat refusal, arriving after the question about history and future" },
-      "time":       { "type": "line", "spans": ["if we known our history, would we know our future?"], "note": "past and future held against each other, both dismissed in the following line" },
-      "wordplay":   { "type": "phrase", "spans": ["pre-dictated"], "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work" },
-      "lineage":    { "type": "lines", "spans": ["where you come from, isn't a debt,", "those that try to make you forget,"], "note": "origin as constitution rather than obligation — the thing being defended" },
-      "exhaustion": { "type": "phrase", "spans": ["it's a futile attempt to, try to figure,"], "note": "weary before it starts; the effort named as futile in the third line rather than discovered to be futile later" }
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "movements of the stars result us to do what we do",
+          "the path to stars, lies through the stars,\nstarting point's also the stars,"
+        ],
+        "note": "the poem's cosmological frame — origin, route, and destination collapsed into one term"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "it's a futile attempt to, try to figure,",
+          "if we known our history, would we know our future?"
+        ],
+        "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work"
+      },
+      "control": {
+        "type": "lines",
+        "spans": [
+          "what you require is pre-dictated,\nwhat requires it is pre-formed,\nwhy you require it is because it's pre-owned."
+        ],
+        "note": "the closing triple — agency removed at three levels: object, subject, motive. the tag's clearest carrier"
+      },
+      "god": {
+        "type": "phrase",
+        "spans": [
+          "the dictator",
+          "pre-owned"
+        ],
+        "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating"
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "is it in a star's nature to rebel?\nonly when you defend, against those that try to make you forget,"
+        ],
+        "note": "rebellion redefined as defense of origin rather than as attack"
+      },
+      "truth": {
+        "type": "line",
+        "spans": [
+          "there is nothing to know, nothing to predict,"
+        ],
+        "note": "the poem's flat refusal, arriving after the question about history and future"
+      },
+      "time": {
+        "type": "line",
+        "spans": [
+          "if we known our history, would we know our future?"
+        ],
+        "note": "past and future held against each other, both dismissed in the following line"
+      },
+      "wordplay": {
+        "type": "phrase",
+        "spans": [
+          "pre-dictated"
+        ],
+        "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work"
+      },
+      "lineage": {
+        "type": "lines",
+        "spans": [
+          "where you come from, isn't a debt,",
+          "those that try to make you forget,"
+        ],
+        "note": "origin as constitution rather than obligation — the thing being defended"
+      },
+      "exhaustion": {
+        "type": "phrase",
+        "spans": [
+          "it's a futile attempt to, try to figure,"
+        ],
+        "note": "weary before it starts; the effort named as futile in the third line rather than discovered to be futile later"
+      }
+    }
+  },
+  {
+    "slug": "ad-after-christ",
+    "date": "2025-05-24",
+    "tags": {
+      "the writing self": {
+        "type": "line",
+        "spans": [
+          "from this day forward ill be employing new ways to write."
+        ],
+        "note": "the entire piece is a two-line announcement about method — the tag is the poem, not a thread inside it"
+      }
+    }
+  },
+  {
+    "slug": "500-miles-to-mordor",
+    "date": "2026-04-28",
+    "tags": {
+      "defiance": {
+        "type": "phrase",
+        "spans": [
+          "sniff sniff i beg to differ,"
+        ],
+        "note": "the poem's only act of resistance is against its own opening claim — defiance turned inward, not outward at a target"
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "is this body of use laid on the floor",
+          "i walked 500 miles to mordor"
+        ]
+      },
+      "body": {
+        "type": "line",
+        "spans": [
+          "is this body of use laid on the floor"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "abandonment-of-meaning-in-favor-of-presence",
+    "date": "2026-05-29",
+    "tags": {
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "i just wanna feel you",
+          "baby don't do anything, please don't do anything"
+        ],
+        "note": "presence defined by subtraction — the poem asks for the removal of explanation, words, and understanding until only being-there is left"
+      }
+    }
+  },
+  {
+    "slug": "ab-come-alive",
+    "date": "2026-06-09",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "Ab is intangible and i expect her to come alive",
+          "Ab come on come alive"
+        ],
+        "note": "the repeated line is the longing — three identical repetitions, each one failing to produce the animation it asks for"
+      }
+    }
+  },
+  {
+    "slug": "a-mind-so-thinned-it-cant-reconstruct-the-abundance-it-once-had",
+    "date": "2026-06-11",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "you ask their name, they're nameless",
+          "they do not ask about your name",
+          "and after a while you forget your name"
+        ],
+        "note": "identity dissolving in three steps — the other has no name, does not ask for yours, and the forgetting follows"
+      }
+    }
+  },
+  {
+    "slug": "6-days-to-sunday",
+    "date": "2026-07-20",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "stranger to my body,",
+          "strange ways lead to my body,"
+        ]
+      },
+      "identity": {
+        "type": "line",
+        "spans": [
+          "but today i fail to recognize myself"
+        ]
+      },
+      "doubt": {
+        "type": "line",
+        "spans": [
+          "and the snow, how does snow feel?"
+        ],
+        "note": "the poem's only question, and it's asked of weather rather than of the self — doubt displaced onto something that can't answer"
+      },
+      "self-erosion": {
+        "type": "lines",
+        "spans": [
+          "the needle grinds at the vinyl,",
+          "hole grows wider,",
+          "senses go lighter,"
+        ]
+      },
+      "the writing self": {
+        "type": "line",
+        "spans": [
+          "dear paper i've been far from you and close to myself"
+        ],
+        "note": "the poem addresses the page directly as an estranged correspondent"
+      },
+      "god": {
+        "type": "none",
+        "note": "the six-days-to-sunday frame implies Genesis and a deferred rest, but the poem never names god or approaches worship — the reference is structural, not textual"
+      },
+      "faith": {
+        "type": "none",
+        "note": "same as god above — the sabbath structure is there in the title's arithmetic, but nothing in the body carries belief or its absence"
+      }
+    }
+  },
+  {
+    "slug": "a-poem-talking-about-talking-about-myself-talks-about-myself",
+    "date": "2026-07-27",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "sure, let's talk about how i feel",
+          "since i'm the one that's writing it should be about me",
+          "but posting what i write makes it hard for me",
+          "to say what i feel, without dressing it up in something pretty"
+        ]
+      },
+      "identity": {
+        "type": "line",
+        "spans": [
+          "i want the world to look at what i made, not at what i'm made of"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "some jerk jerked around,",
+          "fated? \nfaded."
+        ],
+        "note": "second span is the poem's final two lines — one letter apart, question answered by near-repetition"
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "me, who gives a shit about me?",
+          "why should anyone?"
+        ]
+      },
+      "self-loathing": {
+        "type": "lines",
+        "spans": [
+          "me, who gives a shit about me?",
+          "why should anyone?"
+        ],
+        "note": "same span as exhaustion — the two are not separable here; the fatigue and the contempt arrive in one gesture"
+      },
+      "grief": {
+        "type": "lines",
+        "spans": [
+          "tell me sis, we were like twins",
+          "when did we fall out?",
+          "stuff with our mother,",
+          "you held it down,",
+          "i flown."
+        ]
+      }
+    }
+  },
+  {
+    "slug": "42-weeks",
+    "date": "2026-07-30",
+    "tags": {
+      "consciousness": {
+        "type": "lines",
+        "spans": [
+          "at first colors were,",
+          "at first there wasn't a thing as such,"
+        ],
+        "note": "perception preceding the categories that would organize it"
+      },
+      "wonder": {
+        "type": "line",
+        "spans": [
+          "today i can envision purple."
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "yellow, yell oh,",
+          "green, lean in,",
+          "blue, there is a chance you blew,",
+          "purple, portal,"
+        ],
+        "note": "each colour split open to release a word hiding inside its own sound"
+      },
+      "existence": {
+        "type": "line",
+        "spans": [
+          "i've been transcending my humanity for 3 and a half years,"
+        ]
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "is there a point in, articulating what can't be summed up?",
+          "speech dishonors some parts."
+        ],
+        "note": "clarity arriving as a limit on speech rather than as a claim about what's seen"
+      }
+    }
+  },
+  {
+    "slug": "a-barrier-is-necessary",
+    "date": "2025-02-22",
+    "tags": {
+      "guilt": {
+        "type": "lines",
+        "spans": [
+          "i\n\nsorry i am mother\n\nfor bringing destruction to your creation\n\nto build mine",
+          "im sorry for\n\nkilling you mom\n\ni just wanted\n\nmore flowers"
+        ],
+        "note": "the apology repeats eight times across the poem with a different charge each time; these two are the ones where the guilt is stated as damage done rather than as inadequacy"
+      }
+    }
+  },
+  {
+    "slug": "a-passerby-passes-by",
+    "date": "2025-05-17",
+    "tags": {
+      "impermanence": {
+        "type": "line",
+        "spans": [
+          "a passerby passes by a wind blowing by"
+        ],
+        "note": "three passings in one line — person, wind, and the act itself — with no object staying in place"
+      }
+    }
+  },
+  {
+    "slug": "a-shrinking-star",
+    "date": "2025-02-22",
+    "tags": {
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "my head can’t even carry my shoulders",
+          "the weary shoulders carrying this weary head",
+          "this weary shoulders carrying this baggage"
+        ]
+      },
+      "body": {
+        "type": "lines",
+        "spans": [
+          "how can my heart beat",
+          "how can it not get squeezed",
+          "how can it not get caged",
+          "in my rib cage"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "a-veil-unveiled",
+    "date": "2025-07-06",
+    "tags": {
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "i dare\nsee the spots on my face",
+          "i dare not to be\nbut to stay\nwhat i have always was"
+        ],
+        "note": "acceptance framed as daring rather than as ease — and as staying rather than becoming"
+      }
+    }
+  },
+  {
+    "slug": "aesops-fables",
+    "date": "2025-02-22",
+    "tags": {
+      "clarity": {
+        "type": "line",
+        "spans": [
+          "is it conceivable when clarity clears the whole table"
+        ],
+        "note": "clarity named directly, but as a question about whether it's survivable — clearing the table means losing what was on it"
+      }
+    }
+  },
+  {
+    "slug": "am-i-supposed-to",
+    "date": "2025-05-23",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "am i supposed to think before and write after",
+          "i right as wrongs surface",
+          "could i still right then?"
+        ],
+        "note": "right/write held unresolved across three lines — the method question and the pun are the same question"
+      }
+    }
+  },
+  {
+    "slug": "and-piss-on-their-corpse",
+    "date": "2025-07-04",
+    "tags": {
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "i will break their fountain when no one is there",
+          "i will unscrew their water god",
+          "drain their worship into earth"
+        ],
+        "note": "defiance stated as future-tense plan, and performed alone — the first line specifies that no one will be watching"
+      }
+    }
+  },
+  {
+    "slug": "angels-swing-their-feet-off-my-collar-bone",
+    "date": "2025-02-21",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "im not lord's humble servant reporting to it\n\nthe lord ain't even a lord",
+          "i boxed god\n\nwe love each other\n\ni recognize him\n\nhe recognizes me"
+        ],
+        "note": "three distinct positions in one poem — refusing the hierarchy, relocating god from there to here, and then mutual recognition with no hierarchy left to refuse"
+      },
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i have something to say which is i’ve nothing to say",
+          "everything stops when i get to writing",
+          "this task i was tasked with"
+        ]
+      },
+      "consciousness": {
+        "type": "lines",
+        "spans": [
+          "and i gain consciousness",
+          "just because now that you can feel\n\ndoesn't mean it wasn't there"
+        ],
+        "note": "second span is the poem's sharpest claim — feeling something arrive is not the same as it having arrived"
+      }
+    }
+  },
+  {
+    "slug": "answer-seeking-stops",
+    "date": "2025-02-22",
+    "tags": {
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "all i learn teach me how little i know",
+          "i like existing\n\nnot knowing\n\nbelieving"
+        ]
+      },
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "and i believe",
+          "i believe in the pretty things",
+          "i feel in my core i made it rain\n\nand i believe i made it rain"
+        ],
+        "note": "belief here does no metaphysical work — it's a stance toward the pretty and the unverifiable, chosen rather than argued"
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "why existence is definable\n\nbut why\n\nexistence is\n\nnot",
+          "if what i believe turns out to be the truth\n\nam i not the existence?"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "cough",
+    "date": "2025-08-14",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "see myself lurking behind what matters",
+          "these lost feathers"
+        ],
+        "note": "the self positioned behind rather than within what's important — visible only as something lurking"
+      }
+    }
+  },
+  {
+    "slug": "dual-monochrome",
+    "date": "2025-09-21",
+    "tags": {
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "everything so dark and so light at the same time",
+          "my eye catches the eye i was made from"
+        ],
+        "note": "second line is the poem's whole event — the seeing catching sight of its own origin, stated once and not pursued"
+      }
+    }
+  },
+  {
+    "slug": "god-im-so-magnetic",
+    "date": "2026-03-01",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "self, you do not exist",
+          "we are what we’re around\nwe are what’s around us\nbut i’ll remain \nstatic"
+        ],
+        "note": "the self denied and then immediately claimed as static in four lines — the contradiction is the tag's carrier, not either half alone"
+      }
+    }
+  },
+  {
+    "slug": "ars-poetica-1",
+    "date": "2026-05-29",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "is it the purpose of the writing or the purpose of the reading",
+          "i don't like the writer that i am",
+          "i enjoy writing more than reading,\ni refuse the rhymes of reading."
+        ],
+        "note": "the last span refuses rhyme while rhyming reading with reading — the refusal executed through the form refused"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "why do i have to stick to my opening statement for it to be coherent",
+          "why do i feel different when the sun disappears"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "asked-to-step-forward",
+    "date": "2025-05-19",
+    "tags": {
+      "longing": {
+        "type": "line",
+        "spans": [
+          "nerede benim yurdum"
+        ],
+        "note": "the poem's only line in Turkish and its only plain statement — where is my homeland — arriving after four lines of invented or broken words"
+      }
+    }
+  },
+  {
+    "slug": "being-a-polarizing-person-and-my-experience-around-it",
+    "date": "2026-03-05",
+    "tags": {
+      "defiance": {
+        "type": "line",
+        "spans": [
+          "simple is threatening to people who've built complicated lives around avoiding it"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "big-jet-plane",
+    "date": "2026-05-29",
+    "tags": {
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "i'll never tire to explain",
+          "if all goes i will remain"
+        ],
+        "note": "devotion as endurance rather than as feeling — what remains after everything else goes"
+      }
+    }
+  },
+  {
+    "slug": "back-to-back",
+    "date": "2026-06-01",
+    "tags": {
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "i go hard put me on a test",
+          "running laps around these fools while they nap",
+          "i'm the hardest one coming ass fat,"
+        ]
+      },
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "sex in the city and that's that",
+          "her breast, i protest"
+        ]
+      },
+      "release": {
+        "type": "lines",
+        "spans": [
+          "cried a lot during the journey now feeling nice",
+          "the ride held the tears, city does the rest"
+        ],
+        "note": "the poem's only quiet lines, at the top, before the bravado starts — release happens first and the swagger is what follows it"
+      }
+    }
+  },
+  {
+    "slug": "being-denied-home-by-my-own-lungs",
+    "date": "2026-06-05",
+    "tags": {
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "was extremely good at drowning\nyet i could never die",
+          "yet i, at my final breath",
+          "read the words i'll engrave on my tomb",
+          "instruct my loved ones of the process after my passing,"
+        ]
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "still my mother's lamb",
+          "find my home back to her womb,"
+        ],
+        "note": "the title's denial of home answered here — the home being reached for is prenatal, which is the one that can't be returned to"
+      }
+    }
+  },
+  {
+    "slug": "be-in-the-same-space",
+    "date": "2026-07-04",
+    "tags": {
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "be in the same space",
+          "DISREGARD MOST OF I SAID EXCEPT THE LAST SENTENCE\nBE\nIN THE SAME\nSPACE"
+        ],
+        "note": "the poem retracts its own instruction and keeps only the physical one — and then breaks it across four lines so it takes longer to read than the advice it replaced"
+      },
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "love requires commitment.",
+          "if you want a chance at being loved first you have to love",
+          "stay awake learn about the other person"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "bipolar-isnt-bipolar",
+    "date": "2025-03-23",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "bipolar isn’t bipolar",
+          "being bipolar in one polar is bipolar"
+        ],
+        "note": "the whole piece is the pun — bipolar as clinical term against bipolar as literally two-poled, and the joke is that having only one pole still qualifies"
+      }
+    }
+  },
+  {
+    "slug": "blimp-blimp",
+    "date": "2025-05-30",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "staring at a blank page but there is a pulse",
+          "my god is paper"
+        ],
+        "note": "the page as the site of divinity rather than of labour — the writing self here is a worshipper, not a worker"
+      }
+    }
+  },
+  {
+    "slug": "bohemian-whereabouts-and-sick-of-atv-sounds",
+    "date": "2025-08-09",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "is writing really just explaining shit",
+          "they did not write to explain you shit",
+          "they wrote to find the questions that needed asking",
+          "me on the other hand i know the questions",
+          "and yet i'm still talking"
+        ],
+        "note": "the poem argues writing should find questions, claims to already have them, and then indicts itself for continuing anyway — the last line is the verdict on the four above it"
+      }
+    }
+  },
+  {
+    "slug": "boo",
+    "date": "2025-12-13",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i am writing",
+          "so that means i am writing about something",
+          "though i don't know what i'm writing about, i'm still writing about something"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "bread-crumbs",
+    "date": "2025-12-21",
+    "tags": {
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "with this conflict we're at the limit",
+          "isreal and palestine the sign is at my spine"
+        ],
+        "note": "the poem moves from a body's fullness to a named political conflict located physically in the speaker's spine"
+      }
+    }
+  },
+  {
+    "slug": "broken-in-my-failure",
+    "date": "2025-02-22",
+    "tags": {
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "im tired of thinking",
+          "tired of observing",
+          "tired of figuring out",
+          "gosh why is there so much to figure out",
+          "why as i figure out i realize i haven’t figured out"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "can-poetry-ever-be-a-sung-song",
+    "date": "2025-07-08",
+    "tags": {
+      "yearning": {
+        "type": "lines",
+        "spans": [
+          "these hands lost in a time before all the times",
+          "before i was made to be",
+          "what i was meant to be,"
+        ],
+        "note": "yearning aimed backward past origin — toward a time before the speaker was assigned a purpose"
+      },
+      "god": {
+        "type": "lines",
+        "spans": [
+          "god drank from me",
+          "i plead when i found he was pleased with me"
+        ],
+        "note": "the direction is inverted — god consuming the speaker rather than receiving offering, and being pleased is what prompts the plea"
+      }
+    }
+  },
+  {
+    "slug": "creating-is-not-creating",
+    "date": "2025-02-21",
+    "tags": {
+      "creative block": {
+        "type": "lines",
+        "spans": [
+          "creating is not creating anymore it’s destruction to fill my black hole caused by my",
+          "inability to create"
+        ],
+        "note": "quoted as two lines because the source wraps mid-sentence"
+      },
+      "exhaustion": {
+        "type": "line",
+        "spans": [
+          "i just want to create and im so fucking tired of not being able to"
+        ]
+      },
+      "self-loathing": {
+        "type": "line",
+        "spans": [
+          "shut the fuck up"
+        ],
+        "note": "the poem's final line, addressed to itself — three words that end the complaint by silencing the complainer"
+      }
+    }
+  },
+  {
+    "slug": "disregard-everything-that-comes-out-of-my-mouth",
+    "date": "2025-06-23",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "poetry is not it anymore",
+          "poetry is not written",
+          "it's lived and i live pretty poetically",
+          "written poetry is for those with things to say with no way to say it",
+          "and i guess i have a way to say them now"
+        ],
+        "note": "the poem renounces written poetry while being one — and signs off with 'goodbye', which it did not honour"
+      }
+    }
+  },
+  {
+    "slug": "hi-paper",
+    "date": "2026-02-27",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "but i used to sit at the typewriter and bleed",
+          "i no longer do that",
+          "i don’t poke at myself for fun anymore",
+          "see paper",
+          "even when i don’t bleed",
+          "i can speak"
+        ],
+        "note": "a method change reported to the page directly — bleeding replaced by speaking, framed as improvement rather than loss"
+      }
+    }
+  },
+  {
+    "slug": "fighter-all-nighter",
+    "date": "2026-03-29",
+    "tags": {
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "do i need now to make my case and show you how that's the case",
+          "fuck that i'm an angry writer"
+        ],
+        "note": "defiance aimed at the obligation to argue — the poem refuses to defend the claim it just made"
+      },
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "fuck that i'm an angry writer",
+          "righter rider",
+          "fighter all nighter"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "faith-in-ill-succeed",
+    "date": "2026-05-13",
+    "tags": {
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "my record on the track proves i won't crack",
+          "and even if i do not every crack is bad",
+          "diamonds are black, cut me some slack"
+        ]
+      },
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "faith in i'll succeed",
+          "i will return from that"
+        ],
+        "note": "faith placed in an outcome rather than in a being — the title states it and the last line restates it as certainty of return"
+      }
+    }
+  },
+  {
+    "slug": "dont-be-too-attached-to-things",
+    "date": "2026-06-01",
+    "tags": {
+      "letting go": {
+        "type": "lines",
+        "spans": [
+          "don't be too attached to things",
+          "give your most valuable away if you want a piece of the most valuable",
+          "getting, or letting go?"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "fuck-what-you-heard",
+    "date": "2026-06-03",
+    "tags": {
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "NAH FUCK THAT READER I'D BE HAUNTED IF I WAS A GENERIC ASS NOT HAVING MADE PEACE WITH WHO I AM AND WHAT I'VE DONE PERSON BUT THAT AIN'T ME",
+          "THAT AIN'T ME",
+          "MY SILENCES ARE VERY SILENT"
+        ],
+        "note": "acceptance stated at maximum volume, as a rebuttal to an imagined accusation the reader never made"
+      }
+    }
+  },
+  {
+    "slug": "every-winter-i-gaze",
+    "date": "2026-06-10",
+    "tags": {
+      "endurance": {
+        "type": "lines",
+        "spans": [
+          "but you know winter is promised.",
+          "summer seems impossible,",
+          "everything is cold and bleak,",
+          "summer warms so winter doesn't kill"
+        ],
+        "note": "the last line reframes the whole cycle — warmth stored as survival rather than enjoyed as reward"
+      }
+    }
+  },
+  {
+    "slug": "do-i-really-need-a-title-how-many-titles-mentioning-titles-how-many-titles-fucking-your-dad-that-ugly-fuck-would-dream-of-that",
+    "date": "2026-08-03",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "THIS, THAT? PROLLY WHAT GOD FELT.",
+          "OR WHAT IT ENTAILS, ON THE CROSS HOLDIN THE NAILS,",
+          "JUDAS TELLIN EM WHERE IT IS,"
+        ],
+        "note": "the crucifixion entered from the wrong side — holding the nails rather than receiving them"
+      },
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "YOU KNOW WHAT, IM LIKE THAT.",
+          "ON BLAST, FUCK YOUR DAD,",
+          "ROLLIN IN RICK'S, BROKE ASS BITCH DON'T KNOW WHAT IT MEANS,"
+        ]
+      },
+      "blasphemy": {
+        "type": "lines",
+        "spans": [
+          "THIS, THAT? PROLLY WHAT GOD FELT.",
+          "ON THE CROSS HOLDIN THE NAILS,"
+        ],
+        "note": "same material as the god tag, but the blasphemy is specifically in the equivalence — a good mood compared to divine feeling, stated casually"
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "NAH FUCK THAT.",
+          "MAN I SHOULDN'T POST THIS."
+        ],
+        "note": "the last line is defiance aimed at the poem's own publication — knowing better and doing it anyway"
+      }
+    }
+  },
+  {
+    "slug": "dont-be-so-hard-on-yourself",
+    "date": "2025-02-21",
+    "tags": {
+      "self-loathing": {
+        "type": "lines",
+        "spans": [
+          "don’t be so hard on yourself",
+          "someone gotta be"
+        ],
+        "note": "two lines, and the second one accepts the job the first tried to decline"
+      }
+    }
+  },
+  {
+    "slug": "fuck-you-no-title",
+    "date": "2026-07-29",
+    "tags": {
+      "work": {
+        "type": "line",
+        "spans": [
+          "work is hard"
+        ],
+        "note": "the poem's opening line and the only one naming labour — everything after it extends the same predicate to non-work activity"
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "sleeping is hard",
+          "waking up is hard",
+          "eating is hard",
+          "everything is hard"
+        ]
+      },
+      "sadness": {
+        "type": "none",
+        "note": "the flatness is the poem's whole method and sadness is what a reader supplies — nothing in the text names or performs it, which is why the flatness works"
+      },
+      "endurance": {
+        "type": "lines",
+        "spans": [
+          "staying is hard",
+          "everything is hard"
+        ]
+      },
+      "numbness": {
+        "type": "lines",
+        "spans": [
+          "i'm not",
+          "things are hard",
+          "i'm not"
+        ],
+        "note": "the repeated 'i'm not' answers 'hard' — the speaker isn't hard, isn't difficult, and by implication isn't much of anything"
+      },
+      "self-loathing": {
+        "type": "lines",
+        "spans": [
+          "she managed to punch it",
+          "i couldn't",
+          "that was hard"
+        ],
+        "note": "the only concrete incident in the poem, placed at the end, and the failure is measured against a sibling"
+      },
+      "conflict": {
+        "type": "none",
+        "note": "the family trip and the sister appear, but nothing in the text stages a conflict — the punching machine is a private failure, not an argument"
+      }
+    }
+  },
+  {
+    "slug": "fine-ill-continue",
+    "date": "2025-03-02",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "yeah writing without knowing showed me such accident occurred",
+          "now i gotta go clean up"
+        ],
+        "note": "writing framed as an accident site the writer is responsible for clearing"
+      }
+    }
+  },
+  {
+    "slug": "folquenesch-1",
+    "date": "2025-04-08",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "I too am far too gone to make myself whatever use I shall be used of me",
+          "where languages don’t speak"
+        ],
+        "note": "the only two lines that turn from the invented word back onto the speaker — the rest of the poem interrogates folquenesch itself"
+      }
+    }
+  },
+  {
+    "slug": "for-a-overlooker-to-see",
+    "date": "2025-02-21",
+    "tags": {
+      "letting go": {
+        "type": "lines",
+        "spans": [
+          "all i need is nothing",
+          "i came with no thing",
+          "i’ll go with no thing",
+          "and i love no thing"
+        ],
+        "note": "'nothing' split into 'no thing' throughout, which turns absence into a specific object that can be arrived with, departed with, and loved"
+      }
+    }
+  },
+  {
+    "slug": "fuck-all-yall",
+    "date": "2025-05-28",
+    "tags": {
+      "contempt": {
+        "type": "line",
+        "spans": [
+          "fuck all y'all!"
+        ],
+        "note": "the entire piece"
+      },
+      "defiance": {
+        "type": "none",
+        "note": "contempt above carries the whole line; there's no second gesture here for defiance to anchor to separately"
+      }
+    }
+  },
+  {
+    "slug": "fucking-tourists",
+    "date": "2025-06-07",
+    "tags": {
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "fucking tourists",
+          "i'm fucking tourists"
+        ],
+        "note": "the second line converts the first from complaint to activity — same two words, adjective becoming verb, and the contempt survives the flip"
+      }
+    }
+  },
+  {
+    "slug": "god-is-the-devil",
+    "date": "2025-02-22",
+    "tags": {
+      "guilt": {
+        "type": "lines",
+        "spans": [
+          "tell him i’m sorry",
+          "i am sorry for diluting his precious blood",
+          "i am sorry for transforming",
+          "i am sorry for the change i had brought to the world",
+          "i am sorry for wanting to give back"
+        ],
+        "note": "the apology repeats fourteen times; these are the ones where the speaker apologises for his own acts rather than on god's behalf"
+      },
+      "god": {
+        "type": "lines",
+        "spans": [
+          "or was i never the son of god",
+          "i am sorry for worshipping you",
+          "when you are",
+          "the denounced"
+        ]
+      },
+      "blasphemy": {
+        "type": "lines",
+        "spans": [
+          "i am sorry for",
+          "seeing how little he is",
+          "i am sorry for you making us",
+          "just so you can find comfort",
+          "in your pain",
+          "knowing we all suffer"
+        ],
+        "note": "the blasphemy is structural — the apology form kept intact while its content accuses god of smallness and of manufacturing suffering for company"
+      }
+    }
+  },
+  {
+    "slug": "have-you-ever",
+    "date": "2025-05-09",
+    "tags": {
+      "yearning": {
+        "type": "lines",
+        "spans": [
+          "sit long enough",
+          "have you ever walked the ether",
+          "have you ever thanked a trash bin",
+          "have you ever kissed the sun",
+          "have you ever lived"
+        ],
+        "note": "both repeated phrases carry it — 'sit long enough' eleven times as instruction, 'have you ever lived' six times as accusation"
+      }
+    }
+  },
+  {
+    "slug": "hi-paper-lie-paper",
+    "date": "2026-03-01",
+    "tags": {
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "but isn’t someone else’s lie someone else’s truth",
+          "lies are another truth?"
+        ]
+      },
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "hi paper",
+          "lie paper",
+          "let me hear some words of untruth coming out of your mouth, bleed out of your vein,"
+        ],
+        "note": "the page addressed as a collaborator in lying, one letter away from the greeting"
+      }
+    }
+  },
+  {
+    "slug": "heart-and-mind-are-cross-and-jesus-is-the-eye",
+    "date": "2025-03-01",
+    "tags": {
+      "devotion": {
+        "type": "line",
+        "spans": [
+          "i’m meditating on my eyes"
+        ],
+        "note": "the title does the theological work — heart and mind as the cross, Jesus as the eye — while the body reports only the practice, then excuses itself"
+      }
+    }
+  },
+  {
+    "slug": "heed-see-savor",
+    "date": "2025-07-09",
+    "tags": {
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "you won't be forever young",
+          "know that you are a goner",
+          "savor it all 'fore it all fade"
+        ]
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "i keep digging when i done digged",
+          "i keep fixing when i done fixed",
+          "i keep licking the sword that stabs me"
+        ],
+        "note": "three lines of continuing past the point of completion — the third turns the pattern from futile to self-harming"
+      }
+    }
+  },
+  {
+    "slug": "hi",
+    "date": "2025-02-21",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "fucking purely is my religion",
+          "i don’t feel pure if i don’t fuck",
+          "i need to fuck 36 hours a day",
+          "i need everyone to see",
+          "how pure i fuck"
+        ],
+        "note": "desire framed entirely as purification and as spectacle — needing to be seen doing it is inseparable from the doing"
+      },
+      "god": {
+        "type": "lines",
+        "spans": [
+          "god only listens",
+          "he doesn’t hear and",
+          "then find out you're fucking god",
+          "well i got the realer god",
+          "sun",
+          "fuck father"
+        ],
+        "note": "the poem swaps gods mid-way — the one who listens without hearing is replaced by the sun, and the last two words dismiss the first"
+      }
+    }
+  },
+  {
+    "slug": "how-i-feel-in-turkish",
+    "date": "2025-02-24",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "size karsi",
+          "ozlem icerisindeyim.",
+          "her seye karsi ozlem icerisindeyim."
+        ],
+        "note": "özlem — longing/missing — stated twice, first toward specific people and then extended to everything"
+      },
+      "devotion": {
+        "type": "line",
+        "spans": [
+          "daha da sevdikce daha da iyi olacagim."
+        ],
+        "note": "the answer the whole piece was searching for, arrived at while dancing — the more I love the better I'll be"
+      }
+    }
+  },
+  {
+    "slug": "hr-girlfriend",
+    "date": "2025-05-28",
+    "tags": {
+      "sensual": {
+        "type": "lines",
+        "spans": [
+          "we were the most sensual",
+          "reading your mails was better than us fucking"
+        ],
+        "note": "the sensuality located in correspondence rather than in the body — and rated explicitly above it"
+      }
+    }
+  },
+  {
+    "slug": "i-am-going-to-shout-now",
+    "date": "2025-02-25",
+    "tags": {
+      "defiance": {
+        "type": "line",
+        "spans": [
+          "fuck you you don’t know me"
+        ]
+      },
+      "identity": {
+        "type": "line",
+        "spans": [
+          "i write like lynch draws"
+        ],
+        "note": "the whole self-definition is one comparison, offered immediately after refusing to be known"
+      }
+    }
+  },
+  {
+    "slug": "i-am-not-a-writer",
+    "date": "2025-08-26",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i am not a writer and this is not a prologue to my i am not a writer i am a righter rant",
+          "a reader reads with an empty mind",
+          "anyways i am not a writer and i dont want to be a writer"
+        ],
+        "note": "the denial opens and closes the piece, and the middle is a writer's argument about how readers work"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "you need to know something exists and then not believe it",
+          "ignorance isnt anything",
+          "its just ignorance"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-broke-the-rule",
+    "date": "2026-05-05",
+    "tags": {
+      "guilt": {
+        "type": "lines",
+        "spans": [
+          "i broke the rule",
+          "i can't speak of what was done"
+        ],
+        "note": "guilt sealed rather than confessed — the poem names that something happened and immediately forbids itself the content"
+      },
+      "god": {
+        "type": "lines",
+        "spans": [
+          "god won't forgive me if it's a repeating",
+          "thing and not one"
+        ],
+        "note": "forgiveness made conditional on frequency rather than severity — quoted across two lines as the source breaks mid-phrase"
+      }
+    }
+  },
+  {
+    "slug": "i-broke-eye-saw-i-broke-aye-aye",
+    "date": "2026-07-31",
+    "tags": {
+      "self-erosion": {
+        "type": "lines",
+        "spans": [
+          "a broken rock, shell and mineral,",
+          "actively breaking for millions of years."
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "you don't call them by their name, before they broke,",
+          "you call them sand."
+        ],
+        "note": "identity as what survives naming — the original name doesn't apply once the breaking is total"
+      },
+      "impermanence": {
+        "type": "lines",
+        "spans": [
+          "actively breaking for millions of years.",
+          "you call them sand."
+        ]
+      },
+      "acceptance": {
+        "type": "none",
+        "note": "the poem states the process without objecting to it, but the flatness is delivery rather than content — nothing in the text performs acceptance as a move"
+      },
+      "clarity": {
+        "type": "lines",
+        "spans": [
+          "you break two times.",
+          "first when you break,",
+          "second when you realize you're broken."
+        ],
+        "note": "the opening three lines define a process by counting it — clarity as enumeration"
+      },
+      "wordplay": {
+        "type": "line",
+        "spans": [
+          "pieces of scattered pieces are not pieces,"
+        ],
+        "note": "the same word three times, each occurrence undermining the last"
+      },
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "you break two times.",
+          "you call them sand."
+        ]
+      },
+      "endurance": {
+        "type": "line",
+        "spans": [
+          "actively breaking for millions of years."
+        ],
+        "note": "endurance without a survivor — the breaking is what persists, not the thing being broken"
+      }
+    }
+  },
+  {
+    "slug": "i-can-fuck-myself",
+    "date": "2025-09-27",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i use all my sensible senses to make some sense out of it",
+          "and yet",
+          "none of my senses seem to make some sense"
+        ]
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "i have a bleeding heart",
+          "touched by a fleeing love",
+          "i wait",
+          "i follow"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "why am i always left with myself",
+          "can i even touch myself",
+          "can i be a stranger to myself",
+          "can i love myself?"
+        ],
+        "note": "the questions narrow from why to whether, and the final one is asked twice — the repetition is the poem's only answer"
+      }
+    }
+  },
+  {
+    "slug": "i-can-make-people-feel-seen",
+    "date": "2025-05-15",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i can make people feel seen",
+          "cause i see myself just as same",
+          "duh",
+          "fucking idiots"
+        ],
+        "note": "a genuine claim about capability, delivered as if the questioner were stupid for needing it explained"
+      }
+    }
+  },
+  {
+    "slug": "i-cant-wait-to",
+    "date": "2025-05-16",
+    "tags": {
+      "desire": {
+        "type": "line",
+        "spans": [
+          "i cant wait to get home and fuck myself"
+        ],
+        "note": "the entire piece"
+      },
+      "body": {
+        "type": "none",
+        "note": "desire above carries the only line — the body is implied by the act but never described or attended to as a body"
+      }
+    }
+  },
+  {
+    "slug": "i-chose-a-new-spot-for-writing",
+    "date": "2025-08-21",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i chose a new spot for writing",
+          "i chose a new spot to write from too",
+          "i also chose a new spot to right from",
+          "it's higher up my spine just below the fly god"
+        ],
+        "note": "the spot escalates from a place to sit, to a place to write from, to a place to be morally right from — and then turns out to be anatomical"
+      }
+    }
+  },
+  {
+    "slug": "i-dont-give-a-fuck-about-any-of-you",
+    "date": "2025-02-25",
+    "tags": {
+      "self-loathing": {
+        "type": "lines",
+        "spans": [
+          "i’m failing myself",
+          "i’m sorry i’m not worthy myself",
+          "you being worthy and me being a piece of shit makes you another piece of shit"
+        ],
+        "note": "the last line drags the other party down rather than lifting the speaker up — self-loathing used as a weapon"
+      }
+    }
+  },
+  {
+    "slug": "i-dont-like-my-dick-today",
+    "date": "2025-02-21",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "hopped back on my own dick",
+          "maaaaaaaaaaan i don’t like my dick today"
+        ],
+        "note": "the drawn-out vowel does the work — a body complaint delivered as a groan rather than a statement"
+      },
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "flashbacks of ketamine loving model chicks",
+          "then im challenged i can get her hyer",
+          "i did",
+          "then i wasn’t hy"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-dont-owe-my-thoughts-a-paycheck",
+    "date": "2025-05-08",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "door gets slammed and you cant always fact check",
+          "i feel, not deal",
+          "i fear not ideal"
+        ],
+        "note": "verification abandoned as a requirement — the last two lines replace checking with feeling and then with fear"
+      }
+    }
+  },
+  {
+    "slug": "i-dont-shoot-down",
+    "date": "2025-02-21",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "im sorry my %100 really sucks when i have it",
+          "and im sorry that makes me really weird",
+          "but either way im weird",
+          "can you tell me some nice things please"
+        ],
+        "note": "the self described almost entirely through apology, and the last line drops the apologizing to ask directly"
+      }
+    }
+  },
+  {
+    "slug": "im-going-to",
+    "date": "2025-08-20",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "your dearest fan is someone curious to step in that little head",
+          "study what you poured out",
+          "watch how you be",
+          "AHHHHHHHHHH IM SO GOOD"
+        ],
+        "note": "an invented marketplace for used notebooks, and then the writer breaking frame to congratulate himself on the idea"
+      }
+    }
+  },
+  {
+    "slug": "i-doubt-im-good-at-living",
+    "date": "2026-03-07",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "experiences feel",
+          "underwhelming",
+          "like there’s supposed to be more",
+          "yet when i was",
+          "i wasn’t am",
+          "and when i am",
+          "i still am not am"
+        ],
+        "note": "the last four lines break the verb rather than the sentiment — 'am' used as a noun the speaker can fail to be"
+      }
+    }
+  },
+  {
+    "slug": "i-existed-before-existence-knew-what-to-do-with-me",
+    "date": "2025-07-08",
+    "tags": {
+      "god": {
+        "type": "line",
+        "spans": [
+          "god needs the soul as much as the soul needs god"
+        ],
+        "note": "mutual dependency stated flatly in the opening line, with no argument offered for it"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "shaped into a mortal pull",
+          "memory as his only fault",
+          "haunted by the beautiful"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-fear-not-suffering",
+    "date": "2025-02-22",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "i suffer",
+          "i fall",
+          "very slowly",
+          "with no gravity",
+          "i bear your pain",
+          "your sins"
+        ],
+        "note": "sadness enacted as descent rather than named — falling slowly, without gravity, carrying someone else's weight"
+      }
+    }
+  },
+  {
+    "slug": "i-really-have-no-idea-whatsoever",
+    "date": "2025-05-08",
+    "tags": {
+      "creative block": {
+        "type": "lines",
+        "spans": [
+          "i really have no idea whatsoever",
+          "i have nothing",
+          "i do not have an idea",
+          "or should i remain idealess in a not very ideal"
+        ]
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "sometimes i do have ideas but they tire me",
+          "and now im sleepy"
+        ],
+        "note": "the poem ends by falling asleep rather than by resolving — exhaustion as the actual conclusion"
+      }
+    }
+  },
+  {
+    "slug": "i-figured-it-out",
+    "date": "2025-05-28",
+    "tags": {
+      "desire": {
+        "type": "line",
+        "spans": [
+          "i was too busy exploring my sexuality"
+        ],
+        "note": "the punchline, and the only line naming desire — offered as the diagnosis for why the writing isn't working"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "my life is too good too peaceful",
+          "therefore my poetry doesnt hit"
+        ],
+        "note": "doubt about the work, blamed on wellbeing — a suspicion that comfort is disqualifying"
+      }
+    }
+  },
+  {
+    "slug": "i-feel-i-overflowing",
+    "date": "2025-07-31",
+    "tags": {
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "i wonder how",
+          "thats all i do",
+          "to see, to learn",
+          "i dont wonder how one is one with one",
+          "i just wonder how"
+        ],
+        "note": "wonder stripped of its object — the poem refuses the metaphysical version and keeps only the bare verb"
+      }
+    }
+  },
+  {
+    "slug": "i-got-a-question-that-hasnt-formed-yet",
+    "date": "2025-11-07",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "fuck god",
+          "i dont wanna talk about nor think about god",
+          "i fuck god",
+          "if i fuck god and god fucks me",
+          "who fucked who"
+        ],
+        "note": "the last two lines dissolve the agent/object distinction the four lines above were built on"
+      },
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "why is it all about",
+          "fuckinggggggggg",
+          "fucking fucking fucking fucking fucking fucking"
+        ],
+        "note": "the poem's closing — desire arriving as a question about its own dominance, then answered by repetition"
+      }
+    }
+  },
+  {
+    "slug": "i-think-i",
+    "date": "2026-03-05",
+    "tags": {
+      "letting go": {
+        "type": "lines",
+        "spans": [
+          "i think i let go,",
+          "instead of holding for dear life",
+          "i let go for the life of me.",
+          "life bloomed through me and once again, i,"
+        ],
+        "note": "the same idiom turned twice — holding for dear life becomes letting go for the life of me"
+      },
+      "god": {
+        "type": "lines",
+        "spans": [
+          "bet god did see.",
+          "what did he see wasn’t the best of me"
+        ],
+        "note": "god as witness only, and to the worse version — no judgment or response follows"
+      }
+    }
+  },
+  {
+    "slug": "i-feel-so-much-cant-think-of-a-title",
+    "date": "2026-07-22",
+    "tags": {
+      "body": {
+        "type": "none",
+        "note": "the poem is loud and physical in register but nothing in it attends to a body — sisyphus pushing is the closest, and that's a figure rather than a body"
+      },
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "they lie bro.",
+          "THEY FUCKING LIE BRO.",
+          "but someone's lie is someone else's truth,"
+        ],
+        "note": "the swerve after the peak — the caps-lock accusation immediately relativized in the next line"
+      },
+      "work": {
+        "type": "lines",
+        "spans": [
+          "a machine ain't always perfect,",
+          "upkeep to keep it intact,",
+          "i push it up, it rolls back down"
+        ]
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "am i supposed to be listening to anybody?",
+          "it was always revolt,",
+          "FUCK YOU AND FUCK YOUR DADDY"
+        ]
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "am i supposed to be listening to anybody?",
+          "today i found out perceptions work at a fault."
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i forgot my name.",
+          "forgot to pick my face off the rack,",
+          "and that's the unchanging tale."
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "as i wasn't iful.",
+          "i was eyeful.",
+          "SISSY PUSS",
+          "SISSY PUSSY"
+        ],
+        "note": "two different registers of the same technique — the eye/I split, and Sisyphus broken open into an insult"
+      }
+    }
+  },
+  {
+    "slug": "i-flunked-fucking-a-flock-of-birds",
+    "date": "2025-06-24",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "these words voice of god",
+          "morgan freeman or david attenborough?",
+          "glow of the apple"
+        ],
+        "note": "the divine voice immediately cast with two actors — god as a casting decision"
+      },
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "i’m going to get drunk and punch your mom",
+          "imma dunk on your momma’s head!",
+          "oppose me and you shall die"
+        ],
+        "note": "escalating threats, each one undercut by the line following it"
+      }
+    }
+  },
+  {
+    "slug": "i-had-so-many-epiphanies",
+    "date": "2025-05-16",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i had so many epiphanies",
+          "and they left",
+          "now i’m left with the need to state"
+        ],
+        "note": "the doubt is in what remains — the insights are gone and only the compulsion to announce them survives"
+      }
+    }
+  },
+  {
+    "slug": "i-had-the-best-sex-today",
+    "date": "2025-08-16",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "today i fucked and it was like doing 10 lines of coke",
+          "on the stuff god stepped on"
+        ]
+      },
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "YOU GOTTA GET REIMBURSED",
+          "I AM THE FIRST"
+        ],
+        "note": "the poem's only two capitalised lines, and both arrive after the sex is already described — the boast is the afterword, not the event"
+      }
+    }
+  },
+  {
+    "slug": "i-hate-that-i",
+    "date": "2025-02-22",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i hate that i",
+          "always use i",
+          "therefore i",
+          "will always use i",
+          "as i",
+          "experience life",
+          "through",
+          "my own eyes"
+        ],
+        "note": "the complaint and its resolution use the same word — the poem argues its way from hating the first person to justifying it"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "i always wanted to",
+          "die",
+          "to hug the pretty death that awaits me",
+          "in the holy arms of death"
+        ]
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "many times i’ve been hugged",
+          "but for all the times i have not",
+          "i wanted to die",
+          "how little",
+          "you’ve been hugged"
+        ],
+        "note": "the death-wish indexed directly to un-hugged moments — longing for contact, with death as the only guaranteed embrace"
+      }
+    }
+  },
+  {
+    "slug": "i-have-a-serious-addiction",
+    "date": "2026-03-29",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i have a serious addiction, i'm addicted to writing. i will never ever claim i'm a good writer even though i occasionally write good without writing good and write mediocre writing mediocre",
+          "WHEN I WRITE MEDIOCRE I WRITE MEDIOCRE",
+          "WHEN I WRITE GOOD I WRITE GOOD"
+        ],
+        "note": "the joke is literal — quality of writing and the word being written are collapsed, and the postscript spells it out for anyone who missed it"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "see i think i'm a fraud",
+          "i think everything is a joke",
+          "nothing in life is serious"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-havent-felt-dumb-in-a-while",
+    "date": "2025-02-21",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i haven’t felt dumb in a while and that makes me feel really really dumb",
+          "and i got myself to make me feel dumb so i don’t become dumb",
+          "so hi",
+          "im dumb"
+        ],
+        "note": "self-doubt maintained deliberately as a safeguard against actually becoming stupid"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "first you get numb to dumb and then",
+          "eliphany i made a word cause im dumb and don’t know the word for what im trying to say",
+          "but also smart enough to make up a word for it",
+          "but im still dumb cause you don’t know the meaning of it"
+        ],
+        "note": "the invented word and the argument about the invented word are the same gesture — coining as both proof of smart and proof of dumb"
+      }
+    }
+  },
+  {
+    "slug": "i-hit-my-flex-as-usual",
+    "date": "2026-05-27",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "i can stay underwater for 3 and a half minutes",
+          "my heart rate slows down",
+          "i see a bright darkness",
+          "there was this one time i went back to my mother's womb",
+          "i was breathing like it's my first time being here"
+        ],
+        "note": "breath-holding as a route back to the prenatal — the body used as a time machine, with the c-section named as what it's compensating for"
+      }
+    }
+  },
+  {
+    "slug": "i-keep-being-followed",
+    "date": "2025-06-22",
+    "tags": {
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "is this all you can muster what they say to me",
+          "as if it would make a difference to me",
+          "nothing keeps them at bay"
+        ],
+        "note": "defiance and defeat in the same breath — the taunt is undercut by the final line admitting nothing works"
+      }
+    }
+  },
+  {
+    "slug": "i-knew",
+    "date": "2025-08-09",
+    "tags": {
+      "grief": {
+        "type": "lines",
+        "spans": [
+          "today i didnt brew your coffee with cold water",
+          "the usual way",
+          "today i brewed your coffee unlovingly",
+          "today i forgot to take my meds",
+          "and my meds got us separated"
+        ],
+        "note": "grief carried entirely by small procedural changes — the hair, the coffee, the missed dose — with the breakup itself never described"
+      }
+    }
+  },
+  {
+    "slug": "i-remain-sad",
+    "date": "2026-05-12",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "sad music only gets me sadder",
+          "but it's not like sadness emerges it's what's inside",
+          "sadness isn't new it's what's been inside",
+          "i remain sad"
+        ],
+        "note": "sadness reclassified from event to condition — nothing produces it, it was already there and the music only makes it audible"
+      },
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "and why do i even write?",
+          "is it to find a way out of it?"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-look-in-my-eyes",
+    "date": "2026-06-05",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "i, tell me love, when you look into my eyes, what do you see?",
+          "do you concur it's due to the fact that death is the warmest embrace?"
+        ]
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "i, still high, getting by, trying to die",
+          "i'm graceful at the face of dying, though we never met i'm still trying, whatever he's selling i'm buying.",
+          "eye did, drying. soon i'll be arriving."
+        ],
+        "note": "death addressed as a salesman being bought from, and the last line sets an arrival time"
+      }
+    }
+  },
+  {
+    "slug": "i-miss",
+    "date": "2025-02-20",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "i miss missing something other than myself",
+          "i miss what i was when i am",
+          "and when i am",
+          "i still miss what i was"
+        ],
+        "note": "longing turned entirely inward and then complaining about it — the wish is for an object outside the self to miss"
+      },
+      "self-erosion": {
+        "type": "line",
+        "spans": [
+          "though it’s not like i miss myself but i miss myself when i was more myself and less less"
+        ],
+        "note": "quoted as the source wraps — 'less less myself' straddles the line break, and the doubling of 'less' is the erosion stated grammatically"
+      }
+    }
+  },
+  {
+    "slug": "i-need-to-have-sex-with-myself",
+    "date": "2025-02-25",
+    "tags": {
+      "release": {
+        "type": "line",
+        "spans": [
+          "we could let out all our problems."
+        ],
+        "note": "the entire body — and 'we' doing the work, since the title established the other party is also the speaker"
+      }
+    }
+  },
+  {
+    "slug": "i-purged-the-purgatory",
+    "date": "2026-05-27",
+    "tags": {
+      "release": {
+        "type": "lines",
+        "spans": [
+          "i purged the purgatory",
+          "no mo waiting!",
+          "create your ending to this story"
+        ],
+        "note": "purgatory as a waiting room that can simply be exited — release framed as impatience rather than as absolution"
+      }
+    }
+  },
+  {
+    "slug": "i-should-run-a-college",
+    "date": "2025-10-08",
+    "tags": {
+      "healing": {
+        "type": "lines",
+        "spans": [
+          "i'll teach them how to feel",
+          "show me where you broke",
+          "learned to cope",
+          "the cracks are your credentials here",
+          "help you help yourself",
+          "so you can help your fellow man"
+        ],
+        "note": "healing structured as an institution — damage as entry requirement, and the curriculum ends by passing it on"
+      }
+    }
+  },
+  {
+    "slug": "i-thought-this-drought-would-bear-fruit-whatever-they-say-gods-not-cute",
+    "date": "2026-07-27",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "god made it all so you get weary",
+          "if you ask me piece of shit should have asked me"
+        ]
+      },
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "if you ask me piece of shit should have asked me",
+          "i would have made it fair and fairy"
+        ],
+        "note": "contempt as a job application — the speaker claims he'd have done the creating better"
+      },
+      "blasphemy": {
+        "type": "lines",
+        "spans": [
+          "god made it all so you get weary",
+          "if you ask me piece of shit should have asked me"
+        ],
+        "note": "same span as contempt; the blasphemy is specifically in the epithet applied to the maker, not in the complaint about the world"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "contempt?",
+          "contemporary."
+        ],
+        "note": "one word breaking open into another that contains it — the emotion and the era sharing a stem"
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "is it love that hurts or the absence of it?",
+          "all the attempts at locating it to find something essentially different"
+        ]
+      },
+      "defiance": {
+        "type": "line",
+        "spans": [
+          "going gentle into that good night don't ask me why"
+        ],
+        "note": "Thomas inverted — going gentle instead of raging, and refusing to justify the inversion"
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "is it love that hurts or the absence of it?",
+          "this drought has a fullness of its own,"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "i-was-painting",
+    "date": "2025-08-09",
+    "tags": {
+      "yearning": {
+        "type": "lines",
+        "spans": [
+          "i yearn, don't know my place",
+          "i can no longer see my face"
+        ],
+        "note": "yearning without an object — the poem names the state and then reports the cost rather than the want"
+      }
+    }
+  },
+  {
+    "slug": "i-went-to-see",
+    "date": "2025-06-22",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i went to see what all the fuss was about",
+          "i went to see and i’ve seen",
+          "how cruel, how unseen",
+          "aesthetic it only is when you’re not looking"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "i vent to see what all the fuss is about",
+          "authenticity breeded the scizophrenic",
+          "and i paid the price anthropogenic,",
+          "eugenic cardiogenic"
+        ],
+        "note": "first span is the went/vent swap that repeats the opening line one letter changed; the rest is a -genic chain running on sound alone"
+      }
+    }
+  },
+  {
+    "slug": "i-will-be-more-selective-when-it-comes-to-feeling-feelings",
+    "date": "2025-07-08",
+    "tags": {
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "can’t you get to a point where you can choose what to feel after feeling them all a",
+          "am i onto something?",
+          "i’m warming up!!"
+        ],
+        "note": "acceptance arriving as excitement rather than as calm — the piece ends mid-thought, cheering itself on"
+      }
+    }
+  },
+  {
+    "slug": "if-i-had-kids",
+    "date": "2025-06-17",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "if i had kids",
+          "i’d only be talking about them",
+          "i’d only write about them"
+        ],
+        "note": "the longing is conditional and hypothetical throughout — nothing in the poem claims the wanting directly"
+      }
+    }
+  },
+  {
+    "slug": "if-you-dont-take-yourself-seriously",
+    "date": "2025-12-13",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i've been told that if you don't take yourself seriously",
+          "life won't take you either",
+          "i mean though would i like life to take me seriously as serious is heavy and love is a light stepping and a light stepping"
+        ],
+        "note": "the received wisdom quoted and then questioned rather than accepted — doubt aimed at the advice, not at the self"
+      }
+    }
+  },
+  {
+    "slug": "im-busy-fucking",
+    "date": "2025-08-14",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "writing is really hard for me nowadays cause i'm busy fucking",
+          "i'm so busy fucking",
+          "summmmmmmer love",
+          "simmering summer love"
+        ],
+        "note": "desire named as the reason the writing stopped, and the poem ends by stretching the word 'summer' rather than by returning to the argument"
+      }
+    }
+  },
+  {
+    "slug": "im-down",
+    "date": "2025-02-20",
+    "tags": {
+      "work": {
+        "type": "lines",
+        "spans": [
+          "cause im not working",
+          "cause im not putting my blood into something",
+          "cause my blood is being sucked out of my body",
+          "and im not the one doing it"
+        ],
+        "note": "the same fluid framing labour twice — blood given voluntarily versus blood extracted, and only the second is happening"
+      },
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "and now im down",
+          "cause im talking about how i feel and",
+          "not how i feel after doing some amazingly dope shit",
+          "im down"
+        ],
+        "note": "the sadness compounds by being discussed — talking about the feeling is itself listed as a cause of it"
+      }
+    }
+  },
+  {
+    "slug": "im-going-to-fight-you-till-we-stop-and-fuck",
+    "date": "2025-02-25",
+    "tags": {
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "fuck you my brain",
+          "fuck me my brain",
+          "why they’re all towards my brain",
+          "OKAY WHO THE FUCK IS TALKING",
+          "whoever’s talking is trying to pit me against me and my brain"
+        ],
+        "note": "the conflict turns out to have three parties — the speaker, his brain, and an unidentified third voice organising the fight"
+      }
+    }
+  },
+  {
+    "slug": "im-sober",
+    "date": "2026-05-27",
+    "tags": {
+      "truth": {
+        "type": "line",
+        "spans": [
+          "i'm sober, this sausage's kosher."
+        ],
+        "note": "the only claim in the piece, and it's about state rather than about anything true — sobriety asserted and then abandoned for sound"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "swimmers are strokers,",
+          "sperms are strokers,",
+          "we'll meet in october."
+        ],
+        "note": "sober/kosher/stroker/october chained on one vowel with no argument underneath — the rhyme is the entire content"
+      }
+    }
+  },
+  {
+    "slug": "im-sorry-1",
+    "date": "2025-02-20",
+    "tags": {
+      "guilt": {
+        "type": "lines",
+        "spans": [
+          "im sorry everybody",
+          "for my shortcomings",
+          "for my shortcomings caused by the shortcomings that were bestowed upon me which are",
+          "also my shortcomings"
+        ],
+        "note": "inherited failure claimed as personal anyway — the third line wraps in the source, and the wrap is where the ownership gets taken back"
+      },
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "im just terribly sorry",
+          "i really am"
+        ],
+        "note": "the apology exhausting itself into flat repetition rather than escalating"
+      }
+    }
+  },
+  {
+    "slug": "im-sorry",
+    "date": "2025-02-21",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "to get hotter than i already am",
+          "sun and i fuck",
+          "im that hot",
+          "im hotter by the last sentence"
+        ],
+        "note": "heat as the body's only stated property, and it increases with each sentence of the poem itself"
+      }
+    }
+  },
+  {
+    "slug": "im-very-hard-im-soft",
+    "date": "2025-03-10",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "How the hell does one model sand",
+          "mathematically? Is it a fluid? Kinda but no. Is it a solid? Definitely not. Sand defies all",
+          "reason and logic."
+        ],
+        "note": "doubt as a classification failure — a material that answers to neither category, quoted across the source's line wraps"
+      }
+    }
+  },
+  {
+    "slug": "im",
+    "date": "2026-03-27",
+    "tags": {
+      "numbness": {
+        "type": "lines",
+        "spans": [
+          "my feelings",
+          "they are",
+          "non-existent",
+          "i’m frozen",
+          "glacier that’ll not melt before my lifetime comes to an end"
+        ],
+        "note": "the numbness given a timescale — not a passing state but one outlasting the speaker"
+      }
+    }
+  },
+  {
+    "slug": "in-life-one-is-always-lonely",
+    "date": "2026-05-22",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "but who do you have?",
+          "who do you have but you?",
+          "who truly knows you?",
+          "i've horse friends",
+          "dog friends",
+          "cat friends",
+          "this is where it ends"
+        ],
+        "note": "the question asked three times and then answered with animals — the list of friends contains no people"
+      }
+    }
+  },
+  {
+    "slug": "innate-sadness",
+    "date": "2025-02-22",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "innate sadness",
+          "intimate relation birthed madness"
+        ],
+        "note": "sadness as inborn rather than caused — and the causation in line two applies to madness, not to the sadness above it"
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "one faced medallion",
+          "there was my rebellion"
+        ],
+        "note": "a medallion with one face — the rebellion located in something that refuses to have two sides"
+      }
+    }
+  },
+  {
+    "slug": "is-it-smart-to-say",
+    "date": "2026-05-28",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "my girlfriends read the stuff i write",
+          "when i have girlfriends that read",
+          "the stuff i write"
+        ],
+        "note": "the question is about disclosure, and answering it requires repeating the disclosure — the poem does the thing it wonders whether to do"
+      },
+      "bravado": {
+        "type": "line",
+        "spans": [
+          "is it smart to say"
+        ],
+        "note": "the boast smuggled inside a question about whether to boast — plural girlfriends stated only as a hypothetical condition"
+      }
+    }
+  },
+  {
+    "slug": "is-life-lifing-life",
+    "date": "2025-02-22",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "whats been even happening is life lifing or life life not lifing have life ever not lifed if so",
+          "when"
+        ],
+        "note": "one noun verbed and conjugated through four tenses in a single unpunctuated line"
+      },
+      "existence": {
+        "type": "line",
+        "spans": [
+          "whats been even happening is life lifing or life life not lifing have life ever not lifed if so"
+        ],
+        "note": "same span as wordplay — asking whether existence has ever failed to occur, phrased as grammar rather than as metaphysics"
+      }
+    }
+  },
+  {
+    "slug": "is-living-neglecting",
+    "date": "2025-08-09",
+    "tags": {
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "snap and the moment passed",
+          "I WISH I WAS DEAD",
+          "not an ideal weekend"
+        ],
+        "note": "the death-wish placed between a line about time and a line about scheduling — the flanking flatness is what makes it land"
+      }
+    }
+  },
+  {
+    "slug": "is-the-shooting-stars",
+    "date": "2025-02-22",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "i was simply an observer",
+          "i guess that’s what god is",
+          "yet i never wanted to be the one",
+          "to be one",
+          "yet you made me",
+          "one"
+        ],
+        "note": "godhood defined as watching rather than acting, and conferred by others rather than claimed"
+      },
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "sit with me",
+          "let it all go",
+          "watch",
+          "they can’t crucify me if you’re with me",
+          "gods won’t kill us if we don’t kill ourselves"
+        ],
+        "note": "faith placed in mutual presence rather than in a deity — safety conditional on company"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "is that why my hands are nailed",
+          "my arms are spread",
+          "let the gods kill me",
+          "but not you"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "is-there-a-sacred-place",
+    "date": "2025-05-21",
+    "tags": {
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "is there a sacred place",
+          "where the sun really lays"
+        ],
+        "note": "the question asked three identical times before the fourth line completes it — faith as repetition without an answer arriving"
+      },
+      "longing": {
+        "type": "line",
+        "spans": [
+          "where the sun really lays"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "is-there-really-that-much-going-around",
+    "date": "2026-06-16",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "is there really that much going around?",
+          "or is it a human byproduct",
+          "to amplify",
+          "it's all senseless"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "humans are a predator whose strength is",
+          "appearing bigger than they are?"
+        ],
+        "note": "the species defined by inflation as its survival trait — identity as a bluff that worked"
+      }
+    }
+  },
+  {
+    "slug": "it-was-a-mistake",
+    "date": "2025-02-21",
+    "tags": {
+      "body": {
+        "type": "none",
+        "note": "the poem is entirely about substances and a room — a can, incense, a bed, energy — but nothing in it attends to a body; the caffeine's effect is never described as felt"
+      }
+    }
+  },
+  {
+    "slug": "its-a-new-day-and-i-still-wanna-fuck-myself",
+    "date": "2025-02-25",
+    "tags": {
+      "self-acceptance": {
+        "type": "line",
+        "spans": [
+          "not on some narcissistic shit but to get to know myself"
+        ],
+        "note": "the entire body — self-knowledge defended against a charge nobody made"
+      },
+      "doubt": {
+        "type": "none",
+        "note": "the pre-emptive denial implies uncertainty about how it'll be read, but nothing in the single line doubts anything directly"
+      }
+    }
+  },
+  {
+    "slug": "ive-been-away",
+    "date": "2025-02-22",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i’ve been away",
+          "from my paper",
+          "from my pen",
+          "from my sacred den",
+          "i’ve been betraying myself"
+        ]
+      },
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "putting all my faith in the paper lock i put on the door of my den",
+          "putting all my faith in the paper lock i made",
+          "from a 17th century geometry book"
+        ],
+        "note": "faith invested in a lock made of paper — a barrier that guarantees nothing and is chosen anyway"
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "i'm on my way back",
+          "looking the parts of me i may have lost",
+          "in a perfect world i would come back to my den",
+          "and find the remnants of a healed world",
+          "golden hair on the red cushions"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "ive-been-throwing-up",
+    "date": "2025-10-13",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "i am about to puke",
+          "ive been throwing up",
+          "throwing up this sign",
+          "that i know"
+        ],
+        "note": "the physical act turning symbolic mid-phrase — what's being brought up is knowledge rather than contents"
+      }
+    }
+  },
+  {
+    "slug": "ive-been",
+    "date": "2025-04-13",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "forgive me o thee!",
+          "dear sleep",
+          "miss me while i’m away",
+          "cradle me o sleep!",
+          "what will you bring?"
+        ],
+        "note": "sleep addressed in the vocative like a deity, and asked to do the missing rather than the speaker"
+      }
+    }
+  },
+  {
+    "slug": "last-rebellion-of-the-day",
+    "date": "2025-02-21",
+    "tags": {
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "not putting my phone in charge is the last rebellion of the day",
+          "i love my little rebellions",
+          "they make a one big",
+          "rebel against yourself",
+          "if you love yourself enough to hate what you see"
+        ],
+        "note": "rebellion scaled down to a dead battery and then turned inward in the final two lines"
+      }
+    }
+  },
+  {
+    "slug": "leap-of-faith-and-the-remember-me-button",
+    "date": "2025-10-27",
+    "tags": {
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "i am a fool",
+          "i jump",
+          "if my faith introduces me to death we will share a laugh with it",
+          "i wanted to see you"
+        ],
+        "note": "faith stated as foolishness and jumped on anyway — and the reason given at the end is curiosity, not belief"
+      }
+    }
+  },
+  {
+    "slug": "narcissistic-tic-tic-tic",
+    "date": "2025-05-11",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "tic tic tic that boi narcissistic",
+          "some call dis boi a prick prick prick",
+          "tell em get off my dick dick dick",
+          "i fuck wit angels 6 6 6"
+        ],
+        "note": "one consonant cluster repeated in triples through the whole piece — pure sonic drive with no argument underneath"
+      }
+    }
+  },
+  {
+    "slug": "lets-all-have-sex",
+    "date": "2025-08-18",
+    "tags": {
+      "desire": {
+        "type": "line",
+        "spans": [
+          "lets all have sex"
+        ],
+        "note": "the invitation isolated at the end after three lines of unrelated sensory reporting"
+      },
+      "body": {
+        "type": "lines",
+        "spans": [
+          "my hands are oily",
+          "waves crash, people dance"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "nowadays-before-i-write-i",
+    "date": "2026-03-28",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "nowadays before i write i think",
+          "wasn’t always the case",
+          "it was clear as day when it all poured out of me",
+          "all i had to do was take my two fingers and shove them down my throat",
+          "what would come up, would come up"
+        ],
+        "note": "the old method described as induced vomiting, and the new one as thinking first — reported as loss, not improvement"
+      }
+    }
+  },
+  {
+    "slug": "manic",
+    "date": "2026-05-04",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i'm one",
+          "not you, not you, and not you",
+          "i'm not a sand",
+          "i did ascend"
+        ],
+        "note": "identity by exclusion, and 'i'm not a sand' refusing the archive's own recurring image of dissolution into indistinguishable grains"
+      }
+    }
+  },
+  {
+    "slug": "see-me-like-my-neighbour-does",
+    "date": "2026-05-22",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "i wanna believe in me the same way my neighbour who's known me since a kid does",
+          "i wanna see me normal like she does",
+          "none of this bleeding bullshit"
+        ],
+        "note": "the longing is for a lesser view of himself — to be seen ordinarily by someone who never saw the work"
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i can't say i wanna see me like my parents does",
+          "they've seen a lot, my neighbour hasn't",
+          "this talent, the arrogance",
+          "elegant way with words that's my inheritance?",
+          "some sick twisted experiments i am the evidence"
+        ],
+        "note": "the gift and the damage claimed as the same inheritance, with the self offered as the proof"
+      }
+    }
+  },
+  {
+    "slug": "one-stranger-away",
+    "date": "2026-06-16",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "path to seeing yourself lies one stranger away",
+          "path to inner peace lies one stranger away",
+          "some never swam far enough from despair to meet hope",
+          "some never knew despair"
+        ],
+        "note": "the poem states the hope four times, admits it worked, then withdraws it in the CORRECTIONS section — the longing survives its own disproof"
+      }
+    }
+  },
+  {
+    "slug": "reductio-ad-absurdum",
+    "date": "2026-06-22",
+    "tags": {
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "your car makes you seem like a bigger person baby but you're not",
+          "you wrapped up in a metal box",
+          "baby grey is cool as long as you're the only one that has it",
+          "people are cool as long as they are loved ones"
+        ],
+        "note": "contempt scaled down by increments until it exempts only the person being addressed — and then 'i love you'"
+      }
+    }
+  },
+  {
+    "slug": "occupied-in-isolation",
+    "date": "2026-07-03",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i'm aware that last sentence reads a little sus",
+          "and it's better for the poem not to acknowledge it",
+          "you have to trust a reader to get it",
+          "so thaT's why",
+          "writers gotta show how they got to that thought"
+        ],
+        "note": "the poem states the rule it's currently breaking, breaks it anyway, and then argues the breaking was necessary"
+      }
+    }
+  },
+  {
+    "slug": "me-and-him",
+    "date": "2026-07-04",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "we knew what to do",
+          "wrote when we had nothing else to do",
+          "-bipolar"
+        ],
+        "note": "the whole piece in first person plural, and the final line names who the second party is"
+      }
+    }
+  },
+  {
+    "slug": "mind-lost-i-aye",
+    "date": "2025-11-09",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "timid soul with a fractured mind",
+          "my mind finds its way home the way i lose myself",
+          "with no effort",
+          "mind's gone i'm here"
+        ],
+        "note": "the mind arriving and the self departing described as the same motion, then stated flatly in four words"
+      }
+    }
+  },
+  {
+    "slug": "ramblings-of-a-god-and-loneliness-of-a-human",
+    "date": "2026-07-03",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "i get the ramblings of a mad playful god",
+          "then i get human feelings"
+        ],
+        "note": "the two registers named as alternating states rather than as a hierarchy — and the poem enacts the switch immediately after"
+      },
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "LIKE LIKE BRO I WANNA BE AROUND YOU DAWGGGGGGG",
+          "SOMETIMES, I GET LONELY.",
+          "then we hold hands in our search for answers and this is where this poem ends"
+        ],
+        "note": "the loneliness admitted mid-shout, buried in a run of caps, and then answered by company rather than by an answer"
+      }
+    }
+  },
+  {
+    "slug": "mistakes-mistakes-mistakes-all-i-ever-do-is-mistakes-fuck-up-fuck-up-fuck-up-im-fucked-up",
+    "date": "2026-07-29",
+    "tags": {
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "there is a problem",
+          "with us",
+          "with me",
+          "with you",
+          "and i feel like you no longer wanna be my friend"
+        ]
+      },
+      "grief": {
+        "type": "lines",
+        "spans": [
+          "bridges burn but metal isn't paper",
+          "it doesn't turn into ash and scatter away",
+          "none of it dissolve",
+          "this heart, you reside,",
+          "burnmark."
+        ],
+        "note": "grief as residue rather than as loss — the bridge burned but the wreckage stays, and the last two lines locate it anatomically"
+      },
+      "endurance": {
+        "type": "lines",
+        "spans": [
+          "clearing the debris asks us to clean the debris",
+          "me, i have the time to clean it up, flowers shooting through wildlife returning,"
+        ],
+        "note": "endurance as labour — the work of clearing named as a separate task from the burning"
+      },
+      "self-loathing": {
+        "type": "none",
+        "note": "the title carries it entirely — mistakes repeated three times, fucked up repeated three times — but the body never turns on the speaker; it's addressed outward to a friendship"
+      },
+      "letting go": {
+        "type": "lines",
+        "spans": [
+          "but it had, it's done"
+        ],
+        "note": "four words of acceptance, immediately followed by the burnmark line that undoes it"
+      },
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "you",
+          "you don't give a shit",
+          "i don't remember how it burnt",
+          "small lighter burnt a bridge"
+        ],
+        "note": "the pronoun isolated on its own line before the accusation lands"
+      }
+    }
+  },
+  {
+    "slug": "moms-like-mom-and-dads-like",
+    "date": "2025-05-31",
+    "tags": {
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "mom’s like mom and dad’s like a stranger you’re meant to really be close with",
+          "he is the closest stranger",
+          "if you can’t do with him how will you do it with the world",
+          "i do not like men very much"
+        ],
+        "note": "the conflict is generational and unresolved — the poem announces it's not finished, keeps going, then defers the rest to another day"
+      }
+    }
+  },
+  {
+    "slug": "moon-demands-my-eyes-sotto-voce",
+    "date": "2025-07-03",
+    "tags": {
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "when it’s not there i loom",
+          "i change as it does",
+          "i love as it loves",
+          "me"
+        ],
+        "note": "the last word arriving on its own line turns the whole devotion reciprocal — loving as the moon loves him, not as the moon loves generally"
+      }
+    }
+  },
+  {
+    "slug": "moon-makes-me-cry",
+    "date": "2025-07-03",
+    "tags": {
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "we always talk, moon and i",
+          "never in prayer, always face to face",
+          "well i guess one could call searching something in its absence prayer",
+          "i would"
+        ],
+        "note": "prayer refused and then redefined into something the speaker admits he's doing — the two-word retraction is the whole move"
+      }
+    }
+  },
+  {
+    "slug": "my-buddy-asked-me-to-write-on-drugs",
+    "date": "2025-03-02",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "sight of someone captivating is a direct testament to life’s grandeur",
+          "and drugs remind you of that",
+          "life’s grandeur"
+        ]
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "losers get hooked up with the small sight of everything so big",
+          "reals get zoned out"
+        ],
+        "note": "a distinction drawn confidently between two ways of taking drugs, with the speaker's own position left unstated"
+      }
+    }
+  },
+  {
+    "slug": "my-cult-cigar-butt",
+    "date": "2025-11-09",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "im not the largest",
+          "im not the hardest",
+          "im not the smartest",
+          "star dust",
+          "large bust",
+          "bizarre but",
+          "my cult",
+          "cigar butt"
+        ],
+        "note": "the whole piece runs on one two-syllable stress pattern — the title itself is a rhyme discovered at the end of the chain rather than a subject"
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "im not the largest",
+          "im not the hardest",
+          "im not dishonest",
+          "i might be",
+          "retarded"
+        ],
+        "note": "identity built entirely by negation for nine lines, and the only positive claim is self-insult"
+      }
+    }
+  },
+  {
+    "slug": "saying-ugly-things-to-an-ugly-thing",
+    "date": "2026-07-30",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "and i am what i am,",
+          "because i am what i am."
+        ],
+        "note": "the tautology as the poem's central self-definition — nothing outside itself is offered as cause"
+      },
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "i sometimes feel sorry for being an asshole,",
+          "then i feel it was just.",
+          "i sometimes feel sorry for being too kind,",
+          "then i say fuck it,"
+        ],
+        "note": "two regrets, both withdrawn, and withdrawn differently — cruelty gets a legal verdict, kindness gets a dismissal"
+      },
+      "defiance": {
+        "type": "lines",
+        "spans": [
+          "be the love that's hard to find,",
+          "be the one to say fuck you, trust me it's true.",
+          "you ain't getting nothing from me, when you're ready i'll give it to you."
+        ]
+      },
+      "guilt": {
+        "type": "lines",
+        "spans": [
+          "one might even call it overcompensation of the things i'm not gonna reveal,",
+          "one wouldn't be wrong."
+        ],
+        "note": "guilt conceded without its content — the kindness identified as compensation for something the poem refuses to name"
+      },
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "but there is a tiny group of people,",
+          "to whom i've been a mad asshole to,"
+        ]
+      },
+      "god": {
+        "type": "line",
+        "spans": [
+          "this role god bestowed"
+        ],
+        "note": "the poem's final line and its only mention of god — the whole self-description reframed as an assignment"
+      },
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "everyone that knows me knows i'm kind as fuck.",
+          "trust me it's true."
+        ]
+      }
+    }
+  },
+  {
+    "slug": "my-face-pretty-as-fuck-yours-i-prefer-one-without-one",
+    "date": "2026-08-06",
+    "tags": {
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "if you don't like what you see, maybe you're the problem.",
+          "you've a name but what does it entail?",
+          "and when it's not what you want you hide your face."
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "two nameless, two faceless, interaction is weightless,",
+          "a face, is it where the soul is placed?",
+          "hide it, never ever out it,"
+        ]
+      },
+      "yearning": {
+        "type": "lines",
+        "spans": [
+          "when the sun sets i wish for a ship,",
+          "and i feel at home, that's what i fear,",
+          "i want nothing,",
+          "i need some things."
+        ],
+        "note": "the closing couplet separates wanting from needing and admits only the second — yearning conceded in the smallest possible terms"
+      }
+    }
+  },
+  {
+    "slug": "my-face-tells-the-tale-of-mazes",
+    "date": "2025-10-08",
+    "tags": {
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "you're enslaved to the statement",
+          "i made before i knew what making meant",
+          "rent due on a life i never signed the lease for"
+        ],
+        "note": "existence as an inherited obligation — bound by a claim made before understanding, billed for a life never agreed to"
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "killing time while time's been killing",
+          "peace? more like pieces scattered",
+          "gathering what's left just makes the pile look sadder"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "my-first-note",
+    "date": "2025-02-21",
+    "tags": {
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "today im so good at it i don’t even need to read",
+          "you know god never read the bible right?",
+          "riding your own dick is better when ur god"
+        ],
+        "note": "the boast escalated to a theological analogy and then to a joke about self-regard as divine privilege"
+      }
+    }
+  },
+  {
+    "slug": "my-new-fuck-you",
+    "date": "2025-02-21",
+    "tags": {
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "my new fuck you muse is to those that have this zooed out version of old people",
+          "not people that have grown a little a lot",
+          "but old people",
+          "slap a zoo minded people today"
+        ],
+        "note": "the contempt aimed at a way of looking rather than at a group — zoo-mindedness as the offence"
+      }
+    }
+  },
+  {
+    "slug": "nikola-tosic-said",
+    "date": "2025-02-24",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i have been saying it too",
+          "does taking his work and stamping on them make me an artist"
+        ],
+        "note": "the quoted apology adopted as his own, and then the poem questions whether the adopting is itself the art"
+      },
+      "doubt": {
+        "type": "line",
+        "spans": [
+          "does taking his work and stamping on them make me an artist"
+        ],
+        "note": "same span as the writing self — the poem's final line, asked and left unanswered"
+      }
+    }
+  },
+  {
+    "slug": "no-title-everything-sucks",
+    "date": "2025-09-05",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "how feasible is it to write the first thing that pops up",
+          "does it make the blank paper soon to be full less holy",
+          "so this is what it's like to write with an empty mind",
+          "i'm going back to not writing."
+        ],
+        "note": "the poem tests a method it distrusts and then quits it in the last line"
+      }
+    }
+  },
+  {
+    "slug": "nothing-cures-my-sadness",
+    "date": "2025-11-12",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "i'm sad in my happiness but if i were a dad i wouldn't be so bad nor i wouldn't be so sad",
+          "cause then my child will remember me as a sad dad i had a sad dad shit wasn't all that great i often think he is the reason for all"
+        ],
+        "note": "the sadness traced backward to a father and forward to a hypothetical child in a single unpunctuated run"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "be gone before you get beheaded",
+          "how easy death is and how i cling to it in it they said i live but",
+          "it doesn't mean shit to me"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "nothing-is-inside-of-me",
+    "date": "2025-07-09",
+    "tags": {
+      "numbness": {
+        "type": "lines",
+        "spans": [
+          "i don't feel the urge",
+          "just the need to purge",
+          "these bones never break",
+          "this soul never ruptures"
+        ],
+        "note": "numbness as indestructibility rather than as absence — nothing gets through, which is stated as a property of the material"
+      }
+    }
+  },
+  {
+    "slug": "nothing-new",
+    "date": "2025-07-31",
+    "tags": {
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "am i finally awake or was i never sleep",
+          "in this dream that i gleam",
+          "i see pieces of a broken dream",
+          "in it they became whole"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "now-i-will-seriously-ride-my-own-dick",
+    "date": "2025-08-20",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "i wanna have sex with u",
+          "i wanna make love with u",
+          "i wanna love with u",
+          "i wanna see u lovin yoself"
+        ],
+        "note": "the escalation runs the opposite direction from the title — each line drops something until only the other person's self-love is left"
+      }
+    }
+  },
+  {
+    "slug": "now-time-to-be-good",
+    "date": "2025-03-06",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "everyone i knew protected their body while they wore out their soul",
+          "sure bodily pain is not pleasant but the heart lies protected in the rib cage",
+          "i am the container of the soul contained in my body"
+        ],
+        "note": "the body as architecture — a cage whose function is protection, with the self identified as the container rather than the contents"
+      }
+    }
+  },
+  {
+    "slug": "now-what",
+    "date": "2025-08-20",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "semen the sea men crawling under the d-pad with the weedmen",
+          "in the basement serving the base with the bass pumpin my soaked out face"
+        ],
+        "note": "semen/sea men and base/bass — homophone chains carrying the whole line, with the caps-lock protest arriving after"
+      }
+    }
+  },
+  {
+    "slug": "on-communication",
+    "date": "2026-07-04",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "when you speak you stop being a witness,",
+          "you're being witnessed.",
+          "and we tend to dress our parts when that's about to happen."
+        ],
+        "note": "identity as something that appears only under observation — and the dressing is described as involuntary, a tendency rather than a choice"
+      }
+    }
+  },
+  {
+    "slug": "pastel-de-nata",
+    "date": "2025-11-12",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "find a way to explain the inexplicable sadness",
+          "i am not happy with the way things unfold",
+          "i am not happy with life",
+          "i am not happy with myself"
+        ],
+        "note": "the list escalates from the universe down to the self, and then the last two lines dissolve all of it with a pastry order"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "why do i have to always ask questions",
+          "curate a sentence",
+          "to carry out my existence"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "practice",
+    "date": "2026-02-25",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "what do you think god does",
+          "if he doesnt listen to music",
+          "if he doesnt jerk off",
+          "what did he do on the night of jesus’ last supper",
+          "is god a no thinger like i"
+        ],
+        "note": "god interrogated about his ordinary habits before the theological questions arrive — and the last line makes him a peer"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "what comes after if not four",
+          "what is it all for?",
+          "does god have emotions",
+          "does god have weaknesses"
+        ]
+      },
+      "faith": {
+        "type": "lines",
+        "spans": [
+          "do you think he would open up a door for me",
+          "open it up let me see",
+          "what lies in it what my heart needs",
+          "would reveal it to me"
+        ],
+        "note": "faith stated only as a hope conditional on someone else's opinion — 'do you think he would'"
+      }
+    }
+  },
+  {
+    "slug": "probably-a-tragic-myth",
+    "date": "2026-05-03",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i wish to remove myself",
+          "only when i write there is an i",
+          "i'm not really iful in real life",
+          "though eyeful, but not iful",
+          "i wish to let eye know what it sees is i"
+        ],
+        "note": "the writing self identified as the only place the self exists at all — and the poem's wish is to remove it from there too"
+      }
+    }
+  },
+  {
+    "slug": "poetry-for-dew-and-jew",
+    "date": "2026-05-12",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "poetry for poetry sake",
+          "drink sake instead",
+          "fool! stop and swallow your lover's dew"
+        ],
+        "note": "sake as purpose and sake as rice wine in consecutive lines, and the title's dew/jew pairing never appears in the body"
+      }
+    }
+  },
+  {
+    "slug": "put-on-your-gold-ring-old-king",
+    "date": "2026-05-28",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "let go of your hand stop holding,",
+          "let go of what you're withholding.",
+          "put on the blindfolding and stop controlling,",
+          "put on your gold ring, old king,"
+        ],
+        "note": "an -olding chain running four lines, then the title's gold ring/old king near-anagram arriving as the payoff"
+      }
+    }
+  },
+  {
+    "slug": "purple-girl-do-you-wanna-dance-in-purple-rain",
+    "date": "2026-06-24",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "today i met the most beautiful girl there ever was and will be",
+          "the way she gives off grace",
+          "her face radiates",
+          "ready or not i'm going in"
+        ]
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "gosh, is beautiful the word i would use?",
+          "but if i write this and lock it in won't she know?",
+          "fuck it maybe she won't read this",
+          "but this isn't where this poem should end"
+        ],
+        "note": "doubt aimed at the poem's own publication and at its own ending, not at the feeling"
+      }
+    }
+  },
+  {
+    "slug": "pills-are-cool-anti-depressants-aint",
+    "date": "2026-07-28",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "mandatory pills are gone, pills are now taken by desire,",
+          "I WANT THY, DON'T ASK ME WHY."
+        ],
+        "note": "the shift from prescription to appetite named directly, and the last line refuses to justify the wanting"
+      },
+      "work": {
+        "type": "lines",
+        "spans": [
+          "beach volleyball or bitch volleyball? here comes the serve,",
+          "serving the servicer where he works."
+        ]
+      },
+      "numbness": {
+        "type": "lines",
+        "spans": [
+          "drugs numb or activate the parts you want gone or there,",
+          "anti-depressants just numb.",
+          "pain, echoes through the black hole,",
+          "with them it's just hollow."
+        ],
+        "note": "the distinction is the poem's actual argument — numbing with selection versus numbing without it"
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "gone, nothing to remember them by,",
+          "my pain defines me, is that a lie?"
+        ],
+        "note": "identity located in the pain the medication removed, and the question left open"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "which is worse drugs or anti-depressants?",
+          "my pain defines me, is that a lie?",
+          "not knowing what it is or what i gain,"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "napoleon without a crown?",
+          "napoleon complex, what did socrates say?",
+          "hitler complex, one ball index,",
+          "EYE SAID EYE, WRITTEN ON THY THIGHS,"
+        ],
+        "note": "the complex chain running through three historical figures on one joke, then the eye/I split arriving in caps at the end"
+      },
+      "release": {
+        "type": "lines",
+        "spans": [
+          "without anti-depressants i can let it out again.",
+          "here comes the swerve, i'm out this bitch,",
+          "WHAT A TIME TO BE ALIVE, I FEEL I POWERING UP,"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "pope-with-a-home-outside-of-church",
+    "date": "2026-07-29",
+    "tags": {
+      "god": {
+        "type": "lines",
+        "spans": [
+          "used by god, it gets hard,",
+          "performance i'm accustomed to, showing a glimmer of him,",
+          "make non-believers believe, i'm good at it,",
+          "put god at the doorstep, i'm home but i'm homesick."
+        ],
+        "note": "service to god described as a performance skill, and the last line leaves him outside without denying him"
+      },
+      "work": {
+        "type": "lines",
+        "spans": [
+          "used by god, it gets hard,",
+          "performance i'm accustomed to, showing a glimmer of him,",
+          "make non-believers believe, i'm good at it,"
+        ],
+        "note": "same span as god — the labour and the devotion are inseparable here, both stated as competence"
+      },
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "but at the end of the day i'm what i retreat to,",
+          "this equation i need to be a part of,"
+        ]
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i am dumbfounded, instincts, impulses,",
+          "not all need following, some things get old",
+          "but my statements don't make a poem,"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "i envy writers, me, i'm not one,",
+          "but at the end of the day i'm what i retreat to,",
+          "i'm home but i'm homesick."
+        ]
+      },
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "so does this rhyme engine kicking in mid-flight",
+          "it's not purely to impress a reader,",
+          "fuck-a-reader",
+          "they abruptly finish i'm left asking for more,",
+          "i envy writers, me, i'm not one,"
+        ],
+        "note": "the poem names its own mechanism mid-poem — the rhyme engine identified as it's running"
+      },
+      "creative block": {
+        "type": "lines",
+        "spans": [
+          "when dumbfounded take a step back,",
+          "retrace your aim for another shot,",
+          "but my statements don't make a poem,",
+          "or a prose or a complete work,"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "put god at the doorstep, i'm home but i'm homesick.",
+          "fuck-a-reader"
+        ],
+        "note": "home and homesick against each other in one clause; the second span hyphenated to force the reading"
+      }
+    }
+  },
+  {
+    "slug": "pretty-bitches-on-four",
+    "date": "2025-05-11",
+    "tags": {
+      "bravado": {
+        "type": "lines",
+        "spans": [
+          "i got pretty bitches on call",
+          "they be like goddamn",
+          "she's as sexy as a panther"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "a pretty bitch i am",
+          "bitch im hoem schooled like a lamb",
+          "a pretty bitch you too keep it weird on the 'gram"
+        ],
+        "note": "the boast turned onto himself — he's the pretty bitch, and by the last line so is the reader"
+      }
+    }
+  },
+  {
+    "slug": "putting-down-my-sorrows",
+    "date": "2025-06-11",
+    "tags": {
+      "release": {
+        "type": "lines",
+        "spans": [
+          "after all the feelings i borrowed",
+          "i lay down the weight i sorrowed",
+          "say i no want them there"
+        ],
+        "note": "the feelings described as borrowed rather than owned, which makes the putting-down a return rather than a loss"
+      },
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "the fruit, the bite, the stain",
+          "a fate i forgot to name"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "read",
+    "date": "2025-05-15",
+    "tags": {
+      "identity": {
+        "type": "phrase",
+        "spans": [
+          "I'm a human turned ankle monitor THROUGH salvia."
+        ],
+        "note": "the correction to a commenter is where the piece states its own premise most directly — not an object made conscious, a person made object"
+      },
+      "wonder": {
+        "type": "phrase",
+        "spans": [
+          "Being with him I feel wonder-ful, full of wonder, I wander, it's wonderous."
+        ],
+        "note": "the word broken open three ways in one sentence, and then the narrator questions whether the last form is real"
+      }
+    }
+  },
+  {
+    "slug": "riding-my-own-dick",
+    "date": "2025-08-20",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i've been told that if you don't take yourself seriously",
+          "life won't take you either",
+          "i mean though would i like life to take me seriously as serious is heavy and love is a light stepping and a light stepping"
+        ],
+        "note": "the advice quoted and then declined — seriousness rejected on the grounds that love is light"
+      }
+    }
+  },
+  {
+    "slug": "severe-pain",
+    "date": "2025-02-21",
+    "tags": {
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "im in severe pain",
+          "my eyes are weary of what they’ve seen",
+          "that im stuck",
+          "limited and boxed",
+          "im tired"
+        ],
+        "note": "the two-word admission near the end arrives after a long stretch of elaborate machinery-fantasy — exhaustion stated only once it's given up on being described"
+      }
+    }
+  },
+  {
+    "slug": "what-needs-repressing",
+    "date": "2025-08-17",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "nothing needs repressing",
+          "lets touch each other and lets fuck fuck fuck fuck fuck fuck",
+          "damn im an addict",
+          "lets drown in your water baby"
+        ],
+        "note": "the title's question answered in the first line of the second stanza, and the rest of the poem acts on the answer"
+      },
+      "body": {
+        "type": "lines",
+        "spans": [
+          "dance to the music baby",
+          "feel your",
+          "body move",
+          "brain works faster than the hand does",
+          "yet hands always catch up ketchup yeah"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "snails-eating-beans",
+    "date": "2026-02-25",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "niche! i hear you say niece,",
+          "brother are you in a brothel!?",
+          "null, we're making broth, sip it to get hot"
+        ],
+        "note": "brother/brothel/broth mined across three lines — one root split into three unrelated words"
+      }
+    }
+  },
+  {
+    "slug": "this-morning-i-felt-like",
+    "date": "2026-02-27",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "this morning i felt like",
+          "nothing",
+          "when was the last time you felt alive"
+        ],
+        "note": "the line break makes 'nothing' both the feeling and its absence, and the question that follows is asked outward"
+      }
+    }
+  },
+  {
+    "slug": "welcome-to-todays-session",
+    "date": "2026-02-27",
+    "tags": {
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "last week we talked about the loss of the specific sensation",
+          "that something you haven't encountered yet is waiting for you.",
+          "nothing feels new since the last dance i danced",
+          "i feel like, the sun has lost its vigour.",
+          "but i'm too busy feeling nothing."
+        ],
+        "note": "the sadness named clinically in the therapist's voice before the speaker gets to it — anticipation itself identified as the thing lost"
+      }
+    }
+  },
+  {
+    "slug": "whos-a-twat-and-whos-a-good-boy",
+    "date": "2026-02-27",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "who’s a twat and who’s a good boy",
+          "i think i’m a good boy",
+          "says every twat"
+        ],
+        "note": "the self-assessment invalidated by the line that follows it — claiming to be good is offered as evidence of the opposite"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "says every twat",
+          "what’s up with that"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "vulnerability-teaches-you-youre-not-strong",
+    "date": "2026-02-28",
+    "tags": {
+      "self-loathing": {
+        "type": "lines",
+        "spans": [
+          "im so scarred up",
+          "im so",
+          "im so me",
+          "but i dont wanna be me",
+          "i’d rather be anything",
+          "but me"
+        ],
+        "note": "the sentence breaks down mid-repetition — 'im so' left without a predicate before landing on 'me' as the insult"
+      },
+      "sadness": {
+        "type": "lines",
+        "spans": [
+          "im so tired of being the only vulnerable one",
+          "im so tired of taking damages",
+          "im so tired of hurt",
+          "im hurt so badly",
+          "so deeply"
+        ]
+      }
+    }
+  },
+  {
+    "slug": "who-knows-whats-what-and-whats-not",
+    "date": "2026-03-07",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "it turns out i’m not good at speaking",
+          "i’m great at acting",
+          "drag the truth,  never confront it"
+        ],
+        "note": "the doubt is about which mode is honest — speaking fails, performing succeeds, and the last line names the cost"
+      }
+    }
+  },
+  {
+    "slug": "sun-from-suns-perspective",
+    "date": "2026-03-08",
+    "tags": {
+      "wonder": {
+        "type": "lines",
+        "spans": [
+          "hi, i’m conscious but all i say is ah.",
+          "increase in the quantity of an experience changes the essence of that experience"
+        ],
+        "note": "the second line is a genuine claim about perception smuggled into a joke poem written from the sun's point of view"
+      },
+      "body": {
+        "type": "lines",
+        "spans": [
+          "pleasure from constantly burning",
+          "being stung by 10000 bees at the same time is pleasurable",
+          "i’m constantly being fucked"
+        ],
+        "note": "a body with no limit — sensation at a magnitude where pain and pleasure stop being distinguishable"
+      }
+    }
+  },
+  {
+    "slug": "shake-but-nothing-left-carbonation-gone-flat",
+    "date": "2026-06-22",
+    "tags": {
+      "creative block": {
+        "type": "lines",
+        "spans": [
+          "type and delete",
+          "type and delete",
+          "remember the times it poured out of me",
+          "now i shake",
+          "i shake",
+          "nothing's left"
+        ]
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "in another life my neck was taller",
+          "my spine sat more upright",
+          "born after industrial bloom",
+          "breathing down the factory fumes",
+          "my lungs crave the fresh air it never tasted"
+        ],
+        "note": "the exhaustion given a historical cause rather than a personal one — the body worn by an era it was born into"
+      }
+    }
+  },
+  {
+    "slug": "someday-ill-get-it",
+    "date": "2025-06-27",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i want to write but i can’t",
+          "will they turn into things",
+          "will i be able to sit in front of them",
+          "and recognize what i can’t now",
+          "i’m starting more fires than i keep lit"
+        ],
+        "note": "the writing addressed as something that might become legible to its own author later — and the fire line names the cost of the volume"
+      }
+    }
+  },
+  {
+    "slug": "this-table",
+    "date": "2026-03-10",
+    "tags": {
+      "god": {
+        "type": "phrase",
+        "spans": [
+          "I’ve never seen god, so I placed him everywhere.",
+          "God needs the soul as much as the soul needs god."
+        ],
+        "note": "absence answered with ubiquity rather than with denial, and then the mutual-need claim that recurs across the archive"
+      },
+      "mortality": {
+        "type": "phrase",
+        "spans": [
+          "Living felt like dying. But now that I’m dead, it feels strangely alive.",
+          "What am I gonna say when this table rusts and fades, leaves is place to birds and their babes.",
+          "I guess I will feel this table until I don’t feel this table."
+        ],
+        "note": "narrated from after death throughout — the table outlasting the speaker and then being outlasted itself"
+      }
+    }
+  },
+  {
+    "slug": "untitledaugust31a-journey-to-the-sea",
+    "date": "2026-08-31",
+    "tags": {
+      "highlighted": { "type": "lines", "spans": ["i was walking towards the sea, touched by all i witness,", "eye seen what sea would show, without being submerged in it.", "i looked up and saw a flock of crows, they formed a lucid arrow,", "a shade was there, she briefly paused and caught her breath.", "sometimes i duck under and watch it pass,", "saw a turtle on what i deemed was a tough spot,", "moved it elsewhere, it went back.", "sometimes i stand before it and surrender,", "today i did neither,", "wild waters are calm underneath,", "eye know, i know.", "i watched, eye was teary eyed,", "eye seen what sea would show,", "she got up, followed, till we disbanded.", "do you break something or let it break you?", "not knowing what it'll bring or take away.", "maybe the waves will settle, or i will."] }
     }
   }
 ]
