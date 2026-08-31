@@ -53,7 +53,11 @@ import { weightedTintFor, seededPhase, aliveScaleFor, bodyWeightStyle } from "@/
 // Sized and darkened to actually read as dots at a glance, not a faint
 // haze — the reference invisible-ink effect is clearly visible texture,
 // not a barely-there tint.
-const SPARKLE_LAYERS: { image: string; size: string }[] = [
+// Exported so PlayRevealText (the PLAY feature's permanent, non-timed
+// obscure/reveal) can draw on the exact same three-layer glitter look
+// instead of a second hand-tuned approximation of it — same reasoning as
+// aliveScaleFor/seededPhase/weightedTintFor being shared across surfaces.
+export const SPARKLE_LAYERS: { image: string; size: string }[] = [
   {
     image:
       "radial-gradient(circle, rgba(10,10,10,0.78) 1.1px, transparent 1.3px), " +
@@ -86,7 +90,7 @@ const SPARKLE_LAYERS: { image: string; size: string }[] = [
 // that long, so every layer looks mid-drift from the very first frame
 // instead of all three starting together at 0% and only drifting apart
 // later.
-function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSProperties {
+export function sparkleLayerStyle(lineSeed: number, layerIndex: number): React.CSSProperties {
   const layer = SPARKLE_LAYERS[layerIndex];
   const phase = seededPhase(lineSeed * 2.7 + layerIndex * 11.3 + 1);
   const duration = 4 + phase * 4; // 4s – 8s, varies per line and per layer

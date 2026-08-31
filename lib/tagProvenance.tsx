@@ -44,6 +44,38 @@ export function provenanceSlugs(): string[] {
   return Array.from(provenanceBySlug.keys());
 }
 
+// A tag only counts as "playable" (for /play) where it has a real, spanned
+// entry — "none" entries are honest data (the tag genuinely doesn't anchor
+// to text in that piece) but there's nothing to show only-this-tag-visible
+// for, so they're not a doorway into that poem. One pass over the
+// already-loaded provenance array; no post content touched here.
+function hasRealSpan(entry: ProvenanceEntry | undefined): boolean {
+  return !!entry && entry.type !== "none" && !!entry.spans && entry.spans.length > 0;
+}
+
+// Slugs where a given tag has real, spanned provenance — the pool of
+// specific poems /play/[tag] can open into for that tag.
+export function playableSlugsForTag(tag: string): string[] {
+  const data = tagProvenanceData as unknown as PostProvenance[];
+  return data.filter((p) => hasRealSpan(p.tags[tag])).map((p) => p.slug);
+}
+
+// How many playable (real-span) poems each tag currently has — sized
+// without loading any post body, just the provenance data already in
+// memory. Used by /play to size its tag lists and skip tags that are on
+// the taxonomy but have no real doorway into them yet.
+export function playableTagCounts(): Map<string, number> {
+  const data = tagProvenanceData as unknown as PostProvenance[];
+  const counts = new Map<string, number>();
+  for (const post of data) {
+    for (const [tag, entry] of Object.entries(post.tags)) {
+      if (!hasRealSpan(entry)) continue;
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
 // The earliest date any provenance-mapped post carries — the boundary the
 // MILAT seam marks. Computed from the data itself, not hardcoded, so a
 // future post with an earlier date (were that ever true) would move it.
