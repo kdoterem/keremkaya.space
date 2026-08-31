@@ -22,26 +22,44 @@ import { sparkleLayerStyle } from "./InvisibleInkText";
 // accepts; the point was never to be airtight, just to look and feel
 // like the rest of the site instead of a second, different effect.
 //
-// Clickable when obscured (onReveal) — stuck on one word shouldn't
-// require asking to see the whole poem.
+// Clickable when it isn't real provenance (onToggle) — a stuck reader can
+// peek one word without asking for the whole poem, and tap it again to
+// put it back, since a peek is exploratory, not a commitment the way an
+// actual provenanced word is.
 export default function ObscurableToken({
   text,
   weight,
   revealed,
   seed,
-  onReveal,
+  onToggle,
 }: {
   text: string;
   weight: number;
   revealed: boolean;
   seed: number;
-  onReveal?: () => void;
+  onToggle?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const legible = revealed || weight > 0;
 
   if (legible) {
-    if (weight <= 0 || reduceMotion) return <span>{text}</span>;
+    // Legible only because it's been peeked (weight <= 0, revealed forced
+    // true by the caller) — still toggleable, unlike real provenance.
+    if (weight <= 0) {
+      return (
+        <span
+          onClick={onToggle}
+          style={{
+            cursor: onToggle ? "pointer" : undefined,
+            textDecoration: onToggle ? "underline dotted" : undefined,
+            textUnderlineOffset: "3px",
+          }}
+        >
+          {text}
+        </span>
+      );
+    }
+    if (reduceMotion) return <span>{text}</span>;
 
     // Same drift+breathe "alive" motion every other weighted-text surface
     // on the site uses — a word played through PLAY and the same word
@@ -73,7 +91,7 @@ export default function ObscurableToken({
 
   if (reduceMotion) {
     return (
-      <span onClick={onReveal} style={{ opacity: 0.35, cursor: onReveal ? "pointer" : undefined }}>
+      <span onClick={onToggle} style={{ opacity: 0.35, cursor: onToggle ? "pointer" : undefined }}>
         {text}
       </span>
     );
@@ -81,8 +99,8 @@ export default function ObscurableToken({
 
   return (
     <span
-      onClick={onReveal}
-      style={{ position: "relative", display: "inline-block", cursor: onReveal ? "pointer" : undefined }}
+      onClick={onToggle}
+      style={{ position: "relative", display: "inline-block", cursor: onToggle ? "pointer" : undefined }}
     >
       <span style={{ opacity: 0 }}>{text}</span>
       {[0, 1, 2].map((layerIndex) => (

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import ObscurableToken from "./ObscurableToken";
 import { wordWeightLevel } from "./InvisibleInkText";
+import { splitPoemLines, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
 // ── The poem body, line by line, each legible line immediately followed
 // by its own write-in zone — writing happens right where the thought
@@ -10,16 +11,13 @@ import { wordWeightLevel } from "./InvisibleInkText";
 // if any character in it carries the chosen tag's weight; the exact
 // weighted words within it still get the extra alive-motion treatment
 // (via ObscurableToken), the rest of that same line just renders as
-// plain legible text.
+// plain legible text. One more zone sits at the very end, unlinked to
+// any specific line, for whatever didn't belong right after a
+// particular gap.
 //
-// Any obscured word can be clicked to reveal just that word — tracked
-// here as a plain in-memory set (not persisted; a stuck-reader's peek,
-// not a permanent spoiler), so getting unstuck on one word doesn't
-// require asking to see the whole poem.
-//
-// Zone ids are each line's own character-start offset into the body —
-// stable for a given (slug, tag) pair regardless of anything else, so
-// PlayScreen can key its stored draft/attempt state off them directly.
+// Peek state (which obscured words have been tapped open) lives in
+// PlayScreen, not here — it's persisted there the same way the draft is,
+// so this component stays a pure function of its props.
 function PlayZone({
   value,
   onChange,
@@ -69,33 +67,17 @@ export default function PlayPoemBody({
   weights,
   zoneValues,
   onZoneChange,
+  peeked,
+  onTogglePeek,
 }: {
   text: string;
   weights: number[] | undefined;
   zoneValues: Record<string, string>;
   onZoneChange: (id: string, value: string) => void;
+  peeked: Set<number>;
+  onTogglePeek: (start: number) => void;
 }) {
-  const [peeked, setPeeked] = useState<Set<number>>(new Set());
-  const peek = useCallback((start: number) => {
-    setPeeked((prev) => {
-      const next = new Set(prev);
-      next.add(start);
-      return next;
-    });
-  }, []);
-
-  const lines = useMemo(() => {
-    const raw = text.split("\n");
-    let offset = 0;
-    return raw.map((lineText) => {
-      const start = offset;
-      offset += lineText.length + 1; // +1 for the \n split() consumed
-      const end = start + lineText.length;
-      const isBlank = !lineText.trim();
-      const isLegible = !isBlank && !!weights && weights.slice(start, end).some((w) => w > 0);
-      return { text: lineText, start, end, isBlank, isLegible };
-    });
-  }, [text, weights]);
+  const lines = splitPoemLines(text, weights);
 
   return (
     <div style={{ whiteSpace: "pre-wrap" }}>
@@ -114,15 +96,14 @@ export default function PlayPoemBody({
                 offset += tok.length;
                 if (!tok || /^\s+$/.test(tok)) return <span key={j}>{tok}</span>;
                 const weight = weights ? wordWeightLevel(weights, start, tok.length) : 0;
-                const tokenRevealed = peeked.has(start);
                 return (
                   <ObscurableToken
                     key={j}
                     text={tok}
                     weight={weight}
-                    revealed={tokenRevealed}
+                    revealed={peeked.has(start)}
                     seed={start}
-                    onReveal={weight <= 0 && !tokenRevealed ? () => peek(start) : undefined}
+                    onToggle={weight <= 0 ? () => onTogglePeek(start) : undefined}
                   />
                 );
               })}
@@ -136,6 +117,25 @@ export default function PlayPoemBody({
           </div>
         );
       })}
+
+      <div style={{ marginTop: "0.5rem" }}>
+        <p
+          style={{
+            fontSize: "0.62rem",
+            fontWeight: 500,
+            letterSpacing: "0.12em",
+            fontVariant: "small-caps",
+            color: "rgba(10,10,10,0.4)",
+            marginBottom: "0.3rem",
+          }}
+        >
+          anywhere
+        </p>
+        <PlayZone
+          value={zoneValues[ANYWHERE_ZONE_ID] ?? ""}
+          onChange={(v) => onZoneChange(ANYWHERE_ZONE_ID, v)}
+        />
+      </div>
     </div>
   );
 }

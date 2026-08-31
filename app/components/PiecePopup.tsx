@@ -1,21 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 
 // ── Shared modal chrome for PLAY's two "read it properly" moments — your
 // own writing and Kerem's real version — same lime-panel-over-dark-scrim
 // language as ReadingModeModal (app/components/ReadingExperience.tsx), so
 // this reads as one more piece of the same site's own vocabulary rather
-// than a new pattern invented for this one feature.
+// than a new pattern invented for this one feature. Content is children,
+// not a plain string — "your writing" needs to interleave provenance
+// lines with what was written after each one, not just show flat text.
 export default function PiecePopup({
   label,
   title,
-  body,
+  children,
   onClose,
 }: {
   label: string;
   title?: string;
-  body: string;
+  children: ReactNode;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -93,8 +95,8 @@ export default function PiecePopup({
             {title}
           </h2>
         )}
-        <div style={{ whiteSpace: "pre-wrap", fontSize: "1.05rem", lineHeight: 1.8 }}>
-          {body}
+        <div style={{ fontSize: "1.05rem", lineHeight: 1.8 }}>
+          {children}
         </div>
       </div>
     </div>

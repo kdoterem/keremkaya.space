@@ -5,6 +5,7 @@ import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
 import PlayPoemBody from "./PlayPoemBody";
 import PiecePopup from "./PiecePopup";
+import { splitPoemLines, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
 // ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
 // tag's provenanced lines are legible on load, each followed immediately
@@ -19,15 +20,24 @@ import PiecePopup from "./PiecePopup";
 // version" and the writing popup SAVE opens both show their piece in the
 // same plain reading format /writing itself uses — neither one touches
 // the poem's own obscured/write-in state underneath, so closing either
-// one always comes back to exactly where writing left off.
+// one always comes back to exactly where writing left off. "your
+// writing" specifically interleaves each provenance line with what got
+// written after it — showing only the fragments, stripped of what
+// prompted them, made a saved piece unreadable as anything but orphaned
+// notes.
 //
-// Storage is two different things: a `draft` (the live set of zone
-// values, autosaves continuously and silently so nothing is lost — keyed
-// per poem+tag) and `saved` (only grows when SAVE is explicitly pressed
-// — a real history of finished writings at this same doorway, distinct
-// from the draft in progress). Both are plain localStorage, no accounts
-// on this site, same pattern as useReadingPreference.ts and /kismet.
+// Storage is three different things, all plain localStorage (no accounts
+// on this site — same pattern as useReadingPreference.ts and /kismet):
+// - `draft` — the live set of zone values, autosaves continuously and
+//   silently so nothing is lost.
+// - `peeked` — which obscured words have been tapped open, persisted so
+//   a reload doesn't re-hide something already looked at. Toggleable
+//   (tap again to re-obscure), unlike real provenance, since a peek is
+//   exploratory, not a commitment.
+// - `saved` — only grows when SAVE is explicitly pressed: a real history
+//   of finished writings at this same doorway, distinct from the draft.
 const DRAFT_KEY_PREFIX    = "kk-play-draft-v2";
+const PEEKED_KEY_PREFIX   = "kk-play-peeked-v1";
 const ATTEMPTS_KEY_PREFIX = "kk-play-attempts-v1";
 
 interface SavedWriting {
@@ -38,6 +48,9 @@ interface SavedWriting {
 
 function draftKey(slug: string, tag: string): string {
   return `${DRAFT_KEY_PREFIX}:${slug}:${tag}`;
+}
+function peekedKey(slug: string, tag: string): string {
+  return `${PEEKED_KEY_PREFIX}:${slug}:${tag}`;
 }
 function savedKey(slug: string, tag: string): string {
   return `${ATTEMPTS_KEY_PREFIX}:${slug}:${tag}`;
@@ -53,17 +66,6 @@ function fmtDateTime(iso: string): string {
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
     " · " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-}
-
-// Every zone's text, in line order, joined into the one string a saved
-// writing actually stores — keeps the shape (and the /play/saved archive
-// reading it) simple regardless of how many zones a given poem had.
-function composeWritingText(zoneValues: Record<string, string>): string {
-  return Object.entries(zoneValues)
-    .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([, v]) => v.trim())
-    .filter(Boolean)
-    .join("\n\n");
 }
 
 export default function PlayScreen({
@@ -84,6 +86,7 @@ export default function PlayScreen({
   bodyWeights: number[] | undefined;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
+  const [peeked, setPeeked]         = useState<Set<number>>(new Set());
   const [saved, setSaved]           = useState<SavedWriting[]>([]);
   const [hydrated, setHydrated]     = useState(false);
   const [savedListOpen, setSavedListOpen] = useState(false);
@@ -96,6 +99,8 @@ export default function PlayScreen({
     try {
       const rawDraft = localStorage.getItem(draftKey(slug, tag));
       if (rawDraft) setZoneValues(JSON.parse(rawDraft));
+      const rawPeeked = localStorage.getItem(peekedKey(slug, tag));
+      if (rawPeeked) setPeeked(new Set(JSON.parse(rawPeeked) as number[]));
       const rawSaved = localStorage.getItem(savedKey(slug, tag));
       if (rawSaved) setSaved(JSON.parse(rawSaved));
     } catch {
@@ -104,9 +109,9 @@ export default function PlayScreen({
     setHydrated(true);
   }, [slug, tag]);
 
-  // Silent continuous autosave of the in-progress zone values — only
-  // once hydration has actually happened, so the empty initial state
-  // never stomps a real stored draft before it's had a chance to load.
+  // Silent continuous autosave — only once hydration has actually
+  // happened, so the empty initial state never stomps a real stored
+  // value before it's had a chance to load.
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -120,11 +125,56 @@ export default function PlayScreen({
     }
   }, [zoneValues, hydrated, slug, tag]);
 
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      if (peeked.size) {
+        localStorage.setItem(peekedKey(slug, tag), JSON.stringify([...peeked]));
+      } else {
+        localStorage.removeItem(peekedKey(slug, tag));
+      }
+    } catch {
+      // Storage failed — peeked state still holds for this page view.
+    }
+  }, [peeked, hydrated, slug, tag]);
+
   const handleZoneChange = useCallback((id: string, value: string) => {
     setZoneValues((prev) => ({ ...prev, [id]: value }));
   }, []);
 
-  const composedText = useMemo(() => composeWritingText(zoneValues), [zoneValues]);
+  const handleTogglePeek = useCallback((start: number) => {
+    setPeeked((prev) => {
+      const next = new Set(prev);
+      if (next.has(start)) next.delete(start);
+      else next.add(start);
+      return next;
+    });
+  }, []);
+
+  // Every legible line paired with whatever got written after it — the
+  // actual shape of what was made, not the fragments alone. Shared by
+  // both the saved/localStorage text and the "your writing" popup so
+  // they never drift apart from each other.
+  const lines = useMemo(() => splitPoemLines(body, bodyWeights), [body, bodyWeights]);
+  const myBlocks = useMemo(
+    () =>
+      lines
+        .filter((l) => l.isLegible)
+        .map((l) => ({ provenance: l.text, mine: (zoneValues[String(l.start)] ?? "").trim() })),
+    [lines, zoneValues],
+  );
+  const anywhereText = (zoneValues[ANYWHERE_ZONE_ID] ?? "").trim();
+  const hasWriting = myBlocks.some((b) => b.mine) || !!anywhereText;
+
+  const composedText = useMemo(() => {
+    const parts: string[] = [];
+    for (const b of myBlocks) {
+      if (!b.mine) continue;
+      parts.push(`${b.provenance}\n${b.mine}`);
+    }
+    if (anywhereText) parts.push(anywhereText);
+    return parts.join("\n\n");
+  }, [myBlocks, anywhereText]);
 
   const handleSave = useCallback(() => {
     if (!composedText) return;
@@ -200,10 +250,12 @@ export default function PlayScreen({
             color: "rgba(10,10,10,0.55)",
             marginBottom: "2.5rem",
             maxWidth: "36em",
+            lineHeight: 1.6,
           }}
         >
-          the glittering gaps are yours — write in them, right where the feeling was.
-          stuck? tap a glimmer to see what's there.
+          the glittering gaps are yours — write in them, right where the feeling was,
+          or use the open space at the end for anything else.
+          stuck? tap a glimmer to peek — tap it again to hide it back.
         </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
@@ -212,6 +264,8 @@ export default function PlayScreen({
             weights={bodyWeights}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
+            peeked={peeked}
+            onTogglePeek={handleTogglePeek}
           />
         </div>
 
@@ -219,6 +273,18 @@ export default function PlayScreen({
           <button onClick={handleSave} disabled={!composedText} className="export-btn">
             save
           </button>
+          {hasWriting && (
+            <button
+              onClick={() => setPopup("mine")}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: "0.8rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)",
+                textDecoration: "underline", textUnderlineOffset: "3px",
+              }}
+            >
+              see your writing
+            </button>
+          )}
           <button
             onClick={() => setPopup("kerem")}
             style={{
@@ -274,10 +340,26 @@ export default function PlayScreen({
       </div>
 
       {popup === "mine" && (
-        <PiecePopup label={`your writing · ${tag}`} body={composedText} onClose={() => setPopup(null)} />
+        <PiecePopup label={`your writing · ${tag}`} onClose={() => setPopup(null)}>
+          {myBlocks.map((b, i) => (
+            <div key={i} style={{ marginBottom: "1.6rem" }}>
+              <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "0.35rem" }}>
+                {b.provenance}
+              </p>
+              {b.mine && <p style={{ whiteSpace: "pre-wrap" }}>{b.mine}</p>}
+            </div>
+          ))}
+          {anywhereText && (
+            <div style={{ marginTop: "1.6rem", paddingTop: "1.6rem", borderTop: "1px solid rgba(10,10,10,0.15)" }}>
+              <p style={{ whiteSpace: "pre-wrap" }}>{anywhereText}</p>
+            </div>
+          )}
+        </PiecePopup>
       )}
       {popup === "kerem" && (
-        <PiecePopup label={`${categoryTitle} · ${tag}`} title={title} body={body} onClose={() => setPopup(null)} />
+        <PiecePopup label={`${categoryTitle} · ${tag}`} title={title} onClose={() => setPopup(null)}>
+          <div style={{ whiteSpace: "pre-wrap" }}>{body}</div>
+        </PiecePopup>
       )}
     </main>
   );
