@@ -1,23 +1,25 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
+import PlayPoemBody from "./PlayPoemBody";
 
 // ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
-// tag's provenanced spans are legible on load; everything else stays
-// glittered until the reader asks to see "Kerem's version." Repeatable by
-// design (see the attempts list below): this is meant to be returned to,
-// not a once-per-poem quiz.
+// tag's provenanced lines are legible on load, each followed immediately
+// by its own glittered write-in zone (PlayPoemBody) — writing happens
+// right where the thought was, not disconnected in a box at the end.
+// Repeatable by design (see the attempts list below): this is meant to
+// be returned to, not a once-per-poem quiz.
 //
 // Storage is two different things, matching what was actually asked for:
-// a `draft` (autosaves continuously, silent, just so nothing is lost —
-// keyed per poem+tag) and `attempts` (only grows when SAVE is explicitly
-// pressed — a real history of finished tries at this same doorway,
-// distinct from the draft in progress). Both are plain localStorage,
-// no accounts on this site, same pattern as useReadingPreference.ts and
-// /kismet.
-const DRAFT_KEY_PREFIX    = "kk-play-draft-v1";
+// a `draft` (the live set of zone values, autosaves continuously and
+// silently so nothing is lost — keyed per poem+tag) and `attempts` (only
+// grows when SAVE is explicitly pressed — a real history of finished
+// tries at this same doorway, distinct from the draft in progress). Both
+// are plain localStorage, no accounts on this site, same pattern as
+// useReadingPreference.ts and /kismet.
+const DRAFT_KEY_PREFIX    = "kk-play-draft-v2";
 const ATTEMPTS_KEY_PREFIX = "kk-play-attempts-v1";
 
 interface SavedAttempt {
@@ -45,6 +47,18 @@ function fmtDateTime(iso: string): string {
     " · " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+// Every zone's text, in line order, joined into the one string an
+// attempt actually stores — keeps the saved-attempt shape (and the
+// /play/saved archive reading it) simple regardless of how many zones a
+// given poem happened to have.
+function composeAttemptText(zoneValues: Record<string, string>): string {
+  return Object.entries(zoneValues)
+    .sort((a, b) => Number(a[0]) - Number(b[0]))
+    .map(([, v]) => v.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 export default function PlayScreen({
   slug,
   tag,
@@ -64,11 +78,10 @@ export default function PlayScreen({
   bodyWeights: number[] | undefined;
   backHref: string;
 }) {
-  const [draft, setDraft]         = useState("");
-  const [attempts, setAttempts]   = useState<SavedAttempt[]>([]);
-  const [hydrated, setHydrated]   = useState(false);
-  const [askReveal, setAskReveal] = useState(false);
-  const [revealed, setRevealed]   = useState(false);
+  const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
+  const [attempts, setAttempts]     = useState<SavedAttempt[]>([]);
+  const [hydrated, setHydrated]     = useState(false);
+  const [revealed, setRevealed]     = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const [attemptsOpen, setAttemptsOpen] = useState(false);
 
@@ -78,7 +91,7 @@ export default function PlayScreen({
   useEffect(() => {
     try {
       const rawDraft = localStorage.getItem(draftKey(slug, tag));
-      if (rawDraft) setDraft(rawDraft);
+      if (rawDraft) setZoneValues(JSON.parse(rawDraft));
       const rawAttempts = localStorage.getItem(attemptsKey(slug, tag));
       if (rawAttempts) setAttempts(JSON.parse(rawAttempts));
     } catch {
@@ -87,22 +100,31 @@ export default function PlayScreen({
     setHydrated(true);
   }, [slug, tag]);
 
-  // Silent continuous autosave of the in-progress draft — only once
-  // hydration has actually happened, so the empty initial state never
-  // stomps a real stored draft before it's had a chance to load.
+  // Silent continuous autosave of the in-progress zone values — only
+  // once hydration has actually happened, so the empty initial state
+  // never stomps a real stored draft before it's had a chance to load.
   useEffect(() => {
     if (!hydrated) return;
     try {
-      if (draft) localStorage.setItem(draftKey(slug, tag), draft);
-      else localStorage.removeItem(draftKey(slug, tag));
+      if (Object.keys(zoneValues).length) {
+        localStorage.setItem(draftKey(slug, tag), JSON.stringify(zoneValues));
+      } else {
+        localStorage.removeItem(draftKey(slug, tag));
+      }
     } catch {
       // Storage failed — draft still holds for this page view via state.
     }
-  }, [draft, hydrated, slug, tag]);
+  }, [zoneValues, hydrated, slug, tag]);
+
+  const handleZoneChange = useCallback((id: string, value: string) => {
+    setZoneValues((prev) => ({ ...prev, [id]: value }));
+  }, []);
+
+  const composedText = useMemo(() => composeAttemptText(zoneValues), [zoneValues]);
 
   const handleSave = useCallback(() => {
-    if (!draft.trim()) return;
-    const next: SavedAttempt = { id: newId(), text: draft, savedAt: new Date().toISOString() };
+    if (!composedText) return;
+    const next: SavedAttempt = { id: newId(), text: composedText, savedAt: new Date().toISOString() };
     const updated = [...attempts, next];
     setAttempts(updated);
     try {
@@ -112,22 +134,18 @@ export default function PlayScreen({
     }
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1800);
-  }, [draft, attempts, slug, tag]);
-
-  const handleDone = useCallback(() => {
-    setAskReveal(true);
-  }, []);
+  }, [composedText, attempts, slug, tag]);
 
   const startAnother = useCallback(() => {
-    setDraft("");
-    setAskReveal(false);
+    setZoneValues({});
+    setRevealed(false);
   }, []);
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#fff",
+        backgroundColor: "#aaff00",
         color: "#0a0a0a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",
@@ -145,7 +163,7 @@ export default function PlayScreen({
           opacity: 0.5,
         }}
       >
-        ← {tag.toUpperCase()}
+        RETURN
       </Link>
 
       <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "3.5rem" }}>
@@ -168,95 +186,72 @@ export default function PlayScreen({
             fontWeight: 700,
             letterSpacing: "-0.02em",
             lineHeight: 1.15,
-            marginBottom: "2.5rem",
+            marginBottom: "0.6rem",
           }}
         >
           <PlayRevealText text={title} weights={titleWeights} revealed={revealed} />
         </h1>
 
-        <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "3rem" }}>
-          <PlayRevealText text={body} weights={bodyWeights} revealed={revealed} />
-        </div>
-
         {!revealed && (
-          <>
-            <label
-              style={{
-                display: "block",
-                fontSize: "0.65rem",
-                fontWeight: 500,
-                letterSpacing: "0.14em",
-                fontVariant: "small-caps",
-                color: "rgba(10,10,10,0.45)",
-                marginBottom: "0.6rem",
-              }}
-            >
-              your own continuation
-            </label>
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="write from what's visible…"
-              rows={8}
-              style={{
-                width: "100%",
-                fontFamily: "inherit",
-                fontSize: "1rem",
-                lineHeight: 1.7,
-                color: "#0a0a0a",
-                background: "transparent",
-                border: "1px solid rgba(10,10,10,0.18)",
-                borderRadius: "4px",
-                padding: "0.9rem 1rem",
-                resize: "vertical",
-                marginBottom: "1rem",
-              }}
-            />
-
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-              <button onClick={handleSave} disabled={!draft.trim()} className="export-btn">
-                save
-              </button>
-              <button onClick={handleDone} disabled={!draft.trim()} className="export-btn">
-                done — compare
-              </button>
-              {savedFlash && (
-                <span style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.5)", fontStyle: "italic" }}>
-                  saved.
-                </span>
-              )}
-            </div>
-          </>
-        )}
-
-        {askReveal && !revealed && (
-          <div
+          <p
             style={{
-              marginTop: "2rem",
-              paddingTop: "1.5rem",
-              borderTop: "1px solid rgba(10,10,10,0.12)",
+              fontSize: "0.8rem",
+              fontStyle: "italic",
+              color: "rgba(10,10,10,0.55)",
+              marginBottom: "2.5rem",
+              maxWidth: "36em",
             }}
           >
-            <p style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
-              want to see Kerem's version?
-            </p>
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button onClick={() => setRevealed(true)} className="export-btn">
-                yes, show me
-              </button>
-              <button onClick={() => setAskReveal(false)} className="export-btn">
-                not yet
-              </button>
-            </div>
-          </div>
+            the glittering gaps are yours — write in them, right where the feeling was.
+          </p>
         )}
+        {revealed && <div style={{ marginBottom: "2.5rem" }} />}
+
+        <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
+          <PlayPoemBody
+            text={body}
+            weights={bodyWeights}
+            revealed={revealed}
+            zoneValues={zoneValues}
+            onZoneChange={handleZoneChange}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap", marginTop: "1rem" }}>
+          <button onClick={handleSave} disabled={!composedText} className="export-btn">
+            save
+          </button>
+          {savedFlash && (
+            <span style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.5)", fontStyle: "italic" }}>
+              saved.
+            </span>
+          )}
+          {!revealed && (
+            <button
+              onClick={() => setRevealed(true)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontSize: "0.8rem",
+                fontStyle: "italic",
+                color: "rgba(10,10,10,0.55)",
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
+              }}
+            >
+              see kerem's version
+            </button>
+          )}
+        </div>
 
         {revealed && (
           <div
             style={{
-              marginTop: "1rem",
+              marginTop: "2rem",
               paddingTop: "1.5rem",
-              borderTop: "1px solid rgba(10,10,10,0.12)",
+              borderTop: "1px solid rgba(10,10,10,0.15)",
               display: "flex",
               gap: "0.75rem",
               flexWrap: "wrap",

@@ -158,7 +158,10 @@ function trailingPunctuationFactor(lineText: string): number {
 const START_DELAY_MS = 600;
 const TICK_MS = 100;
 
-function wordWeightLevel(weights: number[], start: number, len: number): number {
+// Exported so PlayRevealText/PlayPoemBody (PLAY's obscure/reveal) can
+// share the exact same per-token weight lookup rather than a second
+// hand-rolled copy of it.
+export function wordWeightLevel(weights: number[], start: number, len: number): number {
   let max = 0;
   for (let i = start; i < start + len; i++) {
     if (weights[i] !== undefined) max = Math.max(max, weights[i]);

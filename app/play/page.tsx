@@ -15,26 +15,42 @@ export default function PlayIndexPage() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#fff",
+        backgroundColor: "#aaff00",
         color: "#0a0a0a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",
       }}
     >
-      <Link
-        href="/"
-        style={{
-          fontSize: "0.7rem",
-          fontWeight: 500,
-          letterSpacing: "0.15em",
-          fontVariant: "small-caps",
-          color: "#0a0a0a",
-          textDecoration: "none",
-          opacity: 0.5,
-        }}
-      >
-        RETURN
-      </Link>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Link
+          href="/"
+          style={{
+            fontSize: "0.7rem",
+            fontWeight: 500,
+            letterSpacing: "0.15em",
+            fontVariant: "small-caps",
+            color: "#0a0a0a",
+            textDecoration: "none",
+            opacity: 0.5,
+          }}
+        >
+          RETURN
+        </Link>
+        <Link
+          href="/play/saved"
+          style={{
+            fontSize: "0.7rem",
+            fontWeight: 500,
+            letterSpacing: "0.1em",
+            fontVariant: "small-caps",
+            color: "#0a0a0a",
+            textDecoration: "none",
+            opacity: 0.5,
+          }}
+        >
+          your saved writings →
+        </Link>
+      </div>
 
       <div style={{ maxWidth: "680px", margin: "0 auto", marginTop: "2.5rem" }}>
         <h1
