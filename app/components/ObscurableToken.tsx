@@ -10,28 +10,32 @@ import { sparkleLayerStyle } from "./InvisibleInkText";
 // `inset: 0` sparkle overlay — which silently breaks the moment that run's
 // content wraps onto more than one visual line: `inset: 0` only ever
 // covers an inline element's FIRST line box, so every line after the
-// first rendered as truly blank (the real text sits at opacity 0 with no
-// sparkle drawn over it) rather than glittering. A single word never
-// wraps onto two lines on its own, so doing this per-word instead of
-// per-run sidesteps the bug entirely rather than working around it.
+// first rendered as truly blank rather than glittering. A single word
+// never wraps onto two lines on its own, so doing this per-word instead
+// of per-run sidesteps the bug entirely rather than working around it.
 //
-// Masked to bullet placeholders before the sparkle treatment ever sees
-// them (see maskWord) — same reasoning as the old PlayRevealText: this
-// isn't meant to be a casually-inspectable "hidden" state.
-function maskWord(word: string): string {
-  return word.replace(/\S/g, "•");
-}
-
+// The sparkle is clipped to this word's own real letterforms — same
+// technique, same look as the /writing reader's own reveal
+// (InvisibleInkText) — rather than a placeholder glyph standing in for
+// it. Real text does mean it's sitting in the page's own payload for
+// anyone who goes looking, same tradeoff InvisibleInkText already
+// accepts; the point was never to be airtight, just to look and feel
+// like the rest of the site instead of a second, different effect.
+//
+// Clickable when obscured (onReveal) — stuck on one word shouldn't
+// require asking to see the whole poem.
 export default function ObscurableToken({
   text,
   weight,
   revealed,
   seed,
+  onReveal,
 }: {
   text: string;
   weight: number;
   revealed: boolean;
   seed: number;
+  onReveal?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const legible = revealed || weight > 0;
@@ -67,12 +71,20 @@ export default function ObscurableToken({
     );
   }
 
-  const masked = maskWord(text);
-  if (reduceMotion) return <span style={{ opacity: 0.35 }}>{masked}</span>;
+  if (reduceMotion) {
+    return (
+      <span onClick={onReveal} style={{ opacity: 0.35, cursor: onReveal ? "pointer" : undefined }}>
+        {text}
+      </span>
+    );
+  }
 
   return (
-    <span style={{ position: "relative", display: "inline-block" }}>
-      <span style={{ opacity: 0 }}>{masked}</span>
+    <span
+      onClick={onReveal}
+      style={{ position: "relative", display: "inline-block", cursor: onReveal ? "pointer" : undefined }}
+    >
+      <span style={{ opacity: 0 }}>{text}</span>
       {[0, 1, 2].map((layerIndex) => (
         <span
           key={layerIndex}
@@ -84,7 +96,7 @@ export default function ObscurableToken({
             ...sparkleLayerStyle(seed + layerIndex * 3, layerIndex),
           }}
         >
-          {masked}
+          {text}
         </span>
       ))}
     </span>

@@ -260,6 +260,21 @@ a:hover .post-nav-title {
   color: #aaff00;
   border-color: #0a0a0a;
 }
+/* PLAY's inline write-zones (PlayPoemBody) — deliberately quiet: a hairline
+   bottom rule so it reads as "a line you can write on," nothing louder.
+   Motion/texture would compete with whatever the reader's actually typing
+   right there, which is the opposite of what this needed to do. */
+.play-zone {
+  border: none;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.2);
+}
+.play-zone::placeholder {
+  color: rgba(10, 10, 10, 0.35);
+}
+.play-zone:focus {
+  outline: none;
+  border-bottom-color: rgba(10, 10, 10, 0.5);
+}
 .export-btn:disabled {
   color: rgba(10, 10, 10, 0.35);
   cursor: default;

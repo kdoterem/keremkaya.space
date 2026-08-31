@@ -4,25 +4,33 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
 import PlayPoemBody from "./PlayPoemBody";
+import PiecePopup from "./PiecePopup";
 
 // ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
 // tag's provenanced lines are legible on load, each followed immediately
-// by its own glittered write-in zone (PlayPoemBody) — writing happens
-// right where the thought was, not disconnected in a box at the end.
-// Repeatable by design (see the attempts list below): this is meant to
-// be returned to, not a once-per-poem quiz.
+// by its own write-in zone (PlayPoemBody) — writing happens right where
+// the thought was, not disconnected in a box at the end. Repeatable by
+// design (see the saved-writings list below): this is meant to be
+// returned to, not a once-per-poem quiz — which is also why there's no
+// "start over" control: nothing here is being graded, so editing a zone
+// directly IS starting over.
 //
-// Storage is two different things, matching what was actually asked for:
-// a `draft` (the live set of zone values, autosaves continuously and
-// silently so nothing is lost — keyed per poem+tag) and `attempts` (only
-// grows when SAVE is explicitly pressed — a real history of finished
-// tries at this same doorway, distinct from the draft in progress). Both
-// are plain localStorage, no accounts on this site, same pattern as
-// useReadingPreference.ts and /kismet.
+// Two popups (PiecePopup), not a page-state reveal: "see kerem's
+// version" and the writing popup SAVE opens both show their piece in the
+// same plain reading format /writing itself uses — neither one touches
+// the poem's own obscured/write-in state underneath, so closing either
+// one always comes back to exactly where writing left off.
+//
+// Storage is two different things: a `draft` (the live set of zone
+// values, autosaves continuously and silently so nothing is lost — keyed
+// per poem+tag) and `saved` (only grows when SAVE is explicitly pressed
+// — a real history of finished writings at this same doorway, distinct
+// from the draft in progress). Both are plain localStorage, no accounts
+// on this site, same pattern as useReadingPreference.ts and /kismet.
 const DRAFT_KEY_PREFIX    = "kk-play-draft-v2";
 const ATTEMPTS_KEY_PREFIX = "kk-play-attempts-v1";
 
-interface SavedAttempt {
+interface SavedWriting {
   id:      string;
   text:    string;
   savedAt: string; // ISO
@@ -31,7 +39,7 @@ interface SavedAttempt {
 function draftKey(slug: string, tag: string): string {
   return `${DRAFT_KEY_PREFIX}:${slug}:${tag}`;
 }
-function attemptsKey(slug: string, tag: string): string {
+function savedKey(slug: string, tag: string): string {
   return `${ATTEMPTS_KEY_PREFIX}:${slug}:${tag}`;
 }
 
@@ -47,11 +55,10 @@ function fmtDateTime(iso: string): string {
     " · " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
-// Every zone's text, in line order, joined into the one string an
-// attempt actually stores — keeps the saved-attempt shape (and the
-// /play/saved archive reading it) simple regardless of how many zones a
-// given poem happened to have.
-function composeAttemptText(zoneValues: Record<string, string>): string {
+// Every zone's text, in line order, joined into the one string a saved
+// writing actually stores — keeps the shape (and the /play/saved archive
+// reading it) simple regardless of how many zones a given poem had.
+function composeWritingText(zoneValues: Record<string, string>): string {
   return Object.entries(zoneValues)
     .sort((a, b) => Number(a[0]) - Number(b[0]))
     .map(([, v]) => v.trim())
@@ -67,7 +74,6 @@ export default function PlayScreen({
   titleWeights,
   body,
   bodyWeights,
-  backHref,
 }: {
   slug: string;
   tag: string;
@@ -76,14 +82,12 @@ export default function PlayScreen({
   titleWeights: number[] | undefined;
   body: string;
   bodyWeights: number[] | undefined;
-  backHref: string;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
-  const [attempts, setAttempts]     = useState<SavedAttempt[]>([]);
+  const [saved, setSaved]           = useState<SavedWriting[]>([]);
   const [hydrated, setHydrated]     = useState(false);
-  const [revealed, setRevealed]     = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
-  const [attemptsOpen, setAttemptsOpen] = useState(false);
+  const [savedListOpen, setSavedListOpen] = useState(false);
+  const [popup, setPopup] = useState<"mine" | "kerem" | null>(null);
 
   // Load whatever's already there for this exact (poem, tag) doorway.
   // Deliberately after mount, not during render — localStorage doesn't
@@ -92,8 +96,8 @@ export default function PlayScreen({
     try {
       const rawDraft = localStorage.getItem(draftKey(slug, tag));
       if (rawDraft) setZoneValues(JSON.parse(rawDraft));
-      const rawAttempts = localStorage.getItem(attemptsKey(slug, tag));
-      if (rawAttempts) setAttempts(JSON.parse(rawAttempts));
+      const rawSaved = localStorage.getItem(savedKey(slug, tag));
+      if (rawSaved) setSaved(JSON.parse(rawSaved));
     } catch {
       // Private browsing / storage disabled — just start blank.
     }
@@ -120,26 +124,20 @@ export default function PlayScreen({
     setZoneValues((prev) => ({ ...prev, [id]: value }));
   }, []);
 
-  const composedText = useMemo(() => composeAttemptText(zoneValues), [zoneValues]);
+  const composedText = useMemo(() => composeWritingText(zoneValues), [zoneValues]);
 
   const handleSave = useCallback(() => {
     if (!composedText) return;
-    const next: SavedAttempt = { id: newId(), text: composedText, savedAt: new Date().toISOString() };
-    const updated = [...attempts, next];
-    setAttempts(updated);
+    const next: SavedWriting = { id: newId(), text: composedText, savedAt: new Date().toISOString() };
+    const updated = [...saved, next];
+    setSaved(updated);
     try {
-      localStorage.setItem(attemptsKey(slug, tag), JSON.stringify(updated));
+      localStorage.setItem(savedKey(slug, tag), JSON.stringify(updated));
     } catch {
       // Still holds in state for this page view even if it can't persist.
     }
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1800);
-  }, [composedText, attempts, slug, tag]);
-
-  const startAnother = useCallback(() => {
-    setZoneValues({});
-    setRevealed(false);
-  }, []);
+    setPopup("mine");
+  }, [composedText, saved, slug, tag]);
 
   return (
     <main
@@ -152,7 +150,7 @@ export default function PlayScreen({
       }}
     >
       <Link
-        href={backHref}
+        href="/play"
         style={{
           fontSize: "0.7rem",
           fontWeight: 500,
@@ -180,6 +178,9 @@ export default function PlayScreen({
           {categoryTitle} · {tag}
         </p>
 
+        {/* Title is never obscured — it's the reader's orientation for what
+            they're looking at, not part of the guessing. Any part of it the
+            tag does anchor to still gets the alive-motion treatment. */}
         <h1
           style={{
             fontSize: "clamp(1.6rem, 4vw, 2.4rem)",
@@ -189,29 +190,26 @@ export default function PlayScreen({
             marginBottom: "0.6rem",
           }}
         >
-          <PlayRevealText text={title} weights={titleWeights} revealed={revealed} />
+          <PlayRevealText text={title} weights={titleWeights} revealed={true} />
         </h1>
 
-        {!revealed && (
-          <p
-            style={{
-              fontSize: "0.8rem",
-              fontStyle: "italic",
-              color: "rgba(10,10,10,0.55)",
-              marginBottom: "2.5rem",
-              maxWidth: "36em",
-            }}
-          >
-            the glittering gaps are yours — write in them, right where the feeling was.
-          </p>
-        )}
-        {revealed && <div style={{ marginBottom: "2.5rem" }} />}
+        <p
+          style={{
+            fontSize: "0.8rem",
+            fontStyle: "italic",
+            color: "rgba(10,10,10,0.55)",
+            marginBottom: "2.5rem",
+            maxWidth: "36em",
+          }}
+        >
+          the glittering gaps are yours — write in them, right where the feeling was.
+          stuck? tap a glimmer to see what's there.
+        </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
           <PlayPoemBody
             text={body}
             weights={bodyWeights}
-            revealed={revealed}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
           />
@@ -221,59 +219,28 @@ export default function PlayScreen({
           <button onClick={handleSave} disabled={!composedText} className="export-btn">
             save
           </button>
-          {savedFlash && (
-            <span style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.5)", fontStyle: "italic" }}>
-              saved.
-            </span>
-          )}
-          {!revealed && (
-            <button
-              onClick={() => setRevealed(true)}
-              style={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                fontSize: "0.8rem",
-                fontStyle: "italic",
-                color: "rgba(10,10,10,0.55)",
-                textDecoration: "underline",
-                textUnderlineOffset: "3px",
-              }}
-            >
-              see kerem's version
-            </button>
-          )}
-        </div>
-
-        {revealed && (
-          <div
+          <button
+            onClick={() => setPopup("kerem")}
             style={{
-              marginTop: "2rem",
-              paddingTop: "1.5rem",
-              borderTop: "1px solid rgba(10,10,10,0.15)",
-              display: "flex",
-              gap: "0.75rem",
-              flexWrap: "wrap",
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              fontSize: "0.8rem",
+              fontStyle: "italic",
+              color: "rgba(10,10,10,0.55)",
+              textDecoration: "underline",
+              textUnderlineOffset: "3px",
             }}
           >
-            <button onClick={startAnother} className="export-btn">
-              write another attempt
-            </button>
-            <Link
-              href={backHref}
-              className="export-btn"
-              style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
-            >
-              try a different poem
-            </Link>
-          </div>
-        )}
+            see kerem's version
+          </button>
+        </div>
 
-        {attempts.length > 0 && (
+        {saved.length > 0 && (
           <div style={{ marginTop: "2.5rem" }}>
             <button
-              onClick={() => setAttemptsOpen((v) => !v)}
+              onClick={() => setSavedListOpen((v) => !v)}
               style={{
                 background: "none",
                 border: "none",
@@ -286,11 +253,11 @@ export default function PlayScreen({
                 color: "rgba(10,10,10,0.45)",
               }}
             >
-              {attemptsOpen ? "hide" : "show"} your {attempts.length} saved attempt{attempts.length === 1 ? "" : "s"} here
+              {savedListOpen ? "hide" : "show"} your {saved.length} saved writing{saved.length === 1 ? "" : "s"} here
             </button>
-            {attemptsOpen && (
+            {savedListOpen && (
               <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                {[...attempts].reverse().map((a) => (
+                {[...saved].reverse().map((a) => (
                   <div key={a.id}>
                     <p style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.4)", marginBottom: "0.3rem" }}>
                       {fmtDateTime(a.savedAt)}
@@ -305,6 +272,13 @@ export default function PlayScreen({
           </div>
         )}
       </div>
+
+      {popup === "mine" && (
+        <PiecePopup label={`your writing · ${tag}`} body={composedText} onClose={() => setPopup(null)} />
+      )}
+      {popup === "kerem" && (
+        <PiecePopup label={`${categoryTitle} · ${tag}`} title={title} body={body} onClose={() => setPopup(null)} />
+      )}
     </main>
   );
 }

@@ -47,7 +47,6 @@ export default async function PlaySlugPage({
       titleWeights={titleWeights}
       body={bodyText}
       bodyWeights={bodyWeights}
-      backHref={`/play/${encodeURIComponent(tag)}`}
     />
   );
 }
