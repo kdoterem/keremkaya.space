@@ -5583,5 +5583,215 @@
         "note": "a traditional epitaph, carved on gravestones since at least the eighteenth century, quoted verbatim as the poem's close — the dead addressing the living directly"
       }
     }
+  },
+  {
+    "slug": "i-like-construction-sounds-today",
+    "date": "2025-09-20",
+    "tags": {
+      "devotion": {
+        "type": "lines",
+        "spans": [
+          "the way %100 being of a thing is directed toward one goal",
+          "no backsies"
+        ],
+        "note": "devotion defined structurally rather than emotionally — total commitment with no reverse, observed in machinery rather than in a person"
+      },
+      "acceptance": {
+        "type": "lines",
+        "spans": [
+          "though id like to admit, first experience was way more frightening",
+          "i like construction sounds today"
+        ],
+        "note": "the same noise reclassified over time; the title repeated as the final line makes the acceptance an arrival rather than a premise"
+      }
+    }
+  },
+  {
+    "slug": "im-an-addict",
+    "date": "2025-11-07",
+    "tags": {
+      "body": {
+        "type": "lines",
+        "spans": [
+          "im addicted to fire",
+          "im too hot your water sizzle",
+          "just stay hot as fuck"
+        ],
+        "note": "the body present only as temperature — heat as the sole property claimed, and it survives the poem's abrupt subject change"
+      },
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "im addicted to fucking",
+          "and fuck all of yall"
+        ],
+        "note": "the appetite stated first as a condition and repeated last as a dismissal — the same word doing opposite work at each end"
+      }
+    }
+  },
+  {
+    "slug": "i-summon-thee",
+    "date": "2026-02-26",
+    "tags": {
+      "healing": {
+        "type": "lines",
+        "spans": [
+          "and take these mortal’s wounds",
+          "and stitch them up under a new moon"
+        ],
+        "note": "healing delegated to a summoned figure rather than performed, and scheduled to a lunar phase — the fool given surgical work"
+      }
+    }
+  },
+  {
+    "slug": "i-is-i",
+    "date": "2026-03-11",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "on that day, i",
+          "is i"
+        ],
+        "note": "the tautology broken across a line so the subject sits alone before its own verb — identity asserted by the smallest possible statement, and only for the day named"
+      }
+    }
+  },
+  {
+    "slug": "im-going-to-fuck-you-till-it-all-makes-sense",
+    "date": "2025-11-07",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "im going to fuck you till it all makes sense",
+          "leave senseless in our senses",
+          "sensitive sensibility"
+        ],
+        "note": "desire framed as an epistemological method — sense arrived at through the body, with the sense/senseless chain doing the arguing"
+      },
+      "god": {
+        "type": "line",
+        "spans": [
+          "lets fuck until we fuck god"
+        ],
+        "note": "the only mention, placed as the escalation's endpoint — god reached through repetition rather than through worship"
+      }
+    }
+  },
+  {
+    "slug": "im-not-a-writer",
+    "date": "2025-08-26",
+    "tags": {
+      "the writing self": {
+        "type": "lines",
+        "spans": [
+          "i’m not a writer",
+          "but that doesn’t give me excuses to write mediocre shit",
+          "i right what i once deemed to be mediocre through writing",
+          "i write mediocre i don’t write mediocre"
+        ],
+        "note": "the denial of the vocation followed immediately by professional standards for it — and right/write doing the reconciling"
+      },
+      "doubt": {
+        "type": "line",
+        "spans": [
+          "i write mediocre i don’t write mediocre"
+        ],
+        "note": "the claim and its negation in one unpunctuated line, with nothing offered to adjudicate between them"
+      }
+    }
+  },
+  {
+    "slug": "same-nakedness-different-framing",
+    "date": "2026-05-27",
+    "tags": {
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "you ought to feel your way through the feeling that you're feeling",
+          "skimming through a book while the sun shines on through,",
+          "this poem lost its meaning looking at the view"
+        ],
+        "note": "the last line is the poem abandoning its own argument mid-sentence because something outside it was better — presence winning over the writing about presence"
+      }
+    }
+  },
+  {
+    "slug": "love-lee",
+    "date": "2026-06-01",
+    "tags": {
+      "conflict": {
+        "type": "lines",
+        "spans": [
+          "but maybe duration would be longer and they shorted you that?",
+          "fuck them fuck me and fuck you no more loving for you fools"
+        ],
+        "note": "the conflict is with the transaction itself — worry suspected of shortening the high it was supposed to extend, and the poem ends by cancelling everyone including itself"
+      }
+    }
+  },
+  {
+    "slug": "painful-story-1",
+    "date": "2026-03-27",
+    "tags": {
+      "longing": {
+        "type": "lines",
+        "spans": [
+          "when i first uttered the word mom, it was to my babysitter",
+          "my mom, she was no show",
+          "hold low",
+          "hollow"
+        ],
+        "note": "the last three lines erode one sound into the next — no show, hold low, hollow — so the absence becomes the word for what it left"
+      }
+    }
+  },
+  {
+    "slug": "ranking-my-best-sexes",
+    "date": "2026-06-15",
+    "tags": {
+      "desire": {
+        "type": "lines",
+        "spans": [
+          "eyeing each other till i becomes we.",
+          "a moment to kiss, in the moment but lips evade lips and gives a soft kiss to cheek.",
+          "we haven't fucked but this is a great sex"
+        ],
+        "note": "the whole poem is deferral — lips evading lips, the kiss redirected — and the final line reclassifies the deferral as the event rather than as its prelude"
+      }
+    }
+  },
+  {
+    "slug": "well-whats-new",
+    "date": "2026-03-12",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "how could you be mad and fat",
+          "are you mad cause you’re fat",
+          "or are you fat cause you’re mad",
+          "and i lied my dad isn’t fat"
+        ],
+        "note": "two words rotated through causation in three lines, then the premise withdrawn entirely — the wordplay retroactively revealed to have had no subject"
+      }
+    }
+  },
+  {
+    "slug": "when-i-finish-this-sentence",
+    "date": "2026-03-27",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "i won’t have anxiety about the future",
+          "when i finish this sentence",
+          "i will get a driver’s license",
+          "when i finish this senten"
+        ],
+        "note": "the final line cuts off mid-word, so the condition every promise depended on is never met — the doubt enacted by the poem failing to finish rather than by anything it says"
+      }
+    }
   }
 ]
