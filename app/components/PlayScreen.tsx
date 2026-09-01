@@ -253,7 +253,7 @@ export default function PlayScreen({
             marginBottom: "0.6rem",
           }}
         >
-          <PlayRevealText text={title} weights={titleWeights} revealed={true} />
+          <PlayRevealText text={title} weights={titleWeights} />
         </h1>
 
         <p

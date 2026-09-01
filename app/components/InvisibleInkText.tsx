@@ -160,13 +160,22 @@ const TICK_MS = 100;
 
 // Exported so PlayRevealText/PlayPoemBody (PLAY's obscure/reveal) can
 // share the exact same per-token weight lookup rather than a second
-// hand-rolled copy of it.
+// hand-rolled copy of it. PLAY additionally uses -1 as "legible but not
+// this tag's own anchor — borrowed context from an adjacent tag's span,
+// part of the same argument" (see the play screen route's cluster-
+// merging); a real positive weight always wins over that if a token
+// somehow carries both, obscured (0) only wins if neither is present.
 export function wordWeightLevel(weights: number[], start: number, len: number): number {
   let max = 0;
+  let hasContext = false;
   for (let i = start; i < start + len; i++) {
-    if (weights[i] !== undefined) max = Math.max(max, weights[i]);
+    const w = weights[i];
+    if (w === undefined) continue;
+    if (w > 0) max = Math.max(max, w);
+    else if (w === -1) hasContext = true;
   }
-  return max;
+  if (max > 0) return max;
+  return hasContext ? -1 : 0;
 }
 
 // Renders one line's real text — no reveal logic of its own, the whole

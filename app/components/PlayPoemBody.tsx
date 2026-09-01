@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import ObscurableToken from "./ObscurableToken";
+import ObscurableRun from "./ObscurableRun";
 import { wordWeightLevel } from "./InvisibleInkText";
 import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
@@ -16,9 +17,24 @@ import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID }
 // leaving it empty collapses back to the prompt on the next visit;
 // anything actually written stays open.
 //
-// Peek state (which obscured words have been tapped open) lives in
-// PlayScreen, not here — it's persisted there the same way the draft is,
-// so this component stays a pure function of its props.
+// Each poem line renders in three tiers, per word:
+//  - weight > 0: this tag's own anchor — ObscurableToken, alive motion.
+//  - weight === -1: borrowed context from an adjacent tag's span, part
+//    of the same argument (see the play screen route's cluster-
+//    merging) — plain legible text, no motion, no sparkle.
+//  - weight === 0: obscured — batched into ONE ObscurableRun per
+//    contiguous stretch within the line (not one per word). That
+//    batching is what actually fixed PLAY's real performance problem: a
+//    typical doorway was running ~280 continuously-animated sparkle
+//    elements just sitting there, some over 4,000. Grouping them the
+//    same way InvisibleInkText already groups its own sparkle per line,
+//    rather than per word, cuts that by roughly the run's own word
+//    count with no loss of correctness — the run's boundaries come from
+//    the same weight computation either way.
+//
+// Peek state (which obscured RUNS have been tapped open) lives in
+// PlayScreen, not here — it's persisted there the same way the draft
+// is, so this component stays a pure function of its props.
 function PlayZone({
   value,
   onChange,
@@ -96,6 +112,75 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
   );
 }
 
+// One poem line's content, tier-resolved: alive words render
+// individually (existing per-word treatment, unchanged); obscured
+// stretches accumulate into one combined string and flush as a single
+// ObscurableRun once they hit a non-obscured token or the line's end —
+// never per word.
+function LineContent({
+  lineText,
+  lineStart,
+  weights,
+  peeked,
+  onTogglePeek,
+}: {
+  lineText: string;
+  lineStart: number;
+  weights: number[] | undefined;
+  peeked: Set<number>;
+  onTogglePeek: (start: number) => void;
+}) {
+  const tokens = lineText.split(/(\s+)/);
+  let offset = lineStart;
+  const elements: React.ReactNode[] = [];
+  let obscuredText = "";
+  let obscuredStart: number | null = null;
+
+  const flushObscured = () => {
+    if (!obscuredText) return;
+    const start = obscuredStart as number;
+    elements.push(
+      <ObscurableRun
+        key={`obs-${start}`}
+        text={obscuredText}
+        seed={start}
+        revealed={peeked.has(start)}
+        onToggle={() => onTogglePeek(start)}
+      />,
+    );
+    obscuredText = "";
+    obscuredStart = null;
+  };
+
+  for (let j = 0; j < tokens.length; j++) {
+    const tok = tokens[j];
+    const start = offset;
+    offset += tok.length;
+    if (!tok) continue;
+
+    if (/^\s+$/.test(tok)) {
+      if (obscuredText) obscuredText += tok;
+      else elements.push(<span key={`ws-${start}`}>{tok}</span>);
+      continue;
+    }
+
+    const weight = weights ? wordWeightLevel(weights, start, tok.length) : 0;
+    if (weight > 0) {
+      flushObscured();
+      elements.push(<ObscurableToken key={`a-${start}`} text={tok} weight={weight} seed={start} />);
+    } else if (weight === -1) {
+      flushObscured();
+      elements.push(<span key={`c-${start}`}>{tok}</span>);
+    } else {
+      if (!obscuredText) obscuredStart = start;
+      obscuredText += tok;
+    }
+  }
+  flushObscured();
+
+  return <>{elements}</>;
+}
+
 export default function PlayPoemBody({
   text,
   weights,
@@ -131,29 +216,18 @@ export default function PlayPoemBody({
       {lines.map((line, i) => {
         if (line.isBlank) return <div key={i} style={{ minHeight: "1em" }}>&nbsp;</div>;
 
-        const tokens = line.text.split(/(\s+)/);
-        let offset = line.start;
         const zoneId = passageEndsAt.get(line.start);
 
         return (
           <div key={i}>
             <div>
-              {tokens.map((tok, j) => {
-                const start = offset;
-                offset += tok.length;
-                if (!tok || /^\s+$/.test(tok)) return <span key={j}>{tok}</span>;
-                const weight = weights ? wordWeightLevel(weights, start, tok.length) : 0;
-                return (
-                  <ObscurableToken
-                    key={j}
-                    text={tok}
-                    weight={weight}
-                    revealed={peeked.has(start)}
-                    seed={start}
-                    onToggle={weight <= 0 ? () => onTogglePeek(start) : undefined}
-                  />
-                );
-              })}
+              <LineContent
+                lineText={line.text}
+                lineStart={line.start}
+                weights={weights}
+                peeked={peeked}
+                onTogglePeek={onTogglePeek}
+              />
             </div>
             {zoneId && (
               openZones.has(zoneId) || (zoneValues[zoneId] ?? "").trim() ? (

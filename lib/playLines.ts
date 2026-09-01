@@ -19,7 +19,13 @@ export function splitPoemLines(text: string, weights: number[] | undefined): Poe
     offset += lineText.length + 1; // +1 for the \n split() consumed
     const end = start + lineText.length;
     const isBlank = !lineText.trim();
-    const isLegible = !isBlank && !!weights && weights.slice(start, end).some((w) => w > 0);
+    // !== 0, not > 0 — a word can be legible either because it's this
+    // tag's own anchor (a real positive weight) or because it's borrowed
+    // context from an adjacent tag's span, part of the same argument
+    // (marked -1 by the play screen route's cluster-merging). Both keep
+    // a line inside a passage; only a true 0 (nothing marks it at all)
+    // breaks one.
+    const isLegible = !isBlank && !!weights && weights.slice(start, end).some((w) => w !== 0);
     return { text: lineText, start, end, isBlank, isLegible };
   });
 }
