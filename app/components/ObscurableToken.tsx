@@ -51,7 +51,8 @@ export default function ObscurableToken({
           onClick={onToggle}
           style={{
             cursor: onToggle ? "pointer" : undefined,
-            textDecoration: onToggle ? "underline dotted" : undefined,
+            textDecoration: onToggle ? "underline" : undefined,
+            textDecorationColor: "rgba(10,10,10,0.22)",
             textUnderlineOffset: "3px",
           }}
         >
