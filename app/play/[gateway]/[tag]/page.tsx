@@ -1,19 +1,23 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { findGateway } from "@/lib/playGateways";
 import { findCategoryForTag, getPlayablePoemsForTag } from "@/lib/playData";
 
 export default async function PlayTagPage({
   params,
 }: {
-  params: Promise<{ tag: string }>;
+  params: Promise<{ gateway: string; tag: string }>;
 }) {
-  const { tag: rawTag } = await params;
+  const { gateway: gatewayKey, tag: rawTag } = await params;
+  const gateway = findGateway(gatewayKey);
+  if (!gateway) notFound();
+
   const tag = decodeURIComponent(rawTag);
 
   const category = findCategoryForTag(tag);
   if (!category) notFound();
 
-  const poems = getPlayablePoemsForTag(tag);
+  const poems = getPlayablePoemsForTag(tag, gateway.mode);
   if (poems.length === 0) notFound();
 
   return (
@@ -27,7 +31,7 @@ export default async function PlayTagPage({
       }}
     >
       <Link
-        href="/play"
+        href={`/play/${gateway.key}`}
         style={{
           fontSize: "0.7rem",
           fontWeight: 500,
@@ -38,7 +42,7 @@ export default async function PlayTagPage({
           opacity: 0.5,
         }}
       >
-        ← PLAY
+        ← {gateway.title.toUpperCase()}
       </Link>
 
       <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "3.5rem" }}>
@@ -72,7 +76,7 @@ export default async function PlayTagPage({
           {poems.map((poem) => (
             <Link
               key={poem.slug}
-              href={`/play/${encodeURIComponent(tag)}/${poem.slug}`}
+              href={`/play/${gateway.key}/${encodeURIComponent(tag)}/${poem.slug}`}
               style={{
                 display: "block",
                 padding: "1rem 0",

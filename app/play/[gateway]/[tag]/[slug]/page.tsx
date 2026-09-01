@@ -2,24 +2,28 @@ import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/lib/posts";
 import { getProvenanceTags, computeWeights, playableSlugsForTag } from "@/lib/tagProvenance";
 import { findCategoryForTag } from "@/lib/playData";
+import { findGateway } from "@/lib/playGateways";
 import PlayScreen from "@/app/components/PlayScreen";
 
 export default async function PlaySlugPage({
   params,
 }: {
-  params: Promise<{ tag: string; slug: string }>;
+  params: Promise<{ gateway: string; tag: string; slug: string }>;
 }) {
-  const { tag: rawTag, slug } = await params;
+  const { gateway: gatewayKey, tag: rawTag, slug } = await params;
+  const gateway = findGateway(gatewayKey);
+  if (!gateway) notFound();
+
   const tag = decodeURIComponent(rawTag);
 
   const category = findCategoryForTag(tag);
   if (!category) notFound();
 
-  // Only real, spanned provenance for THIS tag makes a (poem, tag) pair a
-  // valid PLAY doorway — same check /play/[tag] used to list it in the
-  // first place, re-checked here so a stale/typed-in URL can't open a
-  // poem this tag doesn't actually anchor to.
-  if (!playableSlugsForTag(tag).includes(slug)) notFound();
+  // Only real, spanned provenance for THIS tag, matching THIS gateway's
+  // mode, makes a (poem, tag) pair a valid doorway here — re-checked so
+  // a stale/typed-in URL (or the wrong gateway for this poem's actual
+  // mode) can't open something that doesn't belong to it.
+  if (!playableSlugsForTag(tag, gateway.mode).includes(slug)) notFound();
 
   const post = getPostBySlug(slug);
   if (!post) notFound();
@@ -38,6 +42,10 @@ export default async function PlaySlugPage({
   const titleWeights = computeWeights(post.title, singleTag);
   const bodyWeights  = computeWeights(bodyText, singleTag);
 
+  // One consistent prompt for the whole screen — the gateway already
+  // decided this, so there's nothing left to ask per passage.
+  const promptLabel = gateway.mode === "argue" ? "push back" : "write here";
+
   return (
     <PlayScreen
       slug={slug}
@@ -47,6 +55,8 @@ export default async function PlaySlugPage({
       titleWeights={titleWeights}
       body={bodyText}
       bodyWeights={bodyWeights}
+      promptLabel={promptLabel}
+      backHref={`/play/${gateway.key}/${encodeURIComponent(tag)}`}
     />
   );
 }

@@ -5,22 +5,20 @@ import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
 import PlayPoemBody from "./PlayPoemBody";
 import PiecePopup from "./PiecePopup";
-import {
-  splitPoemLines,
-  groupLegiblePassages,
-  writeHereZoneId,
-  pushBackZoneId,
-  ANYWHERE_ZONE_ID,
-} from "@/lib/playLines";
+import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
-// ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
-// tag's provenanced lines are legible on load, each followed immediately
-// by its own write-in zone (PlayPoemBody) — writing happens right where
-// the thought was, not disconnected in a box at the end. Repeatable by
-// design (see the saved-writings list below): this is meant to be
-// returned to, not a once-per-poem quiz — which is also why there's no
-// "start over" control: nothing here is being graded, so editing a zone
-// directly IS starting over.
+// ── PLAY's actual play screen — one (poem, tag) pair, reached through one
+// of the two gateways at /play. Only the chosen tag's provenanced lines
+// are legible on load, each followed immediately by its own write-in
+// zone (PlayPoemBody) — writing happens right where the thought was, not
+// disconnected in a box at the end. The gateway already decided the
+// prompt language for the whole screen (promptLabel — "write here" or
+// "push back"), so there's exactly one zone per passage here, not a
+// choice to make on every one. Repeatable by design (see the
+// saved-writings list below): this is meant to be returned to, not a
+// once-per-poem quiz — which is also why there's no "start over"
+// control: nothing here is being graded, so editing a zone directly IS
+// starting over.
 //
 // Two popups (PiecePopup), not a page-state reveal: "see kerem's
 // version" and the writing popup SAVE opens both show their piece in the
@@ -82,6 +80,8 @@ export default function PlayScreen({
   titleWeights,
   body,
   bodyWeights,
+  promptLabel,
+  backHref,
 }: {
   slug: string;
   tag: string;
@@ -90,6 +90,8 @@ export default function PlayScreen({
   titleWeights: number[] | undefined;
   body: string;
   bodyWeights: number[] | undefined;
+  promptLabel: string;
+  backHref: string;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
   const [peeked, setPeeked]         = useState<Set<number>>(new Set());
@@ -158,32 +160,30 @@ export default function PlayScreen({
   }, []);
 
   // Every legible PASSAGE (a run of consecutive tag-weighted lines — see
-  // groupLegiblePassages) paired with whatever got written in either of
-  // its two doors — the actual shape of what was made, not the fragments
-  // alone, and grouped the same way the on-page zones are so a
-  // multi-line passage shows as the one unbroken thought it actually is,
-  // not several. Shared by both the saved/localStorage text and the
-  // "your writing" popup so they never drift apart from each other.
+  // groupLegiblePassages) paired with whatever got written after it —
+  // the actual shape of what was made, not the fragments alone, and
+  // grouped the same way the on-page zone is so a multi-line passage
+  // shows as the one unbroken thought it actually is, not several. Shared
+  // by both the saved/localStorage text and the "your writing" popup so
+  // they never drift apart from each other.
   const lines    = useMemo(() => splitPoemLines(body, bodyWeights), [body, bodyWeights]);
   const passages = useMemo(() => groupLegiblePassages(lines), [lines]);
   const myBlocks = useMemo(
     () =>
       passages.map((p) => ({
         provenance: p.lines.map((l) => l.text).join("\n"),
-        written:  (zoneValues[writeHereZoneId(p.start)] ?? "").trim(),
-        pushedBack: (zoneValues[pushBackZoneId(p.start)] ?? "").trim(),
+        mine: (zoneValues[passageZoneId(p.start)] ?? "").trim(),
       })),
     [passages, zoneValues],
   );
   const anywhereText = (zoneValues[ANYWHERE_ZONE_ID] ?? "").trim();
-  const hasWriting = myBlocks.some((b) => b.written || b.pushedBack) || !!anywhereText;
+  const hasWriting = myBlocks.some((b) => b.mine) || !!anywhereText;
 
   const composedText = useMemo(() => {
     const parts: string[] = [];
     for (const b of myBlocks) {
-      if (!b.written && !b.pushedBack) continue;
-      const responses = [b.written, b.pushedBack].filter(Boolean).join("\n\n");
-      parts.push(`${b.provenance}\n${responses}`);
+      if (!b.mine) continue;
+      parts.push(`${b.provenance}\n${b.mine}`);
     }
     if (anywhereText) parts.push(anywhereText);
     return parts.join("\n\n");
@@ -213,7 +213,7 @@ export default function PlayScreen({
       }}
     >
       <Link
-        href="/play"
+        href={backHref}
         style={{
           fontSize: "0.7rem",
           fontWeight: 500,
@@ -266,16 +266,16 @@ export default function PlayScreen({
             lineHeight: 1.6,
           }}
         >
-          kerem's marked lines stay legible, as written. after any passage, "+ write here"
-          continues it, "+ push back" responds to it — pick whichever fits, or use the open
-          space at the end for anything else. stuck on a glimmer? tap it to peek — tap it
-          again to hide it back.
+          kerem's marked lines stay legible, as written. "+ {promptLabel}" after any passage
+          you want to answer, or use the open space at the end for anything else. stuck on
+          a glimmer? tap it to peek — tap it again to hide it back.
         </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
           <PlayPoemBody
             text={body}
             weights={bodyWeights}
+            promptLabel={promptLabel}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
             peeked={peeked}
@@ -360,12 +360,7 @@ export default function PlayScreen({
               <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "0.35rem" }}>
                 {b.provenance}
               </p>
-              {b.written && <p style={{ whiteSpace: "pre-wrap" }}>{b.written}</p>}
-              {b.pushedBack && (
-                <p style={{ whiteSpace: "pre-wrap", marginTop: b.written ? "0.6rem" : 0 }}>
-                  {b.pushedBack}
-                </p>
-              )}
+              {b.mine && <p style={{ whiteSpace: "pre-wrap" }}>{b.mine}</p>}
             </div>
           ))}
           {anywhereText && (

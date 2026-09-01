@@ -74,10 +74,14 @@ export interface PlayableTag {
 }
 
 // A category's tags, sized by how many real doorways each one currently
-// has — and only the ones with at least one, so an untouched tag (real in
-// the taxonomy, not yet provenanced) doesn't show up as a dead link.
-export function getPlayableTagsInCategory(category: PlayCategory): PlayableTag[] {
-  const counts = playableTagCounts();
+// has WITHIN one gateway's mode — a tag with plenty of "argue" doorways
+// might have none under "outpour", and only shows up where it actually
+// has something.
+export function getPlayableTagsInCategory(
+  category: PlayCategory,
+  mode: "outpour" | "argue",
+): PlayableTag[] {
+  const counts = playableTagCounts(mode);
   return category.tags
     .map((tag) => ({ tag, count: counts.get(tag) ?? 0 }))
     .filter((t) => t.count > 0)
@@ -90,10 +94,11 @@ export interface PlayablePoem {
   date:  string;
 }
 
-// Every poem playable for a given tag, newest first (matches getAllPosts'
-// own ordering) — the pool /play/[tag] lists for someone to pick from.
-export function getPlayablePoemsForTag(tag: string): PlayablePoem[] {
-  const slugs  = new Set(playableSlugsForTag(tag));
+// Every poem playable for a given tag WITHIN one gateway's mode, newest
+// first (matches getAllPosts' own ordering) — the pool
+// /play/[gateway]/[tag] lists for someone to pick from.
+export function getPlayablePoemsForTag(tag: string, mode: "outpour" | "argue"): PlayablePoem[] {
+  const slugs  = new Set(playableSlugsForTag(tag, mode));
   if (slugs.size === 0) return [];
   return getAllPosts()
     .filter((p) => slugs.has(p.slug))

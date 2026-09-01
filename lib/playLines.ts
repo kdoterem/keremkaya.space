@@ -59,15 +59,10 @@ export function groupLegiblePassages(lines: PoemLine[]): PoemPassage[] {
   return passages;
 }
 
-// Every passage gets two independent doors, not one chosen by a
-// classification that's only ever a guess made from the span text alone —
-// "write here" (continue it) and "push back" (respond to it). A reader
-// picks whichever actually fits how the passage feels to them; the
-// outpour/argue data in tag-provenance.json stays real, it just isn't
-// what decides what's visible anymore.
-export function writeHereZoneId(passageStart: number): string {
+// A passage's one write-in zone. The gateway a screen was reached through
+// (/play/[gateway]) already decided the prompt language for the whole
+// screen — "write here" or "push back" — so there's only ever one zone
+// per passage, not one per possible framing.
+export function passageZoneId(passageStart: number): string {
   return String(passageStart);
-}
-export function pushBackZoneId(passageStart: number): string {
-  return `${passageStart}:argue`;
 }

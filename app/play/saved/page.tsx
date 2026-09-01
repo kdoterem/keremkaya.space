@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { gatewayForMode } from "@/lib/playGateways";
 
 // ── Every PLAY attempt you've ever saved, in one place. Attempts live
 // scattered across one localStorage key per (poem, tag) pair
@@ -31,6 +32,7 @@ function fmtDateTime(iso: string): string {
 export default function SavedWritingsPage() {
   const [attempts, setAttempts] = useState<FlatAttempt[]>([]);
   const [titles, setTitles]     = useState<Record<string, string>>({});
+  const [modes, setModes]       = useState<Record<string, "outpour" | "argue">>({});
   const [loaded, setLoaded]     = useState(false);
 
   useEffect(() => {
@@ -65,6 +67,17 @@ export default function SavedWritingsPage() {
         const map: Record<string, string> = {};
         for (const p of posts) map[p.slug] = p.title;
         setTitles(map);
+      })
+      .catch(() => {});
+    // A (slug, tag) pair only ever has one mode, so only ever belongs to
+    // one gateway — needed to link each saved writing back to the right
+    // /play/[gateway]/[tag]/[slug] screen.
+    fetch("/api/play-modes")
+      .then((r) => r.json())
+      .then((rows: { slug: string; tag: string; mode: "outpour" | "argue" }[]) => {
+        const map: Record<string, "outpour" | "argue"> = {};
+        for (const row of rows) map[`${row.slug}|||${row.tag}`] = row.mode;
+        setModes(map);
       })
       .catch(() => {});
   }, [attempts]);
@@ -113,10 +126,16 @@ export default function SavedWritingsPage() {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-          {attempts.map((a) => (
+          {attempts.map((a) => {
+            const mode = modes[`${a.slug}|||${a.tag}`];
+            const gateway = gatewayForMode(mode);
+            const href = gateway
+              ? `/play/${gateway.key}/${encodeURIComponent(a.tag)}/${a.slug}`
+              : "/play";
+            return (
             <div key={`${a.slug}:${a.tag}:${a.id}`}>
               <Link
-                href={`/play/${encodeURIComponent(a.tag)}/${a.slug}`}
+                href={href}
                 style={{
                   display: "block",
                   fontSize: "0.65rem",
@@ -137,7 +156,8 @@ export default function SavedWritingsPage() {
                 {a.text}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </main>

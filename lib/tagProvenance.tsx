@@ -58,23 +58,31 @@ function hasRealSpan(entry: ProvenanceEntry | undefined): boolean {
   return !!entry && entry.type !== "none" && !!entry.spans && entry.spans.length > 0;
 }
 
+function matchesMode(entry: ProvenanceEntry, mode: "outpour" | "argue" | undefined): boolean {
+  return !mode || entry.mode === mode;
+}
+
 // Slugs where a given tag has real, spanned provenance — the pool of
-// specific poems /play/[tag] can open into for that tag.
-export function playableSlugsForTag(tag: string): string[] {
+// specific poems /play/[gateway]/[tag] can open into for that tag. `mode`
+// scopes this to one gateway (undefined = either) — a poem only ever
+// belongs to the one gateway matching its entry's own mode.
+export function playableSlugsForTag(tag: string, mode?: "outpour" | "argue"): string[] {
   const data = tagProvenanceData as unknown as PostProvenance[];
-  return data.filter((p) => hasRealSpan(p.tags[tag])).map((p) => p.slug);
+  return data
+    .filter((p) => hasRealSpan(p.tags[tag]) && matchesMode(p.tags[tag], mode))
+    .map((p) => p.slug);
 }
 
 // How many playable (real-span) poems each tag currently has — sized
 // without loading any post body, just the provenance data already in
-// memory. Used by /play to size its tag lists and skip tags that are on
-// the taxonomy but have no real doorway into them yet.
-export function playableTagCounts(): Map<string, number> {
+// memory. Used by /play/[gateway] to size its tag lists and skip tags
+// that have no real doorway within this gateway's mode.
+export function playableTagCounts(mode?: "outpour" | "argue"): Map<string, number> {
   const data = tagProvenanceData as unknown as PostProvenance[];
   const counts = new Map<string, number>();
   for (const post of data) {
     for (const [tag, entry] of Object.entries(post.tags)) {
-      if (!hasRealSpan(entry)) continue;
+      if (!hasRealSpan(entry) || !matchesMode(entry, mode)) continue;
       counts.set(tag, (counts.get(tag) ?? 0) + 1);
     }
   }

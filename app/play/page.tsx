@@ -1,16 +1,13 @@
 import Link from "next/link";
-import { PLAY_CATEGORIES, getPlayableTagsInCategory } from "@/lib/playData";
+import { PLAY_GATEWAYS } from "@/lib/playGateways";
 
-// ── PLAY — pick a tag, get shown only what that tag actually marks in one
-// piece (everything else stays glittered), write your own continuation,
-// then compare against the real thing. Not a replacement for reading
-// normally — that's still the default everywhere else on the site — this
-// is the deep-end version, for whoever wants it.
-export default function PlayIndexPage() {
-  const categories = PLAY_CATEGORIES
-    .map((c) => ({ category: c, tags: getPlayableTagsInCategory(c) }))
-    .filter((c) => c.tags.length > 0);
-
+// ── PLAY's entry point — the one choice everything downstream depends
+// on. Not "pick a category" first anymore: which of Kerem's marked
+// thoughts even show up at all is scoped to whichever gateway gets
+// picked here, since a piece only ever belongs to the one gateway
+// matching its own provenance mode. Categories, tags, and poems all live
+// one level in, under /play/[gateway].
+export default function PlayGatewayPage() {
   return (
     <main
       style={{
@@ -52,7 +49,7 @@ export default function PlayIndexPage() {
         </Link>
       </div>
 
-      <div style={{ maxWidth: "680px", margin: "0 auto", marginTop: "2.5rem" }}>
+      <div style={{ maxWidth: "680px", margin: "0 auto", marginTop: "3.5rem" }}>
         <h1
           style={{
             fontSize: "clamp(2rem, 5vw, 3.5rem)",
@@ -69,58 +66,48 @@ export default function PlayIndexPage() {
             lineHeight: 1.6,
             color: "rgba(10,10,10,0.55)",
             maxWidth: "42em",
-            marginBottom: "3.5rem",
+            marginBottom: "3rem",
           }}
         >
-          pick a direction below, then a specific thing it named — you'll see only
-          what that thought marks in one piece, everything else kept illegible. write
-          your own continuation before you look at mine. not a quiz — just two people
+          you'll see only what a thought marks in one piece of mine, everything else kept
+          illegible. write your own before you look at mine. not a quiz — just two people
           who happened to land on the same thought, checking each other's work.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "2.75rem" }}>
-          {categories.map(({ category, tags }) => (
-            <section key={category.key}>
-              <h2
-                style={{
-                  fontSize: "1.4rem",
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
-                  marginBottom: "0.2rem",
-                }}
-              >
-                {category.title}
-              </h2>
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  fontStyle: "italic",
-                  color: "rgba(10,10,10,0.45)",
-                  marginBottom: "0.9rem",
-                }}
-              >
-                {category.blurb}
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
-                {tags.map(({ tag, count }) => (
-                  <Link
-                    key={tag}
-                    href={`/play/${encodeURIComponent(tag)}`}
-                    style={{
-                      fontSize: "0.8rem",
-                      fontWeight: 500,
-                      padding: "0.4rem 0.85rem",
-                      border: "1px solid rgba(10,10,10,0.2)",
-                      borderRadius: "999px",
-                      textDecoration: "none",
-                      color: "#0a0a0a",
-                    }}
-                  >
-                    {tag} <span style={{ opacity: 0.4 }}>· {count}</span>
-                  </Link>
-                ))}
-              </div>
-            </section>
+        <p
+          style={{
+            fontSize: "0.65rem",
+            fontWeight: 500,
+            letterSpacing: "0.14em",
+            fontVariant: "small-caps",
+            color: "rgba(10,10,10,0.45)",
+            marginBottom: "1rem",
+          }}
+        >
+          which door?
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {PLAY_GATEWAYS.map((gateway) => (
+            <Link
+              key={gateway.key}
+              href={`/play/${gateway.key}`}
+              style={{
+                display: "block",
+                padding: "1.4rem 1.5rem",
+                border: "1px solid rgba(10,10,10,0.25)",
+                borderRadius: "6px",
+                textDecoration: "none",
+                color: "#0a0a0a",
+              }}
+            >
+              <span style={{ display: "block", fontSize: "1.3rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
+                {gateway.title}
+              </span>
+              <span style={{ display: "block", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", marginTop: "0.25rem" }}>
+                {gateway.blurb}
+              </span>
+            </Link>
           ))}
         </div>
       </div>
