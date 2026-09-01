@@ -5,7 +5,13 @@ import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
 import PlayPoemBody from "./PlayPoemBody";
 import PiecePopup from "./PiecePopup";
-import { splitPoemLines, groupLegiblePassages, ANYWHERE_ZONE_ID } from "@/lib/playLines";
+import {
+  splitPoemLines,
+  groupLegiblePassages,
+  writeHereZoneId,
+  pushBackZoneId,
+  ANYWHERE_ZONE_ID,
+} from "@/lib/playLines";
 
 // ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
 // tag's provenanced lines are legible on load, each followed immediately
@@ -76,7 +82,6 @@ export default function PlayScreen({
   titleWeights,
   body,
   bodyWeights,
-  mode,
 }: {
   slug: string;
   tag: string;
@@ -85,7 +90,6 @@ export default function PlayScreen({
   titleWeights: number[] | undefined;
   body: string;
   bodyWeights: number[] | undefined;
-  mode: "outpour" | "argue" | undefined;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
   const [peeked, setPeeked]         = useState<Set<number>>(new Set());
@@ -154,30 +158,32 @@ export default function PlayScreen({
   }, []);
 
   // Every legible PASSAGE (a run of consecutive tag-weighted lines — see
-  // groupLegiblePassages) paired with whatever got written after it —
-  // the actual shape of what was made, not the fragments alone, and
-  // grouped the same way the on-page zones are so a multi-line passage
-  // shows as the one unbroken thought it actually is, not several. Shared
-  // by both the saved/localStorage text and the "your writing" popup so
-  // they never drift apart from each other.
+  // groupLegiblePassages) paired with whatever got written in either of
+  // its two doors — the actual shape of what was made, not the fragments
+  // alone, and grouped the same way the on-page zones are so a
+  // multi-line passage shows as the one unbroken thought it actually is,
+  // not several. Shared by both the saved/localStorage text and the
+  // "your writing" popup so they never drift apart from each other.
   const lines    = useMemo(() => splitPoemLines(body, bodyWeights), [body, bodyWeights]);
   const passages = useMemo(() => groupLegiblePassages(lines), [lines]);
   const myBlocks = useMemo(
     () =>
       passages.map((p) => ({
         provenance: p.lines.map((l) => l.text).join("\n"),
-        mine: (zoneValues[String(p.start)] ?? "").trim(),
+        written:  (zoneValues[writeHereZoneId(p.start)] ?? "").trim(),
+        pushedBack: (zoneValues[pushBackZoneId(p.start)] ?? "").trim(),
       })),
     [passages, zoneValues],
   );
   const anywhereText = (zoneValues[ANYWHERE_ZONE_ID] ?? "").trim();
-  const hasWriting = myBlocks.some((b) => b.mine) || !!anywhereText;
+  const hasWriting = myBlocks.some((b) => b.written || b.pushedBack) || !!anywhereText;
 
   const composedText = useMemo(() => {
     const parts: string[] = [];
     for (const b of myBlocks) {
-      if (!b.mine) continue;
-      parts.push(`${b.provenance}\n${b.mine}`);
+      if (!b.written && !b.pushedBack) continue;
+      const responses = [b.written, b.pushedBack].filter(Boolean).join("\n\n");
+      parts.push(`${b.provenance}\n${responses}`);
     }
     if (anywhereText) parts.push(anywhereText);
     return parts.join("\n\n");
@@ -260,16 +266,16 @@ export default function PlayScreen({
             lineHeight: 1.6,
           }}
         >
-          kerem's marked lines stay legible, as written. tap "+ write here" after any
-          passage that speaks to you, or use the open space at the end for anything else.
-          stuck on a glimmer? tap it to peek — tap it again to hide it back.
+          kerem's marked lines stay legible, as written. after any passage, "+ write here"
+          continues it, "+ push back" responds to it — pick whichever fits, or use the open
+          space at the end for anything else. stuck on a glimmer? tap it to peek — tap it
+          again to hide it back.
         </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
           <PlayPoemBody
             text={body}
             weights={bodyWeights}
-            mode={mode}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
             peeked={peeked}
@@ -354,7 +360,12 @@ export default function PlayScreen({
               <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "0.35rem" }}>
                 {b.provenance}
               </p>
-              {b.mine && <p style={{ whiteSpace: "pre-wrap" }}>{b.mine}</p>}
+              {b.written && <p style={{ whiteSpace: "pre-wrap" }}>{b.written}</p>}
+              {b.pushedBack && (
+                <p style={{ whiteSpace: "pre-wrap", marginTop: b.written ? "0.6rem" : 0 }}>
+                  {b.pushedBack}
+                </p>
+              )}
             </div>
           ))}
           {anywhereText && (

@@ -3,17 +3,23 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import ObscurableToken from "./ObscurableToken";
 import { wordWeightLevel } from "./InvisibleInkText";
-import { splitPoemLines, groupLegiblePassages, ANYWHERE_ZONE_ID } from "@/lib/playLines";
+import {
+  splitPoemLines,
+  groupLegiblePassages,
+  writeHereZoneId,
+  pushBackZoneId,
+  ANYWHERE_ZONE_ID,
+} from "@/lib/playLines";
 
 // ── The poem body, rendered as one continuous read — legible passages
 // (grouped runs of consecutive tag-weighted lines, not one zone per
 // individual line: see groupLegiblePassages) stay unbroken text, exactly
-// as written. Nothing to write in is visible by default; a quiet
-// "+ write here" appears once, after each passage and once more at the
-// very end ("anywhere") — reading isn't interrupted by boxes, and
-// writing only appears once actually chosen. Opening one and leaving it
-// empty collapses back to the prompt on the next visit; anything
-// actually written stays open.
+// as written. Nothing to write in is visible by default; each passage
+// gets two quiet prompts — "+ write here" and "+ push back", always
+// both, same order every time — plus one more, "anywhere", at the very
+// end. Reading isn't interrupted by boxes; writing only appears once
+// actually chosen. Opening a door and leaving it empty collapses back to
+// its prompt on the next visit; anything actually written stays open.
 //
 // Peek state (which obscured words have been tapped open) lives in
 // PlayScreen, not here — it's persisted there the same way the draft is,
@@ -79,11 +85,11 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
     <button
       onClick={onClick}
       style={{
-        display: "block",
+        display: "inline-block",
         background: "none",
         border: "none",
         padding: 0,
-        margin: "0.3rem 0 1.3rem",
+        marginRight: "1.25rem",
         cursor: "pointer",
         fontSize: "0.78rem",
         fontStyle: "italic",
@@ -95,17 +101,58 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
   );
 }
 
-// One provenance entry (and so one mode) per screen — every passage here
-// comes from the same tag's spans, so the prompt copy is the same for
-// all of them, not chosen per passage.
-function promptLabelFor(mode: "outpour" | "argue" | undefined): string {
-  return mode === "argue" ? "push back" : "write here";
+// One passage's pair of doors — each independently open/closed, each its
+// own zone value. Order is fixed (write here, then push back) regardless
+// of anything in the data.
+function PassageDoors({
+  zoneValues,
+  onZoneChange,
+  writeId,
+  pushId,
+  openZones,
+  openZone,
+}: {
+  zoneValues: Record<string, string>;
+  onZoneChange: (id: string, value: string) => void;
+  writeId: string;
+  pushId: string;
+  openZones: Set<string>;
+  openZone: (id: string) => void;
+}) {
+  const writeOpen = openZones.has(writeId) || (zoneValues[writeId] ?? "").trim();
+  const pushOpen  = openZones.has(pushId)  || (zoneValues[pushId]  ?? "").trim();
+
+  return (
+    <div style={{ margin: "0.3rem 0 1.3rem" }}>
+      {writeOpen ? (
+        <PlayZone
+          value={zoneValues[writeId] ?? ""}
+          onChange={(v) => onZoneChange(writeId, v)}
+          autoFocus={openZones.has(writeId) && !(zoneValues[writeId] ?? "").trim()}
+          placeholder="write here…"
+        />
+      ) : null}
+      {pushOpen ? (
+        <PlayZone
+          value={zoneValues[pushId] ?? ""}
+          onChange={(v) => onZoneChange(pushId, v)}
+          autoFocus={openZones.has(pushId) && !(zoneValues[pushId] ?? "").trim()}
+          placeholder="push back…"
+        />
+      ) : null}
+      {(!writeOpen || !pushOpen) && (
+        <div>
+          {!writeOpen && <WritePrompt label="write here" onClick={() => openZone(writeId)} />}
+          {!pushOpen && <WritePrompt label="push back" onClick={() => openZone(pushId)} />}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function PlayPoemBody({
   text,
   weights,
-  mode,
   zoneValues,
   onZoneChange,
   peeked,
@@ -113,13 +160,11 @@ export default function PlayPoemBody({
 }: {
   text: string;
   weights: number[] | undefined;
-  mode: "outpour" | "argue" | undefined;
   zoneValues: Record<string, string>;
   onZoneChange: (id: string, value: string) => void;
   peeked: Set<number>;
   onTogglePeek: (start: number) => void;
 }) {
-  const promptLabel = promptLabelFor(mode);
   const [openZones, setOpenZones] = useState<Set<string>>(new Set());
   const openZone = useCallback((id: string) => {
     setOpenZones((prev) => new Set(prev).add(id));
@@ -128,9 +173,9 @@ export default function PlayPoemBody({
   const lines = splitPoemLines(text, weights);
   const passages = groupLegiblePassages(lines);
   // Which line, if any, is the LAST line of a passage — that's where its
-  // one write-in point belongs, keyed by the passage's own zone id.
+  // two doors belong, keyed by the passage's own start offset.
   const passageEndsAt = new Map(
-    passages.map((p) => [p.lines[p.lines.length - 1].start, String(p.start)]),
+    passages.map((p) => [p.lines[p.lines.length - 1].start, p.start]),
   );
 
   return (
@@ -140,7 +185,7 @@ export default function PlayPoemBody({
 
         const tokens = line.text.split(/(\s+)/);
         let offset = line.start;
-        const zoneId = passageEndsAt.get(line.start);
+        const passageStart = passageEndsAt.get(line.start);
 
         return (
           <div key={i}>
@@ -162,17 +207,15 @@ export default function PlayPoemBody({
                 );
               })}
             </div>
-            {zoneId && (
-              openZones.has(zoneId) || (zoneValues[zoneId] ?? "").trim() ? (
-                <PlayZone
-                  value={zoneValues[zoneId] ?? ""}
-                  onChange={(v) => onZoneChange(zoneId, v)}
-                  autoFocus={openZones.has(zoneId) && !(zoneValues[zoneId] ?? "").trim()}
-                  placeholder={`${promptLabel}…`}
-                />
-              ) : (
-                <WritePrompt label={promptLabel} onClick={() => openZone(zoneId)} />
-              )
+            {passageStart !== undefined && (
+              <PassageDoors
+                zoneValues={zoneValues}
+                onZoneChange={onZoneChange}
+                writeId={writeHereZoneId(passageStart)}
+                pushId={pushBackZoneId(passageStart)}
+                openZones={openZones}
+                openZone={openZone}
+              />
             )}
           </div>
         );

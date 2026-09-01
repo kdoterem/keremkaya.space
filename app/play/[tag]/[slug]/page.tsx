@@ -37,9 +37,6 @@ export default async function PlaySlugPage({
   const bodyText     = post.content.trim();
   const titleWeights = computeWeights(post.title, singleTag);
   const bodyWeights  = computeWeights(bodyText, singleTag);
-  // One provenance entry per (slug, tag), so one mode for the whole
-  // screen — every passage here comes from the same entry.
-  const mode = provenanceTags[tag]?.mode;
 
   return (
     <PlayScreen
@@ -50,7 +47,6 @@ export default async function PlaySlugPage({
       titleWeights={titleWeights}
       body={bodyText}
       bodyWeights={bodyWeights}
-      mode={mode}
     />
   );
 }
