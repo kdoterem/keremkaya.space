@@ -1837,7 +1837,7 @@
           "JUDAS TELLIN EM WHERE IT IS,"
         ],
         "note": "the crucifixion entered from the wrong side — holding the nails rather than receiving them",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "bravado": {
         "type": "lines",
@@ -1903,7 +1903,7 @@
           "eating is hard",
           "everything is hard"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "sadness": {
         "type": "none",
@@ -1915,7 +1915,7 @@
           "staying is hard",
           "everything is hard"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "numbness": {
         "type": "lines",
@@ -1925,7 +1925,7 @@
           "i'm not"
         ],
         "note": "the repeated 'i'm not' answers 'hard' — the speaker isn't hard, isn't difficult, and by implication isn't much of anything",
-        "mode": "argue"
+        "mode": "outpour"
       },
       "self-loathing": {
         "type": "lines",
@@ -1986,7 +1986,7 @@
           "and i love no thing"
         ],
         "note": "'nothing' split into 'no thing' throughout, which turns absence into a specific object that can be arrived with, departed with, and loved",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -2019,7 +2019,7 @@
           "i'm fucking tourists"
         ],
         "note": "the second line converts the first from complaint to activity — same two words, adjective becoming verb, and the contempt survives the flip",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -2047,7 +2047,7 @@
           "when you are",
           "the denounced"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "blasphemy": {
         "type": "lines",
@@ -2092,7 +2092,7 @@
           "but isn’t someone else’s lie someone else’s truth",
           "lies are another truth?"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "the writing self": {
         "type": "lines",
@@ -2172,7 +2172,7 @@
           "fuck father"
         ],
         "note": "the poem swaps gods mid-way — the one who listens without hearing is replaced by the sun, and the last two words dismiss the first",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -2272,7 +2272,7 @@
           "i can't speak of what was done"
         ],
         "note": "guilt sealed rather than confessed — the poem names that something happened and immediately forbids itself the content",
-        "mode": "argue"
+        "mode": "outpour"
       },
       "god": {
         "type": "lines",
@@ -2281,7 +2281,7 @@
           "thing and not one"
         ],
         "note": "forgiveness made conditional on frequency rather than severity — quoted across two lines as the source breaks mid-phrase",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -2312,7 +2312,7 @@
           "actively breaking for millions of years.",
           "you call them sand."
         ],
-        "mode": "argue"
+        "mode": "outpour"
       },
       "acceptance": {
         "type": "none",
@@ -2326,7 +2326,7 @@
           "second when you realize you're broken."
         ],
         "note": "the opening three lines define a process by counting it — clarity as enumeration",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "wordplay": {
         "type": "line",
@@ -2334,7 +2334,7 @@
           "pieces of scattered pieces are not pieces,"
         ],
         "note": "the same word three times, each occurrence undermining the last",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "truth": {
         "type": "lines",
@@ -2350,7 +2350,7 @@
           "actively breaking for millions of years."
         ],
         "note": "endurance without a survivor — the breaking is what persists, not the thing being broken",
-        "mode": "argue"
+        "mode": "outpour"
       }
     }
   },
@@ -2469,7 +2469,7 @@
           "maaaaaaaaaaan i don’t like my dick today"
         ],
         "note": "the drawn-out vowel does the work — a body complaint delivered as a groan rather than a statement",
-        "mode": "argue"
+        "mode": "outpour"
       },
       "desire": {
         "type": "lines",
