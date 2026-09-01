@@ -8,20 +8,23 @@
         "spans": [
           "is your silences,",
           "silent?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "death": {
         "type": "line",
         "spans": [
           "until when? until death"
-        ]
+        ],
+        "mode": "argue"
       },
       "absence": {
         "type": "lines",
         "spans": [
           "do you know what absence of something means?",
           "absence of light brings shadow"
-        ]
+        ],
+        "mode": "outpour"
       },
       "consciousness": {
         "type": "none",
@@ -32,14 +35,16 @@
         "spans": [
           "intercept the divine"
         ],
-        "note": "only in the title — the body never touches divinity, god, or worship directly"
+        "note": "only in the title — the body never touches divinity, god, or worship directly",
+        "mode": "outpour"
       },
       "wonder": {
         "type": "lines",
         "spans": [
           "have you ever had nothing?",
           "more you discover, more you discover, \nmore will come."
-        ]
+        ],
+        "mode": "outpour"
       },
       "clarity": {
         "type": "lines",
@@ -47,26 +52,30 @@
           "absence of light brings shadow",
           "light, takes it away."
         ],
-        "note": "the poem's one flat declarative couplet after four questions in a row — clarity as a shift in register, not a claim about content"
+        "note": "the poem's one flat declarative couplet after four questions in a row — clarity as a shift in register, not a claim about content",
+        "mode": "argue"
       },
       "time": {
         "type": "lines",
         "spans": [
           "until when? until death",
           "happening happens every day."
-        ]
+        ],
+        "mode": "argue"
       },
       "truth": {
         "type": "phrase",
         "spans": [
           "happening happens every day."
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "line",
         "spans": [
           "have you ever had nothing?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -74,7 +83,8 @@
           "percept and define, intercept the divine",
           "is your silences,\nsilent?"
         ],
-        "note": "first span is the title (percept/intercept near-rhyme, \"define\" embedded); second is the body's noun-to-adjective turn on the same word"
+        "note": "first span is the title (percept/intercept near-rhyme, \"define\" embedded); second is the body's noun-to-adjective turn on the same word",
+        "mode": "outpour"
       }
     }
   },
@@ -94,14 +104,16 @@
           "i wanna kill them,",
           "they wanna eviscerate me."
         ],
-        "note": "the whole poem is this one repeated opposition — it's the structure, not a single line"
+        "note": "the whole poem is this one repeated opposition — it's the structure, not a single line",
+        "mode": "outpour"
       },
       "defiance": {
         "type": "lines",
         "spans": [
           "i wanna write on a wall,",
           "they want me writin off checks,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "family": {
         "type": "none",
@@ -111,14 +123,16 @@
         "type": "phrase",
         "spans": [
           "i wanna kill them,"
-        ]
+        ],
+        "mode": "argue"
       },
       "rage": {
         "type": "lines",
         "spans": [
           "i wanna kill them,",
           "they wanna eviscerate me."
-        ]
+        ],
+        "mode": "outpour"
       },
       "control": {
         "type": "lines",
@@ -126,7 +140,8 @@
           "they want me writin off checks,",
           "they want me watchin the news,",
           "they want me killin it,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "presence": {
         "type": "none",
@@ -145,7 +160,8 @@
         "spans": [
           "i wanna kill them,",
           "they wanna eviscerate me."
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -158,7 +174,8 @@
         "spans": [
           "so if we formalize, is it the both end?",
           "do i need to hunt as what's in me requires a prey?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -167,14 +184,16 @@
           "red or flag, which invokes a hole farther?",
           "what molly shows, what red flag takes away"
         ],
-        "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart"
+        "note": "hole/holy is the clearest pun; \"red flag\" is worked twice, once literal-idiom, once broken apart",
+        "mode": "outpour"
       },
       "sensual": {
         "type": "lines",
         "spans": [
           "hole, is it glory hole? when i go in i become all holy?",
           "what molly shows, what red flag takes away"
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-acceptance": {
         "type": "none",
@@ -184,7 +203,8 @@
         "type": "line",
         "spans": [
           "something's different, beast's no longer primal."
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "lines",
@@ -192,14 +212,16 @@
           "something's different, beast's no longer primal.",
           "do i need to hunt as what's in me requires a prey?"
         ],
-        "note": "the beast/hunt/prey framing is the primal-survival register this tag is naming"
+        "note": "the beast/hunt/prey framing is the primal-survival register this tag is naming",
+        "mode": "outpour"
       },
       "wonder": {
         "type": "line",
         "spans": [
           "hole, is it glory hole? when i go in i become all holy?"
         ],
-        "note": "same line as wordplay/sensual — the marvel is at the crude-to-sacred turn itself"
+        "note": "same line as wordplay/sensual — the marvel is at the crude-to-sacred turn itself",
+        "mode": "outpour"
       },
       "clarity": {
         "type": "none",
@@ -214,7 +236,8 @@
         "spans": [
           "hole, is it glory hole? when i go in i become all holy?"
         ],
-        "note": "the pun is where devotion actually lives here — \"holy\" turning a crude act sacred, not a separate declaration"
+        "note": "the pun is where devotion actually lives here — \"holy\" turning a crude act sacred, not a separate declaration",
+        "mode": "outpour"
       }
     }
   },
@@ -226,14 +249,16 @@
         "type": "phrase",
         "spans": [
           "no doubt. patience."
-        ]
+        ],
+        "mode": "argue"
       },
       "absence": {
         "type": "lines",
         "spans": [
           "i, i'm sorry",
           "for the absence"
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -241,14 +266,16 @@
           "had to craft faces,",
           "sis didn't eye you into an i'ness, i see,",
           "your beef with seeing was not being seen."
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-acceptance": {
         "type": "lines",
         "spans": [
           "now i am finally able to let it go and",
           "join you"
-        ]
+        ],
+        "mode": "argue"
       },
       "healing": {
         "type": "lines",
@@ -256,14 +283,16 @@
           "it's good to see you here, hear hear,",
           "you look like you been through hell, \nbut you're still alive so near miss,",
           "not needing what was left in a mess, and if she had you wouldn't know the mess gotta be sorted"
-        ]
+        ],
+        "mode": "outpour"
       },
       "presence": {
         "type": "lines",
         "spans": [
           "now that you're here i see you.",
           "are we, connecting right now, eyely??"
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-erosion": {
         "type": "lines",
@@ -271,19 +300,22 @@
           "had to craft faces,",
           "had to interpret the shadows of the wall,",
           "ever since your fall."
-        ]
+        ],
+        "mode": "outpour"
       },
       "clarity": {
         "type": "line",
         "spans": [
           "now that you're here i see you."
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "lines",
         "spans": [
           "very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."
-        ]
+        ],
+        "mode": "outpour"
       },
       "devotion": {
         "type": "none",
@@ -294,7 +326,8 @@
         "spans": [
           "very little left, joined nothing. and very little left, the remaining that we can't perceive yet will soon persevere."
         ],
-        "note": "same line as existence — it carries both: what's left is unknown and that's held open, not resolved"
+        "note": "same line as existence — it carries both: what's left is unknown and that's held open, not resolved",
+        "mode": "outpour"
       }
     }
   },
@@ -306,7 +339,8 @@
         "type": "line",
         "spans": [
           "pain is a sensation and sensations are to be enjoyed"
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "none",
@@ -320,26 +354,30 @@
           "air? you send it back to it, the one who blows",
           "earth? shaping the tree, in accordance with three"
         ],
-        "note": "same four lines as ritual — the questioning-of-elements does both"
+        "note": "same four lines as ritual — the questioning-of-elements does both",
+        "mode": "outpour"
       },
       "presence": {
         "type": "phrase",
         "spans": [
           "in order to enjoy you have to get close"
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "phrase",
         "spans": [
           "you understand, and you understand it's all constructed,"
-        ]
+        ],
+        "mode": "argue"
       },
       "self-erosion": {
         "type": "lines",
         "spans": [
           "tear it apart",
           "let the ruin tell a story."
-        ]
+        ],
+        "mode": "outpour"
       },
       "sensual": {
         "type": "lines",
@@ -347,19 +385,22 @@
           "pain is a sensation and sensations are to be enjoyed",
           "in order to enjoy you have to get close",
           "water? ocean womb cradles"
-        ]
+        ],
+        "mode": "outpour"
       },
       "creation": {
         "type": "phrase",
         "spans": [
           "earth? shaping the tree, in accordance with three"
-        ]
+        ],
+        "mode": "outpour"
       },
       "truth": {
         "type": "phrase",
         "spans": [
           "let the ruin tell a story."
-        ]
+        ],
+        "mode": "outpour"
       },
       "consciousness": {
         "type": "lines",
@@ -368,7 +409,8 @@
           "you hear, you try to understand,",
           "you understand, and you understand it's all constructed,"
         ],
-        "note": "the escalating perception chain is the clearest carrier in the whole set for this tag"
+        "note": "the escalating perception chain is the clearest carrier in the whole set for this tag",
+        "mode": "outpour"
       },
       "ritual": {
         "type": "lines",
@@ -377,7 +419,8 @@
           "water? ocean womb cradles",
           "air? you send it back to it, the one who blows",
           "earth? shaping the tree, in accordance with three"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -389,14 +432,16 @@
         "type": "line",
         "spans": [
           "need a sustained mind to write"
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "lines",
         "spans": [
           "i'm what life blooms, tomato sapling small as fuck,",
           "i no longer am fucking universe,"
-        ]
+        ],
+        "mode": "argue"
       },
       "impermanence": {
         "type": "lines",
@@ -406,60 +451,69 @@
           "then green tomatoes form,",
           "then they get bigger and turn red",
           "all to be ate and enjoyed"
-        ]
+        ],
+        "mode": "outpour"
       },
       "creation": {
         "type": "lines",
         "spans": [
           "i'm what life blooms, tomato sapling small as fuck,",
           "then gets big and tall and heavy,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wonder": {
         "type": "lines",
         "spans": [
           "blow of the wind, celestial dance",
           "something much much much bigger than i ever anticipated"
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-erosion": {
         "type": "line",
         "spans": [
           "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
-        ]
+        ],
+        "mode": "outpour"
       },
       "mortality": {
         "type": "lines",
         "spans": [
           "all to be ate and enjoyed",
           "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
-        ]
+        ],
+        "mode": "outpour"
       },
       "acceptance": {
         "type": "phrase",
         "spans": [
           "today i am it."
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "lines",
         "spans": [
           "i used to think i tasted the forbidden fruit,",
           "today i am it."
-        ]
+        ],
+        "mode": "argue"
       },
       "presence": {
         "type": "phrase",
         "spans": [
           "today i am it."
         ],
-        "note": "same line as acceptance/clarity — \"today\" is doing this work specifically"
+        "note": "same line as acceptance/clarity — \"today\" is doing this work specifically",
+        "mode": "argue"
       },
       "dark": {
         "type": "line",
         "spans": [
           "devours me and my juices, the way i grew that big, fills from his mouth and droplet to be planets"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -473,7 +527,8 @@
           "you, the last and the first one to act",
           "you swept them away"
         ],
-        "note": "alpha/omega framing and a single decisive act — never named \"god\" outright, but this is what makes the addressee god-scaled"
+        "note": "alpha/omega framing and a single decisive act — never named \"god\" outright, but this is what makes the addressee god-scaled",
+        "mode": "outpour"
       },
       "gratitude": {
         "type": "lines",
@@ -483,13 +538,15 @@
           "thank you for asking me to put the bow and arrow down",
           "thank you for such swiftness,"
         ],
-        "note": "the refrain itself — the most direct tag-to-text match in this batch"
+        "note": "the refrain itself — the most direct tag-to-text match in this batch",
+        "mode": "outpour"
       },
       "devotion": {
         "type": "lines",
         "spans": [
           "well you did too, you just never have been away from you"
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "lines",
@@ -497,14 +554,16 @@
           "eye saw you",
           "and knew",
           "it was looking at i"
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-acceptance": {
         "type": "lines",
         "spans": [
           "it was looking at i",
           "thank you for asking me to put the bow and arrow down"
-        ]
+        ],
+        "mode": "outpour"
       },
       "consciousness": {
         "type": "lines",
@@ -512,13 +571,15 @@
           "eye picks up threat first,",
           "i do not",
           "i used to"
-        ]
+        ],
+        "mode": "outpour"
       },
       "presence": {
         "type": "phrase",
         "spans": [
           "you just never have been away from you"
-        ]
+        ],
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -530,19 +591,22 @@
           "and knew",
           "it was looking at i"
         ],
-        "note": "the eye/I homophone, sustained across the whole closing stretch"
+        "note": "the eye/I homophone, sustained across the whole closing stretch",
+        "mode": "outpour"
       },
       "existence": {
         "type": "phrase",
         "spans": [
           "thank you for never changing, while i did,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "healing": {
         "type": "phrase",
         "spans": [
           "thank you for asking me to put the bow and arrow down"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -555,27 +619,31 @@
         "spans": [
           "i did",
           "i believed"
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "lines",
         "spans": [
           "today it's apparent",
           "today single revealed itself"
-        ]
+        ],
+        "mode": "argue"
       },
       "time": {
         "type": "lines",
         "spans": [
           "past me had anger, it'd go on with they didn't",
           "today it's apparent"
-        ]
+        ],
+        "mode": "argue"
       },
       "self-acceptance": {
         "type": "line",
         "spans": [
           "no, i'm not too late. but i'm not the first comer either."
-        ]
+        ],
+        "mode": "argue"
       },
       "existence": {
         "type": "none",
@@ -585,7 +653,8 @@
         "type": "phrase",
         "spans": [
           "who could have believed it was gonna change like this but"
-        ]
+        ],
+        "mode": "outpour"
       },
       "presence": {
         "type": "lines",
@@ -593,27 +662,31 @@
           "today it's apparent",
           "today single revealed itself"
         ],
-        "note": "same lines as time/clarity — \"today\" is the carrier"
+        "note": "same lines as time/clarity — \"today\" is the carrier",
+        "mode": "argue"
       },
       "endurance": {
         "type": "lines",
         "spans": [
           "past me had anger, it'd go on with they didn't",
           "but once the circulation completes and all wires get wired they'll say"
-        ]
+        ],
+        "mode": "outpour"
       },
       "truth": {
         "type": "lines",
         "spans": [
           "and its signal is deafening for some",
           "the signal they cannot hear their navel can,"
-        ]
+        ],
+        "mode": "argue"
       },
       "acceptance": {
         "type": "line",
         "spans": [
           "no, i'm not too late. but i'm not the first comer either."
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -628,7 +701,8 @@
           "i don't give you because it asks you to reveal yourself",
           "pull me out of the rug i hide under,"
         ],
-        "note": "withholding as the poem's entire opening mechanism"
+        "note": "withholding as the poem's entire opening mechanism",
+        "mode": "outpour"
       },
       "vulnerability": {
         "type": "lines",
@@ -637,7 +711,8 @@
           "and if you look at me i'll be forged,",
           "turned into a weapon, wielded in your will,"
         ],
-        "note": "being seen as danger, not relief"
+        "note": "being seen as danger, not relief",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -647,7 +722,8 @@
           "is it because past is the source of sorrow?",
           "how hurt you gotta be to wanna transform?"
         ],
-        "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking"
+        "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking",
+        "mode": "outpour"
       },
       "presence": {
         "type": "lines",
@@ -655,7 +731,8 @@
           "i like you better when you're not here.",
           "i don't even question if they reach you"
         ],
-        "note": "closeness maintained specifically through distance"
+        "note": "closeness maintained specifically through distance",
+        "mode": "argue"
       },
       "existence": {
         "type": "lines",
@@ -664,35 +741,40 @@
           "the sand dunes are the collective power of yesterday,",
           "sun's rays gets here every day yes, but it has been so since yesterday"
         ],
-        "note": "the poem's one stretch of pure metaphysics, unattached to the you"
+        "note": "the poem's one stretch of pure metaphysics, unattached to the you",
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "phrase",
         "spans": [
           "eye sees something unbeaten in i?"
         ],
-        "note": "eye/I doing double work — \"eye sees\" reads straight through as \"I see\""
+        "note": "eye/I doing double work — \"eye sees\" reads straight through as \"I see\"",
+        "mode": "outpour"
       },
       "mortality": {
         "type": "phrase",
         "spans": [
           "how hurt you gotta be to wanna transform?"
         ],
-        "note": "loosely — transformation read as evidence of damage rather than growth"
+        "note": "loosely — transformation read as evidence of damage rather than growth",
+        "mode": "outpour"
       },
       "devotion": {
         "type": "line",
         "spans": [
           "god, you need a god too."
         ],
-        "note": "lives almost entirely in the last line — nowhere else in the poem, care extended outward after nineteen lines of guardedness"
+        "note": "lives almost entirely in the last line — nowhere else in the poem, care extended outward after nineteen lines of guardedness",
+        "mode": "argue"
       },
       "clarity": {
         "type": "phrase",
         "spans": [
           "how hurt you gotta be to wanna transform?"
         ],
-        "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it"
+        "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it",
+        "mode": "outpour"
       },
       "self-acceptance": {
         "type": "none",
@@ -723,7 +805,8 @@
           "all i needed was the absence of the thing i required",
           "what it'd give, in a breath,",
           "it did, it was green."
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -740,7 +823,8 @@
           "same exact breath, anew,\nbringing something new.",
           "new gets old, old gets new,",
           "same old story, same old story."
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -754,7 +838,8 @@
           "movements of the stars result us to do what we do",
           "the path to stars, lies through the stars,\nstarting point's also the stars,"
         ],
-        "note": "the poem's cosmological frame — origin, route, and destination collapsed into one term"
+        "note": "the poem's cosmological frame — origin, route, and destination collapsed into one term",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -762,14 +847,16 @@
           "it's a futile attempt to, try to figure,",
           "if we known our history, would we know our future?"
         ],
-        "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work"
+        "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work",
+        "mode": "outpour"
       },
       "control": {
         "type": "lines",
         "spans": [
           "what you require is pre-dictated,\nwhat requires it is pre-formed,\nwhy you require it is because it's pre-owned."
         ],
-        "note": "the closing triple — agency removed at three levels: object, subject, motive. the tag's clearest carrier"
+        "note": "the closing triple — agency removed at three levels: object, subject, motive. the tag's clearest carrier",
+        "mode": "argue"
       },
       "god": {
         "type": "phrase",
@@ -777,35 +864,40 @@
           "the dictator",
           "pre-owned"
         ],
-        "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating"
+        "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating",
+        "mode": "outpour"
       },
       "defiance": {
         "type": "lines",
         "spans": [
           "is it in a star's nature to rebel?\nonly when you defend, against those that try to make you forget,"
         ],
-        "note": "rebellion redefined as defense of origin rather than as attack"
+        "note": "rebellion redefined as defense of origin rather than as attack",
+        "mode": "outpour"
       },
       "truth": {
         "type": "line",
         "spans": [
           "there is nothing to know, nothing to predict,"
         ],
-        "note": "the poem's flat refusal, arriving after the question about history and future"
+        "note": "the poem's flat refusal, arriving after the question about history and future",
+        "mode": "argue"
       },
       "time": {
         "type": "line",
         "spans": [
           "if we known our history, would we know our future?"
         ],
-        "note": "past and future held against each other, both dismissed in the following line"
+        "note": "past and future held against each other, both dismissed in the following line",
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "phrase",
         "spans": [
           "pre-dictated"
         ],
-        "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work"
+        "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work",
+        "mode": "outpour"
       },
       "lineage": {
         "type": "lines",
@@ -813,14 +905,16 @@
           "where you come from, isn't a debt,",
           "those that try to make you forget,"
         ],
-        "note": "origin as constitution rather than obligation — the thing being defended"
+        "note": "origin as constitution rather than obligation — the thing being defended",
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "phrase",
         "spans": [
           "it's a futile attempt to, try to figure,"
         ],
-        "note": "weary before it starts; the effort named as futile in the third line rather than discovered to be futile later"
+        "note": "weary before it starts; the effort named as futile in the third line rather than discovered to be futile later",
+        "mode": "argue"
       }
     }
   },
@@ -833,7 +927,8 @@
         "spans": [
           "from this day forward ill be employing new ways to write."
         ],
-        "note": "the entire piece is a two-line announcement about method — the tag is the poem, not a thread inside it"
+        "note": "the entire piece is a two-line announcement about method — the tag is the poem, not a thread inside it",
+        "mode": "argue"
       }
     }
   },
@@ -846,20 +941,23 @@
         "spans": [
           "sniff sniff i beg to differ,"
         ],
-        "note": "the poem's only act of resistance is against its own opening claim — defiance turned inward, not outward at a target"
+        "note": "the poem's only act of resistance is against its own opening claim — defiance turned inward, not outward at a target",
+        "mode": "outpour"
       },
       "exhaustion": {
         "type": "lines",
         "spans": [
           "is this body of use laid on the floor",
           "i walked 500 miles to mordor"
-        ]
+        ],
+        "mode": "outpour"
       },
       "body": {
         "type": "line",
         "spans": [
           "is this body of use laid on the floor"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -873,7 +971,8 @@
           "i just wanna feel you",
           "baby don't do anything, please don't do anything"
         ],
-        "note": "presence defined by subtraction — the poem asks for the removal of explanation, words, and understanding until only being-there is left"
+        "note": "presence defined by subtraction — the poem asks for the removal of explanation, words, and understanding until only being-there is left",
+        "mode": "outpour"
       }
     }
   },
@@ -887,7 +986,8 @@
           "Ab is intangible and i expect her to come alive",
           "Ab come on come alive"
         ],
-        "note": "the repeated line is the longing — three identical repetitions, each one failing to produce the animation it asks for"
+        "note": "the repeated line is the longing — three identical repetitions, each one failing to produce the animation it asks for",
+        "mode": "outpour"
       }
     }
   },
@@ -902,7 +1002,8 @@
           "they do not ask about your name",
           "and after a while you forget your name"
         ],
-        "note": "identity dissolving in three steps — the other has no name, does not ask for yours, and the forgetting follows"
+        "note": "identity dissolving in three steps — the other has no name, does not ask for yours, and the forgetting follows",
+        "mode": "outpour"
       }
     }
   },
@@ -915,20 +1016,23 @@
         "spans": [
           "stranger to my body,",
           "strange ways lead to my body,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "line",
         "spans": [
           "but today i fail to recognize myself"
-        ]
+        ],
+        "mode": "argue"
       },
       "doubt": {
         "type": "line",
         "spans": [
           "and the snow, how does snow feel?"
         ],
-        "note": "the poem's only question, and it's asked of weather rather than of the self — doubt displaced onto something that can't answer"
+        "note": "the poem's only question, and it's asked of weather rather than of the self — doubt displaced onto something that can't answer",
+        "mode": "outpour"
       },
       "self-erosion": {
         "type": "lines",
@@ -936,14 +1040,16 @@
           "the needle grinds at the vinyl,",
           "hole grows wider,",
           "senses go lighter,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "the writing self": {
         "type": "line",
         "spans": [
           "dear paper i've been far from you and close to myself"
         ],
-        "note": "the poem addresses the page directly as an estranged correspondent"
+        "note": "the poem addresses the page directly as an estranged correspondent",
+        "mode": "outpour"
       },
       "god": {
         "type": "none",
@@ -966,13 +1072,15 @@
           "since i'm the one that's writing it should be about me",
           "but posting what i write makes it hard for me",
           "to say what i feel, without dressing it up in something pretty"
-        ]
+        ],
+        "mode": "argue"
       },
       "identity": {
         "type": "line",
         "spans": [
           "i want the world to look at what i made, not at what i'm made of"
-        ]
+        ],
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -980,14 +1088,16 @@
           "some jerk jerked around,",
           "fated? \nfaded."
         ],
-        "note": "second span is the poem's final two lines — one letter apart, question answered by near-repetition"
+        "note": "second span is the poem's final two lines — one letter apart, question answered by near-repetition",
+        "mode": "outpour"
       },
       "exhaustion": {
         "type": "lines",
         "spans": [
           "me, who gives a shit about me?",
           "why should anyone?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "self-loathing": {
         "type": "lines",
@@ -995,7 +1105,8 @@
           "me, who gives a shit about me?",
           "why should anyone?"
         ],
-        "note": "same span as exhaustion — the two are not separable here; the fatigue and the contempt arrive in one gesture"
+        "note": "same span as exhaustion — the two are not separable here; the fatigue and the contempt arrive in one gesture",
+        "mode": "outpour"
       },
       "grief": {
         "type": "lines",
@@ -1005,7 +1116,8 @@
           "stuff with our mother,",
           "you held it down,",
           "i flown."
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1019,13 +1131,15 @@
           "at first colors were,",
           "at first there wasn't a thing as such,"
         ],
-        "note": "perception preceding the categories that would organize it"
+        "note": "perception preceding the categories that would organize it",
+        "mode": "outpour"
       },
       "wonder": {
         "type": "line",
         "spans": [
           "today i can envision purple."
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -1035,13 +1149,15 @@
           "blue, there is a chance you blew,",
           "purple, portal,"
         ],
-        "note": "each colour split open to release a word hiding inside its own sound"
+        "note": "each colour split open to release a word hiding inside its own sound",
+        "mode": "outpour"
       },
       "existence": {
         "type": "line",
         "spans": [
           "i've been transcending my humanity for 3 and a half years,"
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "lines",
@@ -1049,7 +1165,8 @@
           "is there a point in, articulating what can't be summed up?",
           "speech dishonors some parts."
         ],
-        "note": "clarity arriving as a limit on speech rather than as a claim about what's seen"
+        "note": "clarity arriving as a limit on speech rather than as a claim about what's seen",
+        "mode": "outpour"
       }
     }
   },
@@ -1063,7 +1180,8 @@
           "i\n\nsorry i am mother\n\nfor bringing destruction to your creation\n\nto build mine",
           "im sorry for\n\nkilling you mom\n\ni just wanted\n\nmore flowers"
         ],
-        "note": "the apology repeats eight times across the poem with a different charge each time; these two are the ones where the guilt is stated as damage done rather than as inadequacy"
+        "note": "the apology repeats eight times across the poem with a different charge each time; these two are the ones where the guilt is stated as damage done rather than as inadequacy",
+        "mode": "outpour"
       }
     }
   },
@@ -1076,7 +1194,8 @@
         "spans": [
           "a passerby passes by a wind blowing by"
         ],
-        "note": "three passings in one line — person, wind, and the act itself — with no object staying in place"
+        "note": "three passings in one line — person, wind, and the act itself — with no object staying in place",
+        "mode": "outpour"
       }
     }
   },
@@ -1090,7 +1209,8 @@
           "my head can’t even carry my shoulders",
           "the weary shoulders carrying this weary head",
           "this weary shoulders carrying this baggage"
-        ]
+        ],
+        "mode": "outpour"
       },
       "body": {
         "type": "lines",
@@ -1099,7 +1219,8 @@
           "how can it not get squeezed",
           "how can it not get caged",
           "in my rib cage"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1113,7 +1234,8 @@
           "i dare\nsee the spots on my face",
           "i dare not to be\nbut to stay\nwhat i have always was"
         ],
-        "note": "acceptance framed as daring rather than as ease — and as staying rather than becoming"
+        "note": "acceptance framed as daring rather than as ease — and as staying rather than becoming",
+        "mode": "outpour"
       }
     }
   },
@@ -1126,7 +1248,8 @@
         "spans": [
           "is it conceivable when clarity clears the whole table"
         ],
-        "note": "clarity named directly, but as a question about whether it's survivable — clearing the table means losing what was on it"
+        "note": "clarity named directly, but as a question about whether it's survivable — clearing the table means losing what was on it",
+        "mode": "outpour"
       }
     }
   },
@@ -1141,7 +1264,8 @@
           "i right as wrongs surface",
           "could i still right then?"
         ],
-        "note": "right/write held unresolved across three lines — the method question and the pun are the same question"
+        "note": "right/write held unresolved across three lines — the method question and the pun are the same question",
+        "mode": "outpour"
       }
     }
   },
@@ -1156,7 +1280,8 @@
           "i will unscrew their water god",
           "drain their worship into earth"
         ],
-        "note": "defiance stated as future-tense plan, and performed alone — the first line specifies that no one will be watching"
+        "note": "defiance stated as future-tense plan, and performed alone — the first line specifies that no one will be watching",
+        "mode": "outpour"
       }
     }
   },
@@ -1170,7 +1295,8 @@
           "im not lord's humble servant reporting to it\n\nthe lord ain't even a lord",
           "i boxed god\n\nwe love each other\n\ni recognize him\n\nhe recognizes me"
         ],
-        "note": "three distinct positions in one poem — refusing the hierarchy, relocating god from there to here, and then mutual recognition with no hierarchy left to refuse"
+        "note": "three distinct positions in one poem — refusing the hierarchy, relocating god from there to here, and then mutual recognition with no hierarchy left to refuse",
+        "mode": "outpour"
       },
       "the writing self": {
         "type": "lines",
@@ -1178,7 +1304,8 @@
           "i have something to say which is i’ve nothing to say",
           "everything stops when i get to writing",
           "this task i was tasked with"
-        ]
+        ],
+        "mode": "outpour"
       },
       "consciousness": {
         "type": "lines",
@@ -1186,7 +1313,8 @@
           "and i gain consciousness",
           "just because now that you can feel\n\ndoesn't mean it wasn't there"
         ],
-        "note": "second span is the poem's sharpest claim — feeling something arrive is not the same as it having arrived"
+        "note": "second span is the poem's sharpest claim — feeling something arrive is not the same as it having arrived",
+        "mode": "argue"
       }
     }
   },
@@ -1199,7 +1327,8 @@
         "spans": [
           "all i learn teach me how little i know",
           "i like existing\n\nnot knowing\n\nbelieving"
-        ]
+        ],
+        "mode": "outpour"
       },
       "faith": {
         "type": "lines",
@@ -1208,14 +1337,16 @@
           "i believe in the pretty things",
           "i feel in my core i made it rain\n\nand i believe i made it rain"
         ],
-        "note": "belief here does no metaphysical work — it's a stance toward the pretty and the unverifiable, chosen rather than argued"
+        "note": "belief here does no metaphysical work — it's a stance toward the pretty and the unverifiable, chosen rather than argued",
+        "mode": "argue"
       },
       "existence": {
         "type": "lines",
         "spans": [
           "why existence is definable\n\nbut why\n\nexistence is\n\nnot",
           "if what i believe turns out to be the truth\n\nam i not the existence?"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1229,7 +1360,8 @@
           "see myself lurking behind what matters",
           "these lost feathers"
         ],
-        "note": "the self positioned behind rather than within what's important — visible only as something lurking"
+        "note": "the self positioned behind rather than within what's important — visible only as something lurking",
+        "mode": "outpour"
       }
     }
   },
@@ -1243,7 +1375,8 @@
           "everything so dark and so light at the same time",
           "my eye catches the eye i was made from"
         ],
-        "note": "second line is the poem's whole event — the seeing catching sight of its own origin, stated once and not pursued"
+        "note": "second line is the poem's whole event — the seeing catching sight of its own origin, stated once and not pursued",
+        "mode": "outpour"
       }
     }
   },
@@ -1257,7 +1390,8 @@
           "self, you do not exist",
           "we are what we’re around\nwe are what’s around us\nbut i’ll remain \nstatic"
         ],
-        "note": "the self denied and then immediately claimed as static in four lines — the contradiction is the tag's carrier, not either half alone"
+        "note": "the self denied and then immediately claimed as static in four lines — the contradiction is the tag's carrier, not either half alone",
+        "mode": "argue"
       }
     }
   },
@@ -1272,14 +1406,16 @@
           "i don't like the writer that i am",
           "i enjoy writing more than reading,\ni refuse the rhymes of reading."
         ],
-        "note": "the last span refuses rhyme while rhyming reading with reading — the refusal executed through the form refused"
+        "note": "the last span refuses rhyme while rhyming reading with reading — the refusal executed through the form refused",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
         "spans": [
           "why do i have to stick to my opening statement for it to be coherent",
           "why do i feel different when the sun disappears"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1292,7 +1428,8 @@
         "spans": [
           "nerede benim yurdum"
         ],
-        "note": "the poem's only line in Turkish and its only plain statement — where is my homeland — arriving after four lines of invented or broken words"
+        "note": "the poem's only line in Turkish and its only plain statement — where is my homeland — arriving after four lines of invented or broken words",
+        "mode": "outpour"
       }
     }
   },
@@ -1304,7 +1441,8 @@
         "type": "line",
         "spans": [
           "simple is threatening to people who've built complicated lives around avoiding it"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -1318,7 +1456,8 @@
           "i'll never tire to explain",
           "if all goes i will remain"
         ],
-        "note": "devotion as endurance rather than as feeling — what remains after everything else goes"
+        "note": "devotion as endurance rather than as feeling — what remains after everything else goes",
+        "mode": "argue"
       }
     }
   },
@@ -1332,14 +1471,16 @@
           "i go hard put me on a test",
           "running laps around these fools while they nap",
           "i'm the hardest one coming ass fat,"
-        ]
+        ],
+        "mode": "argue"
       },
       "desire": {
         "type": "lines",
         "spans": [
           "sex in the city and that's that",
           "her breast, i protest"
-        ]
+        ],
+        "mode": "outpour"
       },
       "release": {
         "type": "lines",
@@ -1347,7 +1488,8 @@
           "cried a lot during the journey now feeling nice",
           "the ride held the tears, city does the rest"
         ],
-        "note": "the poem's only quiet lines, at the top, before the bravado starts — release happens first and the swagger is what follows it"
+        "note": "the poem's only quiet lines, at the top, before the bravado starts — release happens first and the swagger is what follows it",
+        "mode": "outpour"
       }
     }
   },
@@ -1362,7 +1504,8 @@
           "yet i, at my final breath",
           "read the words i'll engrave on my tomb",
           "instruct my loved ones of the process after my passing,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "longing": {
         "type": "lines",
@@ -1370,7 +1513,8 @@
           "still my mother's lamb",
           "find my home back to her womb,"
         ],
-        "note": "the title's denial of home answered here — the home being reached for is prenatal, which is the one that can't be returned to"
+        "note": "the title's denial of home answered here — the home being reached for is prenatal, which is the one that can't be returned to",
+        "mode": "outpour"
       }
     }
   },
@@ -1384,7 +1528,8 @@
           "be in the same space",
           "DISREGARD MOST OF I SAID EXCEPT THE LAST SENTENCE\nBE\nIN THE SAME\nSPACE"
         ],
-        "note": "the poem retracts its own instruction and keeps only the physical one — and then breaks it across four lines so it takes longer to read than the advice it replaced"
+        "note": "the poem retracts its own instruction and keeps only the physical one — and then breaks it across four lines so it takes longer to read than the advice it replaced",
+        "mode": "outpour"
       },
       "devotion": {
         "type": "lines",
@@ -1392,7 +1537,8 @@
           "love requires commitment.",
           "if you want a chance at being loved first you have to love",
           "stay awake learn about the other person"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -1406,7 +1552,8 @@
           "bipolar isn’t bipolar",
           "being bipolar in one polar is bipolar"
         ],
-        "note": "the whole piece is the pun — bipolar as clinical term against bipolar as literally two-poled, and the joke is that having only one pole still qualifies"
+        "note": "the whole piece is the pun — bipolar as clinical term against bipolar as literally two-poled, and the joke is that having only one pole still qualifies",
+        "mode": "outpour"
       }
     }
   },
@@ -1420,7 +1567,8 @@
           "staring at a blank page but there is a pulse",
           "my god is paper"
         ],
-        "note": "the page as the site of divinity rather than of labour — the writing self here is a worshipper, not a worker"
+        "note": "the page as the site of divinity rather than of labour — the writing self here is a worshipper, not a worker",
+        "mode": "outpour"
       }
     }
   },
@@ -1437,7 +1585,8 @@
           "me on the other hand i know the questions",
           "and yet i'm still talking"
         ],
-        "note": "the poem argues writing should find questions, claims to already have them, and then indicts itself for continuing anyway — the last line is the verdict on the four above it"
+        "note": "the poem argues writing should find questions, claims to already have them, and then indicts itself for continuing anyway — the last line is the verdict on the four above it",
+        "mode": "argue"
       }
     }
   },
@@ -1451,7 +1600,8 @@
           "i am writing",
           "so that means i am writing about something",
           "though i don't know what i'm writing about, i'm still writing about something"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1465,7 +1615,8 @@
           "with this conflict we're at the limit",
           "isreal and palestine the sign is at my spine"
         ],
-        "note": "the poem moves from a body's fullness to a named political conflict located physically in the speaker's spine"
+        "note": "the poem moves from a body's fullness to a named political conflict located physically in the speaker's spine",
+        "mode": "outpour"
       }
     }
   },
@@ -1481,7 +1632,8 @@
           "tired of figuring out",
           "gosh why is there so much to figure out",
           "why as i figure out i realize i haven’t figured out"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1496,7 +1648,8 @@
           "before i was made to be",
           "what i was meant to be,"
         ],
-        "note": "yearning aimed backward past origin — toward a time before the speaker was assigned a purpose"
+        "note": "yearning aimed backward past origin — toward a time before the speaker was assigned a purpose",
+        "mode": "outpour"
       },
       "god": {
         "type": "lines",
@@ -1504,7 +1657,8 @@
           "god drank from me",
           "i plead when i found he was pleased with me"
         ],
-        "note": "the direction is inverted — god consuming the speaker rather than receiving offering, and being pleased is what prompts the plea"
+        "note": "the direction is inverted — god consuming the speaker rather than receiving offering, and being pleased is what prompts the plea",
+        "mode": "outpour"
       }
     }
   },
@@ -1518,20 +1672,23 @@
           "creating is not creating anymore it’s destruction to fill my black hole caused by my",
           "inability to create"
         ],
-        "note": "quoted as two lines because the source wraps mid-sentence"
+        "note": "quoted as two lines because the source wraps mid-sentence",
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "line",
         "spans": [
           "i just want to create and im so fucking tired of not being able to"
-        ]
+        ],
+        "mode": "argue"
       },
       "self-loathing": {
         "type": "line",
         "spans": [
           "shut the fuck up"
         ],
-        "note": "the poem's final line, addressed to itself — three words that end the complaint by silencing the complainer"
+        "note": "the poem's final line, addressed to itself — three words that end the complaint by silencing the complainer",
+        "mode": "argue"
       }
     }
   },
@@ -1548,7 +1705,8 @@
           "written poetry is for those with things to say with no way to say it",
           "and i guess i have a way to say them now"
         ],
-        "note": "the poem renounces written poetry while being one — and signs off with 'goodbye', which it did not honour"
+        "note": "the poem renounces written poetry while being one — and signs off with 'goodbye', which it did not honour",
+        "mode": "argue"
       }
     }
   },
@@ -1566,7 +1724,8 @@
           "even when i don’t bleed",
           "i can speak"
         ],
-        "note": "a method change reported to the page directly — bleeding replaced by speaking, framed as improvement rather than loss"
+        "note": "a method change reported to the page directly — bleeding replaced by speaking, framed as improvement rather than loss",
+        "mode": "outpour"
       }
     }
   },
@@ -1580,7 +1739,8 @@
           "do i need now to make my case and show you how that's the case",
           "fuck that i'm an angry writer"
         ],
-        "note": "defiance aimed at the obligation to argue — the poem refuses to defend the claim it just made"
+        "note": "defiance aimed at the obligation to argue — the poem refuses to defend the claim it just made",
+        "mode": "argue"
       },
       "the writing self": {
         "type": "lines",
@@ -1588,7 +1748,8 @@
           "fuck that i'm an angry writer",
           "righter rider",
           "fighter all nighter"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1602,7 +1763,8 @@
           "my record on the track proves i won't crack",
           "and even if i do not every crack is bad",
           "diamonds are black, cut me some slack"
-        ]
+        ],
+        "mode": "argue"
       },
       "faith": {
         "type": "lines",
@@ -1610,7 +1772,8 @@
           "faith in i'll succeed",
           "i will return from that"
         ],
-        "note": "faith placed in an outcome rather than in a being — the title states it and the last line restates it as certainty of return"
+        "note": "faith placed in an outcome rather than in a being — the title states it and the last line restates it as certainty of return",
+        "mode": "argue"
       }
     }
   },
@@ -1624,7 +1787,8 @@
           "don't be too attached to things",
           "give your most valuable away if you want a piece of the most valuable",
           "getting, or letting go?"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -1639,7 +1803,8 @@
           "THAT AIN'T ME",
           "MY SILENCES ARE VERY SILENT"
         ],
-        "note": "acceptance stated at maximum volume, as a rebuttal to an imagined accusation the reader never made"
+        "note": "acceptance stated at maximum volume, as a rebuttal to an imagined accusation the reader never made",
+        "mode": "argue"
       }
     }
   },
@@ -1655,7 +1820,8 @@
           "everything is cold and bleak,",
           "summer warms so winter doesn't kill"
         ],
-        "note": "the last line reframes the whole cycle — warmth stored as survival rather than enjoyed as reward"
+        "note": "the last line reframes the whole cycle — warmth stored as survival rather than enjoyed as reward",
+        "mode": "outpour"
       }
     }
   },
@@ -1670,7 +1836,8 @@
           "OR WHAT IT ENTAILS, ON THE CROSS HOLDIN THE NAILS,",
           "JUDAS TELLIN EM WHERE IT IS,"
         ],
-        "note": "the crucifixion entered from the wrong side — holding the nails rather than receiving them"
+        "note": "the crucifixion entered from the wrong side — holding the nails rather than receiving them",
+        "mode": "outpour"
       },
       "bravado": {
         "type": "lines",
@@ -1678,7 +1845,8 @@
           "YOU KNOW WHAT, IM LIKE THAT.",
           "ON BLAST, FUCK YOUR DAD,",
           "ROLLIN IN RICK'S, BROKE ASS BITCH DON'T KNOW WHAT IT MEANS,"
-        ]
+        ],
+        "mode": "argue"
       },
       "blasphemy": {
         "type": "lines",
@@ -1686,7 +1854,8 @@
           "THIS, THAT? PROLLY WHAT GOD FELT.",
           "ON THE CROSS HOLDIN THE NAILS,"
         ],
-        "note": "same material as the god tag, but the blasphemy is specifically in the equivalence — a good mood compared to divine feeling, stated casually"
+        "note": "same material as the god tag, but the blasphemy is specifically in the equivalence — a good mood compared to divine feeling, stated casually",
+        "mode": "argue"
       },
       "defiance": {
         "type": "lines",
@@ -1694,7 +1863,8 @@
           "NAH FUCK THAT.",
           "MAN I SHOULDN'T POST THIS."
         ],
-        "note": "the last line is defiance aimed at the poem's own publication — knowing better and doing it anyway"
+        "note": "the last line is defiance aimed at the poem's own publication — knowing better and doing it anyway",
+        "mode": "argue"
       }
     }
   },
@@ -1708,7 +1878,8 @@
           "don’t be so hard on yourself",
           "someone gotta be"
         ],
-        "note": "two lines, and the second one accepts the job the first tried to decline"
+        "note": "two lines, and the second one accepts the job the first tried to decline",
+        "mode": "argue"
       }
     }
   },
@@ -1721,7 +1892,8 @@
         "spans": [
           "work is hard"
         ],
-        "note": "the poem's opening line and the only one naming labour — everything after it extends the same predicate to non-work activity"
+        "note": "the poem's opening line and the only one naming labour — everything after it extends the same predicate to non-work activity",
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "lines",
@@ -1730,7 +1902,8 @@
           "waking up is hard",
           "eating is hard",
           "everything is hard"
-        ]
+        ],
+        "mode": "outpour"
       },
       "sadness": {
         "type": "none",
@@ -1741,7 +1914,8 @@
         "spans": [
           "staying is hard",
           "everything is hard"
-        ]
+        ],
+        "mode": "outpour"
       },
       "numbness": {
         "type": "lines",
@@ -1750,7 +1924,8 @@
           "things are hard",
           "i'm not"
         ],
-        "note": "the repeated 'i'm not' answers 'hard' — the speaker isn't hard, isn't difficult, and by implication isn't much of anything"
+        "note": "the repeated 'i'm not' answers 'hard' — the speaker isn't hard, isn't difficult, and by implication isn't much of anything",
+        "mode": "argue"
       },
       "self-loathing": {
         "type": "lines",
@@ -1759,7 +1934,8 @@
           "i couldn't",
           "that was hard"
         ],
-        "note": "the only concrete incident in the poem, placed at the end, and the failure is measured against a sibling"
+        "note": "the only concrete incident in the poem, placed at the end, and the failure is measured against a sibling",
+        "mode": "outpour"
       },
       "conflict": {
         "type": "none",
@@ -1777,7 +1953,8 @@
           "yeah writing without knowing showed me such accident occurred",
           "now i gotta go clean up"
         ],
-        "note": "writing framed as an accident site the writer is responsible for clearing"
+        "note": "writing framed as an accident site the writer is responsible for clearing",
+        "mode": "outpour"
       }
     }
   },
@@ -1791,7 +1968,8 @@
           "I too am far too gone to make myself whatever use I shall be used of me",
           "where languages don’t speak"
         ],
-        "note": "the only two lines that turn from the invented word back onto the speaker — the rest of the poem interrogates folquenesch itself"
+        "note": "the only two lines that turn from the invented word back onto the speaker — the rest of the poem interrogates folquenesch itself",
+        "mode": "outpour"
       }
     }
   },
@@ -1807,7 +1985,8 @@
           "i’ll go with no thing",
           "and i love no thing"
         ],
-        "note": "'nothing' split into 'no thing' throughout, which turns absence into a specific object that can be arrived with, departed with, and loved"
+        "note": "'nothing' split into 'no thing' throughout, which turns absence into a specific object that can be arrived with, departed with, and loved",
+        "mode": "outpour"
       }
     }
   },
@@ -1820,7 +1999,8 @@
         "spans": [
           "fuck all y'all!"
         ],
-        "note": "the entire piece"
+        "note": "the entire piece",
+        "mode": "argue"
       },
       "defiance": {
         "type": "none",
@@ -1838,7 +2018,8 @@
           "fucking tourists",
           "i'm fucking tourists"
         ],
-        "note": "the second line converts the first from complaint to activity — same two words, adjective becoming verb, and the contempt survives the flip"
+        "note": "the second line converts the first from complaint to activity — same two words, adjective becoming verb, and the contempt survives the flip",
+        "mode": "outpour"
       }
     }
   },
@@ -1855,7 +2036,8 @@
           "i am sorry for the change i had brought to the world",
           "i am sorry for wanting to give back"
         ],
-        "note": "the apology repeats fourteen times; these are the ones where the speaker apologises for his own acts rather than on god's behalf"
+        "note": "the apology repeats fourteen times; these are the ones where the speaker apologises for his own acts rather than on god's behalf",
+        "mode": "outpour"
       },
       "god": {
         "type": "lines",
@@ -1864,7 +2046,8 @@
           "i am sorry for worshipping you",
           "when you are",
           "the denounced"
-        ]
+        ],
+        "mode": "outpour"
       },
       "blasphemy": {
         "type": "lines",
@@ -1876,7 +2059,8 @@
           "in your pain",
           "knowing we all suffer"
         ],
-        "note": "the blasphemy is structural — the apology form kept intact while its content accuses god of smallness and of manufacturing suffering for company"
+        "note": "the blasphemy is structural — the apology form kept intact while its content accuses god of smallness and of manufacturing suffering for company",
+        "mode": "argue"
       }
     }
   },
@@ -1893,7 +2077,8 @@
           "have you ever kissed the sun",
           "have you ever lived"
         ],
-        "note": "both repeated phrases carry it — 'sit long enough' eleven times as instruction, 'have you ever lived' six times as accusation"
+        "note": "both repeated phrases carry it — 'sit long enough' eleven times as instruction, 'have you ever lived' six times as accusation",
+        "mode": "outpour"
       }
     }
   },
@@ -1906,7 +2091,8 @@
         "spans": [
           "but isn’t someone else’s lie someone else’s truth",
           "lies are another truth?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "the writing self": {
         "type": "lines",
@@ -1915,7 +2101,8 @@
           "lie paper",
           "let me hear some words of untruth coming out of your mouth, bleed out of your vein,"
         ],
-        "note": "the page addressed as a collaborator in lying, one letter away from the greeting"
+        "note": "the page addressed as a collaborator in lying, one letter away from the greeting",
+        "mode": "outpour"
       }
     }
   },
@@ -1928,7 +2115,8 @@
         "spans": [
           "i’m meditating on my eyes"
         ],
-        "note": "the title does the theological work — heart and mind as the cross, Jesus as the eye — while the body reports only the practice, then excuses itself"
+        "note": "the title does the theological work — heart and mind as the cross, Jesus as the eye — while the body reports only the practice, then excuses itself",
+        "mode": "outpour"
       }
     }
   },
@@ -1942,7 +2130,8 @@
           "you won't be forever young",
           "know that you are a goner",
           "savor it all 'fore it all fade"
-        ]
+        ],
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "lines",
@@ -1951,7 +2140,8 @@
           "i keep fixing when i done fixed",
           "i keep licking the sword that stabs me"
         ],
-        "note": "three lines of continuing past the point of completion — the third turns the pattern from futile to self-harming"
+        "note": "three lines of continuing past the point of completion — the third turns the pattern from futile to self-harming",
+        "mode": "outpour"
       }
     }
   },
@@ -1968,7 +2158,8 @@
           "i need everyone to see",
           "how pure i fuck"
         ],
-        "note": "desire framed entirely as purification and as spectacle — needing to be seen doing it is inseparable from the doing"
+        "note": "desire framed entirely as purification and as spectacle — needing to be seen doing it is inseparable from the doing",
+        "mode": "argue"
       },
       "god": {
         "type": "lines",
@@ -1980,7 +2171,8 @@
           "sun",
           "fuck father"
         ],
-        "note": "the poem swaps gods mid-way — the one who listens without hearing is replaced by the sun, and the last two words dismiss the first"
+        "note": "the poem swaps gods mid-way — the one who listens without hearing is replaced by the sun, and the last two words dismiss the first",
+        "mode": "outpour"
       }
     }
   },
@@ -1995,14 +2187,16 @@
           "ozlem icerisindeyim.",
           "her seye karsi ozlem icerisindeyim."
         ],
-        "note": "özlem — longing/missing — stated twice, first toward specific people and then extended to everything"
+        "note": "özlem — longing/missing — stated twice, first toward specific people and then extended to everything",
+        "mode": "outpour"
       },
       "devotion": {
         "type": "line",
         "spans": [
           "daha da sevdikce daha da iyi olacagim."
         ],
-        "note": "the answer the whole piece was searching for, arrived at while dancing — the more I love the better I'll be"
+        "note": "the answer the whole piece was searching for, arrived at while dancing — the more I love the better I'll be",
+        "mode": "argue"
       }
     }
   },
@@ -2016,7 +2210,8 @@
           "we were the most sensual",
           "reading your mails was better than us fucking"
         ],
-        "note": "the sensuality located in correspondence rather than in the body — and rated explicitly above it"
+        "note": "the sensuality located in correspondence rather than in the body — and rated explicitly above it",
+        "mode": "argue"
       }
     }
   },
@@ -2028,14 +2223,16 @@
         "type": "line",
         "spans": [
           "fuck you you don’t know me"
-        ]
+        ],
+        "mode": "argue"
       },
       "identity": {
         "type": "line",
         "spans": [
           "i write like lynch draws"
         ],
-        "note": "the whole self-definition is one comparison, offered immediately after refusing to be known"
+        "note": "the whole self-definition is one comparison, offered immediately after refusing to be known",
+        "mode": "argue"
       }
     }
   },
@@ -2050,7 +2247,8 @@
           "a reader reads with an empty mind",
           "anyways i am not a writer and i dont want to be a writer"
         ],
-        "note": "the denial opens and closes the piece, and the middle is a writer's argument about how readers work"
+        "note": "the denial opens and closes the piece, and the middle is a writer's argument about how readers work",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -2058,7 +2256,8 @@
           "you need to know something exists and then not believe it",
           "ignorance isnt anything",
           "its just ignorance"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -2072,7 +2271,8 @@
           "i broke the rule",
           "i can't speak of what was done"
         ],
-        "note": "guilt sealed rather than confessed — the poem names that something happened and immediately forbids itself the content"
+        "note": "guilt sealed rather than confessed — the poem names that something happened and immediately forbids itself the content",
+        "mode": "argue"
       },
       "god": {
         "type": "lines",
@@ -2080,7 +2280,8 @@
           "god won't forgive me if it's a repeating",
           "thing and not one"
         ],
-        "note": "forgiveness made conditional on frequency rather than severity — quoted across two lines as the source breaks mid-phrase"
+        "note": "forgiveness made conditional on frequency rather than severity — quoted across two lines as the source breaks mid-phrase",
+        "mode": "outpour"
       }
     }
   },
@@ -2093,7 +2294,8 @@
         "spans": [
           "a broken rock, shell and mineral,",
           "actively breaking for millions of years."
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -2101,14 +2303,16 @@
           "you don't call them by their name, before they broke,",
           "you call them sand."
         ],
-        "note": "identity as what survives naming — the original name doesn't apply once the breaking is total"
+        "note": "identity as what survives naming — the original name doesn't apply once the breaking is total",
+        "mode": "argue"
       },
       "impermanence": {
         "type": "lines",
         "spans": [
           "actively breaking for millions of years.",
           "you call them sand."
-        ]
+        ],
+        "mode": "argue"
       },
       "acceptance": {
         "type": "none",
@@ -2121,28 +2325,32 @@
           "first when you break,",
           "second when you realize you're broken."
         ],
-        "note": "the opening three lines define a process by counting it — clarity as enumeration"
+        "note": "the opening three lines define a process by counting it — clarity as enumeration",
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "line",
         "spans": [
           "pieces of scattered pieces are not pieces,"
         ],
-        "note": "the same word three times, each occurrence undermining the last"
+        "note": "the same word three times, each occurrence undermining the last",
+        "mode": "outpour"
       },
       "truth": {
         "type": "lines",
         "spans": [
           "you break two times.",
           "you call them sand."
-        ]
+        ],
+        "mode": "argue"
       },
       "endurance": {
         "type": "line",
         "spans": [
           "actively breaking for millions of years."
         ],
-        "note": "endurance without a survivor — the breaking is what persists, not the thing being broken"
+        "note": "endurance without a survivor — the breaking is what persists, not the thing being broken",
+        "mode": "argue"
       }
     }
   },
@@ -2156,7 +2364,8 @@
           "i use all my sensible senses to make some sense out of it",
           "and yet",
           "none of my senses seem to make some sense"
-        ]
+        ],
+        "mode": "outpour"
       },
       "longing": {
         "type": "lines",
@@ -2165,7 +2374,8 @@
           "touched by a fleeing love",
           "i wait",
           "i follow"
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -2175,7 +2385,8 @@
           "can i be a stranger to myself",
           "can i love myself?"
         ],
-        "note": "the questions narrow from why to whether, and the final one is asked twice — the repetition is the poem's only answer"
+        "note": "the questions narrow from why to whether, and the final one is asked twice — the repetition is the poem's only answer",
+        "mode": "outpour"
       }
     }
   },
@@ -2191,7 +2402,8 @@
           "duh",
           "fucking idiots"
         ],
-        "note": "a genuine claim about capability, delivered as if the questioner were stupid for needing it explained"
+        "note": "a genuine claim about capability, delivered as if the questioner were stupid for needing it explained",
+        "mode": "argue"
       }
     }
   },
@@ -2204,7 +2416,8 @@
         "spans": [
           "i cant wait to get home and fuck myself"
         ],
-        "note": "the entire piece"
+        "note": "the entire piece",
+        "mode": "argue"
       },
       "body": {
         "type": "none",
@@ -2224,7 +2437,8 @@
           "i also chose a new spot to right from",
           "it's higher up my spine just below the fly god"
         ],
-        "note": "the spot escalates from a place to sit, to a place to write from, to a place to be morally right from — and then turns out to be anatomical"
+        "note": "the spot escalates from a place to sit, to a place to write from, to a place to be morally right from — and then turns out to be anatomical",
+        "mode": "outpour"
       }
     }
   },
@@ -2239,7 +2453,8 @@
           "i’m sorry i’m not worthy myself",
           "you being worthy and me being a piece of shit makes you another piece of shit"
         ],
-        "note": "the last line drags the other party down rather than lifting the speaker up — self-loathing used as a weapon"
+        "note": "the last line drags the other party down rather than lifting the speaker up — self-loathing used as a weapon",
+        "mode": "argue"
       }
     }
   },
@@ -2253,7 +2468,8 @@
           "hopped back on my own dick",
           "maaaaaaaaaaan i don’t like my dick today"
         ],
-        "note": "the drawn-out vowel does the work — a body complaint delivered as a groan rather than a statement"
+        "note": "the drawn-out vowel does the work — a body complaint delivered as a groan rather than a statement",
+        "mode": "argue"
       },
       "desire": {
         "type": "lines",
@@ -2262,7 +2478,8 @@
           "then im challenged i can get her hyer",
           "i did",
           "then i wasn’t hy"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -2277,7 +2494,8 @@
           "i feel, not deal",
           "i fear not ideal"
         ],
-        "note": "verification abandoned as a requirement — the last two lines replace checking with feeling and then with fear"
+        "note": "verification abandoned as a requirement — the last two lines replace checking with feeling and then with fear",
+        "mode": "argue"
       }
     }
   },
@@ -2293,7 +2511,8 @@
           "but either way im weird",
           "can you tell me some nice things please"
         ],
-        "note": "the self described almost entirely through apology, and the last line drops the apologizing to ask directly"
+        "note": "the self described almost entirely through apology, and the last line drops the apologizing to ask directly",
+        "mode": "outpour"
       }
     }
   },
@@ -2309,7 +2528,8 @@
           "watch how you be",
           "AHHHHHHHHHH IM SO GOOD"
         ],
-        "note": "an invented marketplace for used notebooks, and then the writer breaking frame to congratulate himself on the idea"
+        "note": "an invented marketplace for used notebooks, and then the writer breaking frame to congratulate himself on the idea",
+        "mode": "outpour"
       }
     }
   },
@@ -2328,7 +2548,8 @@
           "and when i am",
           "i still am not am"
         ],
-        "note": "the last four lines break the verb rather than the sentiment — 'am' used as a noun the speaker can fail to be"
+        "note": "the last four lines break the verb rather than the sentiment — 'am' used as a noun the speaker can fail to be",
+        "mode": "outpour"
       }
     }
   },
@@ -2341,7 +2562,8 @@
         "spans": [
           "god needs the soul as much as the soul needs god"
         ],
-        "note": "mutual dependency stated flatly in the opening line, with no argument offered for it"
+        "note": "mutual dependency stated flatly in the opening line, with no argument offered for it",
+        "mode": "argue"
       },
       "mortality": {
         "type": "lines",
@@ -2349,7 +2571,8 @@
           "shaped into a mortal pull",
           "memory as his only fault",
           "haunted by the beautiful"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -2367,7 +2590,8 @@
           "i bear your pain",
           "your sins"
         ],
-        "note": "sadness enacted as descent rather than named — falling slowly, without gravity, carrying someone else's weight"
+        "note": "sadness enacted as descent rather than named — falling slowly, without gravity, carrying someone else's weight",
+        "mode": "outpour"
       }
     }
   },
@@ -2382,7 +2606,8 @@
           "i have nothing",
           "i do not have an idea",
           "or should i remain idealess in a not very ideal"
-        ]
+        ],
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "lines",
@@ -2390,7 +2615,8 @@
           "sometimes i do have ideas but they tire me",
           "and now im sleepy"
         ],
-        "note": "the poem ends by falling asleep rather than by resolving — exhaustion as the actual conclusion"
+        "note": "the poem ends by falling asleep rather than by resolving — exhaustion as the actual conclusion",
+        "mode": "outpour"
       }
     }
   },
@@ -2403,7 +2629,8 @@
         "spans": [
           "i was too busy exploring my sexuality"
         ],
-        "note": "the punchline, and the only line naming desire — offered as the diagnosis for why the writing isn't working"
+        "note": "the punchline, and the only line naming desire — offered as the diagnosis for why the writing isn't working",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -2411,7 +2638,8 @@
           "my life is too good too peaceful",
           "therefore my poetry doesnt hit"
         ],
-        "note": "doubt about the work, blamed on wellbeing — a suspicion that comfort is disqualifying"
+        "note": "doubt about the work, blamed on wellbeing — a suspicion that comfort is disqualifying",
+        "mode": "argue"
       }
     }
   },
@@ -2428,7 +2656,8 @@
           "i dont wonder how one is one with one",
           "i just wonder how"
         ],
-        "note": "wonder stripped of its object — the poem refuses the metaphysical version and keeps only the bare verb"
+        "note": "wonder stripped of its object — the poem refuses the metaphysical version and keeps only the bare verb",
+        "mode": "outpour"
       }
     }
   },
@@ -2445,7 +2674,8 @@
           "if i fuck god and god fucks me",
           "who fucked who"
         ],
-        "note": "the last two lines dissolve the agent/object distinction the four lines above were built on"
+        "note": "the last two lines dissolve the agent/object distinction the four lines above were built on",
+        "mode": "outpour"
       },
       "desire": {
         "type": "lines",
@@ -2454,7 +2684,8 @@
           "fuckinggggggggg",
           "fucking fucking fucking fucking fucking fucking"
         ],
-        "note": "the poem's closing — desire arriving as a question about its own dominance, then answered by repetition"
+        "note": "the poem's closing — desire arriving as a question about its own dominance, then answered by repetition",
+        "mode": "outpour"
       }
     }
   },
@@ -2470,7 +2701,8 @@
           "i let go for the life of me.",
           "life bloomed through me and once again, i,"
         ],
-        "note": "the same idiom turned twice — holding for dear life becomes letting go for the life of me"
+        "note": "the same idiom turned twice — holding for dear life becomes letting go for the life of me",
+        "mode": "outpour"
       },
       "god": {
         "type": "lines",
@@ -2478,7 +2710,8 @@
           "bet god did see.",
           "what did he see wasn’t the best of me"
         ],
-        "note": "god as witness only, and to the worse version — no judgment or response follows"
+        "note": "god as witness only, and to the worse version — no judgment or response follows",
+        "mode": "argue"
       }
     }
   },
@@ -2497,7 +2730,8 @@
           "THEY FUCKING LIE BRO.",
           "but someone's lie is someone else's truth,"
         ],
-        "note": "the swerve after the peak — the caps-lock accusation immediately relativized in the next line"
+        "note": "the swerve after the peak — the caps-lock accusation immediately relativized in the next line",
+        "mode": "argue"
       },
       "work": {
         "type": "lines",
@@ -2505,7 +2739,8 @@
           "a machine ain't always perfect,",
           "upkeep to keep it intact,",
           "i push it up, it rolls back down"
-        ]
+        ],
+        "mode": "outpour"
       },
       "defiance": {
         "type": "lines",
@@ -2513,14 +2748,16 @@
           "am i supposed to be listening to anybody?",
           "it was always revolt,",
           "FUCK YOU AND FUCK YOUR DADDY"
-        ]
+        ],
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
         "spans": [
           "am i supposed to be listening to anybody?",
           "today i found out perceptions work at a fault."
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -2528,7 +2765,8 @@
           "i forgot my name.",
           "forgot to pick my face off the rack,",
           "and that's the unchanging tale."
-        ]
+        ],
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -2538,7 +2776,8 @@
           "SISSY PUSS",
           "SISSY PUSSY"
         ],
-        "note": "two different registers of the same technique — the eye/I split, and Sisyphus broken open into an insult"
+        "note": "two different registers of the same technique — the eye/I split, and Sisyphus broken open into an insult",
+        "mode": "outpour"
       }
     }
   },
@@ -2553,7 +2792,8 @@
           "morgan freeman or david attenborough?",
           "glow of the apple"
         ],
-        "note": "the divine voice immediately cast with two actors — god as a casting decision"
+        "note": "the divine voice immediately cast with two actors — god as a casting decision",
+        "mode": "outpour"
       },
       "bravado": {
         "type": "lines",
@@ -2562,7 +2802,8 @@
           "imma dunk on your momma’s head!",
           "oppose me and you shall die"
         ],
-        "note": "escalating threats, each one undercut by the line following it"
+        "note": "escalating threats, each one undercut by the line following it",
+        "mode": "outpour"
       }
     }
   },
@@ -2577,7 +2818,8 @@
           "and they left",
           "now i’m left with the need to state"
         ],
-        "note": "the doubt is in what remains — the insights are gone and only the compulsion to announce them survives"
+        "note": "the doubt is in what remains — the insights are gone and only the compulsion to announce them survives",
+        "mode": "outpour"
       }
     }
   },
@@ -2590,7 +2832,8 @@
         "spans": [
           "today i fucked and it was like doing 10 lines of coke",
           "on the stuff god stepped on"
-        ]
+        ],
+        "mode": "outpour"
       },
       "bravado": {
         "type": "lines",
@@ -2598,7 +2841,8 @@
           "YOU GOTTA GET REIMBURSED",
           "I AM THE FIRST"
         ],
-        "note": "the poem's only two capitalised lines, and both arrive after the sex is already described — the boast is the afterword, not the event"
+        "note": "the poem's only two capitalised lines, and both arrive after the sex is already described — the boast is the afterword, not the event",
+        "mode": "argue"
       }
     }
   },
@@ -2618,7 +2862,8 @@
           "through",
           "my own eyes"
         ],
-        "note": "the complaint and its resolution use the same word — the poem argues its way from hating the first person to justifying it"
+        "note": "the complaint and its resolution use the same word — the poem argues its way from hating the first person to justifying it",
+        "mode": "argue"
       },
       "mortality": {
         "type": "lines",
@@ -2627,7 +2872,8 @@
           "die",
           "to hug the pretty death that awaits me",
           "in the holy arms of death"
-        ]
+        ],
+        "mode": "outpour"
       },
       "longing": {
         "type": "lines",
@@ -2638,7 +2884,8 @@
           "how little",
           "you’ve been hugged"
         ],
-        "note": "the death-wish indexed directly to un-hugged moments — longing for contact, with death as the only guaranteed embrace"
+        "note": "the death-wish indexed directly to un-hugged moments — longing for contact, with death as the only guaranteed embrace",
+        "mode": "outpour"
       }
     }
   },
@@ -2653,7 +2900,8 @@
           "WHEN I WRITE MEDIOCRE I WRITE MEDIOCRE",
           "WHEN I WRITE GOOD I WRITE GOOD"
         ],
-        "note": "the joke is literal — quality of writing and the word being written are collapsed, and the postscript spells it out for anyone who missed it"
+        "note": "the joke is literal — quality of writing and the word being written are collapsed, and the postscript spells it out for anyone who missed it",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -2661,7 +2909,8 @@
           "see i think i'm a fraud",
           "i think everything is a joke",
           "nothing in life is serious"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -2677,7 +2926,8 @@
           "so hi",
           "im dumb"
         ],
-        "note": "self-doubt maintained deliberately as a safeguard against actually becoming stupid"
+        "note": "self-doubt maintained deliberately as a safeguard against actually becoming stupid",
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -2687,7 +2937,8 @@
           "but also smart enough to make up a word for it",
           "but im still dumb cause you don’t know the meaning of it"
         ],
-        "note": "the invented word and the argument about the invented word are the same gesture — coining as both proof of smart and proof of dumb"
+        "note": "the invented word and the argument about the invented word are the same gesture — coining as both proof of smart and proof of dumb",
+        "mode": "outpour"
       }
     }
   },
@@ -2704,7 +2955,8 @@
           "there was this one time i went back to my mother's womb",
           "i was breathing like it's my first time being here"
         ],
-        "note": "breath-holding as a route back to the prenatal — the body used as a time machine, with the c-section named as what it's compensating for"
+        "note": "breath-holding as a route back to the prenatal — the body used as a time machine, with the c-section named as what it's compensating for",
+        "mode": "outpour"
       }
     }
   },
@@ -2719,7 +2971,8 @@
           "as if it would make a difference to me",
           "nothing keeps them at bay"
         ],
-        "note": "defiance and defeat in the same breath — the taunt is undercut by the final line admitting nothing works"
+        "note": "defiance and defeat in the same breath — the taunt is undercut by the final line admitting nothing works",
+        "mode": "argue"
       }
     }
   },
@@ -2736,7 +2989,8 @@
           "today i forgot to take my meds",
           "and my meds got us separated"
         ],
-        "note": "grief carried entirely by small procedural changes — the hair, the coffee, the missed dose — with the breakup itself never described"
+        "note": "grief carried entirely by small procedural changes — the hair, the coffee, the missed dose — with the breakup itself never described",
+        "mode": "outpour"
       }
     }
   },
@@ -2752,14 +3006,16 @@
           "sadness isn't new it's what's been inside",
           "i remain sad"
         ],
-        "note": "sadness reclassified from event to condition — nothing produces it, it was already there and the music only makes it audible"
+        "note": "sadness reclassified from event to condition — nothing produces it, it was already there and the music only makes it audible",
+        "mode": "argue"
       },
       "the writing self": {
         "type": "lines",
         "spans": [
           "and why do i even write?",
           "is it to find a way out of it?"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -2772,7 +3028,8 @@
         "spans": [
           "i, tell me love, when you look into my eyes, what do you see?",
           "do you concur it's due to the fact that death is the warmest embrace?"
-        ]
+        ],
+        "mode": "outpour"
       },
       "mortality": {
         "type": "lines",
@@ -2781,7 +3038,8 @@
           "i'm graceful at the face of dying, though we never met i'm still trying, whatever he's selling i'm buying.",
           "eye did, drying. soon i'll be arriving."
         ],
-        "note": "death addressed as a salesman being bought from, and the last line sets an arrival time"
+        "note": "death addressed as a salesman being bought from, and the last line sets an arrival time",
+        "mode": "outpour"
       }
     }
   },
@@ -2797,14 +3055,16 @@
           "and when i am",
           "i still miss what i was"
         ],
-        "note": "longing turned entirely inward and then complaining about it — the wish is for an object outside the self to miss"
+        "note": "longing turned entirely inward and then complaining about it — the wish is for an object outside the self to miss",
+        "mode": "outpour"
       },
       "self-erosion": {
         "type": "line",
         "spans": [
           "though it’s not like i miss myself but i miss myself when i was more myself and less less"
         ],
-        "note": "quoted as the source wraps — 'less less myself' straddles the line break, and the doubling of 'less' is the erosion stated grammatically"
+        "note": "quoted as the source wraps — 'less less myself' straddles the line break, and the doubling of 'less' is the erosion stated grammatically",
+        "mode": "outpour"
       }
     }
   },
@@ -2817,7 +3077,8 @@
         "spans": [
           "we could let out all our problems."
         ],
-        "note": "the entire body — and 'we' doing the work, since the title established the other party is also the speaker"
+        "note": "the entire body — and 'we' doing the work, since the title established the other party is also the speaker",
+        "mode": "argue"
       }
     }
   },
@@ -2832,7 +3093,8 @@
           "no mo waiting!",
           "create your ending to this story"
         ],
-        "note": "purgatory as a waiting room that can simply be exited — release framed as impatience rather than as absolution"
+        "note": "purgatory as a waiting room that can simply be exited — release framed as impatience rather than as absolution",
+        "mode": "argue"
       }
     }
   },
@@ -2850,7 +3112,8 @@
           "help you help yourself",
           "so you can help your fellow man"
         ],
-        "note": "healing structured as an institution — damage as entry requirement, and the curriculum ends by passing it on"
+        "note": "healing structured as an institution — damage as entry requirement, and the curriculum ends by passing it on",
+        "mode": "outpour"
       }
     }
   },
@@ -2863,7 +3126,8 @@
         "spans": [
           "god made it all so you get weary",
           "if you ask me piece of shit should have asked me"
-        ]
+        ],
+        "mode": "argue"
       },
       "contempt": {
         "type": "lines",
@@ -2871,7 +3135,8 @@
           "if you ask me piece of shit should have asked me",
           "i would have made it fair and fairy"
         ],
-        "note": "contempt as a job application — the speaker claims he'd have done the creating better"
+        "note": "contempt as a job application — the speaker claims he'd have done the creating better",
+        "mode": "argue"
       },
       "blasphemy": {
         "type": "lines",
@@ -2879,7 +3144,8 @@
           "god made it all so you get weary",
           "if you ask me piece of shit should have asked me"
         ],
-        "note": "same span as contempt; the blasphemy is specifically in the epithet applied to the maker, not in the complaint about the world"
+        "note": "same span as contempt; the blasphemy is specifically in the epithet applied to the maker, not in the complaint about the world",
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -2887,28 +3153,32 @@
           "contempt?",
           "contemporary."
         ],
-        "note": "one word breaking open into another that contains it — the emotion and the era sharing a stem"
+        "note": "one word breaking open into another that contains it — the emotion and the era sharing a stem",
+        "mode": "outpour"
       },
       "existence": {
         "type": "lines",
         "spans": [
           "is it love that hurts or the absence of it?",
           "all the attempts at locating it to find something essentially different"
-        ]
+        ],
+        "mode": "outpour"
       },
       "defiance": {
         "type": "line",
         "spans": [
           "going gentle into that good night don't ask me why"
         ],
-        "note": "Thomas inverted — going gentle instead of raging, and refusing to justify the inversion"
+        "note": "Thomas inverted — going gentle instead of raging, and refusing to justify the inversion",
+        "mode": "argue"
       },
       "longing": {
         "type": "lines",
         "spans": [
           "is it love that hurts or the absence of it?",
           "this drought has a fullness of its own,"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -2922,7 +3192,8 @@
           "i yearn, don't know my place",
           "i can no longer see my face"
         ],
-        "note": "yearning without an object — the poem names the state and then reports the cost rather than the want"
+        "note": "yearning without an object — the poem names the state and then reports the cost rather than the want",
+        "mode": "outpour"
       }
     }
   },
@@ -2937,7 +3208,8 @@
           "i went to see and i’ve seen",
           "how cruel, how unseen",
           "aesthetic it only is when you’re not looking"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -2947,7 +3219,8 @@
           "and i paid the price anthropogenic,",
           "eugenic cardiogenic"
         ],
-        "note": "first span is the went/vent swap that repeats the opening line one letter changed; the rest is a -genic chain running on sound alone"
+        "note": "first span is the went/vent swap that repeats the opening line one letter changed; the rest is a -genic chain running on sound alone",
+        "mode": "outpour"
       }
     }
   },
@@ -2962,7 +3235,8 @@
           "am i onto something?",
           "i’m warming up!!"
         ],
-        "note": "acceptance arriving as excitement rather than as calm — the piece ends mid-thought, cheering itself on"
+        "note": "acceptance arriving as excitement rather than as calm — the piece ends mid-thought, cheering itself on",
+        "mode": "outpour"
       }
     }
   },
@@ -2977,7 +3251,8 @@
           "i’d only be talking about them",
           "i’d only write about them"
         ],
-        "note": "the longing is conditional and hypothetical throughout — nothing in the poem claims the wanting directly"
+        "note": "the longing is conditional and hypothetical throughout — nothing in the poem claims the wanting directly",
+        "mode": "outpour"
       }
     }
   },
@@ -2992,7 +3267,8 @@
           "life won't take you either",
           "i mean though would i like life to take me seriously as serious is heavy and love is a light stepping and a light stepping"
         ],
-        "note": "the received wisdom quoted and then questioned rather than accepted — doubt aimed at the advice, not at the self"
+        "note": "the received wisdom quoted and then questioned rather than accepted — doubt aimed at the advice, not at the self",
+        "mode": "outpour"
       }
     }
   },
@@ -3008,7 +3284,8 @@
           "summmmmmmer love",
           "simmering summer love"
         ],
-        "note": "desire named as the reason the writing stopped, and the poem ends by stretching the word 'summer' rather than by returning to the argument"
+        "note": "desire named as the reason the writing stopped, and the poem ends by stretching the word 'summer' rather than by returning to the argument",
+        "mode": "outpour"
       }
     }
   },
@@ -3024,7 +3301,8 @@
           "cause my blood is being sucked out of my body",
           "and im not the one doing it"
         ],
-        "note": "the same fluid framing labour twice — blood given voluntarily versus blood extracted, and only the second is happening"
+        "note": "the same fluid framing labour twice — blood given voluntarily versus blood extracted, and only the second is happening",
+        "mode": "argue"
       },
       "sadness": {
         "type": "lines",
@@ -3034,7 +3312,8 @@
           "not how i feel after doing some amazingly dope shit",
           "im down"
         ],
-        "note": "the sadness compounds by being discussed — talking about the feeling is itself listed as a cause of it"
+        "note": "the sadness compounds by being discussed — talking about the feeling is itself listed as a cause of it",
+        "mode": "argue"
       }
     }
   },
@@ -3051,7 +3330,8 @@
           "OKAY WHO THE FUCK IS TALKING",
           "whoever’s talking is trying to pit me against me and my brain"
         ],
-        "note": "the conflict turns out to have three parties — the speaker, his brain, and an unidentified third voice organising the fight"
+        "note": "the conflict turns out to have three parties — the speaker, his brain, and an unidentified third voice organising the fight",
+        "mode": "outpour"
       }
     }
   },
@@ -3064,7 +3344,8 @@
         "spans": [
           "i'm sober, this sausage's kosher."
         ],
-        "note": "the only claim in the piece, and it's about state rather than about anything true — sobriety asserted and then abandoned for sound"
+        "note": "the only claim in the piece, and it's about state rather than about anything true — sobriety asserted and then abandoned for sound",
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -3073,7 +3354,8 @@
           "sperms are strokers,",
           "we'll meet in october."
         ],
-        "note": "sober/kosher/stroker/october chained on one vowel with no argument underneath — the rhyme is the entire content"
+        "note": "sober/kosher/stroker/october chained on one vowel with no argument underneath — the rhyme is the entire content",
+        "mode": "outpour"
       }
     }
   },
@@ -3089,7 +3371,8 @@
           "for my shortcomings caused by the shortcomings that were bestowed upon me which are",
           "also my shortcomings"
         ],
-        "note": "inherited failure claimed as personal anyway — the third line wraps in the source, and the wrap is where the ownership gets taken back"
+        "note": "inherited failure claimed as personal anyway — the third line wraps in the source, and the wrap is where the ownership gets taken back",
+        "mode": "outpour"
       },
       "sadness": {
         "type": "lines",
@@ -3097,7 +3380,8 @@
           "im just terribly sorry",
           "i really am"
         ],
-        "note": "the apology exhausting itself into flat repetition rather than escalating"
+        "note": "the apology exhausting itself into flat repetition rather than escalating",
+        "mode": "outpour"
       }
     }
   },
@@ -3113,7 +3397,8 @@
           "im that hot",
           "im hotter by the last sentence"
         ],
-        "note": "heat as the body's only stated property, and it increases with each sentence of the poem itself"
+        "note": "heat as the body's only stated property, and it increases with each sentence of the poem itself",
+        "mode": "argue"
       }
     }
   },
@@ -3128,7 +3413,8 @@
           "mathematically? Is it a fluid? Kinda but no. Is it a solid? Definitely not. Sand defies all",
           "reason and logic."
         ],
-        "note": "doubt as a classification failure — a material that answers to neither category, quoted across the source's line wraps"
+        "note": "doubt as a classification failure — a material that answers to neither category, quoted across the source's line wraps",
+        "mode": "outpour"
       }
     }
   },
@@ -3145,7 +3431,8 @@
           "i’m frozen",
           "glacier that’ll not melt before my lifetime comes to an end"
         ],
-        "note": "the numbness given a timescale — not a passing state but one outlasting the speaker"
+        "note": "the numbness given a timescale — not a passing state but one outlasting the speaker",
+        "mode": "argue"
       }
     }
   },
@@ -3164,7 +3451,8 @@
           "cat friends",
           "this is where it ends"
         ],
-        "note": "the question asked three times and then answered with animals — the list of friends contains no people"
+        "note": "the question asked three times and then answered with animals — the list of friends contains no people",
+        "mode": "outpour"
       }
     }
   },
@@ -3178,7 +3466,8 @@
           "innate sadness",
           "intimate relation birthed madness"
         ],
-        "note": "sadness as inborn rather than caused — and the causation in line two applies to madness, not to the sadness above it"
+        "note": "sadness as inborn rather than caused — and the causation in line two applies to madness, not to the sadness above it",
+        "mode": "argue"
       },
       "defiance": {
         "type": "lines",
@@ -3186,7 +3475,8 @@
           "one faced medallion",
           "there was my rebellion"
         ],
-        "note": "a medallion with one face — the rebellion located in something that refuses to have two sides"
+        "note": "a medallion with one face — the rebellion located in something that refuses to have two sides",
+        "mode": "outpour"
       }
     }
   },
@@ -3201,14 +3491,16 @@
           "when i have girlfriends that read",
           "the stuff i write"
         ],
-        "note": "the question is about disclosure, and answering it requires repeating the disclosure — the poem does the thing it wonders whether to do"
+        "note": "the question is about disclosure, and answering it requires repeating the disclosure — the poem does the thing it wonders whether to do",
+        "mode": "outpour"
       },
       "bravado": {
         "type": "line",
         "spans": [
           "is it smart to say"
         ],
-        "note": "the boast smuggled inside a question about whether to boast — plural girlfriends stated only as a hypothetical condition"
+        "note": "the boast smuggled inside a question about whether to boast — plural girlfriends stated only as a hypothetical condition",
+        "mode": "outpour"
       }
     }
   },
@@ -3222,14 +3514,16 @@
           "whats been even happening is life lifing or life life not lifing have life ever not lifed if so",
           "when"
         ],
-        "note": "one noun verbed and conjugated through four tenses in a single unpunctuated line"
+        "note": "one noun verbed and conjugated through four tenses in a single unpunctuated line",
+        "mode": "outpour"
       },
       "existence": {
         "type": "line",
         "spans": [
           "whats been even happening is life lifing or life life not lifing have life ever not lifed if so"
         ],
-        "note": "same span as wordplay — asking whether existence has ever failed to occur, phrased as grammar rather than as metaphysics"
+        "note": "same span as wordplay — asking whether existence has ever failed to occur, phrased as grammar rather than as metaphysics",
+        "mode": "outpour"
       }
     }
   },
@@ -3244,7 +3538,8 @@
           "I WISH I WAS DEAD",
           "not an ideal weekend"
         ],
-        "note": "the death-wish placed between a line about time and a line about scheduling — the flanking flatness is what makes it land"
+        "note": "the death-wish placed between a line about time and a line about scheduling — the flanking flatness is what makes it land",
+        "mode": "argue"
       }
     }
   },
@@ -3262,7 +3557,8 @@
           "yet you made me",
           "one"
         ],
-        "note": "godhood defined as watching rather than acting, and conferred by others rather than claimed"
+        "note": "godhood defined as watching rather than acting, and conferred by others rather than claimed",
+        "mode": "outpour"
       },
       "faith": {
         "type": "lines",
@@ -3273,7 +3569,8 @@
           "they can’t crucify me if you’re with me",
           "gods won’t kill us if we don’t kill ourselves"
         ],
-        "note": "faith placed in mutual presence rather than in a deity — safety conditional on company"
+        "note": "faith placed in mutual presence rather than in a deity — safety conditional on company",
+        "mode": "outpour"
       },
       "mortality": {
         "type": "lines",
@@ -3282,7 +3579,8 @@
           "my arms are spread",
           "let the gods kill me",
           "but not you"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -3296,13 +3594,15 @@
           "is there a sacred place",
           "where the sun really lays"
         ],
-        "note": "the question asked three identical times before the fourth line completes it — faith as repetition without an answer arriving"
+        "note": "the question asked three identical times before the fourth line completes it — faith as repetition without an answer arriving",
+        "mode": "outpour"
       },
       "longing": {
         "type": "line",
         "spans": [
           "where the sun really lays"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -3317,7 +3617,8 @@
           "or is it a human byproduct",
           "to amplify",
           "it's all senseless"
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -3325,7 +3626,8 @@
           "humans are a predator whose strength is",
           "appearing bigger than they are?"
         ],
-        "note": "the species defined by inflation as its survival trait — identity as a bluff that worked"
+        "note": "the species defined by inflation as its survival trait — identity as a bluff that worked",
+        "mode": "argue"
       }
     }
   },
@@ -3348,7 +3650,8 @@
         "spans": [
           "not on some narcissistic shit but to get to know myself"
         ],
-        "note": "the entire body — self-knowledge defended against a charge nobody made"
+        "note": "the entire body — self-knowledge defended against a charge nobody made",
+        "mode": "argue"
       },
       "doubt": {
         "type": "none",
@@ -3368,7 +3671,8 @@
           "from my pen",
           "from my sacred den",
           "i’ve been betraying myself"
-        ]
+        ],
+        "mode": "outpour"
       },
       "faith": {
         "type": "lines",
@@ -3377,7 +3681,8 @@
           "putting all my faith in the paper lock i made",
           "from a 17th century geometry book"
         ],
-        "note": "faith invested in a lock made of paper — a barrier that guarantees nothing and is chosen anyway"
+        "note": "faith invested in a lock made of paper — a barrier that guarantees nothing and is chosen anyway",
+        "mode": "outpour"
       },
       "longing": {
         "type": "lines",
@@ -3387,7 +3692,8 @@
           "in a perfect world i would come back to my den",
           "and find the remnants of a healed world",
           "golden hair on the red cushions"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -3403,7 +3709,8 @@
           "throwing up this sign",
           "that i know"
         ],
-        "note": "the physical act turning symbolic mid-phrase — what's being brought up is knowledge rather than contents"
+        "note": "the physical act turning symbolic mid-phrase — what's being brought up is knowledge rather than contents",
+        "mode": "outpour"
       }
     }
   },
@@ -3420,7 +3727,8 @@
           "cradle me o sleep!",
           "what will you bring?"
         ],
-        "note": "sleep addressed in the vocative like a deity, and asked to do the missing rather than the speaker"
+        "note": "sleep addressed in the vocative like a deity, and asked to do the missing rather than the speaker",
+        "mode": "outpour"
       }
     }
   },
@@ -3437,7 +3745,8 @@
           "rebel against yourself",
           "if you love yourself enough to hate what you see"
         ],
-        "note": "rebellion scaled down to a dead battery and then turned inward in the final two lines"
+        "note": "rebellion scaled down to a dead battery and then turned inward in the final two lines",
+        "mode": "outpour"
       }
     }
   },
@@ -3453,7 +3762,8 @@
           "if my faith introduces me to death we will share a laugh with it",
           "i wanted to see you"
         ],
-        "note": "faith stated as foolishness and jumped on anyway — and the reason given at the end is curiosity, not belief"
+        "note": "faith stated as foolishness and jumped on anyway — and the reason given at the end is curiosity, not belief",
+        "mode": "outpour"
       }
     }
   },
@@ -3469,7 +3779,8 @@
           "tell em get off my dick dick dick",
           "i fuck wit angels 6 6 6"
         ],
-        "note": "one consonant cluster repeated in triples through the whole piece — pure sonic drive with no argument underneath"
+        "note": "one consonant cluster repeated in triples through the whole piece — pure sonic drive with no argument underneath",
+        "mode": "outpour"
       }
     }
   },
@@ -3482,14 +3793,16 @@
         "spans": [
           "lets all have sex"
         ],
-        "note": "the invitation isolated at the end after three lines of unrelated sensory reporting"
+        "note": "the invitation isolated at the end after three lines of unrelated sensory reporting",
+        "mode": "argue"
       },
       "body": {
         "type": "lines",
         "spans": [
           "my hands are oily",
           "waves crash, people dance"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -3506,7 +3819,8 @@
           "all i had to do was take my two fingers and shove them down my throat",
           "what would come up, would come up"
         ],
-        "note": "the old method described as induced vomiting, and the new one as thinking first — reported as loss, not improvement"
+        "note": "the old method described as induced vomiting, and the new one as thinking first — reported as loss, not improvement",
+        "mode": "outpour"
       }
     }
   },
@@ -3522,7 +3836,8 @@
           "i'm not a sand",
           "i did ascend"
         ],
-        "note": "identity by exclusion, and 'i'm not a sand' refusing the archive's own recurring image of dissolution into indistinguishable grains"
+        "note": "identity by exclusion, and 'i'm not a sand' refusing the archive's own recurring image of dissolution into indistinguishable grains",
+        "mode": "argue"
       }
     }
   },
@@ -3537,7 +3852,8 @@
           "i wanna see me normal like she does",
           "none of this bleeding bullshit"
         ],
-        "note": "the longing is for a lesser view of himself — to be seen ordinarily by someone who never saw the work"
+        "note": "the longing is for a lesser view of himself — to be seen ordinarily by someone who never saw the work",
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -3548,7 +3864,8 @@
           "elegant way with words that's my inheritance?",
           "some sick twisted experiments i am the evidence"
         ],
-        "note": "the gift and the damage claimed as the same inheritance, with the self offered as the proof"
+        "note": "the gift and the damage claimed as the same inheritance, with the self offered as the proof",
+        "mode": "outpour"
       }
     }
   },
@@ -3564,7 +3881,8 @@
           "some never swam far enough from despair to meet hope",
           "some never knew despair"
         ],
-        "note": "the poem states the hope four times, admits it worked, then withdraws it in the CORRECTIONS section — the longing survives its own disproof"
+        "note": "the poem states the hope four times, admits it worked, then withdraws it in the CORRECTIONS section — the longing survives its own disproof",
+        "mode": "argue"
       }
     }
   },
@@ -3580,7 +3898,8 @@
           "baby grey is cool as long as you're the only one that has it",
           "people are cool as long as they are loved ones"
         ],
-        "note": "contempt scaled down by increments until it exempts only the person being addressed — and then 'i love you'"
+        "note": "contempt scaled down by increments until it exempts only the person being addressed — and then 'i love you'",
+        "mode": "argue"
       }
     }
   },
@@ -3597,7 +3916,8 @@
           "so thaT's why",
           "writers gotta show how they got to that thought"
         ],
-        "note": "the poem states the rule it's currently breaking, breaks it anyway, and then argues the breaking was necessary"
+        "note": "the poem states the rule it's currently breaking, breaks it anyway, and then argues the breaking was necessary",
+        "mode": "argue"
       }
     }
   },
@@ -3612,7 +3932,8 @@
           "wrote when we had nothing else to do",
           "-bipolar"
         ],
-        "note": "the whole piece in first person plural, and the final line names who the second party is"
+        "note": "the whole piece in first person plural, and the final line names who the second party is",
+        "mode": "outpour"
       }
     }
   },
@@ -3628,7 +3949,8 @@
           "with no effort",
           "mind's gone i'm here"
         ],
-        "note": "the mind arriving and the self departing described as the same motion, then stated flatly in four words"
+        "note": "the mind arriving and the self departing described as the same motion, then stated flatly in four words",
+        "mode": "outpour"
       }
     }
   },
@@ -3642,7 +3964,8 @@
           "i get the ramblings of a mad playful god",
           "then i get human feelings"
         ],
-        "note": "the two registers named as alternating states rather than as a hierarchy — and the poem enacts the switch immediately after"
+        "note": "the two registers named as alternating states rather than as a hierarchy — and the poem enacts the switch immediately after",
+        "mode": "argue"
       },
       "longing": {
         "type": "lines",
@@ -3651,7 +3974,8 @@
           "SOMETIMES, I GET LONELY.",
           "then we hold hands in our search for answers and this is where this poem ends"
         ],
-        "note": "the loneliness admitted mid-shout, buried in a run of caps, and then answered by company rather than by an answer"
+        "note": "the loneliness admitted mid-shout, buried in a run of caps, and then answered by company rather than by an answer",
+        "mode": "outpour"
       }
     }
   },
@@ -3667,7 +3991,8 @@
           "with me",
           "with you",
           "and i feel like you no longer wanna be my friend"
-        ]
+        ],
+        "mode": "outpour"
       },
       "grief": {
         "type": "lines",
@@ -3678,7 +4003,8 @@
           "this heart, you reside,",
           "burnmark."
         ],
-        "note": "grief as residue rather than as loss — the bridge burned but the wreckage stays, and the last two lines locate it anatomically"
+        "note": "grief as residue rather than as loss — the bridge burned but the wreckage stays, and the last two lines locate it anatomically",
+        "mode": "outpour"
       },
       "endurance": {
         "type": "lines",
@@ -3686,7 +4012,8 @@
           "clearing the debris asks us to clean the debris",
           "me, i have the time to clean it up, flowers shooting through wildlife returning,"
         ],
-        "note": "endurance as labour — the work of clearing named as a separate task from the burning"
+        "note": "endurance as labour — the work of clearing named as a separate task from the burning",
+        "mode": "outpour"
       },
       "self-loathing": {
         "type": "none",
@@ -3697,7 +4024,8 @@
         "spans": [
           "but it had, it's done"
         ],
-        "note": "four words of acceptance, immediately followed by the burnmark line that undoes it"
+        "note": "four words of acceptance, immediately followed by the burnmark line that undoes it",
+        "mode": "outpour"
       },
       "sadness": {
         "type": "lines",
@@ -3707,7 +4035,8 @@
           "i don't remember how it burnt",
           "small lighter burnt a bridge"
         ],
-        "note": "the pronoun isolated on its own line before the accusation lands"
+        "note": "the pronoun isolated on its own line before the accusation lands",
+        "mode": "outpour"
       }
     }
   },
@@ -3723,7 +4052,8 @@
           "if you can’t do with him how will you do it with the world",
           "i do not like men very much"
         ],
-        "note": "the conflict is generational and unresolved — the poem announces it's not finished, keeps going, then defers the rest to another day"
+        "note": "the conflict is generational and unresolved — the poem announces it's not finished, keeps going, then defers the rest to another day",
+        "mode": "outpour"
       }
     }
   },
@@ -3739,7 +4069,8 @@
           "i love as it loves",
           "me"
         ],
-        "note": "the last word arriving on its own line turns the whole devotion reciprocal — loving as the moon loves him, not as the moon loves generally"
+        "note": "the last word arriving on its own line turns the whole devotion reciprocal — loving as the moon loves him, not as the moon loves generally",
+        "mode": "outpour"
       }
     }
   },
@@ -3755,7 +4086,8 @@
           "well i guess one could call searching something in its absence prayer",
           "i would"
         ],
-        "note": "prayer refused and then redefined into something the speaker admits he's doing — the two-word retraction is the whole move"
+        "note": "prayer refused and then redefined into something the speaker admits he's doing — the two-word retraction is the whole move",
+        "mode": "outpour"
       }
     }
   },
@@ -3769,7 +4101,8 @@
           "sight of someone captivating is a direct testament to life’s grandeur",
           "and drugs remind you of that",
           "life’s grandeur"
-        ]
+        ],
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -3777,7 +4110,8 @@
           "losers get hooked up with the small sight of everything so big",
           "reals get zoned out"
         ],
-        "note": "a distinction drawn confidently between two ways of taking drugs, with the speaker's own position left unstated"
+        "note": "a distinction drawn confidently between two ways of taking drugs, with the speaker's own position left unstated",
+        "mode": "outpour"
       }
     }
   },
@@ -3797,7 +4131,8 @@
           "my cult",
           "cigar butt"
         ],
-        "note": "the whole piece runs on one two-syllable stress pattern — the title itself is a rhyme discovered at the end of the chain rather than a subject"
+        "note": "the whole piece runs on one two-syllable stress pattern — the title itself is a rhyme discovered at the end of the chain rather than a subject",
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -3808,7 +4143,8 @@
           "i might be",
           "retarded"
         ],
-        "note": "identity built entirely by negation for nine lines, and the only positive claim is self-insult"
+        "note": "identity built entirely by negation for nine lines, and the only positive claim is self-insult",
+        "mode": "outpour"
       }
     }
   },
@@ -3822,7 +4158,8 @@
           "and i am what i am,",
           "because i am what i am."
         ],
-        "note": "the tautology as the poem's central self-definition — nothing outside itself is offered as cause"
+        "note": "the tautology as the poem's central self-definition — nothing outside itself is offered as cause",
+        "mode": "argue"
       },
       "self-acceptance": {
         "type": "lines",
@@ -3832,7 +4169,8 @@
           "i sometimes feel sorry for being too kind,",
           "then i say fuck it,"
         ],
-        "note": "two regrets, both withdrawn, and withdrawn differently — cruelty gets a legal verdict, kindness gets a dismissal"
+        "note": "two regrets, both withdrawn, and withdrawn differently — cruelty gets a legal verdict, kindness gets a dismissal",
+        "mode": "argue"
       },
       "defiance": {
         "type": "lines",
@@ -3840,7 +4178,8 @@
           "be the love that's hard to find,",
           "be the one to say fuck you, trust me it's true.",
           "you ain't getting nothing from me, when you're ready i'll give it to you."
-        ]
+        ],
+        "mode": "argue"
       },
       "guilt": {
         "type": "lines",
@@ -3848,28 +4187,32 @@
           "one might even call it overcompensation of the things i'm not gonna reveal,",
           "one wouldn't be wrong."
         ],
-        "note": "guilt conceded without its content — the kindness identified as compensation for something the poem refuses to name"
+        "note": "guilt conceded without its content — the kindness identified as compensation for something the poem refuses to name",
+        "mode": "argue"
       },
       "contempt": {
         "type": "lines",
         "spans": [
           "but there is a tiny group of people,",
           "to whom i've been a mad asshole to,"
-        ]
+        ],
+        "mode": "argue"
       },
       "god": {
         "type": "line",
         "spans": [
           "this role god bestowed"
         ],
-        "note": "the poem's final line and its only mention of god — the whole self-description reframed as an assignment"
+        "note": "the poem's final line and its only mention of god — the whole self-description reframed as an assignment",
+        "mode": "argue"
       },
       "truth": {
         "type": "lines",
         "spans": [
           "everyone that knows me knows i'm kind as fuck.",
           "trust me it's true."
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -3883,7 +4226,8 @@
           "if you don't like what you see, maybe you're the problem.",
           "you've a name but what does it entail?",
           "and when it's not what you want you hide your face."
-        ]
+        ],
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -3891,7 +4235,8 @@
           "two nameless, two faceless, interaction is weightless,",
           "a face, is it where the soul is placed?",
           "hide it, never ever out it,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "yearning": {
         "type": "lines",
@@ -3901,7 +4246,8 @@
           "i want nothing,",
           "i need some things."
         ],
-        "note": "the closing couplet separates wanting from needing and admits only the second — yearning conceded in the smallest possible terms"
+        "note": "the closing couplet separates wanting from needing and admits only the second — yearning conceded in the smallest possible terms",
+        "mode": "argue"
       }
     }
   },
@@ -3916,7 +4262,8 @@
           "i made before i knew what making meant",
           "rent due on a life i never signed the lease for"
         ],
-        "note": "existence as an inherited obligation — bound by a claim made before understanding, billed for a life never agreed to"
+        "note": "existence as an inherited obligation — bound by a claim made before understanding, billed for a life never agreed to",
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "lines",
@@ -3924,7 +4271,8 @@
           "killing time while time's been killing",
           "peace? more like pieces scattered",
           "gathering what's left just makes the pile look sadder"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -3939,7 +4287,8 @@
           "you know god never read the bible right?",
           "riding your own dick is better when ur god"
         ],
-        "note": "the boast escalated to a theological analogy and then to a joke about self-regard as divine privilege"
+        "note": "the boast escalated to a theological analogy and then to a joke about self-regard as divine privilege",
+        "mode": "argue"
       }
     }
   },
@@ -3955,7 +4304,8 @@
           "but old people",
           "slap a zoo minded people today"
         ],
-        "note": "the contempt aimed at a way of looking rather than at a group — zoo-mindedness as the offence"
+        "note": "the contempt aimed at a way of looking rather than at a group — zoo-mindedness as the offence",
+        "mode": "argue"
       }
     }
   },
@@ -3969,14 +4319,16 @@
           "i have been saying it too",
           "does taking his work and stamping on them make me an artist"
         ],
-        "note": "the quoted apology adopted as his own, and then the poem questions whether the adopting is itself the art"
+        "note": "the quoted apology adopted as his own, and then the poem questions whether the adopting is itself the art",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "line",
         "spans": [
           "does taking his work and stamping on them make me an artist"
         ],
-        "note": "same span as the writing self — the poem's final line, asked and left unanswered"
+        "note": "same span as the writing self — the poem's final line, asked and left unanswered",
+        "mode": "outpour"
       }
     }
   },
@@ -3992,7 +4344,8 @@
           "so this is what it's like to write with an empty mind",
           "i'm going back to not writing."
         ],
-        "note": "the poem tests a method it distrusts and then quits it in the last line"
+        "note": "the poem tests a method it distrusts and then quits it in the last line",
+        "mode": "outpour"
       }
     }
   },
@@ -4006,7 +4359,8 @@
           "i'm sad in my happiness but if i were a dad i wouldn't be so bad nor i wouldn't be so sad",
           "cause then my child will remember me as a sad dad i had a sad dad shit wasn't all that great i often think he is the reason for all"
         ],
-        "note": "the sadness traced backward to a father and forward to a hypothetical child in a single unpunctuated run"
+        "note": "the sadness traced backward to a father and forward to a hypothetical child in a single unpunctuated run",
+        "mode": "outpour"
       },
       "mortality": {
         "type": "lines",
@@ -4014,7 +4368,8 @@
           "be gone before you get beheaded",
           "how easy death is and how i cling to it in it they said i live but",
           "it doesn't mean shit to me"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -4030,7 +4385,8 @@
           "these bones never break",
           "this soul never ruptures"
         ],
-        "note": "numbness as indestructibility rather than as absence — nothing gets through, which is stated as a property of the material"
+        "note": "numbness as indestructibility rather than as absence — nothing gets through, which is stated as a property of the material",
+        "mode": "argue"
       }
     }
   },
@@ -4045,7 +4401,8 @@
           "in this dream that i gleam",
           "i see pieces of a broken dream",
           "in it they became whole"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4061,7 +4418,8 @@
           "i wanna love with u",
           "i wanna see u lovin yoself"
         ],
-        "note": "the escalation runs the opposite direction from the title — each line drops something until only the other person's self-love is left"
+        "note": "the escalation runs the opposite direction from the title — each line drops something until only the other person's self-love is left",
+        "mode": "outpour"
       }
     }
   },
@@ -4076,7 +4434,8 @@
           "sure bodily pain is not pleasant but the heart lies protected in the rib cage",
           "i am the container of the soul contained in my body"
         ],
-        "note": "the body as architecture — a cage whose function is protection, with the self identified as the container rather than the contents"
+        "note": "the body as architecture — a cage whose function is protection, with the self identified as the container rather than the contents",
+        "mode": "argue"
       }
     }
   },
@@ -4090,7 +4449,8 @@
           "semen the sea men crawling under the d-pad with the weedmen",
           "in the basement serving the base with the bass pumpin my soaked out face"
         ],
-        "note": "semen/sea men and base/bass — homophone chains carrying the whole line, with the caps-lock protest arriving after"
+        "note": "semen/sea men and base/bass — homophone chains carrying the whole line, with the caps-lock protest arriving after",
+        "mode": "outpour"
       }
     }
   },
@@ -4105,7 +4465,8 @@
           "you're being witnessed.",
           "and we tend to dress our parts when that's about to happen."
         ],
-        "note": "identity as something that appears only under observation — and the dressing is described as involuntary, a tendency rather than a choice"
+        "note": "identity as something that appears only under observation — and the dressing is described as involuntary, a tendency rather than a choice",
+        "mode": "argue"
       }
     }
   },
@@ -4121,7 +4482,8 @@
           "i am not happy with life",
           "i am not happy with myself"
         ],
-        "note": "the list escalates from the universe down to the self, and then the last two lines dissolve all of it with a pastry order"
+        "note": "the list escalates from the universe down to the self, and then the last two lines dissolve all of it with a pastry order",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -4129,7 +4491,8 @@
           "why do i have to always ask questions",
           "curate a sentence",
           "to carry out my existence"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4146,7 +4509,8 @@
           "what did he do on the night of jesus’ last supper",
           "is god a no thinger like i"
         ],
-        "note": "god interrogated about his ordinary habits before the theological questions arrive — and the last line makes him a peer"
+        "note": "god interrogated about his ordinary habits before the theological questions arrive — and the last line makes him a peer",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -4155,7 +4519,8 @@
           "what is it all for?",
           "does god have emotions",
           "does god have weaknesses"
-        ]
+        ],
+        "mode": "outpour"
       },
       "faith": {
         "type": "lines",
@@ -4165,7 +4530,8 @@
           "what lies in it what my heart needs",
           "would reveal it to me"
         ],
-        "note": "faith stated only as a hope conditional on someone else's opinion — 'do you think he would'"
+        "note": "faith stated only as a hope conditional on someone else's opinion — 'do you think he would'",
+        "mode": "outpour"
       }
     }
   },
@@ -4182,7 +4548,8 @@
           "though eyeful, but not iful",
           "i wish to let eye know what it sees is i"
         ],
-        "note": "the writing self identified as the only place the self exists at all — and the poem's wish is to remove it from there too"
+        "note": "the writing self identified as the only place the self exists at all — and the poem's wish is to remove it from there too",
+        "mode": "outpour"
       }
     }
   },
@@ -4197,7 +4564,8 @@
           "drink sake instead",
           "fool! stop and swallow your lover's dew"
         ],
-        "note": "sake as purpose and sake as rice wine in consecutive lines, and the title's dew/jew pairing never appears in the body"
+        "note": "sake as purpose and sake as rice wine in consecutive lines, and the title's dew/jew pairing never appears in the body",
+        "mode": "outpour"
       }
     }
   },
@@ -4213,7 +4581,8 @@
           "put on the blindfolding and stop controlling,",
           "put on your gold ring, old king,"
         ],
-        "note": "an -olding chain running four lines, then the title's gold ring/old king near-anagram arriving as the payoff"
+        "note": "an -olding chain running four lines, then the title's gold ring/old king near-anagram arriving as the payoff",
+        "mode": "outpour"
       }
     }
   },
@@ -4228,7 +4597,8 @@
           "the way she gives off grace",
           "her face radiates",
           "ready or not i'm going in"
-        ]
+        ],
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -4238,7 +4608,8 @@
           "fuck it maybe she won't read this",
           "but this isn't where this poem should end"
         ],
-        "note": "doubt aimed at the poem's own publication and at its own ending, not at the feeling"
+        "note": "doubt aimed at the poem's own publication and at its own ending, not at the feeling",
+        "mode": "outpour"
       }
     }
   },
@@ -4252,14 +4623,16 @@
           "mandatory pills are gone, pills are now taken by desire,",
           "I WANT THY, DON'T ASK ME WHY."
         ],
-        "note": "the shift from prescription to appetite named directly, and the last line refuses to justify the wanting"
+        "note": "the shift from prescription to appetite named directly, and the last line refuses to justify the wanting",
+        "mode": "argue"
       },
       "work": {
         "type": "lines",
         "spans": [
           "beach volleyball or bitch volleyball? here comes the serve,",
           "serving the servicer where he works."
-        ]
+        ],
+        "mode": "outpour"
       },
       "numbness": {
         "type": "lines",
@@ -4269,7 +4642,8 @@
           "pain, echoes through the black hole,",
           "with them it's just hollow."
         ],
-        "note": "the distinction is the poem's actual argument — numbing with selection versus numbing without it"
+        "note": "the distinction is the poem's actual argument — numbing with selection versus numbing without it",
+        "mode": "argue"
       },
       "identity": {
         "type": "lines",
@@ -4277,7 +4651,8 @@
           "gone, nothing to remember them by,",
           "my pain defines me, is that a lie?"
         ],
-        "note": "identity located in the pain the medication removed, and the question left open"
+        "note": "identity located in the pain the medication removed, and the question left open",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -4285,7 +4660,8 @@
           "which is worse drugs or anti-depressants?",
           "my pain defines me, is that a lie?",
           "not knowing what it is or what i gain,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -4295,7 +4671,8 @@
           "hitler complex, one ball index,",
           "EYE SAID EYE, WRITTEN ON THY THIGHS,"
         ],
-        "note": "the complex chain running through three historical figures on one joke, then the eye/I split arriving in caps at the end"
+        "note": "the complex chain running through three historical figures on one joke, then the eye/I split arriving in caps at the end",
+        "mode": "outpour"
       },
       "release": {
         "type": "lines",
@@ -4303,7 +4680,8 @@
           "without anti-depressants i can let it out again.",
           "here comes the swerve, i'm out this bitch,",
           "WHAT A TIME TO BE ALIVE, I FEEL I POWERING UP,"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -4319,7 +4697,8 @@
           "make non-believers believe, i'm good at it,",
           "put god at the doorstep, i'm home but i'm homesick."
         ],
-        "note": "service to god described as a performance skill, and the last line leaves him outside without denying him"
+        "note": "service to god described as a performance skill, and the last line leaves him outside without denying him",
+        "mode": "argue"
       },
       "work": {
         "type": "lines",
@@ -4328,14 +4707,16 @@
           "performance i'm accustomed to, showing a glimmer of him,",
           "make non-believers believe, i'm good at it,"
         ],
-        "note": "same span as god — the labour and the devotion are inseparable here, both stated as competence"
+        "note": "same span as god — the labour and the devotion are inseparable here, both stated as competence",
+        "mode": "argue"
       },
       "devotion": {
         "type": "lines",
         "spans": [
           "but at the end of the day i'm what i retreat to,",
           "this equation i need to be a part of,"
-        ]
+        ],
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
@@ -4343,7 +4724,8 @@
           "i am dumbfounded, instincts, impulses,",
           "not all need following, some things get old",
           "but my statements don't make a poem,"
-        ]
+        ],
+        "mode": "argue"
       },
       "identity": {
         "type": "lines",
@@ -4351,7 +4733,8 @@
           "i envy writers, me, i'm not one,",
           "but at the end of the day i'm what i retreat to,",
           "i'm home but i'm homesick."
-        ]
+        ],
+        "mode": "argue"
       },
       "the writing self": {
         "type": "lines",
@@ -4362,7 +4745,8 @@
           "they abruptly finish i'm left asking for more,",
           "i envy writers, me, i'm not one,"
         ],
-        "note": "the poem names its own mechanism mid-poem — the rhyme engine identified as it's running"
+        "note": "the poem names its own mechanism mid-poem — the rhyme engine identified as it's running",
+        "mode": "outpour"
       },
       "creative block": {
         "type": "lines",
@@ -4371,7 +4755,8 @@
           "retrace your aim for another shot,",
           "but my statements don't make a poem,",
           "or a prose or a complete work,"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -4379,7 +4764,8 @@
           "put god at the doorstep, i'm home but i'm homesick.",
           "fuck-a-reader"
         ],
-        "note": "home and homesick against each other in one clause; the second span hyphenated to force the reading"
+        "note": "home and homesick against each other in one clause; the second span hyphenated to force the reading",
+        "mode": "outpour"
       }
     }
   },
@@ -4393,7 +4779,8 @@
           "i got pretty bitches on call",
           "they be like goddamn",
           "she's as sexy as a panther"
-        ]
+        ],
+        "mode": "argue"
       },
       "identity": {
         "type": "lines",
@@ -4402,7 +4789,8 @@
           "bitch im hoem schooled like a lamb",
           "a pretty bitch you too keep it weird on the 'gram"
         ],
-        "note": "the boast turned onto himself — he's the pretty bitch, and by the last line so is the reader"
+        "note": "the boast turned onto himself — he's the pretty bitch, and by the last line so is the reader",
+        "mode": "argue"
       }
     }
   },
@@ -4417,14 +4805,16 @@
           "i lay down the weight i sorrowed",
           "say i no want them there"
         ],
-        "note": "the feelings described as borrowed rather than owned, which makes the putting-down a return rather than a loss"
+        "note": "the feelings described as borrowed rather than owned, which makes the putting-down a return rather than a loss",
+        "mode": "outpour"
       },
       "sadness": {
         "type": "lines",
         "spans": [
           "the fruit, the bite, the stain",
           "a fate i forgot to name"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4437,14 +4827,16 @@
         "spans": [
           "I'm a human turned ankle monitor THROUGH salvia."
         ],
-        "note": "the correction to a commenter is where the piece states its own premise most directly — not an object made conscious, a person made object"
+        "note": "the correction to a commenter is where the piece states its own premise most directly — not an object made conscious, a person made object",
+        "mode": "argue"
       },
       "wonder": {
         "type": "phrase",
         "spans": [
           "Being with him I feel wonder-ful, full of wonder, I wander, it's wonderous."
         ],
-        "note": "the word broken open three ways in one sentence, and then the narrator questions whether the last form is real"
+        "note": "the word broken open three ways in one sentence, and then the narrator questions whether the last form is real",
+        "mode": "outpour"
       }
     }
   },
@@ -4459,7 +4851,8 @@
           "life won't take you either",
           "i mean though would i like life to take me seriously as serious is heavy and love is a light stepping and a light stepping"
         ],
-        "note": "the advice quoted and then declined — seriousness rejected on the grounds that love is light"
+        "note": "the advice quoted and then declined — seriousness rejected on the grounds that love is light",
+        "mode": "argue"
       }
     }
   },
@@ -4476,7 +4869,8 @@
           "limited and boxed",
           "im tired"
         ],
-        "note": "the two-word admission near the end arrives after a long stretch of elaborate machinery-fantasy — exhaustion stated only once it's given up on being described"
+        "note": "the two-word admission near the end arrives after a long stretch of elaborate machinery-fantasy — exhaustion stated only once it's given up on being described",
+        "mode": "argue"
       }
     }
   },
@@ -4492,7 +4886,8 @@
           "damn im an addict",
           "lets drown in your water baby"
         ],
-        "note": "the title's question answered in the first line of the second stanza, and the rest of the poem acts on the answer"
+        "note": "the title's question answered in the first line of the second stanza, and the rest of the poem acts on the answer",
+        "mode": "argue"
       },
       "body": {
         "type": "lines",
@@ -4502,7 +4897,8 @@
           "body move",
           "brain works faster than the hand does",
           "yet hands always catch up ketchup yeah"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4517,7 +4913,8 @@
           "brother are you in a brothel!?",
           "null, we're making broth, sip it to get hot"
         ],
-        "note": "brother/brothel/broth mined across three lines — one root split into three unrelated words"
+        "note": "brother/brothel/broth mined across three lines — one root split into three unrelated words",
+        "mode": "outpour"
       }
     }
   },
@@ -4532,7 +4929,8 @@
           "nothing",
           "when was the last time you felt alive"
         ],
-        "note": "the line break makes 'nothing' both the feeling and its absence, and the question that follows is asked outward"
+        "note": "the line break makes 'nothing' both the feeling and its absence, and the question that follows is asked outward",
+        "mode": "outpour"
       }
     }
   },
@@ -4549,7 +4947,8 @@
           "i feel like, the sun has lost its vigour.",
           "but i'm too busy feeling nothing."
         ],
-        "note": "the sadness named clinically in the therapist's voice before the speaker gets to it — anticipation itself identified as the thing lost"
+        "note": "the sadness named clinically in the therapist's voice before the speaker gets to it — anticipation itself identified as the thing lost",
+        "mode": "argue"
       }
     }
   },
@@ -4564,14 +4963,16 @@
           "i think i’m a good boy",
           "says every twat"
         ],
-        "note": "the self-assessment invalidated by the line that follows it — claiming to be good is offered as evidence of the opposite"
+        "note": "the self-assessment invalidated by the line that follows it — claiming to be good is offered as evidence of the opposite",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
         "spans": [
           "says every twat",
           "what’s up with that"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4589,7 +4990,8 @@
           "i’d rather be anything",
           "but me"
         ],
-        "note": "the sentence breaks down mid-repetition — 'im so' left without a predicate before landing on 'me' as the insult"
+        "note": "the sentence breaks down mid-repetition — 'im so' left without a predicate before landing on 'me' as the insult",
+        "mode": "argue"
       },
       "sadness": {
         "type": "lines",
@@ -4599,7 +5001,8 @@
           "im so tired of hurt",
           "im hurt so badly",
           "so deeply"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -4614,7 +5017,8 @@
           "i’m great at acting",
           "drag the truth,  never confront it"
         ],
-        "note": "the doubt is about which mode is honest — speaking fails, performing succeeds, and the last line names the cost"
+        "note": "the doubt is about which mode is honest — speaking fails, performing succeeds, and the last line names the cost",
+        "mode": "argue"
       }
     }
   },
@@ -4628,7 +5032,8 @@
           "hi, i’m conscious but all i say is ah.",
           "increase in the quantity of an experience changes the essence of that experience"
         ],
-        "note": "the second line is a genuine claim about perception smuggled into a joke poem written from the sun's point of view"
+        "note": "the second line is a genuine claim about perception smuggled into a joke poem written from the sun's point of view",
+        "mode": "argue"
       },
       "body": {
         "type": "lines",
@@ -4637,7 +5042,8 @@
           "being stung by 10000 bees at the same time is pleasurable",
           "i’m constantly being fucked"
         ],
-        "note": "a body with no limit — sensation at a magnitude where pain and pleasure stop being distinguishable"
+        "note": "a body with no limit — sensation at a magnitude where pain and pleasure stop being distinguishable",
+        "mode": "argue"
       }
     }
   },
@@ -4654,7 +5060,8 @@
           "now i shake",
           "i shake",
           "nothing's left"
-        ]
+        ],
+        "mode": "outpour"
       },
       "exhaustion": {
         "type": "lines",
@@ -4665,7 +5072,8 @@
           "breathing down the factory fumes",
           "my lungs crave the fresh air it never tasted"
         ],
-        "note": "the exhaustion given a historical cause rather than a personal one — the body worn by an era it was born into"
+        "note": "the exhaustion given a historical cause rather than a personal one — the body worn by an era it was born into",
+        "mode": "outpour"
       }
     }
   },
@@ -4682,7 +5090,8 @@
           "and recognize what i can’t now",
           "i’m starting more fires than i keep lit"
         ],
-        "note": "the writing addressed as something that might become legible to its own author later — and the fire line names the cost of the volume"
+        "note": "the writing addressed as something that might become legible to its own author later — and the fire line names the cost of the volume",
+        "mode": "outpour"
       }
     }
   },
@@ -4696,7 +5105,8 @@
           "I’ve never seen god, so I placed him everywhere.",
           "God needs the soul as much as the soul needs god."
         ],
-        "note": "absence answered with ubiquity rather than with denial, and then the mutual-need claim that recurs across the archive"
+        "note": "absence answered with ubiquity rather than with denial, and then the mutual-need claim that recurs across the archive",
+        "mode": "argue"
       },
       "mortality": {
         "type": "phrase",
@@ -4705,7 +5115,8 @@
           "What am I gonna say when this table rusts and fades, leaves is place to birds and their babes.",
           "I guess I will feel this table until I don’t feel this table."
         ],
-        "note": "narrated from after death throughout — the table outlasting the speaker and then being outlasted itself"
+        "note": "narrated from after death throughout — the table outlasting the speaker and then being outlasted itself",
+        "mode": "argue"
       }
     }
   },
@@ -4734,7 +5145,8 @@
           "do you break something or let it break you?",
           "not knowing what it'll bring or take away.",
           "maybe the waves will settle, or i will."
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4748,7 +5160,8 @@
           "at my job i feel accepted",
           "which makes me feel accepted since a job is the only routine i have in this"
         ],
-        "note": "acceptance located in employment specifically because nothing else in the life is structured — the reasoning is circular and stated as if it weren't"
+        "note": "acceptance located in employment specifically because nothing else in the life is structured — the reasoning is circular and stated as if it weren't",
+        "mode": "argue"
       }
     }
   },
@@ -4765,7 +5178,8 @@
           "who i'd devote everything,",
           "and none to my friends."
         ],
-        "note": "the wish arrives as a solution to the wound in the opening lines — devotion redirected wholesale rather than distributed"
+        "note": "the wish arrives as a solution to the wound in the opening lines — devotion redirected wholesale rather than distributed",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -4774,7 +5188,8 @@
           "to each the world revolves around each.",
           "uglier than the poem itself, this attempt at coping,"
         ],
-        "note": "the self-correction and then the verdict on the self-correction — the coping named as worse than the thing it's coping with"
+        "note": "the self-correction and then the verdict on the self-correction — the coping named as worse than the thing it's coping with",
+        "mode": "argue"
       }
     }
   },
@@ -4790,7 +5205,8 @@
           "will we make it to july?",
           "this can't be goodbye"
         ],
-        "note": "the title repeated as the final line — longing stated as a refusal to accept rather than as a want"
+        "note": "the title repeated as the final line — longing stated as a refusal to accept rather than as a want",
+        "mode": "argue"
       }
     }
   },
@@ -4805,21 +5221,24 @@
           "now i don't feel like writing.",
           "though my writing is never a zoo,"
         ],
-        "note": "the poem argues itself out of writing mid-poem, then defends the writing anyway"
+        "note": "the poem argues itself out of writing mid-poem, then defends the writing anyway",
+        "mode": "outpour"
       },
       "creative block": {
         "type": "line",
         "spans": [
           "now i don't feel like writing."
         ],
-        "note": "arriving as the consequence of the ethical question above it rather than as a failure of ability"
+        "note": "arriving as the consequence of the ethical question above it rather than as a failure of ability",
+        "mode": "argue"
       },
       "truth": {
         "type": "lines",
         "spans": [
           "me, on the other hand i don't conceive the lion,",
           "i see the same old thing."
-        ]
+        ],
+        "mode": "argue"
       },
       "clarity": {
         "type": "lines",
@@ -4827,7 +5246,8 @@
           "lion perceives the car and the human as one.",
           "me, on the other hand i don't conceive the lion,"
         ],
-        "note": "the lion's perceptual limit stated as an advantage, and the speaker's own clarity stated as the deficit"
+        "note": "the lion's perceptual limit stated as an advantage, and the speaker's own clarity stated as the deficit",
+        "mode": "argue"
       },
       "guilt": {
         "type": "lines",
@@ -4835,7 +5255,8 @@
           "isn't it a disservice? isn't it outright evil, fucked up? to want to lock something away,",
           "what is the purpose of, captivating what's on its toes, swift on the air?"
         ],
-        "note": "guilt about the act of writing itself — capture framed as a possible evil rather than as craft"
+        "note": "guilt about the act of writing itself — capture framed as a possible evil rather than as craft",
+        "mode": "outpour"
       },
       "existence": {
         "type": "lines",
@@ -4843,7 +5264,8 @@
           "i see life in a way",
           "in a way that,"
         ],
-        "note": "the sentence stalls before it can complete — the manner of seeing named but never delivered"
+        "note": "the sentence stalls before it can complete — the manner of seeing named but never delivered",
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "none",
@@ -4855,14 +5277,16 @@
           "there never is a barrier excluding you,",
           "you're in it, but lucky for you,"
         ],
-        "note": "the reader placed inside the poem rather than in front of it, and told they're fortunate not to be able to see it"
+        "note": "the reader placed inside the poem rather than in front of it, and told they're fortunate not to be able to see it",
+        "mode": "argue"
       },
       "doubt": {
         "type": "lines",
         "spans": [
           "what is the purpose of writing? if not the attempt at captivating what's fleeting?",
           "isn't it a disservice? isn't it outright evil, fucked up? to want to lock something away,"
-        ]
+        ],
+        "mode": "outpour"
       }
     }
   },
@@ -4878,7 +5302,8 @@
           "give me a moment to repeat the phrase in my head",
           "yoohoo i'm fucking shit up"
         ],
-        "note": "the method narrated live — the poem announces it's about to hunt for a rhyme, then hunts, then congratulates itself"
+        "note": "the method narrated live — the poem announces it's about to hunt for a rhyme, then hunts, then congratulates itself",
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -4889,7 +5314,8 @@
           "lace me eughoul morgue",
           "centriyoohoo force"
         ],
-        "note": "one phrase degraded through four steps until only its rhythm survives, then reassembled with a nonsense word in the middle"
+        "note": "one phrase degraded through four steps until only its rhythm survives, then reassembled with a nonsense word in the middle",
+        "mode": "outpour"
       }
     }
   },
@@ -4905,7 +5331,8 @@
           "what is thinking?",
           "is there such thing as thinking?"
         ],
-        "note": "four lines, each dismantling the term the previous line assumed — the doubt escalates from definition to existence"
+        "note": "four lines, each dismantling the term the previous line assumed — the doubt escalates from definition to existence",
+        "mode": "outpour"
       }
     }
   },
@@ -4919,7 +5346,8 @@
           "lord why this soul avery isn't aware of what he can't see",
           "wrath of god was wrathful upon this soul avery as he very shamelessly screamed lord's name in vanity"
         ],
-        "note": "god addressed in the register of a children's parable, and punishing a man for a perceptual limit he didn't choose"
+        "note": "god addressed in the register of a children's parable, and punishing a man for a perceptual limit he didn't choose",
+        "mode": "outpour"
       },
       "faith": {
         "type": "lines",
@@ -4928,7 +5356,8 @@
           "but kids that was insanity",
           "and he couldn't escape his tragedy"
         ],
-        "note": "the attempt at transcendence classified as madness by the narrator — faith presented as the thing that destroyed him"
+        "note": "the attempt at transcendence classified as madness by the narrator — faith presented as the thing that destroyed him",
+        "mode": "argue"
       }
     }
   },
@@ -4943,7 +5372,8 @@
           "i used to bleed so thick",
           "paint'd take a week to dry"
         ],
-        "note": "the sadness is in the past tense throughout — grief for a former intensity rather than for a subject"
+        "note": "the sadness is in the past tense throughout — grief for a former intensity rather than for a subject",
+        "mode": "argue"
       },
       "wonder": {
         "type": "lines",
@@ -4951,7 +5381,8 @@
           "is it all that's lived lurking under?",
           "thunder and a wave of sonder"
         ],
-        "note": "sonder — the realization that everyone else has a full life too — arriving as the poem's final word and its only outward turn"
+        "note": "sonder — the realization that everyone else has a full life too — arriving as the poem's final word and its only outward turn",
+        "mode": "outpour"
       }
     }
   },
@@ -4967,7 +5398,8 @@
           "this occurrence, only you can cure me,",
           "the mattress that you slept on."
         ],
-        "note": "the poem ends on furniture rather than on the person — the mattress standing in for an absence it can't name directly"
+        "note": "the poem ends on furniture rather than on the person — the mattress standing in for an absence it can't name directly",
+        "mode": "argue"
       }
     }
   },
@@ -4985,7 +5417,8 @@
           "plot line",
           "all mine"
         ],
-        "note": "the questions dissolve into pure rhyme partway through — spit/split is the hinge where meaning stops and sound takes over"
+        "note": "the questions dissolve into pure rhyme partway through — spit/split is the hinge where meaning stops and sound takes over",
+        "mode": "outpour"
       },
       "the writing self": {
         "type": "lines",
@@ -4995,7 +5428,8 @@
           "why lead",
           "why follow"
         ],
-        "note": "the first four lines ask the real question, and the poem answers by abandoning it for sound"
+        "note": "the first four lines ask the real question, and the poem answers by abandoning it for sound",
+        "mode": "outpour"
       }
     }
   },
@@ -5009,7 +5443,8 @@
           "violets are red",
           "roses are blue"
         ],
-        "note": "the colours swapped in the two most familiar lines in English verse — the joke is entirely in the reader's correction reflex"
+        "note": "the colours swapped in the two most familiar lines in English verse — the joke is entirely in the reader's correction reflex",
+        "mode": "outpour"
       }
     }
   },
@@ -5025,7 +5460,8 @@
           "well why do you always digress from the chosen subject and go along with whatever comes up like you saw some tires spinning and now that's all you're thinking about until the tires stop and it's time to get deep but oh you can't cause you saw some more tires spinning",
           "never mind i'm off you now"
         ],
-        "note": "the doubt turns on the speaker's own attention mid-poem, and the poem ends by abandoning the argument it just started"
+        "note": "the doubt turns on the speaker's own attention mid-poem, and the poem ends by abandoning the argument it just started",
+        "mode": "outpour"
       }
     }
   },
@@ -5041,7 +5477,8 @@
           "so we all should hate you to show you how stupid you are",
           "I, HATE."
         ],
-        "note": "the contempt argued into a form of care and then, after all the reasoning, restated bare in the last line with a comma splitting it"
+        "note": "the contempt argued into a form of care and then, after all the reasoning, restated bare in the last line with a comma splitting it",
+        "mode": "argue"
       }
     }
   },
@@ -5058,7 +5495,8 @@
           "we're not gods,",
           "all the time."
         ],
-        "note": "the line break does the work — the denial completed by a qualifier that reinstates what it denied"
+        "note": "the line break does the work — the denial completed by a qualifier that reinstates what it denied",
+        "mode": "argue"
       },
       "mortality": {
         "type": "lines",
@@ -5069,7 +5507,8 @@
           "space is killer of existence",
           "and i am the killer of me"
         ],
-        "note": "the cascade runs one operation outward through four scales before turning back on the speaker"
+        "note": "the cascade runs one operation outward through four scales before turning back on the speaker",
+        "mode": "argue"
       }
     }
   },
@@ -5084,14 +5523,16 @@
           "accumulated, what's passed is past",
           "the residue it left in me, i restfully collect"
         ],
-        "note": "clarity admitted as partial — the fog named as still present in the same line that claims a clear head"
+        "note": "clarity admitted as partial — the fog named as still present in the same line that claims a clear head",
+        "mode": "argue"
       },
       "presence": {
         "type": "lines",
         "spans": [
           "engrossed in it, the mist, amidst",
           "fog remains still, parts of me out there, it's hard to see"
-        ]
+        ],
+        "mode": "outpour"
       },
       "wordplay": {
         "type": "lines",
@@ -5099,7 +5540,8 @@
           "engrossed in it, the mist, amidst",
           "but eye got i's"
         ],
-        "note": "mist folded inside amidst, then the eye/I split arriving in four words with no ceremony"
+        "note": "mist folded inside amidst, then the eye/I split arriving in four words with no ceremony",
+        "mode": "outpour"
       },
       "letting go": {
         "type": "lines",
@@ -5107,7 +5549,8 @@
           "and the coin in my left pocket seen some times",
           "so i don't worry, but i'll toss it in the river when this fog is lifted"
         ],
-        "note": "the letting-go deferred to a condition rather than performed — the coin kept until the weather changes"
+        "note": "the letting-go deferred to a condition rather than performed — the coin kept until the weather changes",
+        "mode": "outpour"
       }
     }
   },
@@ -5122,7 +5565,8 @@
           "the body i despise",
           "the eyes that see"
         ],
-        "note": "the body as sentence rather than as home — carried under compulsion"
+        "note": "the body as sentence rather than as home — carried under compulsion",
+        "mode": "argue"
       },
       "mortality": {
         "type": "lines",
@@ -5130,7 +5574,8 @@
           "among the dead stars",
           "i see in the night sky",
           "thinking how alive"
-        ]
+        ],
+        "mode": "outpour"
       },
       "yearning": {
         "type": "lines",
@@ -5141,7 +5586,8 @@
           "i was a star",
           "i belonged up there"
         ],
-        "note": "the yearning attributed to the star rather than the speaker, then reclaimed in the past tense"
+        "note": "the yearning attributed to the star rather than the speaker, then reclaimed in the past tense",
+        "mode": "outpour"
       }
     }
   },
@@ -5156,7 +5602,8 @@
           "i eye everything",
           "i i everything"
         ],
-        "note": "eye used as a verb, and the final line collapses the two into one word repeated — the split named before it had any theory attached"
+        "note": "eye used as a verb, and the final line collapses the two into one word repeated — the split named before it had any theory attached",
+        "mode": "outpour"
       }
     }
   },
@@ -5172,7 +5619,8 @@
           "not the you that you think you are",
           "but the you that no one can possibly decipher"
         ],
-        "note": "the same sentence negated and affirmed with no words changed — the difference located entirely in which self is meant"
+        "note": "the same sentence negated and affirmed with no words changed — the difference located entirely in which self is meant",
+        "mode": "argue"
       }
     }
   },
@@ -5187,7 +5635,8 @@
           "lies in the sun",
           "last ride sounds really fun"
         ],
-        "note": "the yearning named in the third-to-last line, then immediately redirected toward the bus from the opening"
+        "note": "the yearning named in the third-to-last line, then immediately redirected toward the bus from the opening",
+        "mode": "outpour"
       }
     }
   },
@@ -5201,7 +5650,8 @@
           "this is not real life",
           "this is real life"
         ],
-        "note": "the entire piece — the negation and its removal, with nothing between them to adjudicate"
+        "note": "the entire piece — the negation and its removal, with nothing between them to adjudicate",
+        "mode": "argue"
       },
       "identity": {
         "type": "none",
@@ -5222,7 +5672,8 @@
           "so do what you intended to do",
           "a half-written thought isn’t empty"
         ],
-        "note": "the argument for finishing built on the most extreme available example of an unfinished gesture"
+        "note": "the argument for finishing built on the most extreme available example of an unfinished gesture",
+        "mode": "argue"
       }
     }
   },
@@ -5236,7 +5687,8 @@
           "Hey Mallory, I wonder if you've heard from Valerie.",
           "she used to major in theology but last time we talked she wanted to switch it up for geography."
         ],
-        "note": "wonder as literal curiosity about a missing person, sustained across an -ory/-ary rhyme scheme that never breaks character"
+        "note": "wonder as literal curiosity about a missing person, sustained across an -ory/-ary rhyme scheme that never breaks character",
+        "mode": "outpour"
       }
     }
   },
@@ -5254,7 +5706,8 @@
           "in isolation i,",
           "pet horses"
         ],
-        "note": "two selves sorted by condition rather than by trait — and the naming happens mid-poem, discovered rather than declared"
+        "note": "two selves sorted by condition rather than by trait — and the naming happens mid-poem, discovered rather than declared",
+        "mode": "outpour"
       }
     }
   },
@@ -5271,7 +5724,8 @@
           "get lost in a word choice i made,",
           "and decorate around it."
         ],
-        "note": "the method confessed precisely — a word chosen by accident and then a poem built to justify it"
+        "note": "the method confessed precisely — a word chosen by accident and then a poem built to justify it",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -5279,7 +5733,8 @@
           "many times i treated as if it was actualized,",
           "ESPECIALLY, when it wasn't.",
           "don't choose which is witch,"
-        ]
+        ],
+        "mode": "argue"
       }
     }
   },
@@ -5292,7 +5747,8 @@
         "spans": [
           "keep reading my shit and stop asking me questions"
         ],
-        "note": "the entire piece — addressed to a therapist, refusing the format of therapy while requesting its attention"
+        "note": "the entire piece — addressed to a therapist, refusing the format of therapy while requesting its attention",
+        "mode": "argue"
       }
     }
   },
@@ -5307,7 +5763,8 @@
           "it was either that or marrying a girl from sweden",
           "the semen of the sea man in the passing of the seasons was his reason"
         ],
-        "note": "Finn/Finnish/finished mined in one line, ether/either across two, and semen/sea man/seasons/reason chained through the third — the whole piece is driven by one name's sound"
+        "note": "Finn/Finnish/finished mined in one line, ether/either across two, and semen/sea man/seasons/reason chained through the third — the whole piece is driven by one name's sound",
+        "mode": "outpour"
       },
       "god": {
         "type": "lines",
@@ -5317,7 +5774,8 @@
           "this brings forth satan",
           "Steven was on the crucifix for his treason"
         ],
-        "note": "god as a bouncer arriving late, and the martyrdom handed to a bystander named for the rhyme"
+        "note": "god as a bouncer arriving late, and the martyrdom handed to a bystander named for the rhyme",
+        "mode": "outpour"
       }
     }
   },
@@ -5330,7 +5788,8 @@
         "spans": [
           "man played god and now we can’t have icons"
         ],
-        "note": "the whole argument in one line — the cost of the substitution named without explaining it, and the poem walks away immediately"
+        "note": "the whole argument in one line — the cost of the substitution named without explaining it, and the poem walks away immediately",
+        "mode": "argue"
       }
     }
   },
@@ -5346,7 +5805,8 @@
           "i am a re-writer",
           "i am a re-writer who has no idea what he’s re-writing but knows that he’s re-writing"
         ],
-        "note": "the vocation claimed and immediately hollowed — certain of the activity, ignorant of its object"
+        "note": "the vocation claimed and immediately hollowed — certain of the activity, ignorant of its object",
+        "mode": "argue"
       },
       "identity": {
         "type": "lines",
@@ -5355,7 +5815,8 @@
           "my foresight has to meet my eye",
           "i am"
         ],
-        "note": "eye and I placed in the same line before either had a theory attached, and 'i am' left standing alone as its own line"
+        "note": "eye and I placed in the same line before either had a theory attached, and 'i am' left standing alone as its own line",
+        "mode": "outpour"
       }
     }
   },
@@ -5371,7 +5832,8 @@
           "but i can touch someone’s shoulders now",
           "and if you ask me — it’s more sensual"
         ],
-        "note": "the sensuality located in a foot checking for another foot under a school desk, and then in the change from being held to being able to hold"
+        "note": "the sensuality located in a foot checking for another foot under a school desk, and then in the change from being held to being able to hold",
+        "mode": "outpour"
       }
     }
   },
@@ -5387,7 +5849,8 @@
           "are are are are are are are are",
           "am am am am am am am am ama ma am am am ama ma mam amam amam ama ma"
         ],
-        "note": "repetition run until the words degrade — 'warrior' loses a letter, 'water' dissolves into 'are' and then into 'am', so the piece ends on the verb of being having been arrived at by erosion rather than by choice"
+        "note": "repetition run until the words degrade — 'warrior' loses a letter, 'water' dissolves into 'are' and then into 'am', so the piece ends on the verb of being having been arrived at by erosion rather than by choice",
+        "mode": "outpour"
       }
     }
   },
@@ -5400,7 +5863,8 @@
         "spans": [
           "i"
         ],
-        "note": "the entire body is one letter; the title supplies the incomplete clause it belongs to"
+        "note": "the entire body is one letter; the title supplies the incomplete clause it belongs to",
+        "mode": "outpour"
       }
     }
   },
@@ -5416,7 +5880,8 @@
           "why anchoring",
           "why tending wounds"
         ],
-        "note": "the pun stated plainly, then restated as an unspaced equation asking whether choosing is required at all"
+        "note": "the pun stated plainly, then restated as an unspaced equation asking whether choosing is required at all",
+        "mode": "outpour"
       }
     }
   },
@@ -5432,7 +5897,8 @@
           "so would i",
           "how would you know no blank paper left in william blake’s when i’m the one that scribbled"
         ],
-        "note": "the vandalism proposed as mutual — Blake used his last sheet too, which makes the defacing an exchange rather than a theft"
+        "note": "the vandalism proposed as mutual — Blake used his last sheet too, which makes the defacing an exchange rather than a theft",
+        "mode": "outpour"
       },
       "identity": {
         "type": "lines",
@@ -5442,7 +5908,8 @@
           "new is better than old",
           "until it’s old again"
         ],
-        "note": "identity by position rather than by trait — in it or outside it, and the reader is told which twice"
+        "note": "identity by position rather than by trait — in it or outside it, and the reader is told which twice",
+        "mode": "argue"
       }
     }
   },
@@ -5458,7 +5925,8 @@
           "icing on the mountain is your sweat",
           "dripping down the stones i placed"
         ],
-        "note": "devotion as construction — a mountain assembled from another person's speech, stone by stone, by the speaker's own hand"
+        "note": "devotion as construction — a mountain assembled from another person's speech, stone by stone, by the speaker's own hand",
+        "mode": "outpour"
       },
       "wonder": {
         "type": "lines",
@@ -5470,7 +5938,8 @@
           "you walk as if walking was invented",
           "the moment you first moved"
         ],
-        "note": "eight consecutive 'you walk as if' lines, each granting the beloved priority over a physical law — and the poem ends on 'waiting', which makes all of existence prior to her into anticipation"
+        "note": "eight consecutive 'you walk as if' lines, each granting the beloved priority over a physical law — and the poem ends on 'waiting', which makes all of existence prior to her into anticipation",
+        "mode": "outpour"
       }
     }
   },
@@ -5484,7 +5953,8 @@
           "but i’m not happy",
           "hahahaha"
         ],
-        "note": "the admission and its immediate contradiction on the next line — laughter as the poem's final word and its clearest evidence"
+        "note": "the admission and its immediate contradiction on the next line — laughter as the poem's final word and its clearest evidence",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -5492,7 +5962,8 @@
           "not out of what you’d think but",
           "meh even i do not know why i’m laughing"
         ],
-        "note": "the speaker corrects a reading nobody offered, then admits he has no reading of his own"
+        "note": "the speaker corrects a reading nobody offered, then admits he has no reading of his own",
+        "mode": "outpour"
       }
     }
   },
@@ -5506,7 +5977,8 @@
           "i am writing",
           "so that means i am writing about something",
           "though i don't know what i'm writing about, i'm still writing about something"
-        ]
+        ],
+        "mode": "argue"
       },
       "wordplay": {
         "type": "lines",
@@ -5515,7 +5987,8 @@
           "as long as i'm writing about something",
           "i will write about something"
         ],
-        "note": "the same phrase repeated until 'something' stops functioning as a placeholder and starts reading as an actual object"
+        "note": "the same phrase repeated until 'something' stops functioning as a placeholder and starts reading as an actual object",
+        "mode": "outpour"
       }
     }
   },
@@ -5530,7 +6003,8 @@
           "imagine being so little that you’re a labeled jar",
           "your attempts at preserving keep you from liberation"
         ],
-        "note": "the self as a container with a label on it — and preserving what's inside identified as what prevents release"
+        "note": "the self as a container with a label on it — and preserving what's inside identified as what prevents release",
+        "mode": "outpour"
       },
       "doubt": {
         "type": "lines",
@@ -5539,7 +6013,8 @@
           "not likely when all i write about is contradictions",
           "and the thing that links them"
         ],
-        "note": "contradiction claimed as the subject rather than as a flaw, and the third line names the actual object of interest"
+        "note": "contradiction claimed as the subject rather than as a flaw, and the third line names the actual object of interest",
+        "mode": "argue"
       }
     }
   },
@@ -5556,7 +6031,8 @@
           "i’m fine i, how are you?",
           "are you thinking i?"
         ],
-        "note": "the poem summons an internal antagonist, gets told it's himself, rejects the explanation, and then holds a full conversation with it in the vocative — 'i' used as a name"
+        "note": "the poem summons an internal antagonist, gets told it's himself, rejects the explanation, and then holds a full conversation with it in the vocative — 'i' used as a name",
+        "mode": "outpour"
       },
       "self-loathing": {
         "type": "lines",
@@ -5566,7 +6042,8 @@
           "all this aggression and profanity is kinda cute if you don’t hate yourself babe",
           "only i can talk to me like this if you dare try imma hurt u"
         ],
-        "note": "the abuse is self-directed and then defended as exclusive property — nobody else is permitted to say it"
+        "note": "the abuse is self-directed and then defended as exclusive property — nobody else is permitted to say it",
+        "mode": "argue"
       }
     }
   },
@@ -5580,7 +6057,8 @@
           "as you are now, so once were we,",
           "as we are now, so you shall be!"
         ],
-        "note": "a traditional epitaph, carved on gravestones since at least the eighteenth century, quoted verbatim as the poem's close — the dead addressing the living directly"
+        "note": "a traditional epitaph, carved on gravestones since at least the eighteenth century, quoted verbatim as the poem's close — the dead addressing the living directly",
+        "mode": "argue"
       }
     }
   },
@@ -5594,7 +6072,8 @@
           "the way %100 being of a thing is directed toward one goal",
           "no backsies"
         ],
-        "note": "devotion defined structurally rather than emotionally — total commitment with no reverse, observed in machinery rather than in a person"
+        "note": "devotion defined structurally rather than emotionally — total commitment with no reverse, observed in machinery rather than in a person",
+        "mode": "argue"
       },
       "acceptance": {
         "type": "lines",
@@ -5602,7 +6081,8 @@
           "though id like to admit, first experience was way more frightening",
           "i like construction sounds today"
         ],
-        "note": "the same noise reclassified over time; the title repeated as the final line makes the acceptance an arrival rather than a premise"
+        "note": "the same noise reclassified over time; the title repeated as the final line makes the acceptance an arrival rather than a premise",
+        "mode": "argue"
       }
     }
   },
@@ -5617,7 +6097,8 @@
           "im too hot your water sizzle",
           "just stay hot as fuck"
         ],
-        "note": "the body present only as temperature — heat as the sole property claimed, and it survives the poem's abrupt subject change"
+        "note": "the body present only as temperature — heat as the sole property claimed, and it survives the poem's abrupt subject change",
+        "mode": "argue"
       },
       "desire": {
         "type": "lines",
@@ -5625,7 +6106,8 @@
           "im addicted to fucking",
           "and fuck all of yall"
         ],
-        "note": "the appetite stated first as a condition and repeated last as a dismissal — the same word doing opposite work at each end"
+        "note": "the appetite stated first as a condition and repeated last as a dismissal — the same word doing opposite work at each end",
+        "mode": "argue"
       }
     }
   },
@@ -5639,7 +6121,8 @@
           "and take these mortal’s wounds",
           "and stitch them up under a new moon"
         ],
-        "note": "healing delegated to a summoned figure rather than performed, and scheduled to a lunar phase — the fool given surgical work"
+        "note": "healing delegated to a summoned figure rather than performed, and scheduled to a lunar phase — the fool given surgical work",
+        "mode": "outpour"
       }
     }
   },
@@ -5653,7 +6136,8 @@
           "on that day, i",
           "is i"
         ],
-        "note": "the tautology broken across a line so the subject sits alone before its own verb — identity asserted by the smallest possible statement, and only for the day named"
+        "note": "the tautology broken across a line so the subject sits alone before its own verb — identity asserted by the smallest possible statement, and only for the day named",
+        "mode": "argue"
       }
     }
   },
@@ -5668,14 +6152,16 @@
           "leave senseless in our senses",
           "sensitive sensibility"
         ],
-        "note": "desire framed as an epistemological method — sense arrived at through the body, with the sense/senseless chain doing the arguing"
+        "note": "desire framed as an epistemological method — sense arrived at through the body, with the sense/senseless chain doing the arguing",
+        "mode": "argue"
       },
       "god": {
         "type": "line",
         "spans": [
           "lets fuck until we fuck god"
         ],
-        "note": "the only mention, placed as the escalation's endpoint — god reached through repetition rather than through worship"
+        "note": "the only mention, placed as the escalation's endpoint — god reached through repetition rather than through worship",
+        "mode": "argue"
       }
     }
   },
@@ -5691,14 +6177,16 @@
           "i right what i once deemed to be mediocre through writing",
           "i write mediocre i don’t write mediocre"
         ],
-        "note": "the denial of the vocation followed immediately by professional standards for it — and right/write doing the reconciling"
+        "note": "the denial of the vocation followed immediately by professional standards for it — and right/write doing the reconciling",
+        "mode": "argue"
       },
       "doubt": {
         "type": "line",
         "spans": [
           "i write mediocre i don’t write mediocre"
         ],
-        "note": "the claim and its negation in one unpunctuated line, with nothing offered to adjudicate between them"
+        "note": "the claim and its negation in one unpunctuated line, with nothing offered to adjudicate between them",
+        "mode": "argue"
       }
     }
   },
@@ -5713,7 +6201,8 @@
           "skimming through a book while the sun shines on through,",
           "this poem lost its meaning looking at the view"
         ],
-        "note": "the last line is the poem abandoning its own argument mid-sentence because something outside it was better — presence winning over the writing about presence"
+        "note": "the last line is the poem abandoning its own argument mid-sentence because something outside it was better — presence winning over the writing about presence",
+        "mode": "outpour"
       }
     }
   },
@@ -5727,7 +6216,8 @@
           "but maybe duration would be longer and they shorted you that?",
           "fuck them fuck me and fuck you no more loving for you fools"
         ],
-        "note": "the conflict is with the transaction itself — worry suspected of shortening the high it was supposed to extend, and the poem ends by cancelling everyone including itself"
+        "note": "the conflict is with the transaction itself — worry suspected of shortening the high it was supposed to extend, and the poem ends by cancelling everyone including itself",
+        "mode": "outpour"
       }
     }
   },
@@ -5743,7 +6233,8 @@
           "hold low",
           "hollow"
         ],
-        "note": "the last three lines erode one sound into the next — no show, hold low, hollow — so the absence becomes the word for what it left"
+        "note": "the last three lines erode one sound into the next — no show, hold low, hollow — so the absence becomes the word for what it left",
+        "mode": "outpour"
       }
     }
   },
@@ -5758,7 +6249,8 @@
           "a moment to kiss, in the moment but lips evade lips and gives a soft kiss to cheek.",
           "we haven't fucked but this is a great sex"
         ],
-        "note": "the whole poem is deferral — lips evading lips, the kiss redirected — and the final line reclassifies the deferral as the event rather than as its prelude"
+        "note": "the whole poem is deferral — lips evading lips, the kiss redirected — and the final line reclassifies the deferral as the event rather than as its prelude",
+        "mode": "outpour"
       }
     }
   },
@@ -5774,7 +6266,8 @@
           "or are you fat cause you’re mad",
           "and i lied my dad isn’t fat"
         ],
-        "note": "two words rotated through causation in three lines, then the premise withdrawn entirely — the wordplay retroactively revealed to have had no subject"
+        "note": "two words rotated through causation in three lines, then the premise withdrawn entirely — the wordplay retroactively revealed to have had no subject",
+        "mode": "outpour"
       }
     }
   },
@@ -5790,7 +6283,8 @@
           "i will get a driver’s license",
           "when i finish this senten"
         ],
-        "note": "the final line cuts off mid-word, so the condition every promise depended on is never met — the doubt enacted by the poem failing to finish rather than by anything it says"
+        "note": "the final line cuts off mid-word, so the condition every promise depended on is never met — the doubt enacted by the poem failing to finish rather than by anything it says",
+        "mode": "outpour"
       }
     }
   }
