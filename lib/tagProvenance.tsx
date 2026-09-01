@@ -14,6 +14,11 @@ export interface ProvenanceEntry {
   type: string;
   spans?: string[];
   note?: string;
+  // Separate axis from whether the span is good evidence for the tag:
+  // "outpour" (open — a question, image, or turn, invites continuing)
+  // vs "argue" (closed — a complete, stated claim, invites responding).
+  // Only meaningful for PLAY; unset on the 25 "none" entries.
+  mode?: "outpour" | "argue";
 }
 
 export interface PostProvenance {

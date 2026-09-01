@@ -76,6 +76,7 @@ export default function PlayScreen({
   titleWeights,
   body,
   bodyWeights,
+  mode,
 }: {
   slug: string;
   tag: string;
@@ -84,6 +85,7 @@ export default function PlayScreen({
   titleWeights: number[] | undefined;
   body: string;
   bodyWeights: number[] | undefined;
+  mode: "outpour" | "argue" | undefined;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
   const [peeked, setPeeked]         = useState<Set<number>>(new Set());
@@ -267,6 +269,7 @@ export default function PlayScreen({
           <PlayPoemBody
             text={body}
             weights={bodyWeights}
+            mode={mode}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
             peeked={peeked}

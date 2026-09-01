@@ -22,10 +22,12 @@ function PlayZone({
   value,
   onChange,
   autoFocus,
+  placeholder = "write here…",
 }: {
   value: string;
   onChange: (v: string) => void;
   autoFocus?: boolean;
+  placeholder?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -52,7 +54,7 @@ function PlayZone({
       ref={ref}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder="write here…"
+      placeholder={placeholder}
       rows={1}
       className="play-zone"
       style={{
@@ -93,9 +95,17 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
   );
 }
 
+// One provenance entry (and so one mode) per screen — every passage here
+// comes from the same tag's spans, so the prompt copy is the same for
+// all of them, not chosen per passage.
+function promptLabelFor(mode: "outpour" | "argue" | undefined): string {
+  return mode === "argue" ? "push back" : "write here";
+}
+
 export default function PlayPoemBody({
   text,
   weights,
+  mode,
   zoneValues,
   onZoneChange,
   peeked,
@@ -103,11 +113,13 @@ export default function PlayPoemBody({
 }: {
   text: string;
   weights: number[] | undefined;
+  mode: "outpour" | "argue" | undefined;
   zoneValues: Record<string, string>;
   onZoneChange: (id: string, value: string) => void;
   peeked: Set<number>;
   onTogglePeek: (start: number) => void;
 }) {
+  const promptLabel = promptLabelFor(mode);
   const [openZones, setOpenZones] = useState<Set<string>>(new Set());
   const openZone = useCallback((id: string) => {
     setOpenZones((prev) => new Set(prev).add(id));
@@ -156,9 +168,10 @@ export default function PlayPoemBody({
                   value={zoneValues[zoneId] ?? ""}
                   onChange={(v) => onZoneChange(zoneId, v)}
                   autoFocus={openZones.has(zoneId) && !(zoneValues[zoneId] ?? "").trim()}
+                  placeholder={`${promptLabel}…`}
                 />
               ) : (
-                <WritePrompt label="write here" onClick={() => openZone(zoneId)} />
+                <WritePrompt label={promptLabel} onClick={() => openZone(zoneId)} />
               )
             )}
           </div>
