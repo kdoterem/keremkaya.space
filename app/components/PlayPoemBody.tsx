@@ -1,19 +1,19 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import ObscurableToken from "./ObscurableToken";
 import { wordWeightLevel } from "./InvisibleInkText";
-import { splitPoemLines, ANYWHERE_ZONE_ID } from "@/lib/playLines";
+import { splitPoemLines, groupLegiblePassages, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
-// ── The poem body, line by line, each legible line immediately followed
-// by its own write-in zone — writing happens right where the thought
-// was, not disconnected in a box at the end. A line counts as "legible"
-// if any character in it carries the chosen tag's weight; the exact
-// weighted words within it still get the extra alive-motion treatment
-// (via ObscurableToken), the rest of that same line just renders as
-// plain legible text. One more zone sits at the very end, unlinked to
-// any specific line, for whatever didn't belong right after a
-// particular gap.
+// ── The poem body, rendered as one continuous read — legible passages
+// (grouped runs of consecutive tag-weighted lines, not one zone per
+// individual line: see groupLegiblePassages) stay unbroken text, exactly
+// as written. Nothing to write in is visible by default; a quiet
+// "+ write here" appears once, after each passage and once more at the
+// very end ("anywhere") — reading isn't interrupted by boxes, and
+// writing only appears once actually chosen. Opening one and leaving it
+// empty collapses back to the prompt on the next visit; anything
+// actually written stays open.
 //
 // Peek state (which obscured words have been tapped open) lives in
 // PlayScreen, not here — it's persisted there the same way the draft is,
@@ -21,9 +21,11 @@ import { splitPoemLines, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 function PlayZone({
   value,
   onChange,
+  autoFocus,
 }: {
   value: string;
   onChange: (v: string) => void;
+  autoFocus?: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -36,6 +38,14 @@ function PlayZone({
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   }, [value]);
+
+  // Only true for a zone just opened by clicking its prompt this
+  // session — a zone already showing because it has restored draft text
+  // must never steal focus on page load.
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <textarea
@@ -62,6 +72,27 @@ function PlayZone({
   );
 }
 
+function WritePrompt({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: "block",
+        background: "none",
+        border: "none",
+        padding: 0,
+        margin: "0.3rem 0 1.3rem",
+        cursor: "pointer",
+        fontSize: "0.78rem",
+        fontStyle: "italic",
+        color: "rgba(10,10,10,0.4)",
+      }}
+    >
+      + {label}
+    </button>
+  );
+}
+
 export default function PlayPoemBody({
   text,
   weights,
@@ -77,7 +108,18 @@ export default function PlayPoemBody({
   peeked: Set<number>;
   onTogglePeek: (start: number) => void;
 }) {
+  const [openZones, setOpenZones] = useState<Set<string>>(new Set());
+  const openZone = useCallback((id: string) => {
+    setOpenZones((prev) => new Set(prev).add(id));
+  }, []);
+
   const lines = splitPoemLines(text, weights);
+  const passages = groupLegiblePassages(lines);
+  // Which line, if any, is the LAST line of a passage — that's where its
+  // one write-in point belongs, keyed by the passage's own zone id.
+  const passageEndsAt = new Map(
+    passages.map((p) => [p.lines[p.lines.length - 1].start, String(p.start)]),
+  );
 
   return (
     <div style={{ whiteSpace: "pre-wrap" }}>
@@ -86,7 +128,7 @@ export default function PlayPoemBody({
 
         const tokens = line.text.split(/(\s+)/);
         let offset = line.start;
-        const zoneId = String(line.start);
+        const zoneId = passageEndsAt.get(line.start);
 
         return (
           <div key={i}>
@@ -108,33 +150,45 @@ export default function PlayPoemBody({
                 );
               })}
             </div>
-            {line.isLegible && (
-              <PlayZone
-                value={zoneValues[zoneId] ?? ""}
-                onChange={(v) => onZoneChange(zoneId, v)}
-              />
+            {zoneId && (
+              openZones.has(zoneId) || (zoneValues[zoneId] ?? "").trim() ? (
+                <PlayZone
+                  value={zoneValues[zoneId] ?? ""}
+                  onChange={(v) => onZoneChange(zoneId, v)}
+                  autoFocus={openZones.has(zoneId) && !(zoneValues[zoneId] ?? "").trim()}
+                />
+              ) : (
+                <WritePrompt label="write here" onClick={() => openZone(zoneId)} />
+              )
             )}
           </div>
         );
       })}
 
       <div style={{ marginTop: "0.5rem" }}>
-        <p
-          style={{
-            fontSize: "0.62rem",
-            fontWeight: 500,
-            letterSpacing: "0.12em",
-            fontVariant: "small-caps",
-            color: "rgba(10,10,10,0.4)",
-            marginBottom: "0.3rem",
-          }}
-        >
-          anywhere
-        </p>
-        <PlayZone
-          value={zoneValues[ANYWHERE_ZONE_ID] ?? ""}
-          onChange={(v) => onZoneChange(ANYWHERE_ZONE_ID, v)}
-        />
+        {openZones.has(ANYWHERE_ZONE_ID) || (zoneValues[ANYWHERE_ZONE_ID] ?? "").trim() ? (
+          <>
+            <p
+              style={{
+                fontSize: "0.62rem",
+                fontWeight: 500,
+                letterSpacing: "0.12em",
+                fontVariant: "small-caps",
+                color: "rgba(10,10,10,0.4)",
+                marginBottom: "0.3rem",
+              }}
+            >
+              anywhere
+            </p>
+            <PlayZone
+              value={zoneValues[ANYWHERE_ZONE_ID] ?? ""}
+              onChange={(v) => onZoneChange(ANYWHERE_ZONE_ID, v)}
+              autoFocus={openZones.has(ANYWHERE_ZONE_ID) && !(zoneValues[ANYWHERE_ZONE_ID] ?? "").trim()}
+            />
+          </>
+        ) : (
+          <WritePrompt label="write anything else, anywhere" onClick={() => openZone(ANYWHERE_ZONE_ID)} />
+        )}
       </div>
     </div>
   );

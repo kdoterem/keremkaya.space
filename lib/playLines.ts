@@ -29,3 +29,32 @@ export function splitPoemLines(text: string, weights: number[] | undefined): Poe
 // particular gap. A sentinel far outside any real character offset, so it
 // always sorts last wherever zone ids get ordered numerically.
 export const ANYWHERE_ZONE_ID = String(Number.MAX_SAFE_INTEGER);
+
+export interface PoemPassage {
+  lines: PoemLine[]; // consecutive legible lines, unbroken by a blank or obscured one
+  start: number;     // the passage's first line's start — its zone id
+}
+
+// A passage is one continuous run of legible lines — often a single
+// provenance span already covers several consecutive lines (a whole
+// sentence broken across them), and putting a write-zone after EVERY
+// individual line inside that run forces whatever gets written there to
+// complete a specific line-to-line join rather than respond to the
+// passage as one thought. Grouping first means exactly one write-in
+// point per passage, wherever it actually ends.
+export function groupLegiblePassages(lines: PoemLine[]): PoemPassage[] {
+  const passages: PoemPassage[] = [];
+  let current: PoemLine[] = [];
+  for (const line of lines) {
+    if (line.isLegible) {
+      current.push(line);
+      continue;
+    }
+    if (current.length) {
+      passages.push({ lines: current, start: current[0].start });
+      current = [];
+    }
+  }
+  if (current.length) passages.push({ lines: current, start: current[0].start });
+  return passages;
+}

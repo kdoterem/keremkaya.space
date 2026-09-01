@@ -5,7 +5,7 @@ import Link from "next/link";
 import PlayRevealText from "./PlayRevealText";
 import PlayPoemBody from "./PlayPoemBody";
 import PiecePopup from "./PiecePopup";
-import { splitPoemLines, ANYWHERE_ZONE_ID } from "@/lib/playLines";
+import { splitPoemLines, groupLegiblePassages, ANYWHERE_ZONE_ID } from "@/lib/playLines";
 
 // ── PLAY's actual play screen — one (poem, tag) pair. Only the chosen
 // tag's provenanced lines are legible on load, each followed immediately
@@ -151,17 +151,22 @@ export default function PlayScreen({
     });
   }, []);
 
-  // Every legible line paired with whatever got written after it — the
-  // actual shape of what was made, not the fragments alone. Shared by
-  // both the saved/localStorage text and the "your writing" popup so
+  // Every legible PASSAGE (a run of consecutive tag-weighted lines — see
+  // groupLegiblePassages) paired with whatever got written after it —
+  // the actual shape of what was made, not the fragments alone, and
+  // grouped the same way the on-page zones are so a multi-line passage
+  // shows as the one unbroken thought it actually is, not several. Shared
+  // by both the saved/localStorage text and the "your writing" popup so
   // they never drift apart from each other.
-  const lines = useMemo(() => splitPoemLines(body, bodyWeights), [body, bodyWeights]);
+  const lines    = useMemo(() => splitPoemLines(body, bodyWeights), [body, bodyWeights]);
+  const passages = useMemo(() => groupLegiblePassages(lines), [lines]);
   const myBlocks = useMemo(
     () =>
-      lines
-        .filter((l) => l.isLegible)
-        .map((l) => ({ provenance: l.text, mine: (zoneValues[String(l.start)] ?? "").trim() })),
-    [lines, zoneValues],
+      passages.map((p) => ({
+        provenance: p.lines.map((l) => l.text).join("\n"),
+        mine: (zoneValues[String(p.start)] ?? "").trim(),
+      })),
+    [passages, zoneValues],
   );
   const anywhereText = (zoneValues[ANYWHERE_ZONE_ID] ?? "").trim();
   const hasWriting = myBlocks.some((b) => b.mine) || !!anywhereText;
@@ -253,9 +258,9 @@ export default function PlayScreen({
             lineHeight: 1.6,
           }}
         >
-          the glittering gaps are yours — write in them, right where the feeling was,
-          or use the open space at the end for anything else.
-          stuck? tap a glimmer to peek — tap it again to hide it back.
+          kerem's marked lines stay legible, as written. tap "+ write here" after any
+          passage that speaks to you, or use the open space at the end for anything else.
+          stuck on a glimmer? tap it to peek — tap it again to hide it back.
         </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
@@ -343,7 +348,7 @@ export default function PlayScreen({
         <PiecePopup label={`your writing · ${tag}`} onClose={() => setPopup(null)}>
           {myBlocks.map((b, i) => (
             <div key={i} style={{ marginBottom: "1.6rem" }}>
-              <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "0.35rem" }}>
+              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "0.35rem" }}>
                 {b.provenance}
               </p>
               {b.mine && <p style={{ whiteSpace: "pre-wrap" }}>{b.mine}</p>}
