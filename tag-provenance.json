@@ -105,7 +105,7 @@
           "they wanna eviscerate me."
         ],
         "note": "the whole poem is this one repeated opposition — it's the structure, not a single line",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "defiance": {
         "type": "lines",
@@ -113,7 +113,7 @@
           "i wanna write on a wall,",
           "they want me writin off checks,"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "family": {
         "type": "none",
@@ -132,7 +132,7 @@
           "i wanna kill them,",
           "they wanna eviscerate me."
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "control": {
         "type": "lines",
@@ -141,7 +141,7 @@
           "they want me watchin the news,",
           "they want me killin it,"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "presence": {
         "type": "none",
@@ -161,7 +161,7 @@
           "i wanna kill them,",
           "they wanna eviscerate me."
         ],
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -275,7 +275,7 @@
           "now i am finally able to let it go and",
           "join you"
         ],
-        "mode": "argue"
+        "mode": "outpour"
       },
       "healing": {
         "type": "lines",
@@ -410,7 +410,7 @@
           "you understand, and you understand it's all constructed,"
         ],
         "note": "the escalating perception chain is the clearest carrier in the whole set for this tag",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "ritual": {
         "type": "lines",
@@ -441,7 +441,7 @@
           "i'm what life blooms, tomato sapling small as fuck,",
           "i no longer am fucking universe,"
         ],
-        "mode": "argue"
+        "mode": "outpour"
       },
       "impermanence": {
         "type": "lines",
@@ -572,7 +572,7 @@
           "i do not",
           "i used to"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "presence": {
         "type": "phrase",
@@ -599,7 +599,7 @@
         "spans": [
           "thank you for never changing, while i did,"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "healing": {
         "type": "phrase",
@@ -636,7 +636,7 @@
           "past me had anger, it'd go on with they didn't",
           "today it's apparent"
         ],
-        "mode": "argue"
+        "mode": "outpour"
       },
       "self-acceptance": {
         "type": "line",
@@ -679,7 +679,7 @@
           "and its signal is deafening for some",
           "the signal they cannot hear their navel can,"
         ],
-        "mode": "argue"
+        "mode": "outpour"
       },
       "acceptance": {
         "type": "line",
@@ -702,7 +702,7 @@
           "pull me out of the rug i hide under,"
         ],
         "note": "withholding as the poem's entire opening mechanism",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "vulnerability": {
         "type": "lines",
@@ -723,7 +723,7 @@
           "how hurt you gotta be to wanna transform?"
         ],
         "note": "stated flatly, then a question-chain that never resolves — it keeps re-asking",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "presence": {
         "type": "lines",
@@ -758,7 +758,7 @@
           "how hurt you gotta be to wanna transform?"
         ],
         "note": "loosely — transformation read as evidence of damage rather than growth",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "devotion": {
         "type": "line",
@@ -774,7 +774,7 @@
           "how hurt you gotta be to wanna transform?"
         ],
         "note": "same line as mortality — the poem's one moment that states its own logic plainly instead of circling it",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "self-acceptance": {
         "type": "none",
@@ -848,7 +848,7 @@
           "if we known our history, would we know our future?"
         ],
         "note": "questions posed and abandoned rather than pursued; the poem doesn't expect its own inquiry to work",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "control": {
         "type": "lines",
@@ -865,7 +865,7 @@
           "pre-owned"
         ],
         "note": "the dictator as title, and the closing pre-owned, which implies an owner rather than a mechanism — the divine is never named in the body, present only as the party doing the dictating",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "defiance": {
         "type": "lines",
@@ -873,7 +873,7 @@
           "is it in a star's nature to rebel?\nonly when you defend, against those that try to make you forget,"
         ],
         "note": "rebellion redefined as defense of origin rather than as attack",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "truth": {
         "type": "line",
@@ -889,7 +889,7 @@
           "if we known our history, would we know our future?"
         ],
         "note": "past and future held against each other, both dismissed in the following line",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "wordplay": {
         "type": "phrase",
@@ -897,7 +897,7 @@
           "pre-dictated"
         ],
         "note": "the whole poem turns on predicted/pre-dictated being the same sound doing opposite work",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "lineage": {
         "type": "lines",
@@ -942,7 +942,7 @@
           "sniff sniff i beg to differ,"
         ],
         "note": "the poem's only act of resistance is against its own opening claim — defiance turned inward, not outward at a target",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "exhaustion": {
         "type": "lines",
@@ -1097,7 +1097,7 @@
           "me, who gives a shit about me?",
           "why should anyone?"
         ],
-        "mode": "outpour"
+        "mode": "argue"
       },
       "self-loathing": {
         "type": "lines",
@@ -1106,7 +1106,7 @@
           "why should anyone?"
         ],
         "note": "same span as exhaustion — the two are not separable here; the fatigue and the contempt arrive in one gesture",
-        "mode": "outpour"
+        "mode": "argue"
       },
       "grief": {
         "type": "lines",
@@ -1166,7 +1166,7 @@
           "speech dishonors some parts."
         ],
         "note": "clarity arriving as a limit on speech rather than as a claim about what's seen",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -1235,7 +1235,7 @@
           "i dare not to be\nbut to stay\nwhat i have always was"
         ],
         "note": "acceptance framed as daring rather than as ease — and as staying rather than becoming",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -1249,7 +1249,7 @@
           "is it conceivable when clarity clears the whole table"
         ],
         "note": "clarity named directly, but as a question about whether it's survivable — clearing the table means losing what was on it",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
@@ -1265,7 +1265,7 @@
           "could i still right then?"
         ],
         "note": "right/write held unresolved across three lines — the method question and the pun are the same question",
-        "mode": "outpour"
+        "mode": "argue"
       }
     }
   },
