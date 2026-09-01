@@ -32,9 +32,18 @@ import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID }
 //    count with no loss of correctness — the run's boundaries come from
 //    the same weight computation either way.
 //
-// Peek state (which obscured RUNS have been tapped open) lives in
-// PlayScreen, not here — it's persisted there the same way the draft
-// is, so this component stays a pure function of its props.
+// Peek state (which LINES have been tapped open) lives in PlayScreen,
+// not here — it's persisted there the same way the draft is, so this
+// component stays a pure function of its props. Granularity is the
+// whole line, not the individual run: a line can hold more than one
+// obscured run (a legible word — its own anchor, or borrowed context
+// from the cluster-merge — sitting between two obscured stretches),
+// and tapping any one of them reveals every run in that line together,
+// same as InvisibleInkText's own reveal unit. Simpler to reason about
+// ("did I look at this line yet?" not "did I look at this fragment of
+// it yet?"), and it means progressing through a poem clears a whole
+// line's worth of still-animating sparkle at once rather than one
+// run at a time.
 function PlayZone({
   value,
   onChange,
@@ -116,7 +125,12 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
 // individually (existing per-word treatment, unchanged); obscured
 // stretches accumulate into one combined string and flush as a single
 // ObscurableRun once they hit a non-obscured token or the line's end —
-// never per word.
+// never per word. Every run in the line shares the SAME peeked/toggle
+// state, keyed by the line's own start (not the run's) — see the
+// header comment above for why. Each run still gets its own seed (its
+// own start offset), so two runs in the same line glitter with
+// different phase right up until the line's tapped open, the same
+// variation a multi-run line always had.
 function LineContent({
   lineText,
   lineStart,
@@ -144,8 +158,8 @@ function LineContent({
         key={`obs-${start}`}
         text={obscuredText}
         seed={start}
-        revealed={peeked.has(start)}
-        onToggle={() => onTogglePeek(start)}
+        revealed={peeked.has(lineStart)}
+        onToggle={() => onTogglePeek(lineStart)}
       />,
     );
     obscuredText = "";

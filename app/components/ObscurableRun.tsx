@@ -14,10 +14,14 @@ import { sparkleLayerStyle } from "./InvisibleInkText";
 // rows the run's own text wraps onto — inline elements fragment across
 // line boxes and lose that; inline-block doesn't.
 //
-// Peeking now reveals (and can re-hide) the whole run at once, not one
-// word at a time — a deliberate change, made for the same reason as the
-// sparkle batching: one click handler per run instead of one per word
-// keeps the interactive surface cheap too, not just the animation.
+// Peeking reveals (and can re-hide) this whole run at once, not one
+// word at a time. `revealed`/`onToggle` are handed down from
+// PlayPoemBody's LineContent, keyed by the ENCLOSING LINE, not this
+// run's own offset — so a line with more than one obscured run (a
+// legible word sitting between two obscured stretches) reveals all of
+// them together on one tap, not one run at a time. This component has
+// no idea it's sharing state with siblings; it just renders whatever
+// revealed/onToggle it's given.
 export default function ObscurableRun({
   text,
   seed,

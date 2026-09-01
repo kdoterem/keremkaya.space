@@ -34,14 +34,20 @@ import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID }
 // on this site — same pattern as useReadingPreference.ts and /kismet):
 // - `draft` — the live set of zone values, autosaves continuously and
 //   silently so nothing is lost.
-// - `peeked` — which obscured words have been tapped open, persisted so
-//   a reload doesn't re-hide something already looked at. Toggleable
-//   (tap again to re-obscure), unlike real provenance, since a peek is
-//   exploratory, not a commitment.
+// - `peeked` — which LINES have been tapped open (every obscured run in
+//   a line reveals together, not word by word or run by run — see
+//   PlayPoemBody's header comment), persisted so a reload doesn't
+//   re-hide something already looked at. Toggleable (tap again to
+//   re-obscure), unlike real provenance, since a peek is exploratory,
+//   not a commitment.
 // - `saved` — only grows when SAVE is explicitly pressed: a real history
 //   of finished writings at this same doorway, distinct from the draft.
 const DRAFT_KEY_PREFIX    = "kk-play-draft-v2";
-const PEEKED_KEY_PREFIX   = "kk-play-peeked-v1";
+// v2: the stored numbers used to be individual obscured-run offsets;
+// now they're line offsets (the peek granularity changed from per-run
+// to per-line) — bumped so a reload doesn't try to match old run
+// offsets against the new line-keyed lookup and silently do nothing.
+const PEEKED_KEY_PREFIX   = "kk-play-peeked-v2";
 const ATTEMPTS_KEY_PREFIX = "kk-play-attempts-v1";
 
 interface SavedWriting {
