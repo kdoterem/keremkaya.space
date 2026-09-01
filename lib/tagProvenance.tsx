@@ -58,6 +58,22 @@ function hasRealSpan(entry: ProvenanceEntry | undefined): boolean {
   return !!entry && entry.type !== "none" && !!entry.spans && entry.spans.length > 0;
 }
 
+// Found by the structural audit (see the mode-reclassification work): a
+// span that matches only the post's TITLE, never the body, leaves a PLAY
+// screen with no write-zone anywhere in it — the marked thought exists,
+// but nothing legible sits in the body to write near. Excluded here
+// rather than computed generally: this module is deliberately fs-free
+// (client-importable — /terrain and the reveal components use it too),
+// so checking body-match at runtime would mean loading full post content
+// on every request for every one of ~500 entries. One known case; add
+// another entry here if a future audit finds more.
+const BODY_MATCH_EXCLUSIONS = new Set<string>([
+  "percept-and-define-intercept-the-divine|||god",
+]);
+function hasBodyDoorway(slug: string, tag: string): boolean {
+  return !BODY_MATCH_EXCLUSIONS.has(`${slug}|||${tag}`);
+}
+
 function matchesMode(entry: ProvenanceEntry, mode: "outpour" | "argue" | undefined): boolean {
   return !mode || entry.mode === mode;
 }
@@ -69,7 +85,7 @@ function matchesMode(entry: ProvenanceEntry, mode: "outpour" | "argue" | undefin
 export function playableSlugsForTag(tag: string, mode?: "outpour" | "argue"): string[] {
   const data = tagProvenanceData as unknown as PostProvenance[];
   return data
-    .filter((p) => hasRealSpan(p.tags[tag]) && matchesMode(p.tags[tag], mode))
+    .filter((p) => hasRealSpan(p.tags[tag]) && matchesMode(p.tags[tag], mode) && hasBodyDoorway(p.slug, tag))
     .map((p) => p.slug);
 }
 
@@ -82,7 +98,7 @@ export function playableTagCounts(mode?: "outpour" | "argue"): Map<string, numbe
   const counts = new Map<string, number>();
   for (const post of data) {
     for (const [tag, entry] of Object.entries(post.tags)) {
-      if (!hasRealSpan(entry) || !matchesMode(entry, mode)) continue;
+      if (!hasRealSpan(entry) || !matchesMode(entry, mode) || !hasBodyDoorway(post.slug, tag)) continue;
       counts.set(tag, (counts.get(tag) ?? 0) + 1);
     }
   }
