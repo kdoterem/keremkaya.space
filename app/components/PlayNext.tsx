@@ -82,10 +82,20 @@ export default function PlayNext() {
   // Pick the first passage once progress has hydrated from localStorage —
   // deliberately after hydration, not before, so a returning reader's
   // real tier decides what they see rather than always starting at tier 1
-  // for one frame.
+  // for one frame. Resumes progress.current if there's one still
+  // uncompleted (leaving /play and coming back — say, to check saved
+  // writings — used to re-roll a brand-new random passage here every
+  // time, silently abandoning whatever was mid-draft) — only picks a
+  // fresh one when there's nothing to resume.
   useEffect(() => {
     if (!progress.hydrated || slug !== undefined) return;
-    setSlug(pickNextPassage(progress.tier, progress.completedSet));
+    if (progress.current && !progress.completedSet.has(progress.current)) {
+      setSlug(progress.current);
+      return;
+    }
+    const picked = pickNextPassage(progress.tier, progress.completedSet);
+    setSlug(picked);
+    progress.setCurrent(picked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress.hydrated]);
 
@@ -178,7 +188,9 @@ export default function PlayNext() {
       // overview for the tier that just ended has been seen and dismissed.
       setPendingTierEnd({ finishedTier: tier, nextTier, completedSetAfter, justSlug: slug });
     } else {
-      setSlug(pickNextPassage(nextTier, completedSetAfter, slug));
+      const picked = pickNextPassage(nextTier, completedSetAfter, slug);
+      setSlug(picked);
+      progress.setCurrent(picked);
     }
   }, [slug, text, progress, tier]);
 
@@ -186,8 +198,10 @@ export default function PlayNext() {
     if (!pendingTierEnd) return;
     const { nextTier, completedSetAfter, justSlug } = pendingTierEnd;
     setPendingTierEnd(null);
-    setSlug(pickNextPassage(nextTier, completedSetAfter, justSlug));
-  }, [pendingTierEnd]);
+    const picked = pickNextPassage(nextTier, completedSetAfter, justSlug);
+    setSlug(picked);
+    progress.setCurrent(picked);
+  }, [pendingTierEnd, progress]);
 
   if (!progress.hydrated || slug === undefined) {
     return <main style={mainStyle} />;
@@ -311,41 +325,48 @@ function TopBar({
       >
         RETURN
       </Link>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-          <Link
-            href="/play/saved"
-            style={{
-              fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.1em",
-              fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
-            }}
-          >
-            your saved writings →
-          </Link>
-          <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
-            tier {tier} of {TIER_COUNT}
-          </span>
-          {finishedGame && (
-            <Link
-              href="/play/browse"
-              style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}
-            >
-              browse freely →
-            </Link>
-          )}
-        </div>
-        {/* Quiet fill bar toward the next unlock — no number alongside
-            it on purpose, a count here would read like a countdown. */}
-        <div style={{ width: "90px", height: "3px", background: "rgba(10,10,10,0.15)", borderRadius: "2px", overflow: "hidden" }}>
-          <div
-            style={{
-              width: `${Math.round(progressFraction * 100)}%`,
-              height: "100%",
-              background: "rgba(10,10,10,0.55)",
-              borderRadius: "2px",
-              transition: "width 0.4s ease-out",
-            }}
-          />
+      {/* Two separate columns, not one stack — the progress bar belongs
+          only to the tier column below it; "your saved writings" used to
+          sit crowded into the same right-aligned block, close enough to
+          read as if the bar were under it too. */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "2.5rem" }}>
+        <Link
+          href="/play/saved"
+          style={{
+            fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.1em",
+            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+          }}
+        >
+          your saved writings →
+        </Link>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
+          <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+            <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
+              tier {tier} of {TIER_COUNT}
+            </span>
+            {finishedGame && (
+              <Link
+                href="/play/browse"
+                style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+              >
+                browse freely →
+              </Link>
+            )}
+          </div>
+          {/* Quiet fill bar toward the next unlock — no number alongside
+              it on purpose, a count here would read like a countdown. */}
+          <div style={{ width: "90px", height: "3px", background: "rgba(10,10,10,0.15)", borderRadius: "2px", overflow: "hidden" }}>
+            <div
+              style={{
+                width: `${Math.round(progressFraction * 100)}%`,
+                height: "100%",
+                background: "rgba(10,10,10,0.55)",
+                borderRadius: "2px",
+                transition: "width 0.4s ease-out",
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
