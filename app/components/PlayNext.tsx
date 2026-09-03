@@ -9,6 +9,7 @@ import { countWords, looksUnfinished, randomUnderFloorMessage } from "@/lib/play
 import { getCategoriesForSlug } from "@/lib/playCategories";
 import PlayFakeEvalModal from "./PlayFakeEvalModal";
 import PlayIntro from "./PlayIntro";
+import PlayTierOverview from "./PlayTierOverview";
 
 // ── PLAY's primary screen, replacing the old gateway → category → tag →
 // poem tree entirely. No upfront choice of mode ("push back" vs "write
@@ -63,6 +64,18 @@ export default function PlayNext() {
   const [text, setText] = useState("");
   const [nudge, setNudge] = useState<string | null>(null);
   const [evalOpen, setEvalOpen] = useState(false);
+  // Set only when a completion just crossed a tier threshold — holds the
+  // tier that finished (what the overview recaps) plus everything needed
+  // to actually advance once the reader dismisses it. Picking the next
+  // passage is deliberately deferred until then, not done immediately
+  // alongside marking the passage complete — the overview has to show
+  // the tier that just ended before anything from the new one appears.
+  const [pendingTierEnd, setPendingTierEnd] = useState<{
+    finishedTier: number;
+    nextTier: number;
+    completedSetAfter: Set<string>;
+    justSlug: string;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -160,8 +173,21 @@ export default function PlayNext() {
     // which still reflects the count from before this passage counted.
     const completedSetAfter = new Set([...progress.completedSet, slug]);
     const nextTier = tierForCompletedCount(completedSetAfter.size);
-    setSlug(pickNextPassage(nextTier, completedSetAfter, slug));
-  }, [slug, text, progress]);
+    if (nextTier > tier) {
+      // Crossed a threshold — hold off picking the next passage until the
+      // overview for the tier that just ended has been seen and dismissed.
+      setPendingTierEnd({ finishedTier: tier, nextTier, completedSetAfter, justSlug: slug });
+    } else {
+      setSlug(pickNextPassage(nextTier, completedSetAfter, slug));
+    }
+  }, [slug, text, progress, tier]);
+
+  const handleOverviewContinue = useCallback(() => {
+    if (!pendingTierEnd) return;
+    const { nextTier, completedSetAfter, justSlug } = pendingTierEnd;
+    setPendingTierEnd(null);
+    setSlug(pickNextPassage(nextTier, completedSetAfter, justSlug));
+  }, [pendingTierEnd]);
 
   if (!progress.hydrated || slug === undefined) {
     return <main style={mainStyle} />;
@@ -248,6 +274,13 @@ export default function PlayNext() {
         written={text}
         onProceed={handleProceed}
       />
+
+      {pendingTierEnd && (
+        <PlayTierOverview
+          tier={pendingTierEnd.finishedTier}
+          onContinue={handleOverviewContinue}
+        />
+      )}
     </main>
   );
 }
