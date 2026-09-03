@@ -95,6 +95,21 @@ export function hasFinishedGame(completedCount: number): boolean {
   return completedCount >= TIER_UNLOCK_THRESHOLDS[4] + TIER_4_TASTE;
 }
 
+// 0-1 progress toward the reader's NEXT unlock, for a quiet fill bar
+// under the "tier N of 4" label — not a count, on purpose (a number
+// there reads like a countdown; a bar just reads as motion). Tiers 1-3
+// measure the distance to the next tier's own threshold; tier 4 has no
+// next tier to unlock, so it measures toward "finished the game"
+// instead (hasFinishedGame's own threshold) — a bar with nowhere to go
+// would just look broken.
+export function tierProgressFraction(completedCount: number): number {
+  const tier = tierForCompletedCount(completedCount);
+  const start = TIER_UNLOCK_THRESHOLDS[tier];
+  const end = tier < TIER_COUNT ? TIER_UNLOCK_THRESHOLDS[tier + 1] : TIER_UNLOCK_THRESHOLDS[TIER_COUNT] + TIER_4_TASTE;
+  if (end <= start) return 1;
+  return Math.min(1, Math.max(0, (completedCount - start) / (end - start)));
+}
+
 // Which passage to serve next: a random uncompleted one from the reader's
 // current tier, never repeating whatever they just saw. If that tier is
 // exhausted (a very engaged reader), fall back to the nearest tier with

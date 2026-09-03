@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePlayProgress } from "@/lib/usePlayProgress";
 import { getPassage } from "@/lib/playPassages";
-import { getDifficulty, wordFloorForTier, pickNextPassage, tierForCompletedCount, TIER_COUNT } from "@/lib/playDifficulty";
+import { getDifficulty, wordFloorForTier, pickNextPassage, tierForCompletedCount, tierProgressFraction, TIER_COUNT } from "@/lib/playDifficulty";
 import { countWords, looksUnfinished, randomUnderFloorMessage } from "@/lib/playWriting";
 import PlayFakeEvalModal from "./PlayFakeEvalModal";
 import PlayIntro from "./PlayIntro";
@@ -169,7 +169,7 @@ export default function PlayNext() {
     return (
       <main style={mainStyle}>
         <PlayIntro />
-        <TopBar tier={tier} finishedGame={progress.finishedGame} />
+        <TopBar tier={tier} finishedGame={progress.finishedGame} progressFraction={tierProgressFraction(progress.completed.length)} />
         <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "6rem", textAlign: "center" }}>
           <p style={{ fontSize: "1.1rem", lineHeight: 1.7 }}>
             you've answered every passage there is, for now.
@@ -184,7 +184,7 @@ export default function PlayNext() {
   return (
     <main style={mainStyle}>
       <PlayIntro />
-      <TopBar tier={tier} finishedGame={progress.finishedGame} />
+      <TopBar tier={tier} finishedGame={progress.finishedGame} progressFraction={tierProgressFraction(progress.completed.length)} />
 
       <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "3.5rem" }}>
         <div style={{ fontSize: "1.05rem", lineHeight: 1.85, whiteSpace: "pre-wrap", marginBottom: "2.5rem" }}>
@@ -248,7 +248,13 @@ const mainStyle: React.CSSProperties = {
   padding: "4rem 5vw 6rem",
 };
 
-function TopBar({ tier, finishedGame }: { tier: number; finishedGame: boolean }) {
+function TopBar({
+  tier, finishedGame, progressFraction,
+}: {
+  tier: number;
+  finishedGame: boolean;
+  progressFraction: number;
+}) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
       <Link
@@ -260,18 +266,33 @@ function TopBar({ tier, finishedGame }: { tier: number; finishedGame: boolean })
       >
         RETURN
       </Link>
-      <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-        <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
-          tier {tier} of {TIER_COUNT}
-        </span>
-        {finishedGame && (
-          <Link
-            href="/play/browse"
-            style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}
-          >
-            browse freely →
-          </Link>
-        )}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
+            tier {tier} of {TIER_COUNT}
+          </span>
+          {finishedGame && (
+            <Link
+              href="/play/browse"
+              style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+            >
+              browse freely →
+            </Link>
+          )}
+        </div>
+        {/* Quiet fill bar toward the next unlock — no number alongside
+            it on purpose, a count here would read like a countdown. */}
+        <div style={{ width: "90px", height: "3px", background: "rgba(10,10,10,0.15)", borderRadius: "2px", overflow: "hidden" }}>
+          <div
+            style={{
+              width: `${Math.round(progressFraction * 100)}%`,
+              height: "100%",
+              background: "rgba(10,10,10,0.55)",
+              borderRadius: "2px",
+              transition: "width 0.4s ease-out",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
