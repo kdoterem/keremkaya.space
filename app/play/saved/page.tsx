@@ -5,6 +5,7 @@ import Link from "next/link";
 import PiecePopup from "@/app/components/PiecePopup";
 import PlaySaveImageButton from "@/app/components/PlaySaveImageButton";
 import { getCategoriesForSlug } from "@/lib/playCategories";
+import { getPassage } from "@/lib/playPassages";
 
 // ── Every PLAY writing you've ever finished — merged from the tiered
 // flow's history (kk-play-history-v1) and the free-browse mode's
@@ -20,6 +21,15 @@ import { getCategoriesForSlug } from "@/lib/playCategories";
 // approached through — a poem can touch more than that one tag. Falls
 // back to the poem's own title only for the entries with no real
 // category at all, so nothing ever shows a blank header.
+//
+// The popup shows what a saved writing was answering, not just what got
+// written. Browse-mode saves already have this baked in — PlayScreen's
+// own composedText interleaves each provenance line with what got
+// written after it, so `text` there is already self-contained. Tiered-
+// flow saves never carried the passage at all (kk-play-history-v1 only
+// ever stored the reader's own text) — the popup pulls it back in via
+// getPassage(slug), shown above the writing in the same quiet
+// italic/muted register the old "your writing" popup used for it.
 const ATTEMPTS_PREFIX = "kk-play-attempts-v1:";
 const HISTORY_KEY = "kk-play-history-v1";
 const PREVIEW_MAX = 160;
@@ -173,6 +183,17 @@ export default function SavedWritingsPage() {
 
       {openEntry && (
         <PiecePopup label={labelFor(openEntry.slug)} onClose={() => setOpenKey(null)}>
+          {/* Tier-flow saves never carried the passage — browse-mode
+              saves already have it interleaved into their own text, so
+              only pull it in separately for the ones missing it. */}
+          {!openEntry.browseHref && (() => {
+            const passage = getPassage(openEntry.slug);
+            return passage ? (
+              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.55)", marginBottom: "1rem" }}>
+                {passage.lines.join("\n")}
+              </p>
+            ) : null;
+          })()}
           <p style={{ whiteSpace: "pre-wrap" }}>{openEntry.text}</p>
           <div style={{ marginTop: "2rem", display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
             <PlaySaveImageButton category={labelFor(openEntry.slug)} text={openEntry.text} />

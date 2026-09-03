@@ -4,11 +4,12 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MechButton from "./MechButton";
 
-// ── The contract — shown before a first-time (and, deliberately, every
-// return) visit to /play. States what the system actually is and what
-// the rules are; says nothing about what happens after submit, since
-// that ceremony only works if it isn't pre-announced as theater ("not
-// having control" has to be discovered, not read about first).
+// ── The contract — shown once per browser session before /play, and
+// again each new session after that (deliberately — see below). States
+// what the system actually is and what the rules are; says nothing
+// about what happens after submit, since that ceremony only works if
+// it isn't pre-announced as theater ("not having control" has to be
+// discovered, not read about first).
 //
 // Deliberately NOT the full-bleed lime takeover every other PLAY screen
 // uses (the write screen, the fake-eval modal) — that register is for
@@ -20,13 +21,21 @@ import MechButton from "./MechButton";
 // on the page. No backdrop-click-to-close either, unlike PiecePopup —
 // a contract shouldn't be dismissible by accident.
 //
-// Two ways out, on purpose: "begin" only dismisses for this visit — by
-// default the contract shows again next time, like something you keep
-// re-agreeing to rather than a one-off tutorial. "don't remind me
-// again" is the actual opt-out, small and quiet on purpose (this is a
-// choice to stop seeing it, not the main action).
+// Two ways out: "begin" dismisses for the rest of this browser SESSION
+// (sessionStorage — clears when the tab/browser closes) rather than just
+// this component instance. It used to only clear local React state,
+// which meant leaving /play for something as small as checking saved
+// writings and coming back re-triggered it — that's the same sitting-
+// down-to-play, not a new visit, and re-showing the contract for
+// internal navigation like that was never the intent. "don't remind me
+// again" is still the fully permanent opt-out (localStorage) — small and
+// quiet on purpose, a choice to stop seeing it, not the main action. The
+// contract still reappears next time you genuinely come back to the
+// site, which is the actual "something you keep re-agreeing to" this
+// was going for.
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-const DISMISSED_KEY = "kk-play-intro-dismissed-v1";
+const DISMISSED_KEY = "kk-play-intro-dismissed-v1";     // localStorage — permanent opt-out
+const SESSION_KEY   = "kk-play-intro-session-v1";        // sessionStorage — this browser session only
 
 export default function PlayIntro() {
   const [open, setOpen] = useState(false);
@@ -34,14 +43,24 @@ export default function PlayIntro() {
 
   useIsomorphicLayoutEffect(() => {
     try {
-      setOpen(localStorage.getItem(DISMISSED_KEY) !== "1");
+      const permanentlyDismissed = localStorage.getItem(DISMISSED_KEY) === "1";
+      const dismissedThisSession = sessionStorage.getItem(SESSION_KEY) === "1";
+      setOpen(!permanentlyDismissed && !dismissedThisSession);
     } catch {
       setOpen(true);
     }
     setHydrated(true);
   }, []);
 
-  const begin = () => setOpen(false);
+  const begin = () => {
+    setOpen(false);
+    try {
+      sessionStorage.setItem(SESSION_KEY, "1");
+    } catch {
+      // Shows again on internal navigation this session if it can't
+      // persist — not worth surfacing.
+    }
+  };
   const dontRemind = () => {
     setOpen(false);
     try {
