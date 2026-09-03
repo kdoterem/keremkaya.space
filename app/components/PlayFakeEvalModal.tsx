@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import CryptoScramble from "./CryptoScramble";
-import DodgeCommitButton from "./DodgeCommitButton";
+import ConfirmButton from "./ConfirmButton";
 import ConfettiCanvas from "./ConfettiCanvas";
 
 // ── The ceremony after a reader submits a passage — deliberately not a
@@ -23,7 +23,7 @@ import ConfettiCanvas from "./ConfettiCanvas";
 //     cost is saved for the one thing actually worth celebrating).
 //  3. Underneath, small and unhighlighted on purpose: "send this to
 //     kerem" — a real send (Web3Forms, same pattern as /kismet), gated by
-//     DodgeCommitButton so it takes a genuine second tap. On success the
+//     ConfirmButton so it takes a genuine second tap. On success the
 //     label itself becomes the reward: "kerem appreciates it," plus the
 //     confetti this moment earns and the ceremony above doesn't.
 const EVAL_MS = 1800;
@@ -159,7 +159,7 @@ export default function PlayFakeEvalModal({
                 proceed
               </button>
 
-              <DodgeCommitButton
+              <ConfirmButton
                 label={sendLabel}
                 armedLabel="send it →"
                 onCommit={handleSend}

@@ -6,6 +6,7 @@ import { usePlayProgress } from "@/lib/usePlayProgress";
 import { getPassage } from "@/lib/playPassages";
 import { getDifficulty, wordFloorForTier, pickNextPassage, tierForCompletedCount, tierProgressFraction, TIER_COUNT } from "@/lib/playDifficulty";
 import { countWords, looksUnfinished, randomUnderFloorMessage } from "@/lib/playWriting";
+import { getCategoriesForSlug } from "@/lib/playCategories";
 import PlayFakeEvalModal from "./PlayFakeEvalModal";
 import PlayIntro from "./PlayIntro";
 
@@ -106,6 +107,7 @@ export default function PlayNext() {
   }, [text]);
 
   const passage = slug ? getPassage(slug) : undefined;
+  const categories = slug ? getCategoriesForSlug(slug) : [];
   const difficulty = slug ? getDifficulty(slug) : undefined;
   const tier = difficulty?.tier ?? progress.tier;
   const floor = wordFloorForTier(tier);
@@ -187,6 +189,16 @@ export default function PlayNext() {
       <TopBar tier={tier} finishedGame={progress.finishedGame} progressFraction={tierProgressFraction(progress.completed.length)} />
 
       <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "3.5rem" }}>
+        {/* Only shown when it is real (74% of passages, see
+            lib/playCategories.ts) — nothing invented for the rest.
+            Doubles as quiet familiarization with the taxonomy /play/browse
+            uses later, without asking anyone to learn it up front. */}
+        {categories.length > 0 && (
+          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)", marginBottom: "0.8rem" }}>
+            {categories.map((c) => c.title).join(" · ")}
+          </p>
+        )}
+
         <div style={{ fontSize: "1.05rem", lineHeight: 1.85, whiteSpace: "pre-wrap", marginBottom: "2.5rem" }}>
           {passage.lines.map((line, i) => (
             <div key={i}>{line || " "}</div>
@@ -268,6 +280,15 @@ function TopBar({
       </Link>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <Link
+            href="/play/saved"
+            style={{
+              fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.1em",
+              fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+            }}
+          >
+            your saved writings →
+          </Link>
           <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
             tier {tier} of {TIER_COUNT}
           </span>
