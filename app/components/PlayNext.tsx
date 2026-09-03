@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePlayProgress } from "@/lib/usePlayProgress";
 import { getPassage } from "@/lib/playPassages";
 import { getDifficulty, wordFloorForTier, pickNextPassage, tierForCompletedCount, TIER_COUNT } from "@/lib/playDifficulty";
-import { countWords, looksUnfinished } from "@/lib/playWriting";
+import { countWords, looksUnfinished, randomUnderFloorMessage } from "@/lib/playWriting";
 import PlayFakeEvalModal from "./PlayFakeEvalModal";
+import PlayIntro from "./PlayIntro";
 
 // ── PLAY's primary screen, replacing the old gateway → category → tag →
 // poem tree entirely. No upfront choice of mode ("push back" vs "write
@@ -62,6 +63,7 @@ export default function PlayNext() {
   const [nudge, setNudge] = useState<string | null>(null);
   const [evalOpen, setEvalOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pick the first passage once progress has hydrated from localStorage —
   // deliberately after hydration, not before, so a returning reader's
@@ -110,8 +112,28 @@ export default function PlayNext() {
   const words = useMemo(() => countWords(text), [text]);
   const meetsFloor = words >= floor;
 
+  // No persistent counter — a number sitting there the whole time turns
+  // writing into watching a progress bar. Instead: clear whatever nudge
+  // is showing the instant they type again, and if they're still under
+  // the floor 3 seconds after their last keystroke, offer a quiet
+  // check-in rather than a running tally. Only schedules while there's
+  // something written but not enough of it — nothing to nudge about at
+  // zero words, nothing to say once the floor's cleared.
+  useEffect(() => {
+    if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
+    setNudge(null);
+    if (words > 0 && words < floor) {
+      nudgeTimerRef.current = setTimeout(() => setNudge(randomUnderFloorMessage()), 3000);
+    }
+    return () => { if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current); };
+  }, [text, floor, words]);
+
   const handleSubmit = useCallback(() => {
-    if (!meetsFloor) return;
+    if (!meetsFloor) {
+      if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
+      setNudge(randomUnderFloorMessage());
+      return;
+    }
     if (looksUnfinished(text)) {
       setNudge("doesn't look finished yet");
       return;
@@ -146,6 +168,7 @@ export default function PlayNext() {
   if (slug === null) {
     return (
       <main style={mainStyle}>
+        <PlayIntro />
         <TopBar tier={tier} finishedGame={progress.finishedGame} />
         <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "6rem", textAlign: "center" }}>
           <p style={{ fontSize: "1.1rem", lineHeight: 1.7 }}>
@@ -160,6 +183,7 @@ export default function PlayNext() {
 
   return (
     <main style={mainStyle}>
+      <PlayIntro />
       <TopBar tier={tier} finishedGame={progress.finishedGame} />
 
       <div style={{ maxWidth: "640px", margin: "0 auto", marginTop: "3.5rem" }}>
@@ -191,10 +215,9 @@ export default function PlayNext() {
           }}
         />
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <span style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.4)" }}>
-            {meetsFloor ? " " : `${floor - words} more word${floor - words === 1 ? "" : "s"}`}
-          </span>
+        {/* Fixed height whether or not a nudge is showing, so the submit
+            button below does not hop up and down as messages appear/clear. */}
+        <div style={{ minHeight: "1.4rem", marginBottom: "0.6rem" }}>
           {nudge && (
             <span style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)" }}>
               {nudge}
@@ -202,7 +225,7 @@ export default function PlayNext() {
           )}
         </div>
 
-        <button onClick={handleSubmit} disabled={!meetsFloor} className="export-btn">
+        <button onClick={handleSubmit} className="export-btn">
           submit
         </button>
       </div>

@@ -32,3 +32,21 @@ export function looksUnfinished(text: string): boolean {
   const flagged = tokens.filter(tokenLooksUnfinished).length;
   return flagged / tokens.length > 0.5;
 }
+
+// Under-floor nudges — a real thing was written, just not enough of one
+// yet. Distinct from looksUnfinished's "doesn't look finished yet" (that
+// one's for keymash; this pool is for genuine short answers) and shown
+// either on a submit attempt or after a few seconds of no further typing
+// — see PlayNext.tsx. A small rotating pool rather than one fixed line,
+// so it doesn't read as a scolding form-validation message on repeat.
+export const UNDER_FLOOR_MESSAGES = [
+  "give it a little more",
+  "that's a shrug, not a thought",
+  "not yet",
+  "there's more in there",
+  "keep going",
+];
+
+export function randomUnderFloorMessage(): string {
+  return UNDER_FLOOR_MESSAGES[Math.floor(Math.random() * UNDER_FLOOR_MESSAGES.length)];
+}
