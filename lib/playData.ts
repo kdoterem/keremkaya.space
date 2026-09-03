@@ -76,10 +76,13 @@ export interface PlayableTag {
 // A category's tags, sized by how many real doorways each one currently
 // has WITHIN one gateway's mode — a tag with plenty of "argue" doorways
 // might have none under "outpour", and only shows up where it actually
-// has something.
+// has something. mode is optional (matches playableTagCounts below it) —
+// /play/browse calls this with no mode at all now that the gateway
+// choice is gone from the primary flow, merging what used to be two
+// separate pools into one.
 export function getPlayableTagsInCategory(
   category: PlayCategory,
-  mode: "outpour" | "argue",
+  mode?: "outpour" | "argue",
 ): PlayableTag[] {
   const counts = playableTagCounts(mode);
   return category.tags
@@ -94,10 +97,10 @@ export interface PlayablePoem {
   date:  string;
 }
 
-// Every poem playable for a given tag WITHIN one gateway's mode, newest
-// first (matches getAllPosts' own ordering) — the pool
-// /play/[gateway]/[tag] lists for someone to pick from.
-export function getPlayablePoemsForTag(tag: string, mode: "outpour" | "argue"): PlayablePoem[] {
+// Every poem playable for a given tag, newest first (matches
+// getAllPosts' own ordering) — the pool /play/browse/[tag] lists for
+// someone to pick from. mode is optional; /play/browse never passes one.
+export function getPlayablePoemsForTag(tag: string, mode?: "outpour" | "argue"): PlayablePoem[] {
   const slugs  = new Set(playableSlugsForTag(tag, mode));
   if (slugs.size === 0) return [];
   return getAllPosts()

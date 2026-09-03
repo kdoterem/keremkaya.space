@@ -1,0 +1,3499 @@
+[
+  {
+    "slug": "42-weeks",
+    "difficulty_score": 81.1,
+    "tier": 4,
+    "components": {
+      "words": 40,
+      "lines": 6,
+      "amount_given_difficulty": 52.8,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "500-miles-to-mordor",
+    "difficulty_score": 32.6,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 7,
+      "amount_given_difficulty": 50.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "6-days-to-sunday",
+    "difficulty_score": 53.6,
+    "tier": 3,
+    "components": {
+      "words": 52,
+      "lines": 7,
+      "amount_given_difficulty": 27.6,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-barrier-is-necessary",
+    "difficulty_score": 17.9,
+    "tier": 1,
+    "components": {
+      "words": 57,
+      "lines": 13,
+      "amount_given_difficulty": 13.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-lot-has-changed-in-the-midst-of-the-storm",
+    "difficulty_score": 21.8,
+    "tier": 1,
+    "components": {
+      "words": 55,
+      "lines": 6,
+      "amount_given_difficulty": 23.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-mind-so-thinned-it-cant-reconstruct-the-abundance-it-once-had",
+    "difficulty_score": 56.4,
+    "tier": 3,
+    "components": {
+      "words": 31,
+      "lines": 4,
+      "amount_given_difficulty": 78.6,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-passerby-passes-by",
+    "difficulty_score": 49.1,
+    "tier": 3,
+    "components": {
+      "words": 23,
+      "lines": 4,
+      "amount_given_difficulty": 91.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-poem-talking-about-talking-about-myself-talks-about-myself",
+    "difficulty_score": 28.8,
+    "tier": 2,
+    "components": {
+      "words": 66,
+      "lines": 7,
+      "amount_given_difficulty": 9.6,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-shrinking-star",
+    "difficulty_score": 50.5,
+    "tier": 3,
+    "components": {
+      "words": 54,
+      "lines": 9,
+      "amount_given_difficulty": 20.1,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "a-veil-unveiled",
+    "difficulty_score": 30,
+    "tier": 2,
+    "components": {
+      "words": 43,
+      "lines": 7,
+      "amount_given_difficulty": 43.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ab-come-alive",
+    "difficulty_score": 10.5,
+    "tier": 1,
+    "components": {
+      "words": 55,
+      "lines": 5,
+      "amount_given_difficulty": 26.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "abandonment-of-meaning-in-favor-of-presence",
+    "difficulty_score": 51.8,
+    "tier": 3,
+    "components": {
+      "words": 55,
+      "lines": 6,
+      "amount_given_difficulty": 23.3,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "accumulation-accumulating",
+    "difficulty_score": 18.3,
+    "tier": 1,
+    "components": {
+      "words": 58,
+      "lines": 8,
+      "amount_given_difficulty": 14.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "aesops-fables",
+    "difficulty_score": 40.8,
+    "tier": 2,
+    "components": {
+      "words": 31,
+      "lines": 7,
+      "amount_given_difficulty": 70.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "am-i-supposed-to",
+    "difficulty_score": 60.6,
+    "tier": 3,
+    "components": {
+      "words": 25,
+      "lines": 4,
+      "amount_given_difficulty": 89.1,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "and-piss-on-their-corpse",
+    "difficulty_score": 28.9,
+    "tier": 2,
+    "components": {
+      "words": 33,
+      "lines": 5,
+      "amount_given_difficulty": 72.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "angels-swing-their-feet-off-my-collar-bone",
+    "difficulty_score": 16.5,
+    "tier": 1,
+    "components": {
+      "words": 62,
+      "lines": 9,
+      "amount_given_difficulty": 10,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "answer-seeking-stops",
+    "difficulty_score": 59.5,
+    "tier": 3,
+    "components": {
+      "words": 42,
+      "lines": 10,
+      "amount_given_difficulty": 42.4,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "are-we-doomed",
+    "difficulty_score": 43.8,
+    "tier": 3,
+    "components": {
+      "words": 34,
+      "lines": 7,
+      "amount_given_difficulty": 65.7,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ars-poetica-1",
+    "difficulty_score": 37.5,
+    "tier": 2,
+    "components": {
+      "words": 53,
+      "lines": 5,
+      "amount_given_difficulty": 31.3,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "autophagy-and-propaganda",
+    "difficulty_score": 50.5,
+    "tier": 3,
+    "components": {
+      "words": 21,
+      "lines": 3,
+      "amount_given_difficulty": 95.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "back-to-back",
+    "difficulty_score": 46.3,
+    "tier": 3,
+    "components": {
+      "words": 48,
+      "lines": 5,
+      "amount_given_difficulty": 40.8,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "bathos",
+    "difficulty_score": 32.2,
+    "tier": 2,
+    "components": {
+      "words": 43,
+      "lines": 5,
+      "amount_given_difficulty": 49.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "be-in-the-same-space",
+    "difficulty_score": 94.1,
+    "tier": 4,
+    "components": {
+      "words": 28,
+      "lines": 4,
+      "amount_given_difficulty": 85.3,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "beer-n-doer",
+    "difficulty_score": 42.5,
+    "tier": 2,
+    "components": {
+      "words": 43,
+      "lines": 7,
+      "amount_given_difficulty": 43.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "being-denied-home-by-my-own-lungs",
+    "difficulty_score": 17.7,
+    "tier": 1,
+    "components": {
+      "words": 42,
+      "lines": 8,
+      "amount_given_difficulty": 44.3,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "blimp-blimp",
+    "difficulty_score": 47.5,
+    "tier": 3,
+    "components": {
+      "words": 43,
+      "lines": 7,
+      "amount_given_difficulty": 43.8,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "blood-is-running-through-my-veins-like",
+    "difficulty_score": 35.2,
+    "tier": 2,
+    "components": {
+      "words": 37,
+      "lines": 8,
+      "amount_given_difficulty": 56.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "bohemian-whereabouts-and-sick-of-atv-sounds",
+    "difficulty_score": 53.3,
+    "tier": 3,
+    "components": {
+      "words": 45,
+      "lines": 5,
+      "amount_given_difficulty": 45.9,
+      "openness": "quiet",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "boo",
+    "difficulty_score": 53.9,
+    "tier": 3,
+    "components": {
+      "words": 33,
+      "lines": 5,
+      "amount_given_difficulty": 72.2,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "bread-crumbs",
+    "difficulty_score": 49.5,
+    "tier": 3,
+    "components": {
+      "words": 24,
+      "lines": 3,
+      "amount_given_difficulty": 92.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "broken-in-my-failure",
+    "difficulty_score": 29.5,
+    "tier": 2,
+    "components": {
+      "words": 59,
+      "lines": 12,
+      "amount_given_difficulty": 11.3,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "bruises-on-my-legs-are-identical",
+    "difficulty_score": 28.3,
+    "tier": 2,
+    "components": {
+      "words": 50,
+      "lines": 9,
+      "amount_given_difficulty": 27.1,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "calling-for-silence",
+    "difficulty_score": 64.4,
+    "tier": 4,
+    "components": {
+      "words": 31,
+      "lines": 6,
+      "amount_given_difficulty": 73.4,
+      "openness": "quiet",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "can-poetry-ever-be-a-sung-song",
+    "difficulty_score": 11.4,
+    "tier": 1,
+    "components": {
+      "words": 50,
+      "lines": 8,
+      "amount_given_difficulty": 28.5,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "chosen-one",
+    "difficulty_score": 31.3,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 9,
+      "amount_given_difficulty": 47.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "colonialism",
+    "difficulty_score": 62.6,
+    "tier": 4,
+    "components": {
+      "words": 22,
+      "lines": 3,
+      "amount_given_difficulty": 94.1,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "consumption",
+    "difficulty_score": 27.9,
+    "tier": 2,
+    "components": {
+      "words": 49,
+      "lines": 5,
+      "amount_given_difficulty": 38.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "cough",
+    "difficulty_score": 43.9,
+    "tier": 3,
+    "components": {
+      "words": 31,
+      "lines": 4,
+      "amount_given_difficulty": 78.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "creating-is-not-creating",
+    "difficulty_score": 55.3,
+    "tier": 3,
+    "components": {
+      "words": 33,
+      "lines": 3,
+      "amount_given_difficulty": 75.7,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "dear-light",
+    "difficulty_score": 52.1,
+    "tier": 3,
+    "components": {
+      "words": 52,
+      "lines": 10,
+      "amount_given_difficulty": 24,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "disregard-everything-that-comes-out-of-my-mouth",
+    "difficulty_score": 26,
+    "tier": 2,
+    "components": {
+      "words": 47,
+      "lines": 9,
+      "amount_given_difficulty": 33.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "do-i-really-need-a-title-how-many-titles-mentioning-titles-how-many-titles-fucking-your-dad-that-ugly-fuck-would-dream-of-that",
+    "difficulty_score": 51.5,
+    "tier": 3,
+    "components": {
+      "words": 37,
+      "lines": 4,
+      "amount_given_difficulty": 66.2,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "dont-be-too-attached-to-things",
+    "difficulty_score": 21.8,
+    "tier": 1,
+    "components": {
+      "words": 57,
+      "lines": 5,
+      "amount_given_difficulty": 23.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "earned-my-rest",
+    "difficulty_score": 31.4,
+    "tier": 2,
+    "components": {
+      "words": 41,
+      "lines": 7,
+      "amount_given_difficulty": 47.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "every-winter-i-gaze",
+    "difficulty_score": 17.7,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 9,
+      "amount_given_difficulty": 44.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "every-yes-is-a-death-of-no",
+    "difficulty_score": 53.8,
+    "tier": 3,
+    "components": {
+      "words": 53,
+      "lines": 6,
+      "amount_given_difficulty": 28.4,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "everyting-in-life-is-eggsactly-the-same",
+    "difficulty_score": 73.9,
+    "tier": 4,
+    "components": {
+      "words": 30,
+      "lines": 5,
+      "amount_given_difficulty": 78.5,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "eye-moved-on-i-kept-dreaming",
+    "difficulty_score": 37.5,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 6,
+      "amount_given_difficulty": 62.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "faith-in-ill-succeed",
+    "difficulty_score": 59.6,
+    "tier": 3,
+    "components": {
+      "words": 23,
+      "lines": 6,
+      "amount_given_difficulty": 86.4,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "feels-like-ive-been-here-before",
+    "difficulty_score": 45.7,
+    "tier": 3,
+    "components": {
+      "words": 28,
+      "lines": 5,
+      "amount_given_difficulty": 83,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "fighter-all-nighter",
+    "difficulty_score": 57.3,
+    "tier": 3,
+    "components": {
+      "words": 30,
+      "lines": 4,
+      "amount_given_difficulty": 80.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "fine-ill-continue",
+    "difficulty_score": 31.4,
+    "tier": 2,
+    "components": {
+      "words": 27,
+      "lines": 7,
+      "amount_given_difficulty": 78.4,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "flowchart-of-indecision",
+    "difficulty_score": 58.6,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 3,
+      "amount_given_difficulty": 84,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "folquenesch",
+    "difficulty_score": 49,
+    "tier": 3,
+    "components": {
+      "words": 30,
+      "lines": 8,
+      "amount_given_difficulty": 71.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": true
+    }
+  },
+  {
+    "slug": "folquenesch-1",
+    "difficulty_score": 67.6,
+    "tier": 4,
+    "components": {
+      "words": 55,
+      "lines": 8,
+      "amount_given_difficulty": 19,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "for-a-overlooker-to-see",
+    "difficulty_score": 90.2,
+    "tier": 4,
+    "components": {
+      "words": 30,
+      "lines": 6,
+      "amount_given_difficulty": 75.6,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "fuck",
+    "difficulty_score": 30.8,
+    "tier": 2,
+    "components": {
+      "words": 32,
+      "lines": 4,
+      "amount_given_difficulty": 77,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "fuck-what-you-heard",
+    "difficulty_score": 5.1,
+    "tier": 1,
+    "components": {
+      "words": 89,
+      "lines": 4,
+      "amount_given_difficulty": 12.6,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "fuck-you-no-title",
+    "difficulty_score": 24.8,
+    "tier": 1,
+    "components": {
+      "words": 48,
+      "lines": 14,
+      "amount_given_difficulty": 30.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "god-im-so-magnetic",
+    "difficulty_score": 50.3,
+    "tier": 3,
+    "components": {
+      "words": 54,
+      "lines": 10,
+      "amount_given_difficulty": 19.6,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "god-is-the-devil",
+    "difficulty_score": 10.8,
+    "tier": 1,
+    "components": {
+      "words": 50,
+      "lines": 9,
+      "amount_given_difficulty": 27.1,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "good-and-bad-of-today",
+    "difficulty_score": 20.1,
+    "tier": 1,
+    "components": {
+      "words": 40,
+      "lines": 7,
+      "amount_given_difficulty": 50.1,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "have-you-ever",
+    "difficulty_score": 14.7,
+    "tier": 1,
+    "components": {
+      "words": 67,
+      "lines": 10,
+      "amount_given_difficulty": 5.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "hear-hear-were-here",
+    "difficulty_score": 17.5,
+    "tier": 1,
+    "components": {
+      "words": 58,
+      "lines": 10,
+      "amount_given_difficulty": 12.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "heed-see-savor",
+    "difficulty_score": 50.1,
+    "tier": 3,
+    "components": {
+      "words": 40,
+      "lines": 7,
+      "amount_given_difficulty": 50.1,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "hi",
+    "difficulty_score": 34.4,
+    "tier": 2,
+    "components": {
+      "words": 52,
+      "lines": 11,
+      "amount_given_difficulty": 23.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "hi-paper",
+    "difficulty_score": 41.8,
+    "tier": 2,
+    "components": {
+      "words": 51,
+      "lines": 7,
+      "amount_given_difficulty": 29.5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "hi-paper-lie-paper",
+    "difficulty_score": 45.6,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 4,
+      "amount_given_difficulty": 82.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "how-i-feel-in-turkish",
+    "difficulty_score": 39.7,
+    "tier": 2,
+    "components": {
+      "words": 35,
+      "lines": 5,
+      "amount_given_difficulty": 68.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "how-i-found-myself-bound",
+    "difficulty_score": 47.9,
+    "tier": 3,
+    "components": {
+      "words": 57,
+      "lines": 12,
+      "amount_given_difficulty": 13.5,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "how-to-tell-if-someone-is-hideous",
+    "difficulty_score": 66.3,
+    "tier": 4,
+    "components": {
+      "words": 35,
+      "lines": 9,
+      "amount_given_difficulty": 59.4,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "hr-girlfriend",
+    "difficulty_score": 73.8,
+    "tier": 4,
+    "components": {
+      "words": 17,
+      "lines": 3,
+      "amount_given_difficulty": 97,
+      "openness": "quiet",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-am-not-a-writer",
+    "difficulty_score": 28.5,
+    "tier": 2,
+    "components": {
+      "words": 84,
+      "lines": 6,
+      "amount_given_difficulty": 8.7,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-broke-eye-saw-i-broke-aye-aye",
+    "difficulty_score": 27.7,
+    "tier": 2,
+    "components": {
+      "words": 33,
+      "lines": 6,
+      "amount_given_difficulty": 69.3,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-broke-the-rule",
+    "difficulty_score": 79.1,
+    "tier": 4,
+    "components": {
+      "words": 23,
+      "lines": 4,
+      "amount_given_difficulty": 91.6,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-can-fuck-myself",
+    "difficulty_score": 27.4,
+    "tier": 2,
+    "components": {
+      "words": 45,
+      "lines": 9,
+      "amount_given_difficulty": 37.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-can-make-people-feel-seen",
+    "difficulty_score": 49,
+    "tier": 3,
+    "components": {
+      "words": 36,
+      "lines": 7,
+      "amount_given_difficulty": 60,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-cant-handle-my-brain",
+    "difficulty_score": 18.2,
+    "tier": 1,
+    "components": {
+      "words": 60,
+      "lines": 7,
+      "amount_given_difficulty": 14.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-cant-make-any-other-plans-when-i-have-a-plan",
+    "difficulty_score": 74.1,
+    "tier": 4,
+    "components": {
+      "words": 48,
+      "lines": 7,
+      "amount_given_difficulty": 35.2,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-chose-a-new-spot-for-writing",
+    "difficulty_score": 37.1,
+    "tier": 2,
+    "components": {
+      "words": 57,
+      "lines": 7,
+      "amount_given_difficulty": 17.8,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-dont-give-a-fuck-about-any-of-you",
+    "difficulty_score": 30.6,
+    "tier": 2,
+    "components": {
+      "words": 61,
+      "lines": 7,
+      "amount_given_difficulty": 14,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-dont-like",
+    "difficulty_score": 44.9,
+    "tier": 3,
+    "components": {
+      "words": 31,
+      "lines": 2,
+      "amount_given_difficulty": 81,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-dont-like-my-dick-today",
+    "difficulty_score": 52.2,
+    "tier": 3,
+    "components": {
+      "words": 25,
+      "lines": 5,
+      "amount_given_difficulty": 86.8,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-dont-shoot-down",
+    "difficulty_score": 40.2,
+    "tier": 2,
+    "components": {
+      "words": 46,
+      "lines": 7,
+      "amount_given_difficulty": 38.1,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-doubt-im-good-at-living",
+    "difficulty_score": 74.9,
+    "tier": 4,
+    "components": {
+      "words": 27,
+      "lines": 6,
+      "amount_given_difficulty": 81,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-existed-before-existence-knew-what-to-do-with-me",
+    "difficulty_score": 54.9,
+    "tier": 3,
+    "components": {
+      "words": 38,
+      "lines": 5,
+      "amount_given_difficulty": 62.4,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-fear-not-suffering",
+    "difficulty_score": 61.1,
+    "tier": 3,
+    "components": {
+      "words": 40,
+      "lines": 10,
+      "amount_given_difficulty": 46.5,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-feel-i-overflowing",
+    "difficulty_score": 94.1,
+    "tier": 4,
+    "components": {
+      "words": 28,
+      "lines": 4,
+      "amount_given_difficulty": 85.3,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-feel-so-much-cant-think-of-a-title",
+    "difficulty_score": 73.5,
+    "tier": 4,
+    "components": {
+      "words": 29,
+      "lines": 6,
+      "amount_given_difficulty": 77.5,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-figured-it-out",
+    "difficulty_score": 63.5,
+    "tier": 4,
+    "components": {
+      "words": 18,
+      "lines": 3,
+      "amount_given_difficulty": 96.3,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-flunked-fucking-a-flock-of-birds",
+    "difficulty_score": 25.6,
+    "tier": 2,
+    "components": {
+      "words": 50,
+      "lines": 6,
+      "amount_given_difficulty": 32.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-got-a-question-that-hasnt-formed-yet",
+    "difficulty_score": 22.8,
+    "tier": 1,
+    "components": {
+      "words": 53,
+      "lines": 7,
+      "amount_given_difficulty": 25.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-had-the-best-sex-today",
+    "difficulty_score": 21.1,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 5,
+      "amount_given_difficulty": 52.8,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-hate-that-i",
+    "difficulty_score": 38.5,
+    "tier": 2,
+    "components": {
+      "words": 53,
+      "lines": 13,
+      "amount_given_difficulty": 21.4,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-have-a-serious-addiction",
+    "difficulty_score": 26.8,
+    "tier": 2,
+    "components": {
+      "words": 90,
+      "lines": 7,
+      "amount_given_difficulty": 4.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-havent-felt-dumb-in-a-while",
+    "difficulty_score": 54,
+    "tier": 3,
+    "components": {
+      "words": 54,
+      "lines": 5,
+      "amount_given_difficulty": 28.7,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-hit-my-flex-as-usual",
+    "difficulty_score": 3.1,
+    "tier": 1,
+    "components": {
+      "words": 75,
+      "lines": 7,
+      "amount_given_difficulty": 7.6,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-keep-being-followed",
+    "difficulty_score": 26,
+    "tier": 2,
+    "components": {
+      "words": 47,
+      "lines": 9,
+      "amount_given_difficulty": 33.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-knew",
+    "difficulty_score": 12.5,
+    "tier": 1,
+    "components": {
+      "words": 49,
+      "lines": 8,
+      "amount_given_difficulty": 31.3,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-like-construction-sounds-today",
+    "difficulty_score": 27.9,
+    "tier": 2,
+    "components": {
+      "words": 49,
+      "lines": 5,
+      "amount_given_difficulty": 38.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-look-in-my-eyes",
+    "difficulty_score": 23,
+    "tier": 1,
+    "components": {
+      "words": 55,
+      "lines": 5,
+      "amount_given_difficulty": 26.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-miss",
+    "difficulty_score": 95,
+    "tier": 4,
+    "components": {
+      "words": 27,
+      "lines": 3,
+      "amount_given_difficulty": 87.4,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-need-cocaine",
+    "difficulty_score": 18.9,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 7,
+      "amount_given_difficulty": 47.3,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-need-to-be-slow",
+    "difficulty_score": 46,
+    "tier": 3,
+    "components": {
+      "words": 25,
+      "lines": 6,
+      "amount_given_difficulty": 83.9,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-really-have-no-idea-whatsoever",
+    "difficulty_score": 40.5,
+    "tier": 2,
+    "components": {
+      "words": 45,
+      "lines": 8,
+      "amount_given_difficulty": 38.6,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-really-love-my-friends",
+    "difficulty_score": 55.1,
+    "tier": 3,
+    "components": {
+      "words": 54,
+      "lines": 12,
+      "amount_given_difficulty": 18.9,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-remain-sad",
+    "difficulty_score": 28.8,
+    "tier": 2,
+    "components": {
+      "words": 46,
+      "lines": 6,
+      "amount_given_difficulty": 40.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-should-run-a-college",
+    "difficulty_score": 31.9,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 8,
+      "amount_given_difficulty": 48.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-think-i",
+    "difficulty_score": 57.1,
+    "tier": 3,
+    "components": {
+      "words": 46,
+      "lines": 8,
+      "amount_given_difficulty": 36.4,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-thought-this-drought-would-bear-fruit-whatever-they-say-gods-not-cute",
+    "difficulty_score": 54.6,
+    "tier": 3,
+    "components": {
+      "words": 50,
+      "lines": 7,
+      "amount_given_difficulty": 30.2,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-was-painting",
+    "difficulty_score": 78.9,
+    "tier": 4,
+    "components": {
+      "words": 30,
+      "lines": 5,
+      "amount_given_difficulty": 78.5,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-went-to-see",
+    "difficulty_score": 55.6,
+    "tier": 3,
+    "components": {
+      "words": 37,
+      "lines": 5,
+      "amount_given_difficulty": 63.9,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-will-be-more-selective-when-it-comes-to-feeling-feelings",
+    "difficulty_score": 32.5,
+    "tier": 2,
+    "components": {
+      "words": 58,
+      "lines": 6,
+      "amount_given_difficulty": 18.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-will-not-start-with-a-question",
+    "difficulty_score": 31.3,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 9,
+      "amount_given_difficulty": 47.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-wont-settle-in",
+    "difficulty_score": 89.1,
+    "tier": 4,
+    "components": {
+      "words": 35,
+      "lines": 2,
+      "amount_given_difficulty": 72.7,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "i-wrote-that-i-hate-that-i-use-i",
+    "difficulty_score": 53.6,
+    "tier": 3,
+    "components": {
+      "words": 52,
+      "lines": 7,
+      "amount_given_difficulty": 27.6,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "if-a-tree-falls-in-a-forest",
+    "difficulty_score": 45.6,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 4,
+      "amount_given_difficulty": 82.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "if-i-had-kids",
+    "difficulty_score": 83.1,
+    "tier": 4,
+    "components": {
+      "words": 25,
+      "lines": 4,
+      "amount_given_difficulty": 89.1,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "if-you-dont-take-yourself-seriously",
+    "difficulty_score": 66.2,
+    "tier": 4,
+    "components": {
+      "words": 40,
+      "lines": 3,
+      "amount_given_difficulty": 59.2,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im",
+    "difficulty_score": 63.4,
+    "tier": 4,
+    "components": {
+      "words": 19,
+      "lines": 9,
+      "amount_given_difficulty": 83.5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-an-addict",
+    "difficulty_score": 78,
+    "tier": 4,
+    "components": {
+      "words": 31,
+      "lines": 5,
+      "amount_given_difficulty": 76.3,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-busy-fucking",
+    "difficulty_score": 54.4,
+    "tier": 3,
+    "components": {
+      "words": 39,
+      "lines": 5,
+      "amount_given_difficulty": 61.1,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-down",
+    "difficulty_score": 41.4,
+    "tier": 2,
+    "components": {
+      "words": 33,
+      "lines": 5,
+      "amount_given_difficulty": 72.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-going-to",
+    "difficulty_score": 20,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 6,
+      "amount_given_difficulty": 49.9,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-going-to-fight-you-till-we-stop-and-fuck",
+    "difficulty_score": 27.2,
+    "tier": 2,
+    "components": {
+      "words": 66,
+      "lines": 11,
+      "amount_given_difficulty": 5.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-going-to-fuck-you-till-it-all-makes-sense",
+    "difficulty_score": 30.6,
+    "tier": 2,
+    "components": {
+      "words": 44,
+      "lines": 6,
+      "amount_given_difficulty": 45.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-not-a-writer",
+    "difficulty_score": 64.8,
+    "tier": 4,
+    "components": {
+      "words": 40,
+      "lines": 5,
+      "amount_given_difficulty": 55.7,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-not-the-largest",
+    "difficulty_score": 41.4,
+    "tier": 2,
+    "components": {
+      "words": 33,
+      "lines": 5,
+      "amount_given_difficulty": 72.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-sorry",
+    "difficulty_score": 24.3,
+    "tier": 1,
+    "components": {
+      "words": 49,
+      "lines": 10,
+      "amount_given_difficulty": 29.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-sorry-1",
+    "difficulty_score": 62.5,
+    "tier": 4,
+    "components": {
+      "words": 41,
+      "lines": 6,
+      "amount_given_difficulty": 49.9,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-the-greatest-ever",
+    "difficulty_score": 59.7,
+    "tier": 3,
+    "components": {
+      "words": 45,
+      "lines": 6,
+      "amount_given_difficulty": 42.9,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "im-very-hard-im-soft",
+    "difficulty_score": 23.9,
+    "tier": 1,
+    "components": {
+      "words": 65,
+      "lines": 5,
+      "amount_given_difficulty": 16,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "imma-fuck-you-up-tomorrow",
+    "difficulty_score": 5.2,
+    "tier": 1,
+    "components": {
+      "words": 62,
+      "lines": 7,
+      "amount_given_difficulty": 13,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "in-life-one-is-always-lonely",
+    "difficulty_score": 46.1,
+    "tier": 3,
+    "components": {
+      "words": 40,
+      "lines": 6,
+      "amount_given_difficulty": 52.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "in-the-moment-before-the-moment",
+    "difficulty_score": 37.5,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 6,
+      "amount_given_difficulty": 62.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "is-the-shooting-stars",
+    "difficulty_score": 5.9,
+    "tier": 1,
+    "components": {
+      "words": 57,
+      "lines": 9,
+      "amount_given_difficulty": 14.7,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "is-there-really-that-much-going-around",
+    "difficulty_score": 37.5,
+    "tier": 2,
+    "components": {
+      "words": 35,
+      "lines": 7,
+      "amount_given_difficulty": 62.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "is-your-fingers-numb",
+    "difficulty_score": 27.1,
+    "tier": 2,
+    "components": {
+      "words": 46,
+      "lines": 8,
+      "amount_given_difficulty": 36.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ive-been",
+    "difficulty_score": 51.2,
+    "tier": 3,
+    "components": {
+      "words": 32,
+      "lines": 10,
+      "amount_given_difficulty": 65.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ive-been-away",
+    "difficulty_score": 30.5,
+    "tier": 2,
+    "components": {
+      "words": 85,
+      "lines": 15,
+      "amount_given_difficulty": 1.3,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ive-been-living-a-newfound-life",
+    "difficulty_score": 76.8,
+    "tier": 4,
+    "components": {
+      "words": 26,
+      "lines": 5,
+      "amount_given_difficulty": 85.8,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "knots-and-puzzles",
+    "difficulty_score": 0.6,
+    "tier": 1,
+    "components": {
+      "words": 87,
+      "lines": 10,
+      "amount_given_difficulty": 1.5,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "language-fails",
+    "difficulty_score": 45.3,
+    "tier": 3,
+    "components": {
+      "words": 22,
+      "lines": 9,
+      "amount_given_difficulty": 82,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "last-rain-before-bloom",
+    "difficulty_score": 25,
+    "tier": 2,
+    "components": {
+      "words": 35,
+      "lines": 7,
+      "amount_given_difficulty": 62.5,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "last-rebellion-of-the-day",
+    "difficulty_score": 24.6,
+    "tier": 1,
+    "components": {
+      "words": 50,
+      "lines": 7,
+      "amount_given_difficulty": 30.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "leap-of-faith-and-the-remember-me-button",
+    "difficulty_score": 44.7,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 5,
+      "amount_given_difficulty": 80.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "life-is-a-funeral",
+    "difficulty_score": 51.1,
+    "tier": 3,
+    "components": {
+      "words": 27,
+      "lines": 5,
+      "amount_given_difficulty": 83.9,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "love-lee",
+    "difficulty_score": 47.9,
+    "tier": 3,
+    "components": {
+      "words": 64,
+      "lines": 6,
+      "amount_given_difficulty": 13.5,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "mental-institutions",
+    "difficulty_score": 4.3,
+    "tier": 1,
+    "components": {
+      "words": 64,
+      "lines": 7,
+      "amount_given_difficulty": 10.8,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "mind-lost-i-aye",
+    "difficulty_score": 21.1,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 5,
+      "amount_given_difficulty": 52.8,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "mistakes-mistakes-mistakes-all-i-ever-do-is-mistakes-fuck-up-fuck-up-fuck-up-im-fucked-up",
+    "difficulty_score": 17.3,
+    "tier": 1,
+    "components": {
+      "words": 41,
+      "lines": 11,
+      "amount_given_difficulty": 43.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "moms-like-mom-and-dads-like",
+    "difficulty_score": 46.9,
+    "tier": 3,
+    "components": {
+      "words": 43,
+      "lines": 8,
+      "amount_given_difficulty": 42.1,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "moon-demands-my-eyes-sotto-voce",
+    "difficulty_score": 41.2,
+    "tier": 2,
+    "components": {
+      "words": 32,
+      "lines": 6,
+      "amount_given_difficulty": 71.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "moon-makes-me-cry",
+    "difficulty_score": 55,
+    "tier": 3,
+    "components": {
+      "words": 36,
+      "lines": 6,
+      "amount_given_difficulty": 62.6,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-buddy-asked-me-to-write-on-drugs",
+    "difficulty_score": 50.1,
+    "tier": 3,
+    "components": {
+      "words": 55,
+      "lines": 8,
+      "amount_given_difficulty": 19,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-cult-cigar-butt",
+    "difficulty_score": 83.8,
+    "tier": 4,
+    "components": {
+      "words": 35,
+      "lines": 9,
+      "amount_given_difficulty": 59.4,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-face-pretty-as-fuck-yours-i-prefer-one-without-one",
+    "difficulty_score": 20,
+    "tier": 1,
+    "components": {
+      "words": 58,
+      "lines": 6,
+      "amount_given_difficulty": 18.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-face-tells-the-tale-of-mazes",
+    "difficulty_score": 28.6,
+    "tier": 2,
+    "components": {
+      "words": 45,
+      "lines": 7,
+      "amount_given_difficulty": 40.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-first-note",
+    "difficulty_score": 47.3,
+    "tier": 3,
+    "components": {
+      "words": 40,
+      "lines": 5,
+      "amount_given_difficulty": 55.7,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-mom-taught-me",
+    "difficulty_score": 41.3,
+    "tier": 2,
+    "components": {
+      "words": 53,
+      "lines": 6,
+      "amount_given_difficulty": 28.4,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-new-fuck-you",
+    "difficulty_score": 45.5,
+    "tier": 3,
+    "components": {
+      "words": 45,
+      "lines": 8,
+      "amount_given_difficulty": 38.6,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-silences-are-very-silent",
+    "difficulty_score": 29.6,
+    "tier": 2,
+    "components": {
+      "words": 68,
+      "lines": 6,
+      "amount_given_difficulty": 11.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "my-sleep",
+    "difficulty_score": 73.9,
+    "tier": 4,
+    "components": {
+      "words": 38,
+      "lines": 3,
+      "amount_given_difficulty": 65.9,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "nikola-tosic-said",
+    "difficulty_score": 51.1,
+    "tier": 3,
+    "components": {
+      "words": 38,
+      "lines": 11,
+      "amount_given_difficulty": 52.7,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "no-title-everything-sucks",
+    "difficulty_score": 50.6,
+    "tier": 3,
+    "components": {
+      "words": 66,
+      "lines": 8,
+      "amount_given_difficulty": 7.9,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "nothing-cures-my-sadness",
+    "difficulty_score": 18.9,
+    "tier": 1,
+    "components": {
+      "words": 74,
+      "lines": 4,
+      "amount_given_difficulty": 16.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "nothing-is-inside-of-me",
+    "difficulty_score": 60.2,
+    "tier": 3,
+    "components": {
+      "words": 30,
+      "lines": 6,
+      "amount_given_difficulty": 75.6,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "nothing-new",
+    "difficulty_score": 45.1,
+    "tier": 3,
+    "components": {
+      "words": 40,
+      "lines": 7,
+      "amount_given_difficulty": 50.1,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "now-i-will-seriously-ride-my-own-dick",
+    "difficulty_score": 36.3,
+    "tier": 2,
+    "components": {
+      "words": 38,
+      "lines": 6,
+      "amount_given_difficulty": 59.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "now-time-to-be-good",
+    "difficulty_score": 54,
+    "tier": 3,
+    "components": {
+      "words": 64,
+      "lines": 5,
+      "amount_given_difficulty": 16.4,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "nowadays-before-i-write-i",
+    "difficulty_score": 37.1,
+    "tier": 2,
+    "components": {
+      "words": 50,
+      "lines": 7,
+      "amount_given_difficulty": 30.2,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "occupied-in-isolation",
+    "difficulty_score": 34.3,
+    "tier": 2,
+    "components": {
+      "words": 55,
+      "lines": 6,
+      "amount_given_difficulty": 23.3,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "on-communication",
+    "difficulty_score": 94.3,
+    "tier": 4,
+    "components": {
+      "words": 26,
+      "lines": 5,
+      "amount_given_difficulty": 85.8,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "one-last-one-fore-psych-visit",
+    "difficulty_score": 19.3,
+    "tier": 1,
+    "components": {
+      "words": 60,
+      "lines": 6,
+      "amount_given_difficulty": 16.9,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "one-stranger-away",
+    "difficulty_score": 52.3,
+    "tier": 3,
+    "components": {
+      "words": 52,
+      "lines": 9,
+      "amount_given_difficulty": 24.6,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "pastel-de-nata",
+    "difficulty_score": 38.2,
+    "tier": 2,
+    "components": {
+      "words": 49,
+      "lines": 7,
+      "amount_given_difficulty": 33,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "percept-and-define-intercept-the-divine",
+    "difficulty_score": 58.2,
+    "tier": 3,
+    "components": {
+      "words": 26,
+      "lines": 6,
+      "amount_given_difficulty": 82.9,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "pills-are-cool-anti-depressants-aint",
+    "difficulty_score": 21.1,
+    "tier": 1,
+    "components": {
+      "words": 54,
+      "lines": 8,
+      "amount_given_difficulty": 21.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "pitiful",
+    "difficulty_score": 4.1,
+    "tier": 1,
+    "components": {
+      "words": 60,
+      "lines": 11,
+      "amount_given_difficulty": 10.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "poetry-for-dew-and-jew",
+    "difficulty_score": 65.7,
+    "tier": 4,
+    "components": {
+      "words": 23,
+      "lines": 5,
+      "amount_given_difficulty": 89.3,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "pope-with-a-home-outside-of-church",
+    "difficulty_score": 39.1,
+    "tier": 2,
+    "components": {
+      "words": 47,
+      "lines": 8,
+      "amount_given_difficulty": 35.1,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "practice",
+    "difficulty_score": 23.1,
+    "tier": 1,
+    "components": {
+      "words": 50,
+      "lines": 10,
+      "amount_given_difficulty": 26.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "pretty-bitches-on-four",
+    "difficulty_score": 25,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 6,
+      "amount_given_difficulty": 62.6,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "probably-a-tragic-myth",
+    "difficulty_score": 48.1,
+    "tier": 3,
+    "components": {
+      "words": 44,
+      "lines": 6,
+      "amount_given_difficulty": 45.2,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "purple-girl-do-you-wanna-dance-in-purple-rain",
+    "difficulty_score": 27.6,
+    "tier": 2,
+    "components": {
+      "words": 48,
+      "lines": 6,
+      "amount_given_difficulty": 37.9,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "put-god-in-the-doorstep-he-wouldnt-eat-whats-in-my-fridge",
+    "difficulty_score": 25.6,
+    "tier": 2,
+    "components": {
+      "words": 50,
+      "lines": 6,
+      "amount_given_difficulty": 32.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "put-on-your-gold-ring-old-king",
+    "difficulty_score": 54.4,
+    "tier": 3,
+    "components": {
+      "words": 37,
+      "lines": 6,
+      "amount_given_difficulty": 61,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "putting-down-my-sorrows",
+    "difficulty_score": 46.1,
+    "tier": 3,
+    "components": {
+      "words": 27,
+      "lines": 5,
+      "amount_given_difficulty": 83.9,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ramblings-of-a-god-and-loneliness-of-a-human",
+    "difficulty_score": 63.8,
+    "tier": 4,
+    "components": {
+      "words": 17,
+      "lines": 3,
+      "amount_given_difficulty": 97,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "ranking-my-best-sexes",
+    "difficulty_score": 19.3,
+    "tier": 1,
+    "components": {
+      "words": 45,
+      "lines": 4,
+      "amount_given_difficulty": 48.2,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "read",
+    "difficulty_score": 6.3,
+    "tier": 1,
+    "components": {
+      "words": 86,
+      "lines": 1,
+      "amount_given_difficulty": 15.8,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "readings-fun",
+    "difficulty_score": 48.6,
+    "tier": 3,
+    "components": {
+      "words": 25,
+      "lines": 3,
+      "amount_given_difficulty": 90.3,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "reductio-ad-absurdum",
+    "difficulty_score": 20,
+    "tier": 1,
+    "components": {
+      "words": 58,
+      "lines": 6,
+      "amount_given_difficulty": 18.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "riding-my-own-dick",
+    "difficulty_score": 66.2,
+    "tier": 4,
+    "components": {
+      "words": 40,
+      "lines": 3,
+      "amount_given_difficulty": 59.2,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "same-nakedness-different-framing",
+    "difficulty_score": 44.3,
+    "tier": 3,
+    "components": {
+      "words": 49,
+      "lines": 6,
+      "amount_given_difficulty": 35.7,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "saying-ugly-things-to-an-ugly-thing",
+    "difficulty_score": 67.3,
+    "tier": 4,
+    "components": {
+      "words": 56,
+      "lines": 8,
+      "amount_given_difficulty": 18.3,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "schoolyard",
+    "difficulty_score": 31.5,
+    "tier": 2,
+    "components": {
+      "words": 46,
+      "lines": 9,
+      "amount_given_difficulty": 35,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "see-me-like-my-neighbour-does",
+    "difficulty_score": 38.6,
+    "tier": 2,
+    "components": {
+      "words": 54,
+      "lines": 8,
+      "amount_given_difficulty": 21.5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "see-me-like-my-neighbour-does-i-eye-enacted-the-thrill-pain-gives",
+    "difficulty_score": 10.3,
+    "tier": 1,
+    "components": {
+      "words": 53,
+      "lines": 7,
+      "amount_given_difficulty": 25.7,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "severe-pain",
+    "difficulty_score": 34.6,
+    "tier": 2,
+    "components": {
+      "words": 59,
+      "lines": 11,
+      "amount_given_difficulty": 11.5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "shake-but-nothing-left-carbonation-gone-flat",
+    "difficulty_score": 74.5,
+    "tier": 4,
+    "components": {
+      "words": 32,
+      "lines": 8,
+      "amount_given_difficulty": 67.5,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "shitty-task",
+    "difficulty_score": 34.7,
+    "tier": 2,
+    "components": {
+      "words": 39,
+      "lines": 7,
+      "amount_given_difficulty": 55.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "silence-keeps-vices",
+    "difficulty_score": 37.1,
+    "tier": 2,
+    "components": {
+      "words": 57,
+      "lines": 7,
+      "amount_given_difficulty": 17.8,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "smashed",
+    "difficulty_score": 19.4,
+    "tier": 1,
+    "components": {
+      "words": 78,
+      "lines": 1,
+      "amount_given_difficulty": 17.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "someday-ill-get-it",
+    "difficulty_score": 15.2,
+    "tier": 1,
+    "components": {
+      "words": 64,
+      "lines": 11,
+      "amount_given_difficulty": 6.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "someone-thinks-youre-made-of-metal-doesnt-think-of-tasting-you",
+    "difficulty_score": 49.3,
+    "tier": 3,
+    "components": {
+      "words": 60,
+      "lines": 6,
+      "amount_given_difficulty": 16.9,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "something-about-centrifugal-force",
+    "difficulty_score": 37.9,
+    "tier": 2,
+    "components": {
+      "words": 39,
+      "lines": 4,
+      "amount_given_difficulty": 63.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "something-juicy",
+    "difficulty_score": 4,
+    "tier": 1,
+    "components": {
+      "words": 62,
+      "lines": 9,
+      "amount_given_difficulty": 10,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "sun-aug-2-2323",
+    "difficulty_score": 52.2,
+    "tier": 3,
+    "components": {
+      "words": 39,
+      "lines": 7,
+      "amount_given_difficulty": 55.5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "sun-from-suns-perspective",
+    "difficulty_score": 50.6,
+    "tier": 3,
+    "components": {
+      "words": 42,
+      "lines": 5,
+      "amount_given_difficulty": 51.6,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "sunken-place",
+    "difficulty_score": 84.9,
+    "tier": 4,
+    "components": {
+      "words": 38,
+      "lines": 5,
+      "amount_given_difficulty": 62.4,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "table-and-tires-spinning",
+    "difficulty_score": 47.5,
+    "tier": 3,
+    "components": {
+      "words": 27,
+      "lines": 3,
+      "amount_given_difficulty": 87.4,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "thank-you",
+    "difficulty_score": 20.8,
+    "tier": 1,
+    "components": {
+      "words": 55,
+      "lines": 7,
+      "amount_given_difficulty": 20.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-dictator",
+    "difficulty_score": 18.9,
+    "tier": 1,
+    "components": {
+      "words": 57,
+      "lines": 8,
+      "amount_given_difficulty": 16.1,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-eye-that-cant-stop-watching-itself-watching",
+    "difficulty_score": 26.2,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 5,
+      "amount_given_difficulty": 65.5,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-live-edge-over-the-dead-core",
+    "difficulty_score": 33.7,
+    "tier": 2,
+    "components": {
+      "words": 63,
+      "lines": 9,
+      "amount_given_difficulty": 9.3,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-mattress-you-slept-on",
+    "difficulty_score": 21.6,
+    "tier": 1,
+    "components": {
+      "words": 56,
+      "lines": 6,
+      "amount_given_difficulty": 22.6,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-star-i-once-was",
+    "difficulty_score": 30.2,
+    "tier": 2,
+    "components": {
+      "words": 41,
+      "lines": 9,
+      "amount_given_difficulty": 44.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "the-world-doesnt-need-you",
+    "difficulty_score": 95.6,
+    "tier": 4,
+    "components": {
+      "words": 25,
+      "lines": 4,
+      "amount_given_difficulty": 89.1,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "there-is-a-bus",
+    "difficulty_score": 54.3,
+    "tier": 3,
+    "components": {
+      "words": 35,
+      "lines": 8,
+      "amount_given_difficulty": 60.8,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "thinker-linger-lick-my-finger",
+    "difficulty_score": 64.4,
+    "tier": 4,
+    "components": {
+      "words": 10,
+      "lines": 3,
+      "amount_given_difficulty": 98.5,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-cant-be-goodbye",
+    "difficulty_score": 42.4,
+    "tier": 2,
+    "components": {
+      "words": 54,
+      "lines": 4,
+      "amount_given_difficulty": 31,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-message-is-broadcasted-from-a-primal-place",
+    "difficulty_score": 58.1,
+    "tier": 3,
+    "components": {
+      "words": 35,
+      "lines": 4,
+      "amount_given_difficulty": 70.4,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-morning-i-felt-like",
+    "difficulty_score": 64.3,
+    "tier": 4,
+    "components": {
+      "words": 14,
+      "lines": 3,
+      "amount_given_difficulty": 98.2,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-table",
+    "difficulty_score": 41.7,
+    "tier": 2,
+    "components": {
+      "words": 83,
+      "lines": 1,
+      "amount_given_difficulty": 16.7,
+      "openness": "quiet",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-whole-deal-seems-so-weird",
+    "difficulty_score": 26,
+    "tier": 2,
+    "components": {
+      "words": 47,
+      "lines": 9,
+      "amount_given_difficulty": 33.8,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "this-year-was",
+    "difficulty_score": 13.6,
+    "tier": 1,
+    "components": {
+      "words": 46,
+      "lines": 11,
+      "amount_given_difficulty": 34,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "threading-a-doll-so-endearing",
+    "difficulty_score": 25,
+    "tier": 2,
+    "components": {
+      "words": 35,
+      "lines": 7,
+      "amount_given_difficulty": 62.5,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "thunder-and-a-wave-of-sonder",
+    "difficulty_score": 65.6,
+    "tier": 4,
+    "components": {
+      "words": 25,
+      "lines": 4,
+      "amount_given_difficulty": 89.1,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "to-do-nothing-is-to-let-others-define-the-silence",
+    "difficulty_score": 65.8,
+    "tier": 4,
+    "components": {
+      "words": 54,
+      "lines": 6,
+      "amount_given_difficulty": 25.8,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": true
+    }
+  },
+  {
+    "slug": "to-follow-or-lead",
+    "difficulty_score": 32,
+    "tier": 2,
+    "components": {
+      "words": 81,
+      "lines": 8,
+      "amount_given_difficulty": 5,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "to-the-first-comers",
+    "difficulty_score": 37.5,
+    "tier": 2,
+    "components": {
+      "words": 49,
+      "lines": 8,
+      "amount_given_difficulty": 31.3,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "today",
+    "difficulty_score": 18.8,
+    "tier": 1,
+    "components": {
+      "words": 40,
+      "lines": 9,
+      "amount_given_difficulty": 47.1,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "today-im-writing-an-ugly-poem-consisting-of-ugly-habits-and-ugly-thoughts",
+    "difficulty_score": 66.1,
+    "tier": 4,
+    "components": {
+      "words": 43,
+      "lines": 6,
+      "amount_given_difficulty": 46.4,
+      "openness": "quiet",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "two-lives-no-identity",
+    "difficulty_score": 34.8,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 5,
+      "amount_given_difficulty": 55.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "two-people-at-a-door-each-seeing-something-different",
+    "difficulty_score": 68.5,
+    "tier": 4,
+    "components": {
+      "words": 21,
+      "lines": 2,
+      "amount_given_difficulty": 96.2,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "untitledaugust31a-journey-to-the-sea",
+    "difficulty_score": 2.3,
+    "tier": 1,
+    "components": {
+      "words": 76,
+      "lines": 8,
+      "amount_given_difficulty": 5.7,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "valeries-missing",
+    "difficulty_score": 7.6,
+    "tier": 1,
+    "components": {
+      "words": 70,
+      "lines": 1,
+      "amount_given_difficulty": 19,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "vulnerability-teaches-you-youre-not-strong",
+    "difficulty_score": 55,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 7,
+      "amount_given_difficulty": 74.9,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "waiting-takes-too-longvoice-change",
+    "difficulty_score": 29.5,
+    "tier": 2,
+    "components": {
+      "words": 44,
+      "lines": 7,
+      "amount_given_difficulty": 42.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "want-want-me",
+    "difficulty_score": 25,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 6,
+      "amount_given_difficulty": 62.6,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "we-need-to-talk-about-finn",
+    "difficulty_score": 25.4,
+    "tier": 2,
+    "components": {
+      "words": 51,
+      "lines": 6,
+      "amount_given_difficulty": 32.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "we-stand-in-unison-against-an-enemy",
+    "difficulty_score": 67.6,
+    "tier": 4,
+    "components": {
+      "words": 22,
+      "lines": 3,
+      "amount_given_difficulty": 94.1,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "we-stopped-producing-icons",
+    "difficulty_score": 98.3,
+    "tier": 4,
+    "components": {
+      "words": 19,
+      "lines": 3,
+      "amount_given_difficulty": 95.7,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "welcome-to-todays-session",
+    "difficulty_score": 3.7,
+    "tier": 1,
+    "components": {
+      "words": 64,
+      "lines": 8,
+      "amount_given_difficulty": 9.1,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "well-whats-new",
+    "difficulty_score": 31.9,
+    "tier": 2,
+    "components": {
+      "words": 40,
+      "lines": 8,
+      "amount_given_difficulty": 48.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "what-is-it-about",
+    "difficulty_score": 36.5,
+    "tier": 2,
+    "components": {
+      "words": 36,
+      "lines": 7,
+      "amount_given_difficulty": 60,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "what-needs-repressing",
+    "difficulty_score": 91,
+    "tier": 4,
+    "components": {
+      "words": 29,
+      "lines": 6,
+      "amount_given_difficulty": 77.5,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "what-to-be",
+    "difficulty_score": 50,
+    "tier": 3,
+    "components": {
+      "words": 34,
+      "lines": 9,
+      "amount_given_difficulty": 62.6,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "whats-greater-than-love",
+    "difficulty_score": 37.4,
+    "tier": 2,
+    "components": {
+      "words": 75,
+      "lines": 8,
+      "amount_given_difficulty": 6,
+      "openness": "quiet",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "when-i-finish-this-sentence",
+    "difficulty_score": 53.7,
+    "tier": 3,
+    "components": {
+      "words": 32,
+      "lines": 6,
+      "amount_given_difficulty": 71.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "when-plates-get-angry",
+    "difficulty_score": 36,
+    "tier": 2,
+    "components": {
+      "words": 18,
+      "lines": 6,
+      "amount_given_difficulty": 89.9,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "which-is-witch",
+    "difficulty_score": 83.8,
+    "tier": 4,
+    "components": {
+      "words": 35,
+      "lines": 9,
+      "amount_given_difficulty": 59.4,
+      "openness": "quiet",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "who-knows-whats-what-and-whats-not",
+    "difficulty_score": 70.2,
+    "tier": 4,
+    "components": {
+      "words": 33,
+      "lines": 6,
+      "amount_given_difficulty": 69.3,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "whos-a-twat-and-whos-a-good-boy",
+    "difficulty_score": 56.3,
+    "tier": 3,
+    "components": {
+      "words": 34,
+      "lines": 7,
+      "amount_given_difficulty": 65.7,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "why-the-mom",
+    "difficulty_score": 29.4,
+    "tier": 2,
+    "components": {
+      "words": 31,
+      "lines": 6,
+      "amount_given_difficulty": 73.4,
+      "openness": "obvious",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "why-write-why-read",
+    "difficulty_score": 59.7,
+    "tier": 3,
+    "components": {
+      "words": 16,
+      "lines": 8,
+      "amount_given_difficulty": 86.8,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "william-blake-painting",
+    "difficulty_score": 29.5,
+    "tier": 2,
+    "components": {
+      "words": 44,
+      "lines": 7,
+      "amount_given_difficulty": 42.5,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "wind-carries-your-scent",
+    "difficulty_score": 34.4,
+    "tier": 2,
+    "components": {
+      "words": 43,
+      "lines": 8,
+      "amount_given_difficulty": 42.1,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "women-in-my-life-dont-like-me-today",
+    "difficulty_score": 45.6,
+    "tier": 3,
+    "components": {
+      "words": 29,
+      "lines": 4,
+      "amount_given_difficulty": 82.7,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "writing-about-something",
+    "difficulty_score": 53.9,
+    "tier": 3,
+    "components": {
+      "words": 33,
+      "lines": 5,
+      "amount_given_difficulty": 72.2,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "wry-swagger",
+    "difficulty_score": 47.5,
+    "tier": 3,
+    "components": {
+      "words": 46,
+      "lines": 5,
+      "amount_given_difficulty": 43.6,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "wtf-is-me",
+    "difficulty_score": 36.1,
+    "tier": 2,
+    "components": {
+      "words": 52,
+      "lines": 7,
+      "amount_given_difficulty": 27.6,
+      "openness": "obvious",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "you-are-asked-to-step-forward",
+    "difficulty_score": 18.5,
+    "tier": 1,
+    "components": {
+      "words": 63,
+      "lines": 6,
+      "amount_given_difficulty": 15,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "you-only-bother-to-hate-what-you-think-should-be-better-oand-some-hate-is-thwarted-want",
+    "difficulty_score": 60.9,
+    "tier": 3,
+    "components": {
+      "words": 42,
+      "lines": 7,
+      "amount_given_difficulty": 46,
+      "openness": "some",
+      "concreteness": "abstract",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "you-rob-me-of-the-things-i-have",
+    "difficulty_score": 25.4,
+    "tier": 2,
+    "components": {
+      "words": 48,
+      "lines": 9,
+      "amount_given_difficulty": 32.2,
+      "openness": "obvious",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "you-shall-be",
+    "difficulty_score": 69.2,
+    "tier": 4,
+    "components": {
+      "words": 15,
+      "lines": 3,
+      "amount_given_difficulty": 97.9,
+      "openness": "some",
+      "concreteness": "mixed",
+      "gapped": false
+    }
+  },
+  {
+    "slug": "you-will",
+    "difficulty_score": 44.5,
+    "tier": 3,
+    "components": {
+      "words": 37,
+      "lines": 3,
+      "amount_given_difficulty": 67.5,
+      "openness": "some",
+      "concreteness": "concrete",
+      "gapped": false
+    }
+  }
+]
