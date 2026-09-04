@@ -1612,19 +1612,6 @@
     }
   },
   {
-    "slug": "im-going-to",
-    "difficulty_score": 20,
-    "tier": 1,
-    "components": {
-      "words": 41,
-      "lines": 6,
-      "amount_given_difficulty": 49.9,
-      "openness": "obvious",
-      "concreteness": "concrete",
-      "gapped": false
-    }
-  },
-  {
     "slug": "im-going-to-fight-you-till-we-stop-and-fuck",
     "difficulty_score": 27.2,
     "tier": 2,

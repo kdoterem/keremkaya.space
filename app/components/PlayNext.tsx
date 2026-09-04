@@ -78,6 +78,7 @@ export default function PlayNext() {
   } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const proceededSlugRef = useRef<string | null>(null);
 
   // Pick the first passage once progress has hydrated from localStorage —
   // deliberately after hydration, not before, so a returning reader's
@@ -169,6 +170,12 @@ export default function PlayNext() {
 
   const handleProceed = useCallback(() => {
     if (!slug) return;
+    // A fast double-click on "proceed" (the button has no built-in
+    // debounce) could fire this twice before evalOpen=false unmounts the
+    // modal — guarded per-slug rather than with a simple boolean so it
+    // can never get stuck "already proceeded" for whatever comes next.
+    if (proceededSlugRef.current === slug) return;
+    proceededSlugRef.current = slug;
     appendHistory({ slug, text, completedAt: new Date().toISOString() });
     progress.markCompleted(slug);
     try {

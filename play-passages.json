@@ -2535,19 +2535,8 @@
   {
     "slug": "im-going-to",
     "date": "2025-08-20",
-    "passage": {
-      "lines": [
-        "im going to create a platform where people will auction their used notebooks filled with stuff",
-        "there will be filters like",
-        "from a bilingual person,",
-        "this many languages in the book",
-        "only 5 pages of content will be displayed",
-        "captured randomly"
-      ],
-      "gapped": false,
-      "type": "claim",
-      "note": "stops before the poem turns to who the buyer is and then breaks frame to congratulate itself; the invention is complete and its purpose unstated"
-    }
+    "passage": null,
+    "note": "pulled from PLAY at the author's request — didn't work as a doorway in practice"
   },
   {
     "slug": "now-i-will-seriously-ride-my-own-dick",
