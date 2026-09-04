@@ -286,7 +286,7 @@ export default async function PostPage({
         </div>
 
         {/* Save as image */}
-        <SaveImageButton title={post.title} content={post.content} date={post.date} slug={slug} />
+        <SaveImageButton title={post.title} content={post.content} date={post.date} slug={slug} tags={post.tags} />
 
         {/* Prev / Next */}
         {(prev || next) && (

@@ -25,6 +25,7 @@ interface Props {
   content: string;
   date: string;
   slug?: string;
+  tags?: string[];
 }
 
 // ── constants ────────────────────────────────────────────────────────────────
@@ -39,6 +40,14 @@ const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 const TOP_RESERVE    = 240;
 const FOOTER_RESERVE = 180;
 const GAP            = 80;   // gap between title block and content
+
+// Hashtag row shown above the "keremkaya.space" footer line, every page.
+// Deliberately small/quiet like the footer itself — it's there so the tags
+// read as real hashtags matching the caption, not as a second headline.
+const TAG_FONT_SIZE        = 24;
+const TAG_LINE_H           = 32;
+const TAG_GAP_ABOVE_FOOTER = 20; // gap between the tag row and the footer text above it (page reads top-to-bottom, footer/tags anchor from the bottom up)
+const TAG_COLOR            = 'rgba(10,10,10,0.4)';
 
 const TITLE_SIZE   = 80;
 const TITLE_LINE_H = 98;
@@ -386,6 +395,28 @@ function drawWeightedLineCenteredAnimated(
   });
 }
 
+// All of a post's frontmatter tags, printed as a wrapped hashtag row — the
+// same set a caption would use, so the exported file and the caption read
+// as the same tags instead of the tags only ever doing invisible work
+// (weighting which words go bold/alive in the body). Multi-word tags lose
+// their spaces ("mental illness" -> "#mentalillness") to read as real
+// hashtags. No cap on tag count: even the archive's heaviest-tagged posts
+// (13-14 tags) wrap to at most 3 short lines at this font size, so showing
+// every tag doesn't risk breaking the layout.
+function buildTagLines(ctx: CanvasRenderingContext2D, tags: string[] | undefined): string[] {
+  if (!tags || !tags.length) return [];
+  ctx.font = `${TAG_FONT_SIZE}px ${FONT}`;
+  const text = tags.map(t => `#${t.replace(/\s+/g, '')}`).join(' ');
+  return wrapLine(ctx, text, CW);
+}
+
+// Extra footer height the tag row needs, on top of FOOTER_RESERVE. Zero
+// when there are no tags, so a tagless post lays out pixel-identical to
+// before this existed.
+function tagBlockHeight(tagLines: string[]): number {
+  return tagLines.length ? tagLines.length * TAG_LINE_H + TAG_GAP_ABOVE_FOOTER : 0;
+}
+
 function drawRule(ctx: CanvasRenderingContext2D, y: number) {
   ctx.strokeStyle = 'rgba(10,10,10,0.12)';
   ctx.lineWidth   = 1;
@@ -403,6 +434,7 @@ function buildPages(
   content: string,
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
+  tags: string[] | undefined,
 ) {
   const mc  = document.createElement('canvas');
   const ctx = mc.getContext('2d')!;
@@ -417,9 +449,12 @@ function buildPages(
     : wrapLine(ctx, title, CW);
   const titleBlockH  = titleWrapped.length * TITLE_LINE_H;
 
+  const tagLines   = buildTagLines(ctx, tags);
+  const footerRsv  = FOOTER_RESERVE + tagBlockHeight(tagLines);
+
   // Available content height per page type
-  const availPage1 = H - TOP_RESERVE - FOOTER_RESERVE - titleBlockH        - GAP;
-  const availCont  = H - TOP_RESERVE - FOOTER_RESERVE - CONT_TITLE_LINE_H  - GAP;
+  const availPage1 = H - TOP_RESERVE - footerRsv - titleBlockH        - GAP;
+  const availCont  = H - TOP_RESERVE - footerRsv - CONT_TITLE_LINE_H  - GAP;
 
   // Parse content
   const stripped   = stripMarkdown(content);
@@ -497,7 +532,7 @@ function buildPages(
   }
 
   if (pages.length === 0) pages.push([]);
-  return { titleWrapped, pages, fontSize, lineH, gapH };
+  return { titleWrapped, pages, fontSize, lineH, gapH, tagLines };
 }
 
 // ── render one page ──────────────────────────────────────────────────────────
@@ -514,6 +549,7 @@ function renderPage(
   baseFilename: string,
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
+  tagLines: string[],
 ): Promise<File> {
   return new Promise((resolve, reject) => {
     const canvas    = document.createElement('canvas');
@@ -528,7 +564,7 @@ function renderPage(
     ctx.fillRect(0, 0, W, H);
 
     const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
-    const available     = H - TOP_RESERVE - FOOTER_RESERVE;
+    const available     = H - TOP_RESERVE - FOOTER_RESERVE - tagBlockHeight(tagLines);
     let y: number;
 
     if (pageNum === 1) {
@@ -585,6 +621,17 @@ function renderPage(
       y += lineH;
     }
 
+    // Tag row — above the footer, bottom-anchored so it sits the same
+    // distance above "keremkaya.space" regardless of line count.
+    if (tagLines.length) {
+      ctx.font = `${TAG_FONT_SIZE}px ${FONT}`;
+      let ty = H - 130 - TAG_GAP_ABOVE_FOOTER - tagLines.length * TAG_LINE_H;
+      for (const line of tagLines) {
+        drawCentered(ctx, line, ty, TAG_COLOR);
+        ty += TAG_LINE_H;
+      }
+    }
+
     // Footer
     const footerY = H - 130;
     ctx.font      = `26px ${FONT}`;
@@ -629,13 +676,14 @@ function paintAnimatedFrame(
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
   loopT: number,
+  tagLines: string[],
 ) {
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#aaff00';
   ctx.fillRect(0, 0, W, H);
 
   const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
-  const available     = H - TOP_RESERVE - FOOTER_RESERVE;
+  const available     = H - TOP_RESERVE - FOOTER_RESERVE - tagBlockHeight(tagLines);
   let y: number;
 
   if (pageNum === 1) {
@@ -679,6 +727,15 @@ function paintAnimatedFrame(
     y += lineH;
   }
 
+  if (tagLines.length) {
+    ctx.font = `${TAG_FONT_SIZE}px ${FONT}`;
+    let ty = H - 130 - TAG_GAP_ABOVE_FOOTER - tagLines.length * TAG_LINE_H;
+    for (const line of tagLines) {
+      drawCentered(ctx, line, ty, TAG_COLOR);
+      ty += TAG_LINE_H;
+    }
+  }
+
   const footerY = H - 130;
   ctx.font = `26px ${FONT}`;
   drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.32)');
@@ -706,6 +763,7 @@ function recordAnimatedPage(
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
   mimeType: string,
+  tagLines: string[],
 ): Promise<File> {
   measureCache.clear(); // fresh export, no reason to carry another post's cached word widths
   return new Promise((resolve, reject) => {
@@ -737,7 +795,7 @@ function recordAnimatedPage(
       if (start === null) start = ts;
       const elapsed = (ts - start) / 1000;
       const loopT   = (elapsed % LOOP_S) / LOOP_S;
-      paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT);
+      paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT, tagLines);
       if (elapsed < LOOP_S) requestAnimationFrame(tick);
       else recorder.stop();
     }
@@ -793,6 +851,7 @@ async function fastRecordAnimatedPage(
   baseFilename: string,
   titleWeights: number[] | undefined,
   bodyWeights: number[] | undefined,
+  tagLines: string[],
   onProgress?: (frac: number) => void,
 ): Promise<File> {
   measureCache.clear(); // fresh export, no reason to carry another post's cached word widths
@@ -837,7 +896,7 @@ async function fastRecordAnimatedPage(
   for (let i = 0; i < totalFrames; i++) {
     const t     = i * frameDur;
     const loopT = (t % FAST_ANIM_CYCLE_S) / FAST_ANIM_CYCLE_S;
-    paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT);
+    paintAnimatedFrame(ctx, titleWrapped, contentLines, title, pageNum, totalPages, fontSize, lineH, gapH, titleWeights, bodyWeights, loopT, tagLines);
     await videoSource.add(t, frameDur);
     // Only fire on an actual whole-percent change, not every one of the
     // 540 frames — that'd be 540 React re-renders for one export.
@@ -876,7 +935,7 @@ function ExportButton({
   );
 }
 
-export default function SaveImageButton({ title, content, slug }: Props) {
+export default function SaveImageButton({ title, content, slug, tags }: Props) {
   const [generating, setGenerating] = useState<ExportMode | null>(null);
   const [hint,       setHint]       = useState<string | null>(null);
   // Real progress through the video export (0..1), not a made-up
@@ -904,12 +963,12 @@ export default function SaveImageButton({ title, content, slug }: Props) {
   // function below already falls back to its original flat, unweighted
   // output when that's the case — untouched by any of this.
   function prepare() {
-    const tags = slug ? getProvenanceTags(slug) : undefined;
-    const titleWeights = computeWeights(title, tags);
-    const bodyWeights  = computeWeights(stripMarkdown(content), tags);
-    const { titleWrapped, pages, fontSize, lineH, gapH } = buildPages(title, content, titleWeights, bodyWeights);
+    const provenanceTags = slug ? getProvenanceTags(slug) : undefined;
+    const titleWeights = computeWeights(title, provenanceTags);
+    const bodyWeights  = computeWeights(stripMarkdown(content), provenanceTags);
+    const { titleWrapped, pages, fontSize, lineH, gapH, tagLines } = buildPages(title, content, titleWeights, bodyWeights, tags);
     return {
-      titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH,
+      titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, tagLines,
       totalPages: pages.length,
       baseFilename: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     };
@@ -1044,10 +1103,10 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     setHint(null);
     setTimeout(async () => {
       try {
-        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, totalPages, baseFilename } = prepare();
+        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, tagLines, totalPages, baseFilename } = prepare();
         const files = await Promise.all(
           pages.map((lines, i) =>
-            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+            renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights, tagLines)
           )
         );
         await shareOrDownload(files, files.length > 1 ? multiPageImageHint(files.length) : null);
@@ -1064,7 +1123,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
     setVideoProgress(0);
     setTimeout(async () => {
       try {
-        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, totalPages, baseFilename } = prepare();
+        const { titleWeights, bodyWeights, titleWrapped, pages, fontSize, lineH, gapH, tagLines, totalPages, baseFilename } = prepare();
 
         // Nothing to animate — a video would just be a static frame with a
         // misleading file extension. Same output the image button gives,
@@ -1072,7 +1131,7 @@ export default function SaveImageButton({ title, content, slug }: Props) {
         if (!bodyWeights) {
           const files = await Promise.all(
             pages.map((lines, i) =>
-              renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+              renderPage(titleWrapped, lines, title, i + 1, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights, tagLines)
             )
           );
           setHint(
@@ -1090,27 +1149,27 @@ export default function SaveImageButton({ title, content, slug }: Props) {
           if (await supportsFastVideo()) {
             cover = await fastRecordAnimatedPage(
               titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
-              baseFilename, titleWeights, bodyWeights, setVideoProgress,
+              baseFilename, titleWeights, bodyWeights, tagLines, setVideoProgress,
             );
           } else {
             const mimeType = supportsCaptureStream() ? pickVideoMimeType() : null;
             if (!mimeType) throw new Error('no video recording path available in this browser');
             cover = await recordAnimatedPage(
               titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
-              baseFilename, titleWeights, bodyWeights, mimeType,
+              baseFilename, titleWeights, bodyWeights, mimeType, tagLines,
             );
           }
         } catch (err) {
           console.error('animated cover failed, falling back to a static image', err);
           cover = await renderPage(
             titleWrapped, pages[0], title, 1, totalPages, fontSize, lineH, gapH,
-            baseFilename, titleWeights, bodyWeights,
+            baseFilename, titleWeights, bodyWeights, tagLines,
           );
         }
 
         const rest = await Promise.all(
           pages.slice(1).map((lines, i) =>
-            renderPage(titleWrapped, lines, title, i + 2, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights)
+            renderPage(titleWrapped, lines, title, i + 2, totalPages, fontSize, lineH, gapH, baseFilename, titleWeights, bodyWeights, tagLines)
           )
         );
         const files   = [cover, ...rest];
