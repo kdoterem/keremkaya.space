@@ -93,13 +93,15 @@ const FAST_VIDEO_FPS       = 12;
 const FAST_VIDEO_DURATION_S = 45;  // the actual on-screen length once shared — matches what worked before this whole video system existed
 const FAST_ANIM_CYCLE_S    = 3.5;  // the breath's own pacing — same seamless loop as before, just replayed ~13x to fill the export instead of being the export
 
-// The site's signature sound — a synthesized underwater arrival (a
-// muffled swell that builds and settles, ~6.5s), not a recording. Public
-// asset because it's fetched client-side at export time. Plays once at
-// the front of every exported video; the rest of the clip stays silent
+// The site's signature sound — synthesized, not a recording (~6.5s):
+// sparse, staggered piano notes on a whole-tone scale (no leading tone,
+// nothing resolves) plus tiny granular "dust" grains whose density
+// builds through the middle and thins out toward the end. Public asset
+// because it's fetched client-side at export time. Plays once at the
+// front of every exported video; the rest of the clip stays silent
 // rather than looping it — it was built as a single arrival, not an
 // ambient loop, so repeating it would undercut the whole point of it.
-const SIGNATURE_SOUND_URL = '/sounds/signature-underwater.wav';
+const SIGNATURE_SOUND_URL = '/sounds/signature-piano-dust.wav';
 
 // Tier 2 — real-time fallback, deliberately short (see header comment).
 const RECORD_SCALE = 1;   // video compresses anyway — the PNG's 3x supersampling would just be slower to draw per-frame for nothing
