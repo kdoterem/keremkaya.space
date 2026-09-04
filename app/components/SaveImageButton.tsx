@@ -15,6 +15,7 @@ import {
   Mp4OutputFormat,
   BufferTarget,
   CanvasSource,
+  AudioBufferSource,
   Quality as MbQuality,
   canEncodeVideo,
 } from 'mediabunny';
@@ -82,6 +83,14 @@ const FAST_VIDEO_SCALE     = 1;    // same reasoning as RECORD_SCALE below — n
 const FAST_VIDEO_FPS       = 12;
 const FAST_VIDEO_DURATION_S = 45;  // the actual on-screen length once shared — matches what worked before this whole video system existed
 const FAST_ANIM_CYCLE_S    = 3.5;  // the breath's own pacing — same seamless loop as before, just replayed ~13x to fill the export instead of being the export
+
+// The site's signature sound — a synthesized underwater arrival (a
+// muffled swell that builds and settles, ~6.5s), not a recording. Public
+// asset because it's fetched client-side at export time. Plays once at
+// the front of every exported video; the rest of the clip stays silent
+// rather than looping it — it was built as a single arrival, not an
+// ambient loop, so repeating it would undercut the whole point of it.
+const SIGNATURE_SOUND_URL = '/sounds/signature-underwater.wav';
 
 // Tier 2 — real-time fallback, deliberately short (see header comment).
 const RECORD_SCALE = 1;   // video compresses anyway — the PNG's 3x supersampling would just be slower to draw per-frame for nothing
@@ -737,6 +746,33 @@ function recordAnimatedPage(
   });
 }
 
+// Fetches and decodes the signature sound, then pads it with silence out
+// to the full video length — one AudioBuffer covering the whole
+// timeline, rather than juggling a short buffer plus separate silence
+// packets. copyToChannel leaves the rest of a freshly-created buffer at
+// its default zero (silence), so padding is just "make it longer," not
+// an explicit fill. Returns null on any failure (network, decoding,
+// no AudioContext) — audio is a nice-to-have on top of the export, not
+// something that should ever make the export itself fail.
+async function loadSignatureAudioBuffer(totalDurationS: number): Promise<AudioBuffer | null> {
+  try {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const audioCtx = new Ctx();
+    const res = await fetch(SIGNATURE_SOUND_URL);
+    const arrayBuffer = await res.arrayBuffer();
+    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+
+    const totalSamples = Math.round(totalDurationS * decoded.sampleRate);
+    const padded = audioCtx.createBuffer(decoded.numberOfChannels, totalSamples, decoded.sampleRate);
+    for (let ch = 0; ch < decoded.numberOfChannels; ch++) {
+      padded.copyToChannel(decoded.getChannelData(ch), ch, 0);
+    }
+    return padded;
+  } catch {
+    return null; // silent export rather than a failed one
+  }
+}
+
 // Tier 1 — offline encoding via mediabunny (WebCodecs under the hood).
 // Draws and encodes FAST_VIDEO_DURATION_S * FAST_VIDEO_FPS frames in a
 // tight loop; each call to videoSource.add() encodes one frame and is NOT
@@ -781,7 +817,19 @@ async function fastRecordAnimatedPage(
   });
   output.addVideoTrack(videoSource);
 
+  // Tracks must be declared before output.start(), so the signature
+  // sound has to be fetched/decoded up front rather than lazily during
+  // the frame loop — audioBuffer is null (rather than throwing) on any
+  // failure, and addAudioTrack is simply skipped in that case.
+  const audioBuffer = await loadSignatureAudioBuffer(FAST_VIDEO_DURATION_S);
+  const audioSource = audioBuffer
+    ? new AudioBufferSource({ codec: 'aac', quality: new MbQuality('high') })
+    : null;
+  if (audioSource) output.addAudioTrack(audioSource);
+
   await output.start();
+
+  if (audioSource && audioBuffer) await audioSource.add(audioBuffer);
 
   const totalFrames = Math.round(FAST_VIDEO_DURATION_S * FAST_VIDEO_FPS);
   const frameDur     = 1 / FAST_VIDEO_FPS;
