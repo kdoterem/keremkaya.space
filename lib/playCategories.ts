@@ -1,4 +1,5 @@
 import { getProvenanceTags } from "./tagProvenance";
+import categoryOverrides from "@/play-category-overrides.json";
 
 // ── PLAY's taxonomy — six categories, grounded in a real co-occurrence/lift
 // pass over the archive's tags (which tags actually attract each other in
@@ -80,12 +81,10 @@ const tagToCategory = new Map<string, PlayCategory>(
 // Every category a poem's real (non-"none") provenance spans actually
 // touch, in PLAY_CATEGORIES' own order (not alphabetical, not by
 // count) — used to show a quiet "what this is circling" header on the
-// tiered PLAY screen. A poem can legitimately touch none (66 of 269 real
-// passages have no provenance entry at all, another 3 have provenance
-// but nothing that maps to a category) — callers get an empty array
-// back, not a placeholder; the passage-selection brief's "none" over
-// forced applies here too.
-export function getCategoriesForSlug(slug: string): PlayCategory[] {
+// tiered PLAY screen. A poem can legitimately touch none — callers get
+// an empty array back, not a placeholder; the passage-selection brief's
+// "none" over forced applies here too.
+function categoriesFromProvenance(slug: string): PlayCategory[] {
   const tags = getProvenanceTags(slug);
   if (!tags) return [];
   const found = new Set<PlayCategory>();
@@ -95,4 +94,29 @@ export function getCategoriesForSlug(slug: string): PlayCategory[] {
     if (category) found.add(category);
   }
   return PLAY_CATEGORIES.filter((c) => found.has(c));
+}
+
+// play-category-overrides.json — a genuinely different, coarser kind of
+// judgment than provenance-derived categories above, and deliberately
+// kept in a separate file rather than merged into tag-provenance.json's
+// span data: these 66 poems (mostly the earliest ones in the archive,
+// tagged in an older vocabulary tag-provenance.json's taxonomy never
+// covered) were never given exact-span close-reads, so there's no real
+// span to point to — this is a whole-poem read instead ("what is this
+// piece actually circling"), not a claim that a specific tag anchors to
+// specific text. Same "none over forced" honesty as everything else:
+// 18 of the 66 came back null because they genuinely don't fit any of
+// the six, and stay uncategorized rather than being crammed in.
+const overrideByslug = new Map<string, string | null>(
+  (categoryOverrides as { slug: string; category: string | null }[]).map((o) => [o.slug, o.category]),
+);
+const categoryByKey = new Map(PLAY_CATEGORIES.map((c) => [c.key, c]));
+
+export function getCategoriesForSlug(slug: string): PlayCategory[] {
+  const fromProvenance = categoriesFromProvenance(slug);
+  if (fromProvenance.length > 0) return fromProvenance;
+  const overrideKey = overrideByslug.get(slug);
+  if (!overrideKey) return [];
+  const category = categoryByKey.get(overrideKey);
+  return category ? [category] : [];
 }

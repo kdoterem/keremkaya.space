@@ -1,0 +1,332 @@
+[
+  {
+    "slug": "consumption",
+    "category": "long-grind",
+    "note": "self-erasure, being consumed by another"
+  },
+  {
+    "slug": "fuck",
+    "category": null,
+    "note": "rage at consumerism/institutions, not personal"
+  },
+  {
+    "slug": "silence-keeps-vices",
+    "category": "long-grind",
+    "note": "existential burden, decay, worn down"
+  },
+  {
+    "slug": "why-the-mom",
+    "category": null,
+    "note": "playful anecdote, no real weight"
+  },
+  {
+    "slug": "you-will",
+    "category": null,
+    "note": "address-to-future-kid, legacy/duty — no fit"
+  },
+  {
+    "slug": "if-a-tree-falls-in-a-forest",
+    "category": "wide-awake",
+    "note": "existence/being-heard as a philosophical question"
+  },
+  {
+    "slug": "life-is-a-funeral",
+    "category": null,
+    "note": "dark irony re: death, no faith/god present"
+  },
+  {
+    "slug": "mental-institutions",
+    "category": null,
+    "note": "gallows humor, no real emotional core"
+  },
+  {
+    "slug": "my-sleep",
+    "category": "long-grind",
+    "note": "exhaustion, conditional-love anxiety loop"
+  },
+  {
+    "slug": "pitiful",
+    "category": "long-grind",
+    "note": "rage/conflict, protective fury"
+  },
+  {
+    "slug": "sunken-place",
+    "category": "long-grind",
+    "note": "endurance (\"doing good is hardest, we keep doing it\")"
+  },
+  {
+    "slug": "this-whole-deal-seems-so-weird",
+    "category": "long-grind",
+    "note": "pain, disorientation"
+  },
+  {
+    "slug": "threading-a-doll-so-endearing",
+    "category": "wide-awake",
+    "note": "quiet devotion, tenderness"
+  },
+  {
+    "slug": "i-dont-like",
+    "category": null,
+    "note": "complaint + insomnia sound-collapse, no clean fit"
+  },
+  {
+    "slug": "in-the-moment-before-the-moment",
+    "category": "long-grind",
+    "note": "self-sabotage, self-loathing"
+  },
+  {
+    "slug": "is-your-fingers-numb",
+    "category": "long-grind",
+    "note": "numbness, self-betrayal"
+  },
+  {
+    "slug": "you-rob-me-of-the-things-i-have",
+    "category": "long-grind",
+    "note": "interpersonal conflict/rage"
+  },
+  {
+    "slug": "calling-for-silence",
+    "category": "wide-awake",
+    "note": "sensory presence, stillness"
+  },
+  {
+    "slug": "my-silences-are-very-silent",
+    "category": "unsure-hand",
+    "note": "doubting the point of speaking/writing"
+  },
+  {
+    "slug": "i-cant-handle-my-brain",
+    "category": "long-grind",
+    "note": "overstimulation, wanting to shut down"
+  },
+  {
+    "slug": "i-need-cocaine",
+    "category": "the-body-wants",
+    "note": "wanting release/oblivion"
+  },
+  {
+    "slug": "im-the-greatest-ever",
+    "category": null,
+    "note": "ironic self-mockery, no real anchor"
+  },
+  {
+    "slug": "knots-and-puzzles",
+    "category": "wide-awake",
+    "note": "tender, present-moment domestic scene"
+  },
+  {
+    "slug": "my-mom-taught-me",
+    "category": "wide-awake",
+    "note": "gratitude, self-acceptance"
+  },
+  {
+    "slug": "when-plates-get-angry",
+    "category": "long-grind",
+    "note": "quiet family grief"
+  },
+  {
+    "slug": "folquenesch",
+    "category": "wide-awake",
+    "note": "self-erosion, losing one's name"
+  },
+  {
+    "slug": "how-i-found-myself-bound",
+    "category": "unsure-hand",
+    "note": "doubt, identity, writing as anchor"
+  },
+  {
+    "slug": "what-is-it-about",
+    "category": "long-grind",
+    "note": "insomnia, fragmentation"
+  },
+  {
+    "slug": "i-really-love-my-friends",
+    "category": "wide-awake",
+    "note": "gratitude, presence"
+  },
+  {
+    "slug": "last-rain-before-bloom",
+    "category": "wide-awake",
+    "note": "impermanence, seasonal transition"
+  },
+  {
+    "slug": "imma-fuck-you-up-tomorrow",
+    "category": "long-grind",
+    "note": "raw conflict, contradiction"
+  },
+  {
+    "slug": "one-last-one-fore-psych-visit",
+    "category": "long-grind",
+    "note": "frustration, exhaustion"
+  },
+  {
+    "slug": "readings-fun",
+    "category": null,
+    "note": "too slight/enigmatic to place confidently"
+  },
+  {
+    "slug": "today",
+    "category": "long-grind",
+    "note": "anger, decline, conflict"
+  },
+  {
+    "slug": "feels-like-ive-been-here-before",
+    "category": null,
+    "note": "too slight, dropped mid-thought"
+  },
+  {
+    "slug": "this-year-was",
+    "category": "wide-awake",
+    "note": "healing/renewal through failure"
+  },
+  {
+    "slug": "i-need-to-be-slow",
+    "category": "complicated-prayer",
+    "note": "direct, frustrated address to god"
+  },
+  {
+    "slug": "colonialism",
+    "category": null,
+    "note": "political critique, not personal-emotional"
+  },
+  {
+    "slug": "i-cant-make-any-other-plans-when-i-have-a-plan",
+    "category": "wide-awake",
+    "note": "cyclical time, truth"
+  },
+  {
+    "slug": "language-fails",
+    "category": "the-body-wants",
+    "note": "touch/physicality over language"
+  },
+  {
+    "slug": "chosen-one",
+    "category": null,
+    "note": "grandiosity undercut by its own punchline"
+  },
+  {
+    "slug": "i-wrote-that-i-hate-that-i-use-i",
+    "category": "unsure-hand",
+    "note": "doubt about the writing self"
+  },
+  {
+    "slug": "good-and-bad-of-today",
+    "category": "long-grind",
+    "note": "spirals into rage/conflict"
+  },
+  {
+    "slug": "i-will-not-start-with-a-question",
+    "category": "long-grind",
+    "note": "carrying unspeakable weight, endurance"
+  },
+  {
+    "slug": "ive-been-living-a-newfound-life",
+    "category": "wide-awake",
+    "note": "presence, being \"too alive to narrate\""
+  },
+  {
+    "slug": "i-wont-settle-in",
+    "category": null,
+    "note": "playful nonsense detour"
+  },
+  {
+    "slug": "beer-n-doer",
+    "category": "wide-awake",
+    "note": "stillness, consciousness"
+  },
+  {
+    "slug": "shitty-task",
+    "category": "long-grind",
+    "note": "duty, endurance"
+  },
+  {
+    "slug": "im-not-the-largest",
+    "category": "wide-awake",
+    "note": "shedding old ways, healing"
+  },
+  {
+    "slug": "a-lot-has-changed-in-the-midst-of-the-storm",
+    "category": "wide-awake",
+    "note": "renewal, hope"
+  },
+  {
+    "slug": "dear-light",
+    "category": "wide-awake",
+    "note": "impermanence, existence"
+  },
+  {
+    "slug": "we-stand-in-unison-against-an-enemy",
+    "category": null,
+    "note": "anti-war, political, not personal"
+  },
+  {
+    "slug": "how-to-tell-if-someone-is-hideous",
+    "category": "long-grind",
+    "note": "spiraling self-loathing"
+  },
+  {
+    "slug": "earned-my-rest",
+    "category": "long-grind",
+    "note": "\"there is no rest\" — endurance/exhaustion"
+  },
+  {
+    "slug": "blood-is-running-through-my-veins-like",
+    "category": "the-body-wants",
+    "note": "visceral, bodily release imagery"
+  },
+  {
+    "slug": "wry-swagger",
+    "category": null,
+    "note": "dark-humor coded, too ambiguous"
+  },
+  {
+    "slug": "bruises-on-my-legs-are-identical",
+    "category": "wide-awake",
+    "note": "identity/self persisting through change"
+  },
+  {
+    "slug": "two-people-at-a-door-each-seeing-something-different",
+    "category": "wide-awake",
+    "note": "quiet truth about invisible kindness"
+  },
+  {
+    "slug": "smashed",
+    "category": "complicated-prayer",
+    "note": "surrendered, rescuing divine figure"
+  },
+  {
+    "slug": "every-yes-is-a-death-of-no",
+    "category": null,
+    "note": "indecision/paralysis, no category fits"
+  },
+  {
+    "slug": "flowchart-of-indecision",
+    "category": null,
+    "note": "same — indecision, no fit"
+  },
+  {
+    "slug": "are-we-doomed",
+    "category": null,
+    "note": "societal cynicism, not personal"
+  },
+  {
+    "slug": "bathos",
+    "category": null,
+    "note": "pure dark-comedy device"
+  },
+  {
+    "slug": "schoolyard",
+    "category": "the-ache-toward",
+    "note": "missing the liveliness that was just there"
+  },
+  {
+    "slug": "autophagy-and-propaganda",
+    "category": "long-grind",
+    "note": "mind consuming itself, numbness"
+  },
+  {
+    "slug": "accumulation-accumulating",
+    "category": "long-grind",
+    "note": "dread accumulating, unresolved"
+  }
+]
