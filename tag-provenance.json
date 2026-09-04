@@ -6287,5 +6287,101 @@
         "mode": "outpour"
       }
     }
+  },
+  {
+    "slug": "september-4-reminiscing",
+    "date": "2026-09-04",
+    "tags": {
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "this is me. i'm not much, but i am what i touch.",
+          "invisible child now seen, rebellion with a face attached"
+        ],
+        "note": "the poem's central definition and its final arrival — self constituted by contact rather than by perception, and then given a face",
+        "mode": "argue"
+      },
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "i've stilled a dancing flame, with it i arose,",
+          "i've dipped in still waters, in it it dissolved,",
+          "i've laid down beneath a sand dune,",
+          "i've also stood and let the wind move what was unmoving in me,"
+        ],
+        "note": "the four elements undergone rather than theorized; presence as accumulated contact",
+        "mode": "outpour"
+      },
+      "letting go": {
+        "type": "lines",
+        "spans": [
+          "i've cut the ropes binding it, i've cut the ropes binding me,",
+          "i took it off, playing field leveled,"
+        ],
+        "note": "two separate releases — the tree's and the mask's — and the second is voluntary while the first was rescue",
+        "mode": "argue"
+      },
+      "self-acceptance": {
+        "type": "lines",
+        "spans": [
+          "hi. i'll keep it honest and brief. i love.",
+          "all those times spent, were time well spent."
+        ],
+        "note": "the opening declaration and the verdict on the past, neither of which is qualified anywhere in the poem",
+        "mode": "argue"
+      },
+      "gratitude": {
+        "type": "line",
+        "spans": [
+          "all those times spent, were time well spent."
+        ],
+        "note": "same line as above, doing different work — the years accounted for without regret",
+        "mode": "argue"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "the distance i've covered, written on my forehead, i was coveted,",
+          "i covered my face, their eyes nowhere to land,"
+        ],
+        "note": "covered/coveted/covered across five lines, the same sound accumulating meaning each time",
+        "mode": "outpour"
+      },
+      "vulnerability": {
+        "type": "lines",
+        "spans": [
+          "eyes landing on me, this foreign deity dirtied me,",
+          "hand got unsure, feet trembled,"
+        ],
+        "note": "the body's involuntary response to being seen, reported before the mind's",
+        "mode": "outpour"
+      },
+      "endurance": {
+        "type": "line",
+        "spans": [
+          "there was more, i've been at this for nearly 4 years now,"
+        ],
+        "note": "the duration stated flatly, mid-list, without asking for credit",
+        "mode": "argue"
+      },
+      "self-concealment": {
+        "type": "lines",
+        "spans": [
+          "i covered my face, their eyes nowhere to land,",
+          "beneath it i laughed, this game got easier to play,"
+        ],
+        "note": "concealment that worked, named as an advantage, before it gets surrendered",
+        "mode": "argue"
+      },
+      "defiance": {
+        "type": "phrase",
+        "spans": [
+          "rebellion with a face attached",
+          "name? some know."
+        ],
+        "note": "defiance made costly by being identifiable, and the name neither given nor withheld",
+        "mode": "argue"
+      }
+    }
   }
 ]
