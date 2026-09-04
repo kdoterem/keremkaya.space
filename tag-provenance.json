@@ -6383,5 +6383,120 @@
         "mode": "argue"
       }
     }
+  },
+  {
+    "slug": "feels-like-ive-been-here-before",
+    "date": "2025-05-31",
+    "tags": {
+      "family": {
+        "type": "lines",
+        "spans": [
+          "is mom more important or the dad",
+          "are dads equally important"
+        ],
+        "note": "the two questions bookending the poem, neither one answered",
+        "mode": "outpour"
+      },
+      "avoidance": {
+        "type": "lines",
+        "spans": [
+          "possibly due to daddy issues but i digress",
+          "meh too much to think about"
+        ],
+        "note": "the digression named as itself, then the whole question shrugged off",
+        "mode": "argue"
+      },
+      "doubt": {
+        "type": "line",
+        "spans": [
+          "but why do i think that"
+        ],
+        "note": "the poem turning on its own first answer before it's even finished giving it",
+        "mode": "outpour"
+      },
+      "deadpan": {
+        "type": "line",
+        "spans": [
+          "meh too much to think about"
+        ],
+        "note": "the flattest possible close to a question about which parent matters more",
+        "mode": "argue"
+      },
+      "self-concealment": {
+        "type": "line",
+        "spans": [
+          "possibly due to daddy issues but i digress"
+        ],
+        "note": "naming the real reason and immediately declining to follow it",
+        "mode": "outpour"
+      },
+      "exhaustion": {
+        "type": "line",
+        "spans": [
+          "meh too much to think about"
+        ],
+        "note": "not too painful to think about — too much, a tiredness rather than a wound",
+        "mode": "argue"
+      }
+    }
+  },
+  {
+    "slug": "why-the-mom",
+    "date": "2025-02-20",
+    "tags": {
+      "bravado": {
+        "type": "line",
+        "spans": [
+          "and im so good at it"
+        ],
+        "note": "the boast, stated flat, right before it gets punished",
+        "mode": "argue"
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "and im so good at it",
+          "yet my ass got handed to me cause"
+        ],
+        "note": "self-image asserted and immediately undercut in the very next line",
+        "mode": "outpour"
+      },
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "why the mom",
+          "got mad at me",
+          "it’s not like",
+          "she was there to play with him"
+        ],
+        "note": "the accusation built line by line — she wasn't even present, so what right does she have",
+        "mode": "argue"
+      },
+      "deadpan": {
+        "type": "line",
+        "spans": [
+          "just threw random shit up"
+        ],
+        "note": "the whole loss explained in one flat, unbothered line",
+        "mode": "argue"
+      },
+      "wonder": {
+        "type": "line",
+        "spans": [
+          "that little kid did not contemplate my next move"
+        ],
+        "note": "genuine surprise at being beaten by someone with no strategy at all",
+        "mode": "outpour"
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "that little kid did not contemplate my next move",
+          "just threw random shit up"
+        ],
+        "note": "the overthought strategy losing to no strategy — what was the good at it even for",
+        "mode": "outpour"
+      }
+    }
   }
 ]
