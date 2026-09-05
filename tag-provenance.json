@@ -1177,8 +1177,8 @@
       "guilt": {
         "type": "lines",
         "spans": [
-          "i\n\nsorry i am mother\n\nfor bringing destruction to your creation\n\nto build mine",
-          "im sorry for\n\nkilling you mom\n\ni just wanted\n\nmore flowers"
+          "i\nsorry i am mother\nfor bringing destruction to your creation\nto build mine",
+          "im sorry for\nkilling you mom\ni just wanted\nmore flowers"
         ],
         "note": "the apology repeats eight times across the poem with a different charge each time; these two are the ones where the guilt is stated as damage done rather than as inadequacy",
         "mode": "outpour"
@@ -1292,8 +1292,8 @@
       "god": {
         "type": "lines",
         "spans": [
-          "im not lord's humble servant reporting to it\n\nthe lord ain't even a lord",
-          "i boxed god\n\nwe love each other\n\ni recognize him\n\nhe recognizes me"
+          "im not lord's humble servant reporting to it\nthe lord ain't even a lord",
+          "i boxed god\nwe love each other\ni recognize him\nhe recognizes me"
         ],
         "note": "three distinct positions in one poem — refusing the hierarchy, relocating god from there to here, and then mutual recognition with no hierarchy left to refuse",
         "mode": "argue"
@@ -1311,7 +1311,7 @@
         "type": "lines",
         "spans": [
           "and i gain consciousness",
-          "just because now that you can feel\n\ndoesn't mean it wasn't there"
+          "just because now that you can feel\ndoesn't mean it wasn't there"
         ],
         "note": "second span is the poem's sharpest claim — feeling something arrive is not the same as it having arrived",
         "mode": "argue"
@@ -1326,7 +1326,7 @@
         "type": "lines",
         "spans": [
           "all i learn teach me how little i know",
-          "i like existing\n\nnot knowing\n\nbelieving"
+          "i like existing\nnot knowing\nbelieving"
         ],
         "mode": "outpour"
       },
@@ -1335,7 +1335,7 @@
         "spans": [
           "and i believe",
           "i believe in the pretty things",
-          "i feel in my core i made it rain\n\nand i believe i made it rain"
+          "i feel in my core i made it rain\nand i believe i made it rain"
         ],
         "note": "belief here does no metaphysical work — it's a stance toward the pretty and the unverifiable, chosen rather than argued",
         "mode": "argue"
@@ -1343,8 +1343,8 @@
       "existence": {
         "type": "lines",
         "spans": [
-          "why existence is definable\n\nbut why\n\nexistence is\n\nnot",
-          "if what i believe turns out to be the truth\n\nam i not the existence?"
+          "why existence is definable\nbut why\nexistence is\nnot",
+          "if what i believe turns out to be the truth\nam i not the existence?"
         ],
         "mode": "argue"
       }
