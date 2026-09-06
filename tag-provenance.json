@@ -6506,11 +6506,11 @@
       "wordplay": {
         "type": "lines",
         "spans": [
-          "and i ran\nwith a heart ripped in my rib cage",
-          "caged in my rip cage",
-          "rip to my heart in my rib cage",
-          "i ran from a graveyard",
-          "became gravely ill"
+          "and i ran,\nran with a heart ripped in my rib cage,",
+          "caged in my rip cage,",
+          "rip to my heart in my rib cage.",
+          "i ran from a graveyard,",
+          "became gravely ill."
         ],
         "note": "the rib cage/rip cage swap, set up by the run into the graveyard and the graveyard turning gravely ill",
         "mode": "argue"
@@ -6518,9 +6518,9 @@
       "mortality": {
         "type": "lines",
         "spans": [
-          "rip to my heart in my rib cage",
-          "i ran from a graveyard",
-          "the tolling bells so still"
+          "rip to my heart in my rib cage.",
+          "i ran from a graveyard,",
+          "the tolling bells so still,"
         ],
         "note": "the imagery doing the actual work — graveyard, tolling bells, a heart already torn",
         "mode": "outpour"
@@ -6528,8 +6528,8 @@
       "pain": {
         "type": "lines",
         "spans": [
-          "the ease i deemed to feel",
-          "was the pain",
+          "the ease i deemed to feel,",
+          "was the pain,",
           "ever real?"
         ],
         "note": "the poem's own question about whether what it called ease was pain all along",
@@ -6538,8 +6538,8 @@
       "doubt": {
         "type": "lines",
         "spans": [
-          "what was the whole deal with this ordeal",
-          "was the pain",
+          "what was the whole deal with this ordeal?",
+          "was the pain,",
           "ever real?"
         ],
         "note": "the opening question and the closing question are the same doubt, restated",
@@ -6548,8 +6548,8 @@
       "dissociation": {
         "type": "lines",
         "spans": [
-          "the ease i deemed to feel",
-          "was the pain"
+          "the ease i deemed to feel,",
+          "was the pain,"
         ],
         "note": "naming a feeling and then not trusting the name it was just given",
         "mode": "outpour"
@@ -6557,8 +6557,8 @@
       "bewilderment": {
         "type": "lines",
         "spans": [
-          "what was the whole deal with this ordeal",
-          "this whole deal seems so weird"
+          "what was the whole deal with this ordeal?",
+          "this whole deal seems so weird."
         ],
         "note": "the poem opens and closes on the same flat bewilderment, nothing resolved in between",
         "mode": "outpour"
@@ -6566,8 +6566,8 @@
       "body": {
         "type": "lines",
         "spans": [
-          "and i ran\nwith a heart ripped in my rib cage",
-          "caged in my rip cage"
+          "and i ran,\nran with a heart ripped in my rib cage,",
+          "caged in my rip cage,"
         ],
         "note": "the heart made physically literal — torn, caged, running",
         "mode": "outpour"
@@ -6575,7 +6575,7 @@
       "silence": {
         "type": "line",
         "spans": [
-          "the tolling bells so still"
+          "the tolling bells so still,"
         ],
         "note": "bells that toll and are still in the same breath",
         "mode": "outpour"
