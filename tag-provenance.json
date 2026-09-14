@@ -6581,5 +6581,12 @@
         "mode": "outpour"
       }
     }
+  },
+  {
+    "slug": "friday-september-11",
+    "date": "2026-09-11",
+    "tags": {
+      "highlighted": { "type": "lines", "spans": ["lying the ruins of those that lied,", "still child, unkind lies,", "ahead, kind awaits,", "below kind lies.", "lingers still, ailment of the ill,", "he stench of iron still lingers.", "it evokes something red,", "my scent attracts hunters, i'm not a prey", "my scent attracts hunters, i'm not a prey.", "all this goes somewhere,", "when i need to be going somewhere,", "i wind up somewhere else.", "taking a path unemerged,"] }
+    }
   }
 ]
