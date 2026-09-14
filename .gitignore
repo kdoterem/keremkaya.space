@@ -42,5 +42,6 @@ next-env.d.ts
 
 # shelved / throwaway work-in-progress — never linked from the live site,
 # not meant to be swept into a commit by a broad `git add .` or `-A`.
-# Remove this line deliberately when the work is ready to ship.
+# Remove these lines deliberately when the work is ready to ship.
 /app/preview/
+/lib/tagColor.ts
