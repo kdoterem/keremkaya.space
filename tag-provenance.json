@@ -6588,5 +6588,79 @@
     "tags": {
       "highlighted": { "type": "lines", "spans": ["lying the ruins of those that lied,", "still child, unkind lies,", "ahead, kind awaits,", "below kind lies.", "lingers still, ailment of the ill,", "he stench of iron still lingers.", "it evokes something red,", "my scent attracts hunters, i'm not a prey", "my scent attracts hunters, i'm not a prey.", "all this goes somewhere,", "when i need to be going somewhere,", "i wind up somewhere else.", "taking a path unemerged,"] }
     }
+  },
+  {
+    "slug": "autophagy-and-propaganda",
+    "date": "2026-06-11",
+    "tags": {
+      "emptiness": {
+        "type": "line",
+        "spans": [
+          "after a while there was nothing to feed on"
+        ],
+        "note": "the mind's output outruns its input — the line where the feeding stops cold",
+        "mode": "argue"
+      },
+      "capitalism": {
+        "type": "lines",
+        "spans": [
+          "capitalist order is sure to keep you full",
+          "among the industrialized working order"
+        ],
+        "note": "the promise of fullness paired with the machinery that extracts it — irony stated flatly, not argued",
+        "mode": "argue"
+      },
+      "self-erosion": {
+        "type": "lines",
+        "spans": [
+          "mind fed on what it made",
+          "after a while there was nothing to feed on"
+        ],
+        "note": "consuming its own output until there's nothing left to consume — erosion as a closed loop",
+        "mode": "argue"
+      },
+      "consciousness": {
+        "type": "lines",
+        "spans": [
+          "mind drew pictures on the clouds",
+          "mind fed on what it made"
+        ],
+        "note": "the mind caught making and then eating its own images — creation and consumption in the same faculty",
+        "mode": "outpour"
+      },
+      "creation": {
+        "type": "line",
+        "spans": [
+          "mind drew pictures on the clouds"
+        ],
+        "note": "image-making named directly, before the poem turns on it",
+        "mode": "outpour"
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "mind fed on what it made",
+          "capitalist order is sure to keep you full"
+        ],
+        "note": "two different systems, mind and market, both promising to sustain what they starve",
+        "mode": "argue"
+      },
+      "work": {
+        "type": "line",
+        "spans": [
+          "among the industrialized working order"
+        ],
+        "note": "the only line that names the system by its structure rather than its promise",
+        "mode": "outpour"
+      },
+      "dark": {
+        "type": "line",
+        "spans": [
+          "after a while there was nothing to feed on"
+        ],
+        "note": "the same line as emptiness, read for its bleakness rather than its absence",
+        "mode": "argue"
+      }
+    }
   }
 ]
