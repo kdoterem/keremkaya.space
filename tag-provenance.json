@@ -6662,5 +6662,92 @@
         "mode": "argue"
       }
     }
+  },
+  {
+    "slug": "and-joy-enjoy",
+    "date": "2026-09-15",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "do broken pieces change the story?",
+          "what are we here for? why we do what we do? is it to change our story? or the story we tell ourselves?",
+          "am i supposed to have nothing? how am i to own when life is owed?"
+        ],
+        "note": "three unanswered questions escalating from repair, to purpose, to ownership — the poem never resolves any of them"
+      },
+      "self-concealment": {
+        "type": "lines",
+        "spans": [
+          "my soul, an inn hidden behind the bushes,",
+          "something about being out there that's hard,",
+          "not for an overlooker to see,"
+        ],
+        "note": "the soul as something deliberately kept out of sight — hidden, hard to be exposed, and built not to be seen by a certain kind of onlooker"
+      },
+      "vulnerability": {
+        "type": "lines",
+        "spans": [
+          "i pour my heart out have a drink,",
+          "it sits vandalized in the physical plane,",
+          "once again vibrancy's scent attracted hunters,"
+        ],
+        "note": "the confession offered and then immediately damaged — any color it shows gets hunted"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "ravagers, savages, inn is a front,",
+          "in this hole, the knot will swallow me whole."
+        ],
+        "note": "inn/in doing the poem's front-vs-hidden work twice — once as a facade, once as the hole that finally swallows whole"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "what am i meant to do when i fall in a well? get close to hell?",
+          "am i supposed to die there? with nothing attached to my name?"
+        ],
+        "note": "falling into a well read straight through as a death question, then made explicit"
+      },
+      "legacy": {
+        "type": "lines",
+        "spans": [
+          "am i supposed to die there? with nothing attached to my name?",
+          "are we meant to cast a mold before we're old?"
+        ],
+        "note": "the same fear stated twice — dying with nothing attached to your name, and failing to leave a shape behind before it's too late"
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "how am i to own when life is owed?",
+          "what are we here for? why we do what we do?"
+        ],
+        "note": "life framed as a debt, then followed straight by the question of why acting at all matters"
+      },
+      "identity": {
+        "type": "line",
+        "spans": [
+          "they're for a looker to see and see them and me,"
+        ],
+        "note": "the artifacts reclassified mid-line, from things not meant to be seen to things meant to include the self among them"
+      },
+      "god": {
+        "type": "line",
+        "spans": [
+          "will a chalice hold the rain?"
+        ],
+        "note": "the one line naming a vessel built to hold something sacred, immediately doubted"
+      },
+      "dread": {
+        "type": "lines",
+        "spans": [
+          "if i get deeper i'll forgot,",
+          "in this hole, the knot will swallow me whole."
+        ],
+        "note": "the warning to stop, arriving right before the poem's own admission that going deeper means being swallowed"
+      }
+    }
   }
 ]
