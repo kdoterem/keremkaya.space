@@ -80,7 +80,7 @@ function ReadingModeModal({
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.25)"; }}
           >
-            <span style={{ display: "block", fontWeight: 500 }}>read how it&rsquo;s suggested</span>
+            <span style={{ display: "block", fontWeight: 500 }}>read a different way</span>
             <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>unravels line by line, one at a time — tap anywhere to move things along</span>
           </button>
           <button

@@ -6750,4 +6750,113 @@
       }
     }
   }
+,
+  {
+    "slug": "same-ordeal-primordial",
+    "date": "2026-09-20",
+    "tags": {
+      "healing": {
+        "type": "lines",
+        "spans": [
+          "bird's wing is healed, it's ready for flight.",
+          "healers on speed dial, it's me,"
+        ],
+        "note": "the wing's repair and the speed-dial healers named in the same breath — recovery as something already in motion, not hoped for"
+      },
+      "renewal": {
+        "type": "lines",
+        "spans": [
+          "things are looking up,",
+          "bird's wing is healed, it's ready for flight."
+        ],
+        "note": "the upturn stated flat, then given a body — a wing that's healed and ready, not just a mood"
+      },
+      "memory": {
+        "type": "lines",
+        "spans": [
+          "as time passes you forget —",
+          "something tells me to honor my past,"
+        ],
+        "note": "forgetting and the pull to honor what's forgotten, set right against each other"
+      },
+      "self-acceptance": {
+        "type": "line",
+        "spans": [
+          "healers on speed dial, it's me,"
+        ],
+        "note": "the healer turns out to be the self, named plainly after the line's own comma turn"
+      },
+      "sensual": {
+        "type": "line",
+        "spans": [
+          "sex never included penetration."
+        ]
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "dual wasn't excluded to begin with.",
+          "one wasn't one at all,",
+          "one plus one, it's three."
+        ],
+        "note": "the poem doing arithmetic on being itself — one was never singular, and the sum exceeds its parts"
+      },
+      "hope": {
+        "type": "lines",
+        "spans": [
+          "tomorrow's,",
+          "always free."
+        ],
+        "note": "the shortest couplet in the poem, and the only unqualified promise in it"
+      },
+      "cyclical": {
+        "type": "lines",
+        "spans": [
+          "same ordeal, primordial",
+          "things are not the same the second time around,"
+        ],
+        "note": "the title claims recurrence back to origin, then the body immediately denies it repeats cleanly — the cycle admitting it isn't quite one"
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "same ordeal, primordial",
+          "more heights to climb, wrongs to right,",
+          "ether is the fifth element, either for or against,"
+        ],
+        "note": "ordeal/primordial, heights/right, ether/either — the title's rhyme sets the pattern the body keeps chasing"
+      },
+      "endurance": {
+        "type": "lines",
+        "spans": [
+          "still,",
+          "there are more heights.",
+          "life a day more, die tomorrow,"
+        ],
+        "note": "still doing double duty as stillness and continuation, then the plain arithmetic of one more day"
+      },
+      "defiance": {
+        "type": "line",
+        "spans": [
+          "to stand for something, you must risk getting run,"
+        ]
+      },
+      "time": {
+        "type": "lines",
+        "spans": [
+          "it's been a while.",
+          "life a day more, die tomorrow,"
+        ],
+        "note": "the poem opens already mid-duration and closes counting down by the day"
+      },
+      "mortality": {
+        "type": "lines",
+        "spans": [
+          "life a day more, die tomorrow,",
+          "a day in this earth, life and death in cosmos."
+        ],
+        "note": "the deal restated at cosmic scale in the poem's last line"
+      }
+    }
+  }
 ]
