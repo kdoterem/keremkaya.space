@@ -562,7 +562,7 @@ function renderPage(
     ctx.textBaseline = 'top';
 
     // Background
-    ctx.fillStyle = '#aaff00';
+    ctx.fillStyle = '#A49B9C';
     ctx.fillRect(0, 0, W, H);
 
     const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
@@ -681,7 +681,7 @@ function paintAnimatedFrame(
   tagLines: string[],
 ) {
   ctx.textBaseline = 'top';
-  ctx.fillStyle = '#aaff00';
+  ctx.fillStyle = '#A49B9C';
   ctx.fillRect(0, 0, W, H);
 
   const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);

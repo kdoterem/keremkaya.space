@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-lime: #aaff00;
+  --color-ground: #A49B9C;
   --color-ink: #0a0a0a;
   --font-sans: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
@@ -16,7 +16,7 @@
 
 html,
 body {
-  background-color: #aaff00;
+  background-color: #A49B9C;
   color: #0a0a0a;
   font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -31,7 +31,7 @@ body {
 @media (prefers-color-scheme: dark) {
   html,
   body {
-    background-color: #aaff00;
+    background-color: #A49B9C;
     color: #0a0a0a;
   }
 }
@@ -39,7 +39,7 @@ body {
 /* Selection color */
 ::selection {
   background: #0a0a0a;
-  color: #aaff00;
+  color: #A49B9C;
 }
 
 /* Prev/next post navigation titles */
@@ -257,7 +257,7 @@ a:hover .post-nav-title {
 }
 .export-btn:hover:not(:disabled) {
   background-color: #0a0a0a;
-  color: #aaff00;
+  color: #A49B9C;
   border-color: #0a0a0a;
 }
 /* PLAY's inline write-zones (PlayPoemBody) — deliberately quiet: a hairline

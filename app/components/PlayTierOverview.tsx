@@ -10,7 +10,7 @@ import { getCategoriesForSlug, type PlayCategory } from "@/lib/playCategories";
 // dropped into the next one's first passage. Same dark-scrim-behind-a-
 // bounded-panel register as PlayIntro (a milestone deserves the same
 // "this is a different kind of moment" weight the contract gets, not
-// the full-bleed lime the write screen and fake-eval ceremony use).
+// the full-bleed ground color the write screen and fake-eval ceremony use).
 //
 // Groups everything completed in that tier by the categories its
 // provenance actually touches (lib/playCategories.ts) — a passage
@@ -123,7 +123,7 @@ export default function PlayTierOverview({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            background: "#aaff00",
+            background: "#A49B9C",
             border: "1px solid rgba(10,10,10,0.2)",
             maxWidth: "34rem",
             width: "100%",

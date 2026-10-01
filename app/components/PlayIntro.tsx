@@ -11,7 +11,7 @@ import MechButton from "./MechButton";
 // it isn't pre-announced as theater ("not having control" has to be
 // discovered, not read about first).
 //
-// Deliberately NOT the full-bleed lime takeover every other PLAY screen
+// Deliberately NOT the full-bleed ground-color takeover every other PLAY screen
 // uses (the write screen, the fake-eval modal) — that register is for
 // being immersed IN something. A contract is something you look AT, so
 // it borrows PiecePopup's language instead: a dark scrim behind a
@@ -98,7 +98,7 @@ export default function PlayIntro() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            background: "#aaff00",
+            background: "#A49B9C",
             border: "1px solid rgba(10,10,10,0.2)",
             maxWidth: "34rem",
             width: "100%",

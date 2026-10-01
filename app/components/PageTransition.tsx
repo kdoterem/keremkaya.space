@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Blind-pull-open: a panel that starts fully covering the screen,
 // then pulls away upward (revealing content from top to bottom).
-// Preceded by a lime green flash on route change.
+// Preceded by a ground-color flash on route change.
 
 const DURATION = 0.25; // seconds
 const EASE: [number, number, number, number] = [0.76, 0, 0.24, 1]; // cubic-bezier, no bounce
@@ -64,7 +64,7 @@ export default function PageTransition({
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "#aaff00",
+              backgroundColor: "#A49B9C",
               zIndex: 9999,
               pointerEvents: "none",
             }}
@@ -84,7 +84,7 @@ export default function PageTransition({
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "#aaff00",
+              backgroundColor: "#A49B9C",
               zIndex: 9998,
               pointerEvents: "none",
               transformOrigin: "top",

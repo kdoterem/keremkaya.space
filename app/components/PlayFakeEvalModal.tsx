@@ -103,7 +103,7 @@ export default function PlayFakeEvalModal({
             position: "fixed",
             inset: 0,
             zIndex: 300,
-            background: "#aaff00",
+            background: "#A49B9C",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

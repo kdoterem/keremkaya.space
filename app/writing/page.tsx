@@ -400,7 +400,7 @@ export default function WritingPage() {
                       style={{
                         fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
                         fontWeight:    isHighlighted && !isHovered ? 700 : 500,
-                        color:         isActive ? "#aaff00" : "#0a0a0a",
+                        color:         isActive ? "#A49B9C" : "#0a0a0a",
                         transition:    "color 0.15s, font-weight 0.15s",
                         letterSpacing: "-0.01em",
                       }}
@@ -473,7 +473,7 @@ export default function WritingPage() {
           left:           0,
           right:          0,
           height:         "calc(8rem + env(safe-area-inset-bottom))",
-          background:     "linear-gradient(to top, #aaff00 55%, transparent)",
+          background:     "linear-gradient(to top, #A49B9C 55%, transparent)",
           zIndex:         49,
           pointerEvents:  "none",
         }}
@@ -485,7 +485,7 @@ export default function WritingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: posts.length > 0 ? 1 : 0, pointerEvents: posts.length > 0 ? "auto" : "none" }}
         transition={{ duration: 0.3 }}
-        whileHover={firing ? {} : { backgroundColor: "#0a0a0a", color: "#aaff00", opacity: 1, transition: { duration: 0.15 } }}
+        whileHover={firing ? {} : { backgroundColor: "#0a0a0a", color: "#A49B9C", opacity: 1, transition: { duration: 0.15 } }}
         style={{
           position:        "fixed",
           bottom:          "calc(2rem + env(safe-area-inset-bottom))",

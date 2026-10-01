@@ -123,7 +123,7 @@ export default function SavedWritingsPage() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#aaff00",
+        backgroundColor: "#A49B9C",
         color: "#0a0a0a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",

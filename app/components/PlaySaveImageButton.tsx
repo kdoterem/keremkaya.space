@@ -57,7 +57,7 @@ export default function PlaySaveImageButton({ category, text }: { category: stri
       return;
     }
 
-    ctx.fillStyle = "#aaff00";
+    ctx.fillStyle = "#A49B9C";
     ctx.fillRect(0, 0, W, H);
 
     ctx.fillStyle = "rgba(10,10,10,0.45)";

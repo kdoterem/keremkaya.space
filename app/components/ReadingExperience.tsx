@@ -7,7 +7,7 @@ import AliveWeightedText from "./AliveWeightedText";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-// Panel is the site's own lime green (#aaff00), not black — a stark black
+// Panel is the site's own warm gray (#A49B9C), not black — a stark black
 // box read as a separate thing dropped onto the page rather than part of
 // it. The backdrop behind it stays a dark scrim (dims the page, gives the
 // panel something to pop against); the panel itself and all its text now
@@ -43,7 +43,7 @@ function ReadingModeModal({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "relative",
-          background: "#aaff00",
+          background: "#A49B9C",
           color: "#0a0a0a",
           maxWidth: "26rem",
           width: "100%",

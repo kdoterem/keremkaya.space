@@ -801,7 +801,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
             style={{
               position:       "fixed",
               inset:          0,
-              background:     "#aaff00",
+              background:     "#A49B9C",
               display:        "flex",
               alignItems:     "center",
               justifyContent: "center",

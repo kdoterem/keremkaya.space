@@ -473,7 +473,7 @@ export default function Home() {
               <span style={{
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: "clamp(1rem, 3vw, 1.4rem)", fontWeight: 700,
-                color: "#aaff00", letterSpacing: "-0.01em",
+                color: "#A49B9C", letterSpacing: "-0.01em",
               }}>
                 {selectedTag}
               </span>
@@ -602,7 +602,7 @@ export default function Home() {
               <span style={{
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: "clamp(1rem, 3vw, 1.4rem)", fontWeight: 700,
-                color: "#aaff00", letterSpacing: "-0.01em",
+                color: "#A49B9C", letterSpacing: "-0.01em",
               }}>
                 all tags ({allTagCounts.length})
               </span>
