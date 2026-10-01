@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
       { source: "/art", destination: "/kismet", permanent: true },
       { source: "/writing/mimilat", destination: "/writing/thank-you", permanent: true },
       { source: "/terrain", destination: "/writing", permanent: true },
+      // SCANS lived at /answers (repurposed from the old Q&A listing) before
+      // moving to its own /scans route — /answers/[slug] still serves the
+      // old Q&A pages directly, untouched, so this only redirects the exact
+      // index path, not everything under it.
+      { source: "/answers", destination: "/scans", permanent: true },
     ];
   },
 };

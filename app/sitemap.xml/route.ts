@@ -6,7 +6,7 @@ const STATIC_PAGES = [
   { url: "/",         priority: "1.0", changefreq: "weekly"  },
   { url: "/writing",  priority: "0.9", changefreq: "weekly"  },
   { url: "/kismet",   priority: "0.8", changefreq: "monthly" },
-  { url: "/answers",  priority: "0.7", changefreq: "monthly" },
+  { url: "/scans",    priority: "0.7", changefreq: "monthly" },
   { url: "/find-me",  priority: "0.6", changefreq: "yearly"  },
 ];
 
