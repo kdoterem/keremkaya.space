@@ -41,21 +41,43 @@ export default function ScansPage() {
         fontFamily:      '"Helvetica Neue", Helvetica, Arial, sans-serif',
       }}
     >
-      <Link
-        href="/"
-        style={{
-          fontSize:       "0.7rem",
-          fontWeight:     500,
-          letterSpacing:  "0.15em",
-          fontVariant:    "small-caps",
-          color:          "#0a0a0a",
-          textDecoration: "none",
-          opacity:        0.6,
-          flexShrink:     0,
-        }}
-      >
-        RETURN
-      </Link>
+      {expanded ? (
+        <button
+          onClick={() => setOpenSlug(null)}
+          style={{
+            fontSize:       "0.7rem",
+            fontWeight:     500,
+            letterSpacing:  "0.15em",
+            fontVariant:    "small-caps",
+            color:          "#0a0a0a",
+            textDecoration: "none",
+            opacity:        0.6,
+            flexShrink:     0,
+            background:     "none",
+            border:         "none",
+            padding:        0,
+            cursor:         "pointer",
+          }}
+        >
+          RETURN
+        </button>
+      ) : (
+        <Link
+          href="/"
+          style={{
+            fontSize:       "0.7rem",
+            fontWeight:     500,
+            letterSpacing:  "0.15em",
+            fontVariant:    "small-caps",
+            color:          "#0a0a0a",
+            textDecoration: "none",
+            opacity:        0.6,
+            flexShrink:     0,
+          }}
+        >
+          RETURN
+        </Link>
+      )}
 
       <motion.h2
         onClick={expanded ? () => setOpenSlug(null) : undefined}
