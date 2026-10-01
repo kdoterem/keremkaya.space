@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ScanCollection } from "@/lib/scans";
 import ScanExpanded from "@/app/components/ScanExpanded";
+import useIsNarrow from "@/lib/useIsNarrow";
 
 // ── SCANS — the warm gray (#A49B9C) this page was designed around is now
 // the whole site's ground color (see globals.css), so this page just
@@ -28,13 +29,19 @@ export default function ScansPage() {
 
   const openCollection = collections?.find(c => c.slug === openSlug) ?? null;
   const expanded = openCollection !== null;
+  const narrow = useIsNarrow();
+  // The fixed-height, no-scroll "fits one screen" treatment was a desktop
+  // request — on a phone there's no side-by-side room for hero + filmstrip
+  // to begin with (see ScanExpanded), so it needs to scroll like any other
+  // mobile page rather than fight to cram everything above the fold.
+  const fitToScreen = expanded && !narrow;
 
   return (
     <main
       style={{
         minHeight:       "100vh",
-        height:          expanded ? "100dvh" : undefined,
-        overflow:        expanded ? "hidden" : undefined,
+        height:          fitToScreen ? "100dvh" : undefined,
+        overflow:        fitToScreen ? "hidden" : undefined,
         display:         expanded ? "flex" : undefined,
         flexDirection:   expanded ? "column" : undefined,
         padding:         expanded ? "1.75rem 5vw 1.25rem" : "4rem 5vw 6rem",
@@ -112,7 +119,7 @@ export default function ScansPage() {
       ) : (
         <AnimatePresence mode="wait">
           {openCollection ? (
-            <ScanExpanded key="expanded" collection={openCollection} onClose={() => setOpenSlug(null)} />
+            <ScanExpanded key="expanded" collection={openCollection} onClose={() => setOpenSlug(null)} narrow={narrow} />
           ) : (
             <motion.div
               key="grid"
@@ -122,7 +129,7 @@ export default function ScansPage() {
               transition={{ duration: 0.3 }}
               style={{
                 display:             "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))",
                 gap:                 "2.5rem 1.75rem",
                 maxWidth:            "60rem",
               }}
