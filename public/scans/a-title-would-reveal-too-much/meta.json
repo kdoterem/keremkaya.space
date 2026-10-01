@@ -1,0 +1,31 @@
+{
+  "title": "a title would reveal too much",
+  "date": "2026-10-01",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7110538373424972
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.711295871559633
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.7070008643042351
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.7052420509882555
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 0.6882255389718076
+    },
+    {
+      "file": "06.jpg",
+      "ratio": 0.676702307259426
+    }
+  ]
+}

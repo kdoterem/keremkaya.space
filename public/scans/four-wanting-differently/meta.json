@@ -1,0 +1,27 @@
+{
+  "title": "four wanting differently",
+  "date": "2026-10-01",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7018900343642611
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.7018931901667138
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.7075688073394495
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.7297757592960545
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 0.7089659123460327
+    }
+  ]
+}

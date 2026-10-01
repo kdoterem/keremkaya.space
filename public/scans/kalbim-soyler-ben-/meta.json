@@ -1,0 +1,27 @@
+{
+  "title": "kalbim soyler ben-",
+  "date": "2026-10-01",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7101200686106347
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.7053930005737234
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.7051061388410786
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.6905927134312126
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 0.6975291110479978
+    }
+  ]
+}
