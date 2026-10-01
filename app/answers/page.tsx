@@ -1,21 +1,44 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
+import type { ScanCollection } from "@/lib/scans";
+import ScanExpanded from "@/app/components/ScanExpanded";
 
-// ── SCANS — repurposed from the old Q&A listing. That page fetched and
-// rendered answers/[slug] entries via /api/answers; none of that data or
-// those routes were touched, just this listing no longer shows them (the
-// [slug] pages and API route still exist, just unreached from here now).
-// Paper scans are the new content for this section, not built yet — this
-// is the placeholder until they start coming in.
-export default function AnswersPage() {
+// ── SCANS — the warm gray (#A49B9C) this page was designed around is now
+// the whole site's ground color (see globals.css), so this page just
+// inherits it rather than setting its own — the paper is still the only
+// color doing active work on the page, same as before, it's just no longer
+// a departure from the rest of the site to get there. Nothing here is a
+// pop-up: opening a collection swaps the grid out for ScanExpanded in the
+// same spot, same page, header untouched. Covers are small and plain on
+// purpose — no stack cue, no sheet-count caption; everybody clicks a cover
+// regardless, so a tile shouldn't spend effort telegraphing "there's more"
+// before it's clicked.
+
+export default function ScansPage() {
+  const [collections, setCollections] = useState<ScanCollection[] | null>(null);
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/scans").then(r => r.json()).then(setCollections);
+  }, []);
+
+  const openCollection = collections?.find(c => c.slug === openSlug) ?? null;
+  const expanded = openCollection !== null;
+
   return (
     <main
       style={{
-        minHeight:  "100vh",
-        padding:    "4rem 5vw",
-        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        minHeight:       "100vh",
+        height:          expanded ? "100dvh" : undefined,
+        overflow:        expanded ? "hidden" : undefined,
+        display:         expanded ? "flex" : undefined,
+        flexDirection:   expanded ? "column" : undefined,
+        padding:         expanded ? "1.75rem 5vw 1.25rem" : "4rem 5vw 6rem",
+        fontFamily:      '"Helvetica Neue", Helvetica, Arial, sans-serif',
       }}
     >
       <Link
@@ -27,41 +50,128 @@ export default function AnswersPage() {
           fontVariant:    "small-caps",
           color:          "#0a0a0a",
           textDecoration: "none",
-          opacity:        0.5,
+          opacity:        0.6,
+          flexShrink:     0,
         }}
       >
         RETURN
       </Link>
 
       <motion.h2
+        onClick={expanded ? () => setOpenSlug(null) : undefined}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         style={{
-          fontSize:      "clamp(2rem, 5vw, 3.5rem)",
+          fontSize:      expanded ? "clamp(1.4rem, 3vw, 2rem)" : "clamp(2rem, 5vw, 3.5rem)",
           fontWeight:    700,
           letterSpacing: "-0.02em",
           color:         "#0a0a0a",
-          marginTop:     "2.5rem",
-          marginBottom:  "1rem",
+          marginTop:     expanded ? "0.75rem" : "2.5rem",
+          marginBottom:  expanded ? "1rem" : "3rem",
+          cursor:        expanded ? "pointer" : undefined,
+          flexShrink:    0,
         }}
       >
         SCANS
       </motion.h2>
 
-      <motion.p
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+      {collections === null ? null : collections.length === 0 ? (
+        <p
+          style={{
+            fontSize:      "0.95rem",
+            fontStyle:     "italic",
+            color:         "rgba(10,10,10,0.55)",
+            letterSpacing: "0.01em",
+          }}
+        >
+          work in progress.
+        </p>
+      ) : (
+        <AnimatePresence mode="wait">
+          {openCollection ? (
+            <ScanExpanded key="expanded" collection={openCollection} onClose={() => setOpenSlug(null)} />
+          ) : (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                display:             "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                gap:                 "2.5rem 1.75rem",
+                maxWidth:            "60rem",
+              }}
+            >
+              {collections.map((c) => (
+                <ScanTile key={c.slug} collection={c} onOpen={() => setOpenSlug(c.slug)} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+    </main>
+  );
+}
+
+function ScanTile({
+  collection,
+  onOpen,
+}: {
+  collection: ScanCollection;
+  onOpen: () => void;
+}) {
+  const cover = collection.cover;
+  const ratio = collection.pages[0].ratio;
+
+  return (
+    <motion.button
+      onClick={onOpen}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      style={{
+        background: "none",
+        border:     "none",
+        padding:    0,
+        cursor:     "pointer",
+        display:        "flex",
+        flexDirection:  "column",
+        alignItems:     "flex-start",
+        gap:            "0.5rem",
+        width:          "100%",
+      }}
+    >
+      <div
         style={{
-          fontSize:      "0.95rem",
-          fontStyle:     "italic",
-          color:         "rgba(10,10,10,0.4)",
-          letterSpacing: "0.01em",
+          position:    "relative",
+          width:       "100%",
+          aspectRatio: String(ratio),
+          boxShadow:   "0 8px 20px rgba(10,10,10,0.22)",
         }}
       >
-        work in progress.
-      </motion.p>
-    </main>
+        <Image
+          src={cover}
+          alt={collection.title}
+          fill
+          sizes="(max-width: 600px) 45vw, (max-width: 1000px) 25vw, 180px"
+          style={{ objectFit: "cover" }}
+        />
+      </div>
+
+      <span
+        style={{
+          fontSize:      "0.7rem",
+          fontWeight:    500,
+          letterSpacing: "0.04em",
+          color:         "#0a0a0a",
+          opacity:       0.65,
+        }}
+      >
+        {collection.title}
+      </span>
+    </motion.button>
   );
 }

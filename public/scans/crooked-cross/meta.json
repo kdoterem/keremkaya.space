@@ -1,0 +1,11 @@
+{
+  "title": "crooked cross",
+  "date": "2026-10-01",
+  "cover": "01-front-thumb.jpg",
+  "pages": [
+    { "file": "01-front.jpg", "ratio": 0.6766666666666666 },
+    { "file": "01-back.jpg", "ratio": 0.67625 },
+    { "file": "02-front.jpg", "ratio": 0.6858333333333333 },
+    { "file": "02-back.jpg", "ratio": 0.6858333333333333 }
+  ]
+}
