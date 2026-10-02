@@ -1,0 +1,19 @@
+{
+  "title": "letter to carl",
+  "date": "2026-10-02",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.6237260497350183
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.6117886178861789
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.6121951219512195
+    }
+  ]
+}

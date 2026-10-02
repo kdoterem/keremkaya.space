@@ -1,0 +1,27 @@
+{
+  "title": "no smile smile",
+  "date": "2026-10-02",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7106685633001423
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.707512139388746
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.6818434203220433
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.6951735817104149
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 0.707471264367816
+    }
+  ]
+}
