@@ -131,7 +131,6 @@ export default function ScansPage() {
                 display:             "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))",
                 gap:                 "2.5rem 1.75rem",
-                maxWidth:            "60rem",
               }}
             >
               {collections.map((c) => (
