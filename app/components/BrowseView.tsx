@@ -52,7 +52,7 @@ function PoemBlock({ post }: { post: SearchDoc }) {
       >
         <WeightedText text={post.title} weights={titleWeights} weightStyle={titleWeightStyle} />
       </h2>
-      <p style={{ fontFamily: PROSE, fontSize: "0.72rem", color: "rgba(10,10,10,0.4)", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
+      <p style={{ fontFamily: PROSE, fontSize: "0.72rem", color: "rgba(10,10,10,0.6)", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
         {post.date}
       </p>
       <div style={{ fontFamily: PROSE, fontSize: "1rem", lineHeight: 1.75, color: "#0a0a0a", whiteSpace: "pre-wrap" }}>
@@ -148,7 +148,7 @@ export default function BrowseView({ months, postsByMonth, month, onNavigate, on
       </h1>
 
       {posts.length === 0 ? (
-        <p style={{ fontFamily: PROSE, fontSize: "0.85rem", color: "rgba(10,10,10,0.4)" }}>
+        <p style={{ fontFamily: PROSE, fontSize: "0.85rem", color: "rgba(10,10,10,0.6)" }}>
           nothing here
         </p>
       ) : (

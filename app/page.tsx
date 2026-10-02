@@ -315,7 +315,7 @@ function TagWord({
         background:    "none",
         border:        "none",
         // Tags: slightly muted so they read as content, distinct from the nav
-        color:         "rgba(10,10,10,0.72)",
+        color:         "rgba(10,10,10,0.83)",
         cursor:        dragging ? "grabbing" : "grab",
         padding:       0,
         fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -552,8 +552,8 @@ export default function Home() {
           zIndex:        20,
           padding:       "0.5rem 0.9rem",
           background:    "transparent",
-          border:        "1px solid rgba(10,10,10,0.22)",
-          color:         "rgba(10,10,10,0.5)",
+          border:        "1px solid rgba(10,10,10,0.62)",
+          color:         "rgba(10,10,10,0.68)",
           fontSize:      "0.65rem",
           fontWeight:    500,
           fontVariant:   "small-caps",
@@ -567,8 +567,8 @@ export default function Home() {
           e.currentTarget.style.borderColor = "#0a0a0a";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = "rgba(10,10,10,0.5)";
-          e.currentTarget.style.borderColor = "rgba(10,10,10,0.22)";
+          e.currentTarget.style.color = "rgba(10,10,10,0.68)";
+          e.currentTarget.style.borderColor = "rgba(10,10,10,0.62)";
         }}
       >
         all tags
@@ -681,13 +681,13 @@ export default function Home() {
               fontVariant:    "small-caps",
               letterSpacing:  "0.18em",
               // Nav: clearly muted — reads as UI chrome, not content
-              color:          "rgba(10,10,10,0.3)",
+              color:          "rgba(10,10,10,0.52)",
               textDecoration: "none",
               fontFamily:     '"Helvetica Neue", Helvetica, Arial, sans-serif',
               transition:     "color 0.2s",
             }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.8)")}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.3)")}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.88)")}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.52)")}
           >
             {label}
           </Link>

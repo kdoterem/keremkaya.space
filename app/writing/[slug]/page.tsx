@@ -191,7 +191,7 @@ export default async function PostPage({
           fontVariant: "small-caps",
           color: "#0a0a0a",
           textDecoration: "none",
-          opacity: 0.5,
+          opacity: 0.68,
         }}
       >
         ← WRITING
@@ -255,7 +255,7 @@ export default async function PostPage({
         <p
           style={{
             fontSize: "0.75rem",
-            color: "rgba(10,10,10,0.4)",
+            color: "rgba(10,10,10,0.6)",
             letterSpacing: "0.05em",
             marginBottom: "3rem",
           }}
@@ -297,14 +297,14 @@ export default async function PostPage({
               alignItems:    "flex-start",
               marginTop:     "4rem",
               paddingTop:    "2rem",
-              borderTop:     "1px solid rgba(10,10,10,0.12)",
+              borderTop:     "1px solid rgba(10,10,10,0.52)",
               gap:           "2rem",
             }}
           >
             {/* Previous = older post */}
             {prev ? (
               <Link href={`/writing/${prev.slug}`} style={{ textDecoration: "none", flex: 1 }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
                   ← previous
                 </span>
                 <span className="post-nav-title">{prev.title}</span>
@@ -313,7 +313,7 @@ export default async function PostPage({
 
             {next ? (
               <Link href={`/writing/${next.slug}`} style={{ textDecoration: "none", flex: 1, textAlign: "right" }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
                   next →
                 </span>
                 <span className="post-nav-title">{next.title}</span>

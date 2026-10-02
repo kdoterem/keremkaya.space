@@ -64,7 +64,7 @@ export default async function AnswerPage({
           fontVariant:    "small-caps",
           color:          "#0a0a0a",
           textDecoration: "none",
-          opacity:        0.5,
+          opacity:        0.68,
         }}
       >
         ← ANSWERS
@@ -83,7 +83,7 @@ export default async function AnswerPage({
                   letterSpacing: "0.1em",
                   fontWeight:    500,
                   fontVariant:   "small-caps",
-                  color:         "rgba(10,10,10,0.4)",
+                  color:         "rgba(10,10,10,0.6)",
                 }}
               >
                 {tag}
@@ -122,7 +122,7 @@ export default async function AnswerPage({
         <p
           style={{
             fontSize:      "0.7rem",
-            color:         "rgba(10,10,10,0.35)",
+            color:         "rgba(10,10,10,0.56)",
             letterSpacing: "0.05em",
             marginTop:     "2.5rem",
           }}
@@ -139,13 +139,13 @@ export default async function AnswerPage({
               alignItems:     "flex-start",
               marginTop:      "4rem",
               paddingTop:     "2rem",
-              borderTop:      "1px solid rgba(10,10,10,0.12)",
+              borderTop:      "1px solid rgba(10,10,10,0.52)",
               gap:            "2rem",
             }}
           >
             {prev ? (
               <Link href={`/answers/${prev.slug}`} style={{ textDecoration: "none", flex: 1 }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
                   ← previous
                 </span>
                 <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#0a0a0a" }}>
@@ -156,7 +156,7 @@ export default async function AnswerPage({
 
             {next ? (
               <Link href={`/answers/${next.slug}`} style={{ textDecoration: "none", flex: 1, textAlign: "right" }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.38)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
                   next →
                 </span>
                 <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#0a0a0a" }}>

@@ -58,7 +58,7 @@ export default function ScansPage() {
             fontVariant:    "small-caps",
             color:          "#0a0a0a",
             textDecoration: "none",
-            opacity:        0.6,
+            opacity:        0.76,
             flexShrink:     0,
             background:     "none",
             border:         "none",
@@ -78,7 +78,7 @@ export default function ScansPage() {
             fontVariant:    "small-caps",
             color:          "#0a0a0a",
             textDecoration: "none",
-            opacity:        0.6,
+            opacity:        0.76,
             flexShrink:     0,
           }}
         >
@@ -110,7 +110,7 @@ export default function ScansPage() {
           style={{
             fontSize:      "0.95rem",
             fontStyle:     "italic",
-            color:         "rgba(10,10,10,0.55)",
+            color:         "rgba(10,10,10,0.72)",
             letterSpacing: "0.01em",
           }}
         >
@@ -178,7 +178,7 @@ function ScanTile({
           position:    "relative",
           width:       "100%",
           aspectRatio: String(ratio),
-          boxShadow:   "0 8px 20px rgba(10,10,10,0.22)",
+          boxShadow:   "0 8px 20px rgba(10,10,10,0.43)",
         }}
       >
         <Image
@@ -196,7 +196,7 @@ function ScanTile({
           fontWeight:    500,
           letterSpacing: "0.04em",
           color:         "#0a0a0a",
-          opacity:       0.65,
+          opacity:       0.79,
         }}
       >
         {collection.title}

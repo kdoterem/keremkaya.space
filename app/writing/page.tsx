@@ -285,7 +285,7 @@ export default function WritingPage() {
             fontVariant:    "small-caps",
             color:          "#0a0a0a",
             textDecoration: "none",
-            opacity:        0.5,
+            opacity:        0.68,
           }}
         >
           RETURN
@@ -344,7 +344,7 @@ export default function WritingPage() {
             width:         "100%",
             background:    "none",
             border:        "none",
-            borderBottom:  "1px solid rgba(10,10,10,0.2)",
+            borderBottom:  "1px solid rgba(10,10,10,0.6)",
             outline:       "none",
             fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
@@ -414,7 +414,7 @@ export default function WritingPage() {
                           fontWeight:    400,
                           fontStyle:     "italic",
                           lineHeight:    1.4,
-                          color:         isActive ? "rgba(184,240,74,0.65)" : "rgba(10,10,10,0.5)",
+                          color:         isActive ? "rgba(184,240,74,0.65)" : "rgba(10,10,10,0.68)",
                           transition:    "color 0.15s",
                           letterSpacing: "-0.005em",
                         }}
@@ -427,7 +427,7 @@ export default function WritingPage() {
                     style={{
                       fontSize:      "0.75rem",
                       fontWeight:    400,
-                      color:         isActive ? "rgba(184,240,74,0.6)" : "rgba(10,10,10,0.4)",
+                      color:         isActive ? "rgba(184,240,74,0.6)" : "rgba(10,10,10,0.6)",
                       transition:    "color 0.15s",
                       letterSpacing: "0.05em",
                       flexShrink:    0,
@@ -453,7 +453,7 @@ export default function WritingPage() {
             fontSize:      "0.75rem",
             fontWeight:    400,
             letterSpacing: "0.05em",
-            color:         "rgba(10,10,10,0.4)",
+            color:         "rgba(10,10,10,0.6)",
             paddingTop:    "1.1rem",
             paddingLeft:   "calc(1rem + clamp(1.5em, 5vw, 2.5em))",
             paddingRight:  "1rem",

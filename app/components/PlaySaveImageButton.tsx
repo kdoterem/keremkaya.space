@@ -60,7 +60,7 @@ export default function PlaySaveImageButton({ category, text }: { category: stri
     ctx.fillStyle = "#A49B9C";
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = "rgba(10,10,10,0.45)";
+    ctx.fillStyle = "rgba(10,10,10,0.64)";
     ctx.font = `600 26px ${FONT}`;
     ctx.fillText(category.toUpperCase(), PAD_X, PAD_TOP);
 
@@ -99,7 +99,7 @@ export default function PlaySaveImageButton({ category, text }: { category: stri
       y += lineHeight;
     }
 
-    ctx.fillStyle = "rgba(10,10,10,0.4)";
+    ctx.fillStyle = "rgba(10,10,10,0.6)";
     ctx.font = `600 22px ${FONT}`;
     ctx.fillText("PLAY · KEREMKAYA.SPACE", PAD_X, H - 50);
 

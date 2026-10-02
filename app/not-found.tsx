@@ -71,7 +71,7 @@ export default function NotFound() {
           fontVariant:   "small-caps",
           color:         "#0a0a0a",
           textDecoration: "none",
-          opacity:       0.5,
+          opacity:       0.68,
         }}
       >
         RETURN
@@ -97,7 +97,7 @@ export default function NotFound() {
             fontWeight:    400,
             letterSpacing: "0.01em",
             lineHeight:    1.5,
-            color:         "rgba(10,10,10,0.5)",
+            color:         "rgba(10,10,10,0.68)",
           }}
         >
           {line2 || "\u00A0"}

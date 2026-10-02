@@ -291,7 +291,7 @@ export default function ArtPage() {
             fontVariant:    "small-caps",
             color:          "#0a0a0a",
             textDecoration: "none",
-            opacity:        0.5,
+            opacity:        0.68,
           }}
         >
           RETURN
@@ -406,7 +406,7 @@ export default function ArtPage() {
             <p
               style={{
                 fontSize:      "0.75rem",
-                color:         "rgba(10,10,10,0.4)",
+                color:         "rgba(10,10,10,0.6)",
                 letterSpacing: "0.05em",
               }}
             >

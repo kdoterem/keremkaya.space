@@ -268,7 +268,7 @@ export function MeshLayers({
   const crossSections = useMemo(() => buildCrossSections(points, confidences), [points, confidences]);
 
   return (
-    <g style={glow ? { filter: "drop-shadow(0 0 1.5px rgba(10,10,10,0.4))" } : undefined}>
+    <g style={glow ? { filter: "drop-shadow(0 0 1.5px rgba(10,10,10,0.6))" } : undefined}>
       {crossSections.map((cs, i) => {
         const midX = (cs.x0 + cs.x1) / 2, midY = (cs.y0 + cs.y1) / 2;
         const op = CROSS_OPACITY * cs.confidence * cs.weight * opacityMultiplier;

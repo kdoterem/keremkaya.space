@@ -50,14 +50,14 @@ export default function WitnessButton() {
           zIndex: 50,
           width: "11px",
           height: "11px",
-          border: "1px solid rgba(10,10,10,0.15)",
+          border: "1px solid rgba(10,10,10,0.55)",
           background: "transparent",
           cursor: "pointer",
           padding: 0,
           transition: "border-color 0.3s",
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.4)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.15)"; }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.6)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.55)"; }}
       />
 
       <AnimatePresence>

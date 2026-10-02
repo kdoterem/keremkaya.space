@@ -241,7 +241,7 @@ export default function PlayNext() {
             Doubles as quiet familiarization with the taxonomy /play/browse
             uses later, without asking anyone to learn it up front. */}
         {categories.length > 0 && (
-          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)", marginBottom: "0.8rem" }}>
+          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.6)", marginBottom: "0.8rem" }}>
             {categories.map((c) => c.title).join(" · ")}
           </p>
         )}
@@ -278,7 +278,7 @@ export default function PlayNext() {
             button below does not hop up and down as messages appear/clear. */}
         <div style={{ minHeight: "1.4rem", marginBottom: "0.6rem" }}>
           {nudge && (
-            <span style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)" }}>
+            <span style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.68)" }}>
               {nudge}
             </span>
           )}
@@ -327,7 +327,7 @@ function TopBar({
         href="/"
         style={{
           fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.15em",
-          fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+          fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.68,
         }}
       >
         RETURN
@@ -341,7 +341,7 @@ function TopBar({
           href="/play/saved"
           style={{
             fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.1em",
-            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.68,
           }}
         >
           your saved writings →
@@ -349,13 +349,13 @@ function TopBar({
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-            <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.4)" }}>
+            <span style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.1em", fontVariant: "small-caps", color: "rgba(10,10,10,0.6)" }}>
               tier {tier} of {TIER_COUNT}
             </span>
             {finishedGame && (
               <Link
                 href="/play/browse"
-                style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+                style={{ fontSize: "0.7rem", fontStyle: "italic", color: "rgba(10,10,10,0.68)", textDecoration: "underline", textUnderlineOffset: "3px" }}
               >
                 browse freely →
               </Link>
@@ -363,12 +363,12 @@ function TopBar({
           </div>
           {/* Quiet fill bar toward the next unlock — no number alongside
               it on purpose, a count here would read like a countdown. */}
-          <div style={{ width: "90px", height: "3px", background: "rgba(10,10,10,0.15)", borderRadius: "2px", overflow: "hidden" }}>
+          <div style={{ width: "90px", height: "3px", background: "rgba(10,10,10,0.35)", borderRadius: "2px", overflow: "hidden" }}>
             <div
               style={{
                 width: `${Math.round(progressFraction * 100)}%`,
                 height: "100%",
-                background: "rgba(10,10,10,0.55)",
+                background: "rgba(10,10,10,0.72)",
                 borderRadius: "2px",
                 transition: "width 0.4s ease-out",
               }}

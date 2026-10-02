@@ -42,7 +42,7 @@ export default function ObscurableRun({
         style={{
           cursor: "pointer",
           textDecoration: "underline",
-          textDecorationColor: "rgba(10,10,10,0.22)",
+          textDecorationColor: "rgba(10,10,10,0.43)",
           textUnderlineOffset: "3px",
         }}
       >

@@ -34,7 +34,7 @@ export default function PlayBrowsePage() {
           href="/play"
           style={{
             fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.15em",
-            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.68,
           }}
         >
           ← PLAY
@@ -43,7 +43,7 @@ export default function PlayBrowsePage() {
           href="/play/saved"
           style={{
             fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.1em",
-            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.5,
+            fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.68,
           }}
         >
           your saved writings →
@@ -54,7 +54,7 @@ export default function PlayBrowsePage() {
         <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
           browse freely
         </h1>
-        <p style={{ fontSize: "0.95rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)", marginBottom: "3rem" }}>
+        <p style={{ fontSize: "0.95rem", fontStyle: "italic", color: "rgba(10,10,10,0.68)", marginBottom: "3rem" }}>
           the whole archive, by what it's carrying — pick a thread and see where it goes.
         </p>
 
@@ -64,7 +64,7 @@ export default function PlayBrowsePage() {
               <h2 style={{ fontSize: "1.4rem", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "0.2rem" }}>
                 {category.title}
               </h2>
-              <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.45)", marginBottom: "0.9rem" }}>
+              <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.64)", marginBottom: "0.9rem" }}>
                 {category.blurb}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
@@ -74,7 +74,7 @@ export default function PlayBrowsePage() {
                     href={`/play/browse/${encodeURIComponent(tag)}`}
                     style={{
                       fontSize: "0.8rem", fontWeight: 500, padding: "0.4rem 0.85rem",
-                      border: "1px solid rgba(10,10,10,0.2)", borderRadius: "999px",
+                      border: "1px solid rgba(10,10,10,0.6)", borderRadius: "999px",
                       textDecoration: "none", color: "#0a0a0a",
                     }}
                   >

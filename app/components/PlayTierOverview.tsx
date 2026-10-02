@@ -48,7 +48,7 @@ function CategoryBlock({ category, entries }: { category: PlayCategory; entries:
           onClick={() => setOpen((v) => !v)}
           style={{
             background: "none", border: "none", padding: 0, cursor: "pointer",
-            fontSize: "0.72rem", fontStyle: "italic", color: "rgba(10,10,10,0.5)",
+            fontSize: "0.72rem", fontStyle: "italic", color: "rgba(10,10,10,0.68)",
             textDecoration: "underline", textUnderlineOffset: "3px",
           }}
         >
@@ -58,7 +58,7 @@ function CategoryBlock({ category, entries }: { category: PlayCategory; entries:
       {open && (
         <div style={{ marginTop: "0.7rem", display: "flex", flexDirection: "column", gap: "0.9rem" }}>
           {entries.map((e, i) => (
-            <p key={i} style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(10,10,10,0.75)" }}>
+            <p key={i} style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(10,10,10,0.85)" }}>
               {e.text}
             </p>
           ))}
@@ -110,7 +110,7 @@ export default function PlayTierOverview({
           position: "fixed",
           inset: 0,
           zIndex: 400,
-          background: "rgba(10,10,10,0.72)",
+          background: "rgba(10,10,10,0.83)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -124,7 +124,7 @@ export default function PlayTierOverview({
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
             background: "#A49B9C",
-            border: "1px solid rgba(10,10,10,0.2)",
+            border: "1px solid rgba(10,10,10,0.6)",
             maxWidth: "34rem",
             width: "100%",
             maxHeight: "85vh",
@@ -132,7 +132,7 @@ export default function PlayTierOverview({
             padding: "2.5rem",
           }}
         >
-          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.45)", marginBottom: "1rem" }}>
+          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.64)", marginBottom: "1rem" }}>
             tier {tier} — done
           </p>
           <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2rem)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "1.8rem", color: "#0a0a0a" }}>
@@ -146,13 +146,13 @@ export default function PlayTierOverview({
               ))}
             </div>
           ) : (
-            <p style={{ fontSize: "0.9rem", color: "rgba(10,10,10,0.6)", marginBottom: "1.5rem" }}>
+            <p style={{ fontSize: "0.9rem", color: "rgba(10,10,10,0.76)", marginBottom: "1.5rem" }}>
               nothing here settled into one thread — onward.
             </p>
           )}
 
           {grouped.uncategorized > 0 && (
-            <p style={{ fontSize: "0.78rem", fontStyle: "italic", color: "rgba(10,10,10,0.45)", marginBottom: "2rem" }}>
+            <p style={{ fontSize: "0.78rem", fontStyle: "italic", color: "rgba(10,10,10,0.64)", marginBottom: "2rem" }}>
               plus {grouped.uncategorized} answer{grouped.uncategorized === 1 ? "" : "s"} that weren't circling any one thing in particular.
             </p>
           )}

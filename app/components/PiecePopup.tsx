@@ -35,7 +35,7 @@ export default function PiecePopup({
         position: "fixed",
         inset: 0,
         zIndex: 300,
-        background: "rgba(10,10,10,0.6)",
+        background: "rgba(10,10,10,0.76)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -64,7 +64,7 @@ export default function PiecePopup({
           style={{
             position: "absolute", top: "1rem", right: "1rem",
             background: "none", border: "none", cursor: "pointer",
-            color: "rgba(10,10,10,0.4)", fontSize: "1.1rem", padding: "0.25rem",
+            color: "rgba(10,10,10,0.6)", fontSize: "1.1rem", padding: "0.25rem",
           }}
         >
           ×
@@ -76,7 +76,7 @@ export default function PiecePopup({
             fontWeight: 500,
             letterSpacing: "0.14em",
             fontVariant: "small-caps",
-            color: "rgba(10,10,10,0.45)",
+            color: "rgba(10,10,10,0.64)",
             marginBottom: "0.6rem",
           }}
         >

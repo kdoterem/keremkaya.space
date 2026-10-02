@@ -71,7 +71,7 @@ function ContactLine({ text, type, delay }: { text: string; type: string; delay:
     opacity:       visible ? 1 : 0,
     transition:    "opacity 0.15s",
     textDecoration:      "underline",
-    textDecorationColor: "rgba(10,10,10,0.25)",
+    textDecorationColor: "rgba(10,10,10,0.47)",
     textUnderlineOffset: "3px",
     cursor:        "pointer",
   };
@@ -121,7 +121,7 @@ function RssLine() {
           display:             "block",
           marginBottom:        "0.4rem",
           textDecoration:      "underline",
-          textDecorationColor: "rgba(10,10,10,0.25)",
+          textDecorationColor: "rgba(10,10,10,0.47)",
           textUnderlineOffset: "3px",
           opacity:             rssVisible ? 1 : 0,
           transition:          "opacity 0.15s",
@@ -168,7 +168,7 @@ export default function FindMePage() {
           fontVariant:   "small-caps",
           color:         "#0a0a0a",
           textDecoration: "none",
-          opacity:       0.5,
+          opacity:       0.68,
         }}
       >
         RETURN

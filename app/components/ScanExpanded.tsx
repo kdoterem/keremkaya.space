@@ -87,14 +87,14 @@ export default function ScanExpanded({
                     position:    "relative",
                     width:       "100%",
                     aspectRatio: String(hero.ratio),
-                    boxShadow:   "0 14px 32px rgba(10,10,10,0.25)",
+                    boxShadow:   "0 14px 32px rgba(10,10,10,0.47)",
                   }
                 : {
                     position:    "relative",
                     height:      "100%",
                     maxWidth:    "100%",
                     aspectRatio: String(hero.ratio),
-                    boxShadow:   "0 14px 32px rgba(10,10,10,0.25)",
+                    boxShadow:   "0 14px 32px rgba(10,10,10,0.47)",
                     flexShrink:  0,
                   }
             }
@@ -133,9 +133,9 @@ export default function ScanExpanded({
                   cursor:      "pointer",
                   flexShrink:  0,
                   opacity:     i === heroIndex ? 1 : 0.55,
-                  outline:     i === heroIndex ? "2px solid rgba(10,10,10,0.55)" : "none",
+                  outline:     i === heroIndex ? "2px solid rgba(10,10,10,0.72)" : "none",
                   outlineOffset: "3px",
-                  boxShadow:   "0 6px 14px rgba(10,10,10,0.18)",
+                  boxShadow:   "0 6px 14px rgba(10,10,10,0.39)",
                 }}
               >
                 <Image

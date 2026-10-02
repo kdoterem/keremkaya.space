@@ -85,7 +85,7 @@ export default function PlayIntro() {
           position: "fixed",
           inset: 0,
           zIndex: 400,
-          background: "rgba(10,10,10,0.72)",
+          background: "rgba(10,10,10,0.83)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -99,7 +99,7 @@ export default function PlayIntro() {
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
             background: "#A49B9C",
-            border: "1px solid rgba(10,10,10,0.2)",
+            border: "1px solid rgba(10,10,10,0.6)",
             maxWidth: "34rem",
             width: "100%",
             maxHeight: "85vh",
@@ -107,13 +107,13 @@ export default function PlayIntro() {
             padding: "2.5rem",
           }}
         >
-          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.45)", marginBottom: "1rem" }}>
+          <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.64)", marginBottom: "1rem" }}>
             PLAY — before you begin
           </p>
           <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "1.5rem", color: "#0a0a0a" }}>
             the terms are simple
           </h1>
-          <div style={{ fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(10,10,10,0.75)", display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2.5rem" }}>
+          <div style={{ fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(10,10,10,0.85)", display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2.5rem" }}>
             <p>you'll be given one passage at a time — a real stretch of something I wrote, quoted exactly, stopped somewhere it's still moving.</p>
             <p>write onward from it, however you want. continue it, answer it, argue, drift — there's no wrong way in.</p>
             <p>there's a minimum before you can submit. no maximum — say as much as you need to.</p>
@@ -131,7 +131,7 @@ export default function PlayIntro() {
                 cursor: "pointer",
                 fontSize: "0.75rem",
                 fontStyle: "italic",
-                color: "rgba(10,10,10,0.45)",
+                color: "rgba(10,10,10,0.64)",
                 textDecoration: "underline",
                 textUnderlineOffset: "3px",
               }}

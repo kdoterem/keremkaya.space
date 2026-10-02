@@ -697,7 +697,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
               <MechButton label="Read" onClick={handleRead} />
             ) : (
               <>
-                <span style={{ fontSize: "0.7rem", letterSpacing: "0.1em", color: "rgba(10,10,10,0.4)" }}>
+                <span style={{ fontSize: "0.7rem", letterSpacing: "0.1em", color: "rgba(10,10,10,0.6)" }}>
                   nothing left here
                 </span>
                 <MechButton label="Proceed" onClick={handleProceed} />
@@ -730,7 +730,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
             )}
           </h1>
 
-          <p style={{ fontFamily: PROSE, fontSize: "0.75rem", color: "rgba(10,10,10,0.4)", letterSpacing: "0.05em", marginBottom: "2.5rem", minHeight: "1em" }}>
+          <p style={{ fontFamily: PROSE, fontSize: "0.75rem", color: "rgba(10,10,10,0.6)", letterSpacing: "0.05em", marginBottom: "2.5rem", minHeight: "1em" }}>
             {revealStage >= 2 && (
               <CryptoScramble
                 text={currentPoem.date} duration={SCRAMBLE_MS} tickMs={TICK_MS}

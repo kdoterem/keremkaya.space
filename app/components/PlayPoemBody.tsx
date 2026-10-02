@@ -113,7 +113,7 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
         cursor: "pointer",
         fontSize: "0.78rem",
         fontStyle: "italic",
-        color: "rgba(10,10,10,0.4)",
+        color: "rgba(10,10,10,0.6)",
       }}
     >
       + {label}
@@ -268,7 +268,7 @@ export default function PlayPoemBody({
                 fontWeight: 500,
                 letterSpacing: "0.12em",
                 fontVariant: "small-caps",
-                color: "rgba(10,10,10,0.4)",
+                color: "rgba(10,10,10,0.6)",
                 marginBottom: "0.3rem",
               }}
             >

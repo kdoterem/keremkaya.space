@@ -58,7 +58,7 @@ export default function ConfirmButton({
         cursor: disabled ? "default" : "pointer",
         fontSize: "0.8rem",
         fontStyle: "italic",
-        color: "rgba(10,10,10,0.55)",
+        color: "rgba(10,10,10,0.72)",
         textDecoration: "underline",
         textUnderlineOffset: "3px",
         opacity: disabled ? 0.5 : 1,

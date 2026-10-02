@@ -47,7 +47,7 @@ const GAP            = 80;   // gap between title block and content
 const TAG_FONT_SIZE        = 24;
 const TAG_LINE_H           = 32;
 const TAG_GAP_ABOVE_FOOTER = 20; // gap between the tag row and the footer text above it (page reads top-to-bottom, footer/tags anchor from the bottom up)
-const TAG_COLOR            = 'rgba(10,10,10,0.4)';
+const TAG_COLOR            = 'rgba(10,10,10,0.6)';
 
 const TITLE_SIZE   = 80;
 const TITLE_LINE_H = 98;
@@ -420,7 +420,7 @@ function tagBlockHeight(tagLines: string[]): number {
 }
 
 function drawRule(ctx: CanvasRenderingContext2D, y: number) {
-  ctx.strokeStyle = 'rgba(10,10,10,0.12)';
+  ctx.strokeStyle = 'rgba(10,10,10,0.31)';
   ctx.lineWidth   = 1;
   const rw = Math.min(320, CW * 0.35);
   ctx.beginPath();
@@ -593,7 +593,7 @@ function renderPage(
       while (ctx.measureText(display).width > CW && display.length > 1)
         display = display.slice(0, -1);
       if (display !== title) display = display.trimEnd() + '…';
-      drawCentered(ctx, display, y, 'rgba(10,10,10,0.28)');
+      drawCentered(ctx, display, y, 'rgba(10,10,10,0.5)');
       y += CONT_TITLE_LINE_H;
     }
 
@@ -637,12 +637,12 @@ function renderPage(
     // Footer
     const footerY = H - 130;
     ctx.font      = `26px ${FONT}`;
-    ctx.fillStyle = 'rgba(10,10,10,0.32)';
-    drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.32)');
+    ctx.fillStyle = 'rgba(10,10,10,0.53)';
+    drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.53)');
 
     if (totalPages > 1) {
       ctx.font = `22px ${FONT}`;
-      drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.22)');
+      drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.43)');
     }
 
     const filename = totalPages > 1
@@ -711,7 +711,7 @@ function paintAnimatedFrame(
     while (ctx.measureText(display).width > CW && display.length > 1)
       display = display.slice(0, -1);
     if (display !== title) display = display.trimEnd() + '…';
-    drawCentered(ctx, display, y, 'rgba(10,10,10,0.28)');
+    drawCentered(ctx, display, y, 'rgba(10,10,10,0.5)');
     y += CONT_TITLE_LINE_H;
   }
 
@@ -740,10 +740,10 @@ function paintAnimatedFrame(
 
   const footerY = H - 130;
   ctx.font = `26px ${FONT}`;
-  drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.32)');
+  drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.53)');
   if (totalPages > 1) {
     ctx.font = `22px ${FONT}`;
-    drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.22)');
+    drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.43)');
   }
 }
 
@@ -1242,7 +1242,7 @@ export default function SaveImageButton({ title, content, slug, tags }: Props) {
           fontSize:      '0.72rem',
           lineHeight:    1.5,
           letterSpacing: '0.01em',
-          color:         'rgba(10,10,10,0.5)',
+          color:         'rgba(10,10,10,0.68)',
           fontFamily:    FONT,
         }}
       >

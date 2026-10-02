@@ -60,20 +60,20 @@ import { weightedTintFor, seededPhase, aliveScaleFor, bodyWeightStyle } from "@/
 export const SPARKLE_LAYERS: { image: string; size: string }[] = [
   {
     image:
-      "radial-gradient(circle, rgba(10,10,10,0.78) 1.1px, transparent 1.3px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.48) 0.85px, transparent 1px)",
+      "radial-gradient(circle, rgba(10,10,10,0.87) 1.1px, transparent 1.3px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.67) 0.85px, transparent 1px)",
     size: "7px 7px, 10px 9px",
   },
   {
     image:
-      "radial-gradient(circle, rgba(10,10,10,0.62) 1px, transparent 1.15px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.36) 0.75px, transparent 0.9px)",
+      "radial-gradient(circle, rgba(10,10,10,0.77) 1px, transparent 1.15px), " +
+      "radial-gradient(circle, rgba(10,10,10,0.57) 0.75px, transparent 0.9px)",
     size: "9px 11px, 6px 8px",
   },
   {
     image:
       "radial-gradient(circle, rgba(10,10,10,0.50) 0.9px, transparent 1.05px), " +
-      "radial-gradient(circle, rgba(10,10,10,0.28) 0.65px, transparent 0.8px)",
+      "radial-gradient(circle, rgba(10,10,10,0.5) 0.65px, transparent 0.8px)",
     size: "6px 9px, 11px 7px",
   },
 ];
