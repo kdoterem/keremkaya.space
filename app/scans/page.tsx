@@ -191,7 +191,7 @@ function ScanTile({
 
       <span
         style={{
-          fontSize:      "0.7rem",
+          fontSize:      "0.8rem",
           fontWeight:    500,
           letterSpacing: "0.04em",
           color:         "#0a0a0a",
