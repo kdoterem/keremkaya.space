@@ -6858,5 +6858,99 @@
         "note": "the deal restated at cosmic scale in the poem's last line"
       }
     }
+  },
+  {
+    "slug": "the-span-the-distance-first-place-and-the-resting-place",
+    "date": "2026-10-02",
+    "tags": {
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "doing feels a bit final,",
+          "if they are to choose or,",
+          "the dust that's under the bed is it star dust?",
+          "miles from home, is it cozier here?"
+        ]
+      },
+      "freedom": {
+        "type": "lines",
+        "spans": [
+          "but i guess in life one must choose,",
+          "if they are to choose or,"
+        ]
+      },
+      "truth": {
+        "type": "lines",
+        "spans": [
+          "but it's not the backstory, it's the story you tell yourself,",
+          "what i've seen",
+          "wasn't often what my eye picked up"
+        ]
+      },
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "what i've seen",
+          "wasn't often what my eye picked up",
+          "come and state,",
+          "compensate."
+        ]
+      },
+      "mortality": {
+        "type": "line",
+        "spans": [
+          "what about my story? so eager to die, not despite, because,"
+        ]
+      },
+      "identity": {
+        "type": "lines",
+        "spans": [
+          "if it's a lamb, or a",
+          "or a",
+          "i"
+        ]
+      },
+      "self-concealment": {
+        "type": "lines",
+        "spans": [
+          "so eager to die, not despite, because,",
+          "come and state,"
+        ]
+      },
+      "solitude": {
+        "type": "line",
+        "spans": [
+          "sit in a cave and have their imprinted soul imprint on the shadows of the wall,"
+        ]
+      },
+      "indecision": {
+        "type": "lines",
+        "spans": [
+          "if they are to choose or,",
+          "miles from",
+          "miles from",
+          "one must"
+        ]
+      },
+      "contempt": {
+        "type": "lines",
+        "spans": [
+          "you act so courtageous but you're not really feeling love",
+          "i can see in your act your backstory"
+        ]
+      },
+      "wonder": {
+        "type": "line",
+        "spans": [
+          "the dust that's under the bed is it star dust?"
+        ]
+      },
+      "displacement": {
+        "type": "line",
+        "spans": [
+          "miles from home, is it cozier here?"
+        ]
+      }
+    }
   }
 ]
