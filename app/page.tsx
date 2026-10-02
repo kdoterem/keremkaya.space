@@ -32,7 +32,7 @@ interface TagLayout {
 // remainder filling out the rest of each breakpoint's cap.
 const MOBILE_TOP_GUARANTEED  = 30, MOBILE_ROTATING  = 15;  // 45 total
 const TABLET_TOP_GUARANTEED  = 35, TABLET_ROTATING  = 35;  // 70 total
-const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 70;  // 110 total
+const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 41;  // 81 total
 
 // Keeps tags clear of the fixed nav row (which sits 2rem from the viewport
 // bottom, plus its own text height) — shared by initial placement and by

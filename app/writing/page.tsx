@@ -414,7 +414,7 @@ export default function WritingPage() {
                           fontWeight:    400,
                           fontStyle:     "italic",
                           lineHeight:    1.4,
-                          color:         isActive ? "rgba(184,240,74,0.65)" : "rgba(10,10,10,0.68)",
+                          color:         isActive ? "rgba(164,155,156,0.65)" : "rgba(10,10,10,0.68)",
                           transition:    "color 0.15s",
                           letterSpacing: "-0.005em",
                         }}
@@ -427,7 +427,7 @@ export default function WritingPage() {
                     style={{
                       fontSize:      "0.75rem",
                       fontWeight:    400,
-                      color:         isActive ? "rgba(184,240,74,0.6)" : "rgba(10,10,10,0.6)",
+                      color:         isActive ? "rgba(164,155,156,0.6)" : "rgba(10,10,10,0.6)",
                       transition:    "color 0.15s",
                       letterSpacing: "0.05em",
                       flexShrink:    0,
