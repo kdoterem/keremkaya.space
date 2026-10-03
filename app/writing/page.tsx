@@ -127,11 +127,18 @@ function highlightParts(text: string, terms: string[]): React.ReactNode[] {
   );
 }
 
-// Persist list + scroll across navigation to a poem and back.
+// Persist list + scroll + search across navigation to a poem and back.
 // Module-level so it survives client-side route changes (the bundle stays loaded),
-// mirroring the tag-cloud caching on the home page.
+// mirroring the tag-cloud caching on the home page. Scroll alone used to be enough
+// to land back where you were — but if a search was open, the posts list it was
+// scrolled against is gone the moment the component remounts with an empty query,
+// so the restored offset pointed at the wrong (unfiltered) list. Query and open
+// state now round-trip the same way scroll does.
 let _postsCache: PostMeta[] | null = null;
+let _bodiesCache: Record<string, string> | null = null;
 let _scrollY = 0;
+let _searchQuery = "";
+let _searchOpen = false;
 
 export default function WritingPage() {
   const [posts,          setPosts]          = useState<PostMeta[]>(_postsCache ?? []);
@@ -140,10 +147,10 @@ export default function WritingPage() {
   const [btnLabel,       setBtnLabel]       = useState(LABEL);
   const [firing,         setFiring]         = useState(false);
 
-  const [searchQuery,  setSearchQuery]  = useState("");
-  const [searchOpen,   setSearchOpen]   = useState(false);
+  const [searchQuery,  setSearchQuery]  = useState(_searchQuery);
+  const [searchOpen,   setSearchOpen]   = useState(_searchOpen);
   const [scrolled,     setScrolled]     = useState(false);
-  const [bodies,       setBodies]       = useState<Record<string, string>>({});
+  const [bodies,       setBodies]       = useState<Record<string, string>>(_bodiesCache ?? {});
   const rafRef         = useRef<number | null>(null);
   const firingRef      = useRef(false);
   const rowRefs        = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -191,6 +198,7 @@ export default function WritingPage() {
     fetch("/api/search-index").then(r => r.json()).then((docs: SearchDoc[]) => {
       const map: Record<string, string> = {};
       for (const d of docs) map[d.slug] = d.body;
+      _bodiesCache = map;
       setBodies(map);
     });
   }, [searchOpen, bodies]);
@@ -208,6 +216,9 @@ export default function WritingPage() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => { _searchQuery = searchQuery; }, [searchQuery]);
+  useEffect(() => { _searchOpen  = searchOpen;  }, [searchOpen]);
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();

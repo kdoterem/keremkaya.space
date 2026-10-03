@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,10 +22,26 @@ import useIsNarrow from "@/lib/useIsNarrow";
 export default function ScansPage() {
   const [collections, setCollections] = useState<ScanCollection[] | null>(null);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
+  // Opening a collection replaces main's own scroll (height:100dvh + hidden
+  // overflow — see `fitToScreen` below) with the expanded view's, so the
+  // grid's scroll position is gone the moment you open one — nothing left
+  // to return to without saving it first. Restored after a delay matching
+  // AnimatePresence's exit transition (0.3s) so the grid has actually
+  // remounted — and is tall again — before the browser tries to scroll it.
+  const savedScrollY = useRef(0);
 
   useEffect(() => {
     fetch("/api/scans").then(r => r.json()).then(setCollections);
   }, []);
+
+  const openCollectionAt = (slug: string) => {
+    savedScrollY.current = window.scrollY;
+    setOpenSlug(slug);
+  };
+  const closeCollection = () => {
+    setOpenSlug(null);
+    setTimeout(() => window.scrollTo(0, savedScrollY.current), 320);
+  };
 
   const openCollection = collections?.find(c => c.slug === openSlug) ?? null;
   const expanded = openCollection !== null;
@@ -50,7 +66,7 @@ export default function ScansPage() {
     >
       {expanded ? (
         <button
-          onClick={() => setOpenSlug(null)}
+          onClick={closeCollection}
           style={{
             fontSize:       "0.7rem",
             fontWeight:     500,
@@ -87,7 +103,7 @@ export default function ScansPage() {
       )}
 
       <motion.h2
-        onClick={expanded ? () => setOpenSlug(null) : undefined}
+        onClick={expanded ? closeCollection : undefined}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
@@ -119,7 +135,7 @@ export default function ScansPage() {
       ) : (
         <AnimatePresence mode="wait">
           {openCollection ? (
-            <ScanExpanded key="expanded" collection={openCollection} onClose={() => setOpenSlug(null)} narrow={narrow} />
+            <ScanExpanded key="expanded" collection={openCollection} onClose={closeCollection} narrow={narrow} />
           ) : (
             <motion.div
               key="grid"
@@ -134,7 +150,7 @@ export default function ScansPage() {
               }}
             >
               {collections.map((c) => (
-                <ScanTile key={c.slug} collection={c} onOpen={() => setOpenSlug(c.slug)} />
+                <ScanTile key={c.slug} collection={c} onOpen={() => openCollectionAt(c.slug)} />
               ))}
             </motion.div>
           )}
