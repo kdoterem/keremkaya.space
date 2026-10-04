@@ -142,10 +142,13 @@ export async function generateMetadata({
 
 export default async function PostPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tag?: string }>;
 }) {
   const { slug } = await params;
+  const { tag: fromTag } = await searchParams;
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
@@ -181,9 +184,13 @@ export default async function PostPage({
         padding: "4rem 5vw 6rem",
       }}
     >
-      {/* Back to writing */}
+      {/* Back to wherever this was reached from — the writing list by
+          default, or the home tag panel if that's genuinely where the
+          reader came from (arrived via ?tag=, same param the inline tag
+          pills below already send home with — see app/page.tsx's own
+          preselect-from-URL effect, which this just finally has a way in to). */}
       <Link
-        href="/writing"
+        href={fromTag ? `/?tag=${encodeURIComponent(fromTag)}` : "/writing"}
         style={{
           fontSize: "0.7rem",
           fontWeight: 500,
@@ -194,7 +201,7 @@ export default async function PostPage({
           opacity: 0.68,
         }}
       >
-        ← WRITING
+        {fromTag ? `← ${fromTag}` : "← WRITING"}
       </Link>
 
       <div

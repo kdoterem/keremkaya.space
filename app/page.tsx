@@ -487,7 +487,7 @@ export default function Home() {
                   cursor: "pointer",
                 }}
               >
-                CLOSE ×
+                RETURN
               </button>
             </div>
 
@@ -501,7 +501,7 @@ export default function Home() {
             ) : matching.map((post) => (
               <Link
                 key={post.slug}
-                href={`/writing/${post.slug}`}
+                href={`/writing/${post.slug}?tag=${encodeURIComponent(selectedTag)}`}
                 style={{
                   display: "flex", alignItems: "baseline",
                   justifyContent: "space-between",
