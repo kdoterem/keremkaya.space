@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ScanCollection } from "@/lib/scans";
@@ -25,6 +25,15 @@ import type { ScanCollection } from "@/lib/scans";
 //    beneath it. ScansPage already dropped the no-scroll constraint for
 //    this case — stacked content is free to run past one screen and scroll,
 //    same as every other page on the site does on mobile.
+//    The hero itself is a swipeable track of every page (native scroll-snap,
+//    so momentum and feel are the phone's own), not a single image you can
+//    only change by hitting a thumbnail. Slides are a little narrower than
+//    the screen so the neighbouring page peeks in at the edges — the only
+//    hint that it swipes. The track is the source of truth for which page is
+//    showing: scrolling it sets heroIndex, and thumbnails/arrow keys just
+//    scroll it (never the other way round, so the two can't fight mid-swipe).
+const SLIDE_VW = 84;
+const SLIDE_GAP_VW = 3;
 const LABEL_STYLE: React.CSSProperties = {
   fontSize:      "0.7rem",
   fontWeight:    500,
@@ -44,16 +53,57 @@ export default function ScanExpanded({
 }) {
   const [heroIndex, setHeroIndex] = useState(0);
   const hero = collection.pages[heroIndex];
+  const count = collection.pages.length;
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const indexRef = useRef(0);
+  indexRef.current = heroIndex;
+
+  // Distance between one slide's snap point and the next.
+  const slideStep = (track: HTMLDivElement) => {
+    const first = track.firstElementChild as HTMLElement | null;
+    return (first?.offsetWidth ?? track.clientWidth) + parseFloat(getComputedStyle(track).columnGap || "0");
+  };
+
+  const goTo = (i: number) => {
+    const next = (i + count) % count;
+    const track = trackRef.current;
+    if (narrow && track) track.scrollTo({ left: next * slideStep(track), behavior: "smooth" });
+    else setHeroIndex(next);
+  };
+
+  const onTrackScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    const i = Math.min(count - 1, Math.max(0, Math.round(track.scrollLeft / slideStep(track))));
+    if (i !== indexRef.current) setHeroIndex(i);
+  };
+
+  // Opening from far down the grid would otherwise leave the phone scrolled
+  // past the top of a much shorter page.
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") setHeroIndex(i => (i + 1) % collection.pages.length);
-      if (e.key === "ArrowLeft")  setHeroIndex(i => (i - 1 + collection.pages.length) % collection.pages.length);
+      if (e.key === "ArrowRight") goTo(indexRef.current + 1);
+      if (e.key === "ArrowLeft")  goTo(indexRef.current - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, collection.pages.length]);
+  });
+
+  // Keep the current page's thumbnail in view as you swipe. Scrolls the
+  // strip directly rather than scrollIntoView, which would also yank the
+  // window vertically if the strip happened to be off screen.
+  useEffect(() => {
+    const strip = stripRef.current;
+    const thumb = thumbRefs.current[heroIndex];
+    if (!narrow || !strip || !thumb) return;
+    strip.scrollTo({ left: thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2, behavior: "smooth" });
+  }, [heroIndex, narrow]);
 
   return (
     <motion.div
@@ -74,6 +124,53 @@ export default function ScanExpanded({
             : { flex: 1, minHeight: 0, display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: "1.5rem" }
         }
       >
+        {narrow ? (
+          <div
+            ref={trackRef}
+            onScroll={onTrackScroll}
+            style={{
+              display:                 "flex",
+              alignItems:              "center",
+              gap:                     `${SLIDE_GAP_VW}vw`,
+              overflowX:               "auto",
+              scrollSnapType:          "x mandatory",
+              overscrollBehaviorX:     "contain",
+              scrollbarWidth:          "none",
+              WebkitOverflowScrolling: "touch",
+              // Bleed past main's 5vw gutter to the screen edges so the
+              // neighbouring pages can peek in, and pad the bottom so the
+              // overflow doesn't clip the slides' drop shadow.
+              margin:                  "0 -5vw -1.75rem",
+              padding:                 `0 ${(100 - SLIDE_VW) / 2}vw 2.75rem`,
+            }}
+          >
+            {collection.pages.map((page, i) => (
+              <div
+                key={page.src}
+                style={{
+                  position:        "relative",
+                  flex:            `0 0 ${SLIDE_VW}vw`,
+                  aspectRatio:     String(page.ratio),
+                  scrollSnapAlign: "center",
+                  scrollSnapStop:  "always",
+                  boxShadow:       "0 14px 32px rgba(10,10,10,0.47)",
+                }}
+              >
+                <Image
+                  src={page.src}
+                  alt={`${collection.title}, page ${i + 1}`}
+                  fill
+                  sizes={`${SLIDE_VW}vw`}
+                  style={{ objectFit: "cover" }}
+                  priority={i === 0}
+                  // The pages either side are fetched up front so a swipe
+                  // never lands on a blank slide.
+                  loading={Math.abs(i - heroIndex) <= 1 ? "eager" : "lazy"}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
         <AnimatePresence mode="wait">
           <motion.div
             key={heroIndex}
@@ -109,19 +206,22 @@ export default function ScanExpanded({
             />
           </motion.div>
         </AnimatePresence>
+        )}
 
         {collection.pages.length > 1 && (
           <div
+            ref={stripRef}
             style={
               narrow
-                ? { display: "flex", flexDirection: "row", gap: "0.65rem", overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "0.25rem" }
+                ? { position: "relative", display: "flex", flexDirection: "row", gap: "0.65rem", overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "5px 5px 0.25rem" }
                 : { display: "flex", flexDirection: "column", flexWrap: "wrap", gap: "0.75rem", height: "100%" }
             }
           >
             {collection.pages.map((page, i) => (
               <button
                 key={page.src}
-                onClick={() => setHeroIndex(i)}
+                ref={(el) => { thumbRefs.current[i] = el; }}
+                onClick={() => goTo(i)}
                 aria-label={`Page ${i + 1}`}
                 style={{
                   position:    "relative",
@@ -152,7 +252,7 @@ export default function ScanExpanded({
       </div>
 
       <p style={{ ...LABEL_STYLE, opacity: 0.45, marginTop: "0.85rem", flexShrink: 0 }}>
-        {collection.title} · {heroIndex + 1}/{collection.pages.length}
+        {collection.title} · {heroIndex + 1}/{count}
       </p>
     </motion.div>
   );

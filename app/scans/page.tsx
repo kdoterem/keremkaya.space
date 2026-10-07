@@ -29,16 +29,44 @@ export default function ScansPage() {
   // AnimatePresence's exit transition (0.3s) so the grid has actually
   // remounted — and is tall again — before the browser tries to scroll it.
   const savedScrollY = useRef(0);
+  const openSlugRef = useRef(openSlug);
+  openSlugRef.current = openSlug;
+
+  // An open collection gets its own history entry, so the phone's back
+  // gesture/button closes it instead of leaving SCANS altogether. The entry
+  // spreads Next's own history state (__NA etc.) — without it the app
+  // router treats the entry as foreign and reloads the page on back.
+  // popstate is the single place that actually opens/closes from history,
+  // so RETURN, the heading, Escape and the back button all end up there.
+  useEffect(() => {
+    fetch("/api/scans").then(r => r.json()).then((cs: ScanCollection[]) => {
+      setCollections(cs);
+      // A reload while a collection was open lands back on that entry.
+      const slug = window.history.state?.scan;
+      if (slug && cs.some(c => c.slug === slug)) setOpenSlug(slug);
+    });
+  }, []);
 
   useEffect(() => {
-    fetch("/api/scans").then(r => r.json()).then(setCollections);
+    const onPop = () => {
+      const slug: string | null = window.history.state?.scan ?? null;
+      if (openSlugRef.current && !slug) setTimeout(() => window.scrollTo(0, savedScrollY.current), 320);
+      setOpenSlug(slug);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   const openCollectionAt = (slug: string) => {
     savedScrollY.current = window.scrollY;
+    window.history.pushState({ ...window.history.state, scan: slug }, "");
     setOpenSlug(slug);
   };
   const closeCollection = () => {
+    if (window.history.state?.scan) {
+      window.history.back();
+      return;
+    }
     setOpenSlug(null);
     setTimeout(() => window.scrollTo(0, savedScrollY.current), 320);
   };
