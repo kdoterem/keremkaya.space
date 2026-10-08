@@ -1041,16 +1041,19 @@ export default function SaveImageButton({ title, content, slug, tags }: Props) {
     return false;
   }
 
-  // Both the mobile Photos library (via the share sheet's "Save Images")
-  // and desktop downloads shelves/folders commonly sort newest-first — so
-  // saving/downloading in page order (1, 2, 3…) makes page 2 the most
-  // recent, and it displays *above* page 1. Reversed to last-page-first /
-  // page-1-last, whichever one lands most recently — page 1 — is the one
-  // that sorts first, so the saved/downloaded order matches reading order.
-  // Filenames are unaffected: they still read "-1", "-2"… regardless of
-  // save order, self-documenting the intended order too.
+  // Pages go out in reading order (1, 2, 3…). An earlier fix reversed them,
+  // betting that Photos/downloads sort newest-first — but the share sheet
+  // hands the array straight to whatever app you pick, so a DM or post got
+  // the last page first, every time. The real source of the "random" order
+  // was every file being generated within the same few milliseconds:
+  // identical timestamps leave anything that sorts by date (Photos, a
+  // downloads folder) free to put them in any order. So each file is
+  // re-stamped one second apart, page 1 oldest — a definite order for
+  // date-sorted views that agrees with the order the files are handed over.
   function orderPages(files: File[]): File[] {
-    return files.length > 1 ? [...files].reverse() : files;
+    if (files.length <= 1) return files;
+    const base = Date.now() - files.length * 1000;
+    return files.map((f, i) => new File([f], f.name, { type: f.type, lastModified: base + i * 1000 }));
   }
 
   // Used by the image button, and the "nothing to animate" fallback in
