@@ -7153,5 +7153,112 @@
         ]
       }
     }
+  },
+  {
+    "slug": "2121-a-bird-chirps-still-a-recovering-ill-burning-my-will",
+    "date": "2026-10-12",
+    "tags": {
+      "wordplay": {
+        "type": "lines",
+        "spans": [
+          "21:21 a bird chirps still,",
+          "my body not so much so,",
+          "4 lefts 4 rights, any left for tomorrow?",
+          "this feels like the right sorrow.",
+          "questions questions questions",
+          "in this quest i'm all i'm familiar with,"
+        ]
+      },
+      "presence": {
+        "type": "lines",
+        "spans": [
+          "i now am in,",
+          "eyes squinted, i'm there.",
+          "today my navel's alive,"
+        ]
+      },
+      "body": {
+        "type": "lines",
+        "spans": [
+          "my body not so much so,",
+          "today my navel's alive,"
+        ]
+      },
+      "doubt": {
+        "type": "lines",
+        "spans": [
+          "a friend is he? he keeps to himself,",
+          "until a question reveals itself",
+          "am i to walk the ether to get to ether, to become ether"
+        ]
+      },
+      "indecision": {
+        "type": "line",
+        "spans": [
+          "4 lefts 4 rights, any left for tomorrow?"
+        ]
+      },
+      "time": {
+        "type": "lines",
+        "spans": [
+          "21:21 a bird chirps still,",
+          "any left for tomorrow?"
+        ]
+      },
+      "solitude": {
+        "type": "lines",
+        "spans": [
+          "a friend is he? he keeps to himself,",
+          "part ways with those that were walking and the hecklers,"
+        ]
+      },
+      "existence": {
+        "type": "lines",
+        "spans": [
+          "every yes is a death of no, every no is a death of yes,",
+          "absence of evidence is not evidence of absence"
+        ]
+      },
+      "sadness": {
+        "type": "line",
+        "spans": [
+          "this feels like the right sorrow."
+        ]
+      },
+      "exhaustion": {
+        "type": "lines",
+        "spans": [
+          "to finally rest, part ways with those that were walking and the hecklers,",
+          "the louder the noise",
+          "this is where i stop writing."
+        ]
+      },
+      "the writing self": {
+        "type": "line",
+        "spans": [
+          "this is where i stop writing."
+        ]
+      },
+      "mysticism": {
+        "type": "lines",
+        "spans": [
+          "the souls occupying the space waited for me",
+          "am i to walk the ether to get to ether, to become ether"
+        ]
+      },
+      "contempt": {
+        "type": "phrase",
+        "spans": [
+          "part ways with those that were walking and the hecklers,"
+        ]
+      },
+      "dark": {
+        "type": "lines",
+        "spans": [
+          "light is a little dim.",
+          "red light, room full of red paint"
+        ]
+      }
+    }
   }
 ]
