@@ -254,6 +254,25 @@ export default function ScanExpanded({
       <p style={{ ...LABEL_STYLE, opacity: 0.45, marginTop: "0.85rem", flexShrink: 0 }}>
         {collection.title} · {heroIndex + 1}/{count}
       </p>
+      {/* One line, same quiet gray as the counter above it — on desktop
+          every extra line comes out of the hero's height, so captions are
+          kept to a sentence rather than allowed to grow into a paragraph. */}
+      {hero.caption && (
+        <p
+          style={{
+            fontSize:      "0.8rem",
+            letterSpacing: "0.01em",
+            lineHeight:    1.4,
+            color:         "#0a0a0a",
+            opacity:       0.62,
+            marginTop:     "0.3rem",
+            maxWidth:      "60ch",
+            flexShrink:    0,
+          }}
+        >
+          {hero.caption}
+        </p>
+      )}
     </motion.div>
   );
 }

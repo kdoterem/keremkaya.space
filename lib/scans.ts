@@ -14,6 +14,9 @@ export interface ScanPage {
   // Natural aspect ratio (width / height), so the spread and magnified view
   // can size each page before its image has loaded — avoids layout jumping.
   ratio: number;
+  // Optional one-line note shown under the page in the expanded view —
+  // a translation or what the thing was for, when the page alone can't say.
+  caption?: string;
 }
 
 export interface ScanCollection {
@@ -28,7 +31,7 @@ interface ScanMeta {
   title: string;
   date:  string;
   cover?: string;
-  pages: { file: string; ratio: number }[];
+  pages: { file: string; ratio: number; caption?: string }[];
 }
 
 const SCANS_DIR = path.join(process.cwd(), "public", "scans");
@@ -51,7 +54,7 @@ export function getAllScanCollections(): ScanCollection[] {
         title: meta.title,
         date:  meta.date,
         cover: `/scans/${slug}/${coverFile}`,
-        pages: meta.pages.map((p) => ({ src: `/scans/${slug}/${p.file}`, ratio: p.ratio })),
+        pages: meta.pages.map((p) => ({ src: `/scans/${slug}/${p.file}`, ratio: p.ratio, caption: p.caption })),
       };
     })
     .filter((c): c is ScanCollection => c !== null && c.pages.length > 0);

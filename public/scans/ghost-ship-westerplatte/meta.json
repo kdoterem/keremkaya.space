@@ -1,0 +1,52 @@
+{
+  "title": "ghost ship: westerplatte",
+  "date": "2026-10-12T23:51",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7436363636363637,
+      "caption": "the load line disc — the mark on a ship's side showing how deep it may legally sit in the water. the stencil."
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.7488563586459286,
+      "caption": "the load line disc, cut a second time."
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 3.299586776859504,
+      "caption": "the bottom of the load line disc."
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 2.1142384105960264,
+      "caption": "a strip of sea chart: westerplatte, in the port of gdańsk, poland."
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 2.3512014787430684,
+      "caption": "the westerplatte chart again, from the other side."
+    },
+    {
+      "file": "06.jpg",
+      "ratio": 2.1377005347593583,
+      "caption": "a black-sprayed scrap."
+    },
+    {
+      "file": "07.jpg",
+      "ratio": 0.4683782091421415,
+      "caption": "a scrap of a cargo weight table: \"150,700 mts\" in handwriting."
+    },
+    {
+      "file": "08.jpg",
+      "ratio": 2.134228187919463,
+      "caption": "a black-sprayed scrap."
+    },
+    {
+      "file": "09.jpg",
+      "ratio": 2.3512014787430684,
+      "caption": "a black-sprayed scrap."
+    }
+  ]
+}

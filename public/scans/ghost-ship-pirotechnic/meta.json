@@ -1,0 +1,137 @@
+{
+  "title": "ghost ship: pirotechnic",
+  "date": "2026-10-12T23:53",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.6331156358048405,
+      "caption": "ПИРОТЕХНИКА / PIROTECHNIC — the locker for distress flares and rockets. \"pirotechnic\" is misspelled."
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.6334998079139454,
+      "caption": "the pyrotechnics stencil, cut from a crew employment contract."
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.7021822849807445,
+      "caption": "УКВ / VHF — the short-range radio, the one used to talk to other ships and ports."
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.7026101839965768,
+      "caption": "the VHF stencil, cut from a radio directory of vietnam."
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 0.7372165406847487,
+      "caption": "АИС / AIS — the system that broadcasts the ship's name and position to everyone nearby."
+    },
+    {
+      "file": "06.jpg",
+      "ratio": 0.7367718986216096,
+      "caption": "the AIS stencil, cut from a british admiralty form for reporting errors on charts."
+    },
+    {
+      "file": "07.jpg",
+      "ratio": 1.5992414664981036,
+      "caption": "an S, sprayed black."
+    },
+    {
+      "file": "08.jpg",
+      "ratio": 0.6254948535233571,
+      "caption": "an S, cut from the admiralty pilot guide for angra do heroísmo, the azores."
+    },
+    {
+      "file": "09.jpg",
+      "ratio": 1.4895027624309392,
+      "caption": "GP… — part of \"GPS\", sprayed."
+    },
+    {
+      "file": "10.jpg",
+      "ratio": 0.658753709198813,
+      "caption": "the GP stencil, cut from the pilot guide for praia da vitória, the azores."
+    },
+    {
+      "file": "11.jpg",
+      "ratio": 0.7083333333333334,
+      "caption": "НАВТЕКС / NAVTEX — the receiver that prints out weather and danger warnings at sea."
+    },
+    {
+      "file": "12.jpg",
+      "ratio": 0.7083333333333334,
+      "caption": "the NAVTEX stencil, cut from a radio directory: vietnam, yemen, zimbabwe."
+    },
+    {
+      "file": "13.jpg",
+      "ratio": 0.7042434633519075,
+      "caption": "UBWE3 — the ship's radio call sign, its name over the air."
+    },
+    {
+      "file": "14.jpg",
+      "ratio": 0.678250204415372,
+      "caption": "ИНМАРСАТ / INMARSAT — the satellite phone, for when land is too far for radio."
+    },
+    {
+      "file": "15.jpg",
+      "ratio": 0.6778413736713,
+      "caption": "the INMARSAT stencil."
+    },
+    {
+      "file": "16.jpg",
+      "ratio": 0.7141003460207612,
+      "caption": "COMPASS, sprayed black."
+    },
+    {
+      "file": "17.jpg",
+      "ratio": 0.7141003460207612,
+      "caption": "the COMPASS stencil."
+    },
+    {
+      "file": "18.jpg",
+      "ratio": 0.716044142614601,
+      "caption": "ГИРОКОМПАСНАЯ / GYRO ROOM — the room for the gyrocompass, which finds true north by spinning."
+    },
+    {
+      "file": "19.jpg",
+      "ratio": 0.716893039049236,
+      "caption": "the gyro room stencil, cut from a crew list from taganrog, 2023."
+    },
+    {
+      "file": "20.jpg",
+      "ratio": 0.70276008492569,
+      "caption": "ПВ/КВ / MF/HF — medium and high frequency: the long-range radio."
+    },
+    {
+      "file": "21.jpg",
+      "ratio": 0.70276008492569,
+      "caption": "the MF/HF stencil."
+    },
+    {
+      "file": "22.jpg",
+      "ratio": 0.6003086419753086,
+      "caption": "MF/HF again, smaller."
+    },
+    {
+      "file": "23.jpg",
+      "ratio": 0.7054852320675106,
+      "caption": "АИС / AIS again, a second pair."
+    },
+    {
+      "file": "24.jpg",
+      "ratio": 0.7054852320675106,
+      "caption": "the second AIS stencil, cut from a radio directory of vietnam."
+    },
+    {
+      "file": "25.jpg",
+      "ratio": 0.7141009055627425,
+      "caption": "GPS, sprayed black."
+    },
+    {
+      "file": "26.jpg",
+      "ratio": 0.7141009055627425,
+      "caption": "the GPS stencil."
+    }
+  ]
+}
