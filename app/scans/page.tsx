@@ -25,10 +25,29 @@ export default function ScansPage() {
   // Opening a collection replaces main's own scroll (height:100dvh + hidden
   // overflow — see `fitToScreen` below) with the expanded view's, so the
   // grid's scroll position is gone the moment you open one — nothing left
-  // to return to without saving it first. Restored after a delay matching
-  // AnimatePresence's exit transition (0.3s) so the grid has actually
-  // remounted — and is tall again — before the browser tries to scroll it.
+  // to return to without saving it first. Restored from the grid's own
+  // mount (its fade-in starting), not a timer: a fixed delay matching the
+  // 0.3s exit transition raced the remount on phones and often scrolled a
+  // still-short page, which clamps to the top. The browser's own scroll
+  // restoration is switched off while here for the same reason — on back it
+  // applies the saved position to the short expanded page before the grid
+  // exists, and can land after ours on a swipe-back.
   const savedScrollY = useRef(0);
+  const pendingRestore = useRef(false);
+  const restoreScroll = () => {
+    if (!pendingRestore.current) return;
+    pendingRestore.current = false;
+    const y = savedScrollY.current;
+    window.scrollTo(0, y);
+    // Again next frame, in case layout settled (or the browser scrolled) after.
+    requestAnimationFrame(() => window.scrollTo(0, y));
+  };
+
+  useEffect(() => {
+    const prev = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    return () => { window.history.scrollRestoration = prev; };
+  }, []);
   const openSlugRef = useRef(openSlug);
   openSlugRef.current = openSlug;
 
@@ -50,7 +69,7 @@ export default function ScansPage() {
   useEffect(() => {
     const onPop = () => {
       const slug: string | null = window.history.state?.scan ?? null;
-      if (openSlugRef.current && !slug) setTimeout(() => window.scrollTo(0, savedScrollY.current), 320);
+      if (openSlugRef.current && !slug) pendingRestore.current = true;
       setOpenSlug(slug);
     };
     window.addEventListener("popstate", onPop);
@@ -68,7 +87,7 @@ export default function ScansPage() {
       return;
     }
     setOpenSlug(null);
-    setTimeout(() => window.scrollTo(0, savedScrollY.current), 320);
+    pendingRestore.current = true;
   };
 
   const openCollection = collections?.find(c => c.slug === openSlug) ?? null;
@@ -167,6 +186,9 @@ export default function ScansPage() {
           ) : (
             <motion.div
               key="grid"
+              // Fires once the grid is back in the DOM (tall again), which is
+              // the first moment the saved position can actually be reached.
+              ref={(el) => { if (el) restoreScroll(); }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
