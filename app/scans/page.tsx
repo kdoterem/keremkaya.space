@@ -219,7 +219,10 @@ function ScanTile({
       <div
         style={{
           position:    "relative",
-          width:       "100%",
+          // Capped by height too, so a cover that's a narrow strip (some of
+          // the ghost ship scans) stays a sensible size instead of towering
+          // over the rest of its row. Ordinary sheets never reach the cap.
+          width:       `min(100%, calc(240px * ${ratio}))`,
           aspectRatio: String(ratio),
           boxShadow:   "0 8px 20px rgba(10,10,10,0.43)",
         }}

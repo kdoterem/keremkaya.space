@@ -34,6 +34,14 @@ import type { ScanCollection } from "@/lib/scans";
 //    scroll it (never the other way round, so the two can't fight mid-swipe).
 const SLIDE_VW = 84;
 const SLIDE_GAP_VW = 3;
+// Pages aren't all sheets — some collections (the ghost ship scans) include
+// torn strips 3-4x taller or wider than they are long, and every size below
+// was originally derived from width alone, so one tall strip made the whole
+// phone swipe row (and a desktop thumbnail column) balloon to fit it. Each
+// box is now the smaller of its usual width and the width that keeps it
+// under a height cap, so ordinary sheets render exactly as before.
+const SLIDE_MAX_H = "72svh";
+const slideWidth = (ratio: number) => `min(${SLIDE_VW}vw, calc(${SLIDE_MAX_H} * ${ratio}))`;
 const LABEL_STYLE: React.CSSProperties = {
   fontSize:      "0.7rem",
   fontWeight:    500,
@@ -61,23 +69,42 @@ export default function ScanExpanded({
   const indexRef = useRef(0);
   indexRef.current = heroIndex;
 
-  // Distance between one slide's snap point and the next.
-  const slideStep = (track: HTMLDivElement) => {
-    const first = track.firstElementChild as HTMLElement | null;
-    return (first?.offsetWidth ?? track.clientWidth) + parseFloat(getComputedStyle(track).columnGap || "0");
+  // Desktop: the filmstrip's width depends on how many columns its
+  // thumbnails wrap into, which only the browser knows. The hero needs it so
+  // a very wide page can shrink to fit beside the strip rather than pushing
+  // the strip onto a hidden second line.
+  const [stripWidth, setStripWidth] = useState(0);
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (narrow || !strip) return;
+    setStripWidth(strip.offsetWidth);
+    const ro = new ResizeObserver(() => setStripWidth(strip.offsetWidth));
+    ro.observe(strip);
+    return () => ro.disconnect();
+  }, [narrow]);
+
+  // Slides can differ in width (see slideWidth), so positions come from the
+  // slides themselves rather than index × one fixed step.
+  const slideCenter = (track: HTMLDivElement, i: number) => {
+    const el = track.children[i] as HTMLElement | undefined;
+    return el ? el.offsetLeft + el.offsetWidth / 2 : 0;
   };
 
   const goTo = (i: number) => {
     const next = (i + count) % count;
     const track = trackRef.current;
-    if (narrow && track) track.scrollTo({ left: next * slideStep(track), behavior: "smooth" });
+    if (narrow && track) track.scrollTo({ left: slideCenter(track, next) - track.clientWidth / 2, behavior: "smooth" });
     else setHeroIndex(next);
   };
 
   const onTrackScroll = () => {
     const track = trackRef.current;
     if (!track) return;
-    const i = Math.min(count - 1, Math.max(0, Math.round(track.scrollLeft / slideStep(track))));
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let i = 0;
+    for (let j = 1; j < count; j++) {
+      if (Math.abs(slideCenter(track, j) - mid) < Math.abs(slideCenter(track, i) - mid)) i = j;
+    }
     if (i !== indexRef.current) setHeroIndex(i);
   };
 
@@ -129,6 +156,7 @@ export default function ScanExpanded({
             ref={trackRef}
             onScroll={onTrackScroll}
             style={{
+              position:                "relative",
               display:                 "flex",
               alignItems:              "center",
               gap:                     `${SLIDE_GAP_VW}vw`,
@@ -141,7 +169,12 @@ export default function ScanExpanded({
               // neighbouring pages can peek in, and pad the bottom so the
               // overflow doesn't clip the slides' drop shadow.
               margin:                  "0 -5vw -1.75rem",
-              padding:                 `0 ${(100 - SLIDE_VW) / 2}vw 2.75rem`,
+              // Enough edge room for the first and last slide to center —
+              // with ordinary sheets this works out to (100 - SLIDE_VW) / 2.
+              paddingTop:              0,
+              paddingBottom:           "2.75rem",
+              paddingLeft:             `calc((100vw - ${slideWidth(collection.pages[0].ratio)}) / 2)`,
+              paddingRight:            `calc((100vw - ${slideWidth(collection.pages[count - 1].ratio)}) / 2)`,
             }}
           >
             {collection.pages.map((page, i) => (
@@ -149,7 +182,7 @@ export default function ScanExpanded({
                 key={page.src}
                 style={{
                   position:        "relative",
-                  flex:            `0 0 ${SLIDE_VW}vw`,
+                  flex:            `0 0 ${slideWidth(page.ratio)}`,
                   aspectRatio:     String(page.ratio),
                   scrollSnapAlign: "center",
                   scrollSnapStop:  "always",
@@ -188,8 +221,13 @@ export default function ScanExpanded({
                   }
                 : {
                     position:    "relative",
-                    height:      "100%",
+                    // A very wide strip at full row height would be wider than
+                    // the space beside the filmstrip and get clamped by
+                    // maxWidth into a box of the wrong shape (cropping the
+                    // page) — cap its height instead.
+                    height:      `min(100%, calc((90vw - ${stripWidth}px - 2rem) / ${hero.ratio}))`,
                     maxWidth:    "100%",
+                    alignSelf:   "center",
                     aspectRatio: String(hero.ratio),
                     boxShadow:   "0 14px 32px rgba(10,10,10,0.47)",
                     flexShrink:  0,
@@ -213,7 +251,7 @@ export default function ScanExpanded({
             ref={stripRef}
             style={
               narrow
-                ? { position: "relative", display: "flex", flexDirection: "row", gap: "0.65rem", overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "5px 5px 0.25rem" }
+                ? { position: "relative", display: "flex", flexDirection: "row", alignItems: "center", gap: "0.65rem", overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "5px 5px 0.25rem" }
                 : { display: "flex", flexDirection: "column", flexWrap: "wrap", gap: "0.75rem", height: "100%" }
             }
           >
@@ -225,7 +263,9 @@ export default function ScanExpanded({
                 aria-label={`Page ${i + 1}`}
                 style={{
                   position:    "relative",
-                  width:       narrow ? `calc(68px * ${page.ratio})` : "clamp(56px, 7vw, 84px)",
+                  width:       narrow
+                    ? `min(calc(68px * ${page.ratio}), 136px)`
+                    : `min(clamp(56px, 7vw, 84px), calc(140px * ${page.ratio}))`,
                   aspectRatio: String(page.ratio),
                   background:  "none",
                   border:      "none",
