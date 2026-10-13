@@ -7260,5 +7260,127 @@
         ]
       }
     }
+  },
+  {
+    "slug": "eye-was-teary-i-forgot",
+    "date": "2026-10-13",
+    "tags": {
+      "memory": {
+        "type": "lines",
+        "spans": [
+          "i forgot.",
+          "eye was teary, i forgot."
+        ]
+      },
+      "work": {
+        "type": "line",
+        "spans": [
+          "all the things i wrought,"
+        ]
+      },
+      "collapse": {
+        "type": "line",
+        "spans": [
+          "wrecked i am i was,"
+        ]
+      },
+      "rain": {
+        "type": "lines",
+        "spans": [
+          "who's gonna take care of it when it rains?",
+          "i guess the rain'll water when i can't,"
+        ]
+      },
+      "letting go": {
+        "type": "line",
+        "spans": [
+          "i guess the rain'll water when i can't,"
+        ]
+      },
+      "grief": {
+        "type": "line",
+        "spans": [
+          "and my tears, do i also rain?"
+        ]
+      },
+      "numbness": {
+        "type": "line",
+        "spans": [
+          "today i'm not stoked,"
+        ]
+      },
+      "endurance": {
+        "type": "line",
+        "spans": [
+          "i ask the warmth stocked in my body to warm me,"
+        ]
+      },
+      "russia": {
+        "type": "line",
+        "spans": [
+          "i'm not in russia but russian shit gets here,"
+        ]
+      },
+      "dissociation": {
+        "type": "line",
+        "spans": [
+          "shit i'm not even here"
+        ]
+      },
+      "identity": {
+        "type": "line",
+        "spans": [
+          "today the rack has no face for me to wear"
+        ]
+      },
+      "facelessness": {
+        "type": "line",
+        "spans": [
+          "and today i can't recognize the no face on my face"
+        ]
+      },
+      "absence": {
+        "type": "line",
+        "spans": [
+          "as it's not touched by"
+        ]
+      },
+      "existence": {
+        "type": "line",
+        "spans": [
+          "one is zero without another one"
+        ]
+      },
+      "doubt": {
+        "type": "line",
+        "spans": [
+          "i? what i am if eye can't see how you feel around me,"
+        ]
+      },
+      "self-loathing": {
+        "type": "phrase",
+        "spans": [
+          "mirror? i see all that's wrong,"
+        ]
+      },
+      "impermanence": {
+        "type": "phrase",
+        "spans": [
+          "still water? it still moves,"
+        ]
+      },
+      "acceptance": {
+        "type": "line",
+        "spans": [
+          "so all that's stagnant moves along with it."
+        ]
+      },
+      "wordplay": {
+        "type": "line",
+        "spans": [
+          "eye was teary, i forgot."
+        ]
+      }
+    }
   }
 ]
