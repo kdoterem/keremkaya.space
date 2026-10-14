@@ -4,7 +4,13 @@ import PageTransition from "./components/PageTransition";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://keremkaya.space"),
-  icons: { icon: "/icon.png" },
+  // ?v= changes whenever the icon does — browsers cache favicons by URL and
+  // otherwise keep showing the old one long after it's replaced
+  icons: {
+    icon: [{ url: "/icon.png?v=knife", type: "image/png" }],
+    shortcut: "/favicon.ico?v=knife",
+    apple: "/apple-icon.png?v=knife",
+  },
   alternates: { types: { "application/rss+xml": "/feed.xml" } },
   title: "Believable Belief",
   description: "rider. righter. re-writer.",
