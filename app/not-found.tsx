@@ -69,7 +69,7 @@ export default function NotFound() {
           fontWeight:    500,
           letterSpacing: "0.15em",
           fontVariant:   "small-caps",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           textDecoration: "none",
           opacity:       0.68,
         }}
@@ -84,7 +84,7 @@ export default function NotFound() {
             fontWeight:    700,
             letterSpacing: "-0.02em",
             lineHeight:    1.1,
-            color:         "#0a0a0a",
+            color:         "#ffa31a",
             marginBottom:  "1.2rem",
           }}
         >
@@ -97,7 +97,7 @@ export default function NotFound() {
             fontWeight:    400,
             letterSpacing: "0.01em",
             lineHeight:    1.5,
-            color:         "rgba(10,10,10,0.68)",
+            color:         "rgba(255,163,26,0.68)",
           }}
         >
           {line2 || "\u00A0"}

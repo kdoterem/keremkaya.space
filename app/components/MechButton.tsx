@@ -53,14 +53,14 @@ export default function MechButton({
         fontWeight:     600,
         letterSpacing:  "0.14em",
         textTransform:  "uppercase",
-        border:         "1px solid #0a0a0a",
+        border:         "1px solid #ffa31a",
         borderRadius:   0,
         // Opaque at rest, not transparent — this button sits over the fixed
         // 3D terrain backdrop on /writing; a transparent resting state let
         // the mesh show through it, reading as "obscured by the terrain"
         // even where the button was already correctly stacked above it.
-        background:     active ? "#0a0a0a" : "#A49B9C",
-        color:          active ? "#A49B9C" : "#0a0a0a",
+        background:     active ? "#ffa31a" : "#2a0a4a",
+        color:          active ? "#2a0a4a" : "#ffa31a",
         padding:        "0.7rem 1.5rem",
         cursor:         disabled ? "default" : "pointer",
         opacity:        disabled ? 0.35 : 1,

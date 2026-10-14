@@ -236,9 +236,10 @@ export function seededPhase(seed: number): number {
   return hash01(seed);
 }
 
-// The rest/plain text color — everything not carrying a tag stays this
-// color always.
-export const ALIVE_REST_COLOR = "#0a0a0a";
+// The colour tag-carrying text rests at. Electric orange on the purple
+// ground: short tagged phrases get the louder orange, while everything read
+// line after line stays the warm orange body colour (#ffa31a).
+export const ALIVE_REST_COLOR = "#ff5f00";
 
 // Static tint for weighted text — reverted back to plain near-black after
 // two attempts at a green-blended tint (8/16/26%, then 30/45/60%) neither

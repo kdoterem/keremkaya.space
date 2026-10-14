@@ -551,7 +551,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
           fontWeight:     600,
           letterSpacing:  "0.14em",
           textTransform:  "uppercase",
-          color:          "#0a0a0a",
+          color:          "#ffa31a",
           background:     "none",
           border:         "none",
           padding:        0,
@@ -610,7 +610,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                 {/* sonar point field — detected-but-unresolved ground, spans the whole width */}
                 <g>
                   {dots.map((d, i) => (
-                    <circle key={i} cx={d.x} cy={d.y} r={DOT_R} fill="#0a0a0a" fillOpacity={d.base} />
+                    <circle key={i} cx={d.x} cy={d.y} r={DOT_R} fill="#ffa31a" fillOpacity={d.base} />
                   ))}
                 </g>
 
@@ -640,7 +640,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                   <>
                     <line
                       x1={milatX} y1={0} x2={milatX} y2={dims.height}
-                      stroke="#0a0a0a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
+                      stroke="#ffa31a" strokeWidth={1} strokeDasharray="1 7" strokeOpacity={0.4}
                     />
                     <Annotation
                       x={milatX} y={dims.height * 0.55}
@@ -675,8 +675,8 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                 {/* the reader's position — its own hard-edged marker (unchanged),
                     plus a leader-line readout, distinct from the peak/trough
                     annotations above. */}
-                <line x1={resolveX} y1={resolveY} x2={resolveX} y2={dims.height} stroke="#0a0a0a" strokeWidth={1} />
-                <rect x={resolveX - 3} y={resolveY - 3} width={6} height={6} fill="#0a0a0a" />
+                <line x1={resolveX} y1={resolveY} x2={resolveX} y2={dims.height} stroke="#ffa31a" strokeWidth={1} />
+                <rect x={resolveX - 3} y={resolveY - 3} width={6} height={6} fill="#ffa31a" />
                 {position != null && months[position] && (
                   <Annotation
                     x={resolveX} y={resolveY}
@@ -697,7 +697,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
               <MechButton label="Read" onClick={handleRead} />
             ) : (
               <>
-                <span style={{ fontSize: "0.7rem", letterSpacing: "0.1em", color: "rgba(10,10,10,0.6)" }}>
+                <span style={{ fontSize: "0.7rem", letterSpacing: "0.1em", color: "rgba(255,163,26,0.6)" }}>
                   nothing left here
                 </span>
                 <MechButton label="Proceed" onClick={handleProceed} />
@@ -717,7 +717,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
           <h1
             style={{
               fontFamily: PROSE, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", fontWeight: 700,
-              letterSpacing: "-0.02em", lineHeight: 1.15, color: "#0a0a0a", marginBottom: "0.5rem",
+              letterSpacing: "-0.02em", lineHeight: 1.15, color: "#ffa31a", marginBottom: "0.5rem",
               minHeight: "1.15em",
             }}
           >
@@ -730,7 +730,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
             )}
           </h1>
 
-          <p style={{ fontFamily: PROSE, fontSize: "0.75rem", color: "rgba(10,10,10,0.6)", letterSpacing: "0.05em", marginBottom: "2.5rem", minHeight: "1em" }}>
+          <p style={{ fontFamily: PROSE, fontSize: "0.75rem", color: "rgba(255,163,26,0.6)", letterSpacing: "0.05em", marginBottom: "2.5rem", minHeight: "1em" }}>
             {revealStage >= 2 && (
               <CryptoScramble
                 text={currentPoem.date} duration={SCRAMBLE_MS} tickMs={TICK_MS}
@@ -739,7 +739,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
             )}
           </p>
 
-          <div style={{ fontFamily: PROSE, fontSize: "1.05rem", lineHeight: 1.8, color: "#0a0a0a", whiteSpace: "pre-wrap" }}>
+          <div style={{ fontFamily: PROSE, fontSize: "1.05rem", lineHeight: 1.8, color: "#ffa31a", whiteSpace: "pre-wrap" }}>
             {revealStage >= 3 && (
               <CryptoScramble
                 text={currentPoem.body} duration={SCRAMBLE_MS} tickMs={TICK_MS}
@@ -801,7 +801,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
             style={{
               position:       "fixed",
               inset:          0,
-              background:     "#A49B9C",
+              background:     "#2a0a4a",
               display:        "flex",
               alignItems:     "center",
               justifyContent: "center",
@@ -817,7 +817,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
                 fontWeight:    700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color:         "#0a0a0a",
+                color:         "#ffa31a",
                 textAlign:     "center",
               }}
             >

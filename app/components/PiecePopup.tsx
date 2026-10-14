@@ -35,7 +35,7 @@ export default function PiecePopup({
         position: "fixed",
         inset: 0,
         zIndex: 300,
-        background: "rgba(10,10,10,0.76)",
+        background: "rgba(12,2,26,0.76)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -48,8 +48,8 @@ export default function PiecePopup({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "relative",
-          background: "#A49B9C",
-          color: "#0a0a0a",
+          background: "#2a0a4a",
+          color: "#ffa31a",
           maxWidth: "36rem",
           width: "100%",
           maxHeight: "85vh",
@@ -64,7 +64,7 @@ export default function PiecePopup({
           style={{
             position: "absolute", top: "1rem", right: "1rem",
             background: "none", border: "none", cursor: "pointer",
-            color: "rgba(10,10,10,0.6)", fontSize: "1.1rem", padding: "0.25rem",
+            color: "rgba(255,163,26,0.6)", fontSize: "1.1rem", padding: "0.25rem",
           }}
         >
           ×
@@ -76,7 +76,7 @@ export default function PiecePopup({
             fontWeight: 500,
             letterSpacing: "0.14em",
             fontVariant: "small-caps",
-            color: "rgba(10,10,10,0.64)",
+            color: "rgba(255,163,26,0.64)",
             marginBottom: "0.6rem",
           }}
         >

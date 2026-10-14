@@ -91,7 +91,7 @@ function PlayZone({
         fontFamily: "inherit",
         fontSize: "0.98rem",
         lineHeight: 1.7,
-        color: "#0a0a0a",
+        color: "#ffa31a",
         background: "transparent",
         resize: "none",
         overflow: "hidden",
@@ -113,7 +113,7 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
         cursor: "pointer",
         fontSize: "0.78rem",
         fontStyle: "italic",
-        color: "rgba(10,10,10,0.6)",
+        color: "rgba(255,163,26,0.6)",
       }}
     >
       + {label}
@@ -268,7 +268,7 @@ export default function PlayPoemBody({
                 fontWeight: 500,
                 letterSpacing: "0.12em",
                 fontVariant: "small-caps",
-                color: "rgba(10,10,10,0.6)",
+                color: "rgba(255,163,26,0.6)",
                 marginBottom: "0.3rem",
               }}
             >

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-ground: #A49B9C;
-  --color-ink: #0a0a0a;
+  --color-ground: #2a0a4a;
+  --color-ink: #ffa31a;
   --font-sans: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 
@@ -16,8 +16,8 @@
 
 html,
 body {
-  background-color: #A49B9C;
-  color: #0a0a0a;
+  background-color: #2a0a4a;
+  color: #ffa31a;
   font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -31,22 +31,22 @@ body {
 @media (prefers-color-scheme: dark) {
   html,
   body {
-    background-color: #A49B9C;
-    color: #0a0a0a;
+    background-color: #2a0a4a;
+    color: #ffa31a;
   }
 }
 
 /* Selection color */
 ::selection {
-  background: #0a0a0a;
-  color: #A49B9C;
+  background: #ffa31a;
+  color: #2a0a4a;
 }
 
 /* Prev/next post navigation titles */
 .post-nav-title {
   font-size: 0.88rem;
   font-weight: 500;
-  color: #0a0a0a;
+  color: #ffa31a;
   letter-spacing: -0.01em;
   transition: opacity 0.15s;
 }
@@ -56,11 +56,11 @@ a:hover .post-nav-title {
 
 /* Tag links on the reader page */
 .tag-link {
-  color: rgba(10,10,10,0.45);
+  color: rgba(255, 163, 26, 0.45);
   transition: color 0.15s;
 }
 .tag-link:hover {
-  color: #0a0a0a;
+  color: #ffa31a;
 }
 
 /* /kismet — three tall cards in a row on desktop; three full-width landscape
@@ -80,7 +80,7 @@ a:hover .post-nav-title {
   flex:            1 1 0;
   max-width:       260px;
   aspect-ratio:    2 / 3;
-  border:          1px solid rgba(10, 10, 10, 0.12);
+  border:          1px solid rgba(255, 163, 26, 0.12);
   display:         flex;
   align-items:     flex-start;  /* all three cards start text at the same height */
   padding:         2rem 1.75rem;
@@ -88,7 +88,7 @@ a:hover .post-nav-title {
 .art-card-text {
   font-size:      clamp(1.3rem, 6vw, 1.85rem);
   font-weight:    600;
-  color:          #0a0a0a;
+  color:          #ffa31a;
   line-height:    1.25;
   letter-spacing: -0.015em;
   text-align:     left;
@@ -122,10 +122,10 @@ a:hover .post-nav-title {
   font-weight:    400;
   line-height:    1.6;
   letter-spacing: -0.005em;
-  color:          rgba(10, 10, 10, 0.85);
+  color:          rgba(255, 163, 26, 0.85);
 }
 .kismet-note::placeholder {
-  color: rgba(10, 10, 10, 0.4);
+  color: rgba(255, 163, 26, 0.4);
 }
 .kismet-note-action {
   min-height: 3rem;
@@ -144,12 +144,12 @@ a:hover .post-nav-title {
   font-size:      0.75rem;
   font-weight:    400;
   letter-spacing: 0.05em;
-  color:          rgba(10, 10, 10, 0.4);
+  color:          rgba(255, 163, 26, 0.4);
   padding:        0;
   transition:     color 0.15s;
 }
 .kismet-send:hover:not(:disabled) {
-  color: #0a0a0a;
+  color: #ffa31a;
 }
 .kismet-send:disabled {
   cursor: default;
@@ -222,7 +222,7 @@ a:hover .post-nav-title {
   border:     none;
   cursor:     pointer;
   font:       inherit;
-  color:      #0a0a0a;
+  color:      #ffa31a;
   opacity:    0.55;
   transition: opacity 0.15s;
 }
@@ -247,18 +247,18 @@ a:hover .post-nav-title {
   letter-spacing: 0.12em;
   font-variant: small-caps;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #0a0a0a;
+  color: #ffa31a;
   background-color: transparent;
-  border: 1px solid rgba(10, 10, 10, 0.22);
+  border: 1px solid rgba(255, 163, 26, 0.22);
   padding: 0.55rem 1.2rem;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
   user-select: none;
 }
 .export-btn:hover:not(:disabled) {
-  background-color: #0a0a0a;
-  color: #A49B9C;
-  border-color: #0a0a0a;
+  background-color: #ffa31a;
+  color: #2a0a4a;
+  border-color: #ffa31a;
 }
 /* PLAY's inline write-zones (PlayPoemBody) — deliberately quiet: a hairline
    bottom rule so it reads as "a line you can write on," nothing louder.
@@ -266,17 +266,17 @@ a:hover .post-nav-title {
    right there, which is the opposite of what this needed to do. */
 .play-zone {
   border: none;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.2);
+  border-bottom: 1px solid rgba(255, 163, 26, 0.2);
 }
 .play-zone::placeholder {
-  color: rgba(10, 10, 10, 0.35);
+  color: rgba(255, 163, 26, 0.35);
 }
 .play-zone:focus {
   outline: none;
-  border-bottom-color: rgba(10, 10, 10, 0.5);
+  border-bottom-color: rgba(255, 163, 26, 0.5);
 }
 .export-btn:disabled {
-  color: rgba(10, 10, 10, 0.35);
+  color: rgba(255, 163, 26, 0.35);
   cursor: default;
 }
 

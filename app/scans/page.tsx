@@ -8,7 +8,7 @@ import type { ScanCollection } from "@/lib/scans";
 import ScanExpanded from "@/app/components/ScanExpanded";
 import useIsNarrow from "@/lib/useIsNarrow";
 
-// ── SCANS — the warm gray (#A49B9C) this page was designed around is now
+// ── SCANS — the ground this page was designed around (once warm gray) is now
 // the whole site's ground color (see globals.css), so this page just
 // inherits it rather than setting its own — the paper is still the only
 // color doing active work on the page, same as before, it's just no longer
@@ -119,7 +119,7 @@ export default function ScansPage() {
             fontWeight:     500,
             letterSpacing:  "0.15em",
             fontVariant:    "small-caps",
-            color:          "#0a0a0a",
+            color:          "#ffa31a",
             textDecoration: "none",
             opacity:        0.76,
             flexShrink:     0,
@@ -139,7 +139,7 @@ export default function ScansPage() {
             fontWeight:     500,
             letterSpacing:  "0.15em",
             fontVariant:    "small-caps",
-            color:          "#0a0a0a",
+            color:          "#ffa31a",
             textDecoration: "none",
             opacity:        0.76,
             flexShrink:     0,
@@ -158,7 +158,7 @@ export default function ScansPage() {
           fontSize:      expanded ? "clamp(1.4rem, 3vw, 2rem)" : "clamp(2rem, 5vw, 3.5rem)",
           fontWeight:    700,
           letterSpacing: "-0.02em",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           marginTop:     expanded ? "0.75rem" : "2.5rem",
           marginBottom:  expanded ? "1rem" : "3rem",
           cursor:        expanded ? "pointer" : undefined,
@@ -173,7 +173,7 @@ export default function ScansPage() {
           style={{
             fontSize:      "0.95rem",
             fontStyle:     "italic",
-            color:         "rgba(10,10,10,0.72)",
+            color:         "rgba(255,163,26,0.72)",
             letterSpacing: "0.01em",
           }}
         >
@@ -246,7 +246,7 @@ function ScanTile({
           // over the rest of its row. Ordinary sheets never reach the cap.
           width:       `min(100%, calc(240px * ${ratio}))`,
           aspectRatio: String(ratio),
-          boxShadow:   "0 8px 20px rgba(10,10,10,0.43)",
+          boxShadow:   "0 8px 20px rgba(8,0,20,0.43)",
         }}
       >
         <Image
@@ -263,7 +263,7 @@ function ScanTile({
           fontSize:      "0.8rem",
           fontWeight:    500,
           letterSpacing: "0.04em",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           opacity:       0.79,
         }}
       >

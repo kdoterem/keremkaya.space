@@ -47,7 +47,7 @@ const LABEL_STYLE: React.CSSProperties = {
   fontWeight:    500,
   letterSpacing: "0.15em",
   fontVariant:   "small-caps",
-  color:         "#0a0a0a",
+  color:         "#ffa31a",
 };
 
 export default function ScanExpanded({
@@ -186,7 +186,7 @@ export default function ScanExpanded({
                   aspectRatio:     String(page.ratio),
                   scrollSnapAlign: "center",
                   scrollSnapStop:  "always",
-                  boxShadow:       "0 14px 32px rgba(10,10,10,0.47)",
+                  boxShadow:       "0 14px 32px rgba(8,0,20,0.47)",
                 }}
               >
                 <Image
@@ -217,7 +217,7 @@ export default function ScanExpanded({
                     position:    "relative",
                     width:       "100%",
                     aspectRatio: String(hero.ratio),
-                    boxShadow:   "0 14px 32px rgba(10,10,10,0.47)",
+                    boxShadow:   "0 14px 32px rgba(8,0,20,0.47)",
                   }
                 : {
                     position:    "relative",
@@ -229,7 +229,7 @@ export default function ScanExpanded({
                     maxWidth:    "100%",
                     alignSelf:   "center",
                     aspectRatio: String(hero.ratio),
-                    boxShadow:   "0 14px 32px rgba(10,10,10,0.47)",
+                    boxShadow:   "0 14px 32px rgba(8,0,20,0.47)",
                     flexShrink:  0,
                   }
             }
@@ -273,9 +273,9 @@ export default function ScanExpanded({
                   cursor:      "pointer",
                   flexShrink:  0,
                   opacity:     i === heroIndex ? 1 : 0.55,
-                  outline:     i === heroIndex ? "2px solid rgba(10,10,10,0.72)" : "none",
+                  outline:     i === heroIndex ? "2px solid rgba(255,163,26,0.72)" : "none",
                   outlineOffset: "3px",
-                  boxShadow:   "0 6px 14px rgba(10,10,10,0.39)",
+                  boxShadow:   "0 6px 14px rgba(8,0,20,0.39)",
                 }}
               >
                 <Image
@@ -303,7 +303,7 @@ export default function ScanExpanded({
             fontSize:      "0.8rem",
             letterSpacing: "0.01em",
             lineHeight:    1.4,
-            color:         "#0a0a0a",
+            color:         "#ffa31a",
             opacity:       0.62,
             marginTop:     "0.3rem",
             maxWidth:      "60ch",

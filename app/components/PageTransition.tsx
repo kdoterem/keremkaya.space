@@ -64,7 +64,7 @@ export default function PageTransition({
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "#A49B9C",
+              backgroundColor: "#2a0a4a",
               zIndex: 9999,
               pointerEvents: "none",
             }}
@@ -84,7 +84,7 @@ export default function PageTransition({
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "#A49B9C",
+              backgroundColor: "#2a0a4a",
               zIndex: 9998,
               pointerEvents: "none",
               transformOrigin: "top",

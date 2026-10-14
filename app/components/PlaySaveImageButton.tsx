@@ -57,10 +57,10 @@ export default function PlaySaveImageButton({ category, text }: { category: stri
       return;
     }
 
-    ctx.fillStyle = "#A49B9C";
+    ctx.fillStyle = "#2a0a4a";
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = "rgba(10,10,10,0.64)";
+    ctx.fillStyle = "rgba(255,163,26,0.64)";
     ctx.font = `600 26px ${FONT}`;
     ctx.fillText(category.toUpperCase(), PAD_X, PAD_TOP);
 
@@ -92,14 +92,14 @@ export default function PlaySaveImageButton({ category, text }: { category: stri
 
     const usedHeight = renderLines.length * lineHeight;
     let y = contentTop + Math.max(0, (budget - usedHeight) / 2) + fontSize;
-    ctx.fillStyle = "#0a0a0a";
+    ctx.fillStyle = "#ffa31a";
     ctx.font = `500 ${fontSize}px ${FONT}`;
     for (const line of renderLines) {
       ctx.fillText(line, PAD_X, y);
       y += lineHeight;
     }
 
-    ctx.fillStyle = "rgba(10,10,10,0.6)";
+    ctx.fillStyle = "rgba(255,163,26,0.6)";
     ctx.font = `600 22px ${FONT}`;
     ctx.fillText("PLAY · KEREMKAYA.SPACE", PAD_X, H - 50);
 

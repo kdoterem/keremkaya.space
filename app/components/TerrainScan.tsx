@@ -268,21 +268,21 @@ export function MeshLayers({
   const crossSections = useMemo(() => buildCrossSections(points, confidences), [points, confidences]);
 
   return (
-    <g style={glow ? { filter: "drop-shadow(0 0 1.5px rgba(10,10,10,0.6))" } : undefined}>
+    <g style={glow ? { filter: "drop-shadow(0 0 1.5px rgba(255,163,26,0.6))" } : undefined}>
       {crossSections.map((cs, i) => {
         const midX = (cs.x0 + cs.x1) / 2, midY = (cs.y0 + cs.y1) / 2;
         const op = CROSS_OPACITY * cs.confidence * cs.weight * opacityMultiplier;
         return (
           <g key={`cs-${i}`}>
-            <line x1={cs.x0} y1={cs.y0} x2={midX} y2={midY} stroke="#0a0a0a" strokeWidth={CROSS_STROKE_FRONT} strokeOpacity={op} />
-            <line x1={midX} y1={midY} x2={cs.x1} y2={cs.y1} stroke="#0a0a0a" strokeWidth={CROSS_STROKE_BACK} strokeOpacity={op} />
+            <line x1={cs.x0} y1={cs.y0} x2={midX} y2={midY} stroke="#ffa31a" strokeWidth={CROSS_STROKE_FRONT} strokeOpacity={op} />
+            <line x1={midX} y1={midY} x2={cs.x1} y2={cs.y1} stroke="#ffa31a" strokeWidth={CROSS_STROKE_BACK} strokeOpacity={op} />
           </g>
         );
       })}
       {layers.map(layer => layer.segments.map((seg, si) => (
         <path
           key={`l${layer.layer}-${si}`}
-          d={seg.d} fill="none" stroke="#0a0a0a"
+          d={seg.d} fill="none" stroke="#ffa31a"
           strokeWidth={LAYER_STROKE_W[layer.layer] * ELEV_WEIGHT[seg.tier]}
           strokeLinecap="round" strokeLinejoin="round"
           strokeOpacity={Math.min(1, LAYER_OPACITY[layer.layer] * ELEV_WEIGHT[seg.tier] * opacityMultiplier)}
@@ -334,7 +334,7 @@ export function SweepOverlay({
         <MeshLayers points={points} dispTrees={dispTrees} mag0={mag0} confidences={confidences} opacityMultiplier={2.4} glow />
       </g>
 
-      <line x1={0} y1={0} x2={0} y2={height} stroke="#0a0a0a" strokeWidth={1} strokeOpacity={0.5}>
+      <line x1={0} y1={0} x2={0} y2={height} stroke="#ffa31a" strokeWidth={1} strokeOpacity={0.5}>
         <animate attributeName="x1" values={`0;${width};0`} dur={`${durationS}s`} repeatCount="indefinite" />
         <animate attributeName="x2" values={`0;${width};0`} dur={`${durationS}s`} repeatCount="indefinite" />
       </line>
@@ -380,15 +380,15 @@ export function Annotation({
 
   return (
     <g>
-      <circle cx={x} cy={y} r={variant === "position" ? 2.5 : 1.5} fill="#0a0a0a" fillOpacity={style.opacity} />
+      <circle cx={x} cy={y} r={variant === "position" ? 2.5 : 1.5} fill="#ffa31a" fillOpacity={style.opacity} />
       <path
         d={`M ${x.toFixed(1)},${y.toFixed(1)} L ${midX.toFixed(1)},${midY.toFixed(1)} L ${endX.toFixed(1)},${endY.toFixed(1)}`}
-        fill="none" stroke="#0a0a0a" strokeWidth={0.75} strokeOpacity={style.opacity} strokeDasharray={style.dash}
+        fill="none" stroke="#ffa31a" strokeWidth={0.75} strokeOpacity={style.opacity} strokeDasharray={style.dash}
       />
       <text
         x={endX + dir * 4} y={endY}
         textAnchor={side === "right" ? "start" : "end"}
-        fontFamily={HUD_MONO} fontSize={9} fill="#0a0a0a" fillOpacity={style.opacity}
+        fontFamily={HUD_MONO} fontSize={9} fill="#ffa31a" fillOpacity={style.opacity}
         style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}
       >
         {label}

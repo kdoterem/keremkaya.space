@@ -4,6 +4,7 @@ import { motion, AnimatePresence, animate, useMotionValue } from "framer-motion"
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { TagCount } from "@/lib/posts";
+import HomeArt from "./components/HomeArt";
 
 interface PostMeta {
   slug:  string;
@@ -37,7 +38,7 @@ const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 41;  // 81 total
 // Keeps tags clear of the fixed nav row (which sits 2rem from the viewport
 // bottom, plus its own text height) — shared by initial placement and by
 // where a flung tag comes to rest, so neither can land under the nav.
-const NAV_CLEARANCE = 110; // px
+const NAV_CLEARANCE = 170; // px — the nav now rides inside the knife man's arm, so keep tags off him too
 
 const NAV = [
   { label: "WRITING", href: "/writing"  },
@@ -79,8 +80,9 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
   const sqrtMin   = Math.sqrt(minCount);
   const sqrtSpan  = Math.sqrt(maxCount) - sqrtMin || 1;
 
-  const FONT_MIN = isMobile ? 8 : 9;
-  const FONT_MAX = isMobile ? 16 : 22;
+  // desktop a size up so the smallest tags still hold from a step back
+  const FONT_MIN = isMobile ? 8 : 12;
+  const FONT_MAX = isMobile ? 16 : 24;
 
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
@@ -314,8 +316,9 @@ function TagWord({
         y:             "-50%",
         background:    "none",
         border:        "none",
-        // Tags: slightly muted so they read as content, distinct from the nav
-        color:         "rgba(10,10,10,0.83)",
+        // Tags: electric orange, with a halo of the ground so they lift off the drawing behind
+        color:         "#ff5f00",
+        textShadow:    "0 0 2px #2a0a4a, 0 0 5px #2a0a4a, 0 0 10px #2a0a4a, 0 1px 14px rgba(8,0,20,0.55)",
         cursor:        dragging ? "grabbing" : "grab",
         padding:       0,
         fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -351,6 +354,7 @@ export default function Home() {
   const [tagListOpen,  setTagListOpen]  = useState(false);
 
   const positions = useRef<Map<string, PosEntry>>(new Map());
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const vw = window.innerWidth, vh = window.innerHeight;
@@ -432,6 +436,9 @@ export default function Home() {
         overscrollBehavior: "none",
       }}
     >
+      {/* ── KILL, and the knife man holding the nav ── */}
+      <HomeArt navRef={navRef} />
+
       {/* ── word cloud ── */}
       {layout.map((l) => (
         <TagWord
@@ -461,7 +468,7 @@ export default function Home() {
               right:      0,
               maxHeight:  "58vh",
               overflowY:  "auto",
-              background: "#0a0a0a",
+              background: "#14052a",
               padding:    "1.8rem 5vw calc(1.8rem + env(safe-area-inset-bottom))",
               zIndex:     100,
             }}
@@ -473,7 +480,7 @@ export default function Home() {
               <span style={{
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: "clamp(1rem, 3vw, 1.4rem)", fontWeight: 700,
-                color: "#A49B9C", letterSpacing: "-0.01em",
+                color: "#ff5f00", letterSpacing: "-0.01em",
               }}>
                 {selectedTag}
               </span>
@@ -481,7 +488,7 @@ export default function Home() {
                 onClick={clearTag}
                 style={{
                   background: "none", border: "none",
-                  color: "rgba(255,255,255,0.35)", fontSize: "0.7rem",
+                  color: "rgba(255,163,26,0.35)", fontSize: "0.7rem",
                   letterSpacing: "0.12em",
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                   cursor: "pointer",
@@ -493,7 +500,7 @@ export default function Home() {
 
             {matching.length === 0 ? (
               <p style={{
-                color: "rgba(255,255,255,0.3)", fontSize: "0.85rem",
+                color: "rgba(255,163,26,0.3)", fontSize: "0.85rem",
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
               }}>
                 no posts tagged &quot;{selectedTag}&quot;
@@ -506,7 +513,7 @@ export default function Home() {
                   display: "flex", alignItems: "baseline",
                   justifyContent: "space-between",
                   padding: "0.75rem 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(255,163,26,0.06)",
                   textDecoration: "none", transition: "opacity 0.2s",
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
@@ -515,13 +522,13 @@ export default function Home() {
                 <span style={{
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                   fontSize: "clamp(0.88rem, 2vw, 1.05rem)",
-                  fontWeight: 500, color: "#fff", letterSpacing: "-0.01em",
+                  fontWeight: 500, color: "#ffa31a", letterSpacing: "-0.01em",
                 }}>
                   {post.title}
                 </span>
                 <span style={{
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: "0.68rem", color: "rgba(255,255,255,0.3)",
+                  fontSize: "0.68rem", color: "rgba(255,163,26,0.3)",
                   letterSpacing: "0.05em", flexShrink: 0, marginLeft: "2rem",
                 }}>
                   {post.date}
@@ -552,8 +559,8 @@ export default function Home() {
           zIndex:        20,
           padding:       "0.5rem 0.9rem",
           background:    "transparent",
-          border:        "1px solid rgba(10,10,10,0.62)",
-          color:         "rgba(10,10,10,0.68)",
+          border:        "1px solid rgba(255,163,26,0.62)",
+          color:         "rgba(255,163,26,0.68)",
           fontSize:      "0.65rem",
           fontWeight:    500,
           fontVariant:   "small-caps",
@@ -563,12 +570,12 @@ export default function Home() {
           transition:    "color 0.2s, border-color 0.2s",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.color = "#0a0a0a";
-          e.currentTarget.style.borderColor = "#0a0a0a";
+          e.currentTarget.style.color = "#ffa31a";
+          e.currentTarget.style.borderColor = "#ffa31a";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = "rgba(10,10,10,0.68)";
-          e.currentTarget.style.borderColor = "rgba(10,10,10,0.62)";
+          e.currentTarget.style.color = "rgba(255,163,26,0.68)";
+          e.currentTarget.style.borderColor = "rgba(255,163,26,0.62)";
         }}
       >
         all tags
@@ -590,7 +597,7 @@ export default function Home() {
               right:      0,
               maxHeight:  "72vh",
               overflowY:  "auto",
-              background: "#0a0a0a",
+              background: "#14052a",
               padding:    "1.8rem 5vw calc(1.8rem + env(safe-area-inset-bottom))",
               zIndex:     110,
             }}
@@ -602,7 +609,7 @@ export default function Home() {
               <span style={{
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 fontSize: "clamp(1rem, 3vw, 1.4rem)", fontWeight: 700,
-                color: "#A49B9C", letterSpacing: "-0.01em",
+                color: "#ff5f00", letterSpacing: "-0.01em",
               }}>
                 all tags ({allTagCounts.length})
               </span>
@@ -610,7 +617,7 @@ export default function Home() {
                 onClick={() => setTagListOpen(false)}
                 style={{
                   background: "none", border: "none",
-                  color: "rgba(255,255,255,0.35)", fontSize: "0.7rem",
+                  color: "rgba(255,163,26,0.35)", fontSize: "0.7rem",
                   letterSpacing: "0.12em",
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                   cursor: "pointer",
@@ -632,7 +639,7 @@ export default function Home() {
                   padding:      "0.75rem 0",
                   background:   "none",
                   border:       "none",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(255,163,26,0.06)",
                   textAlign:    "left",
                   cursor:       "pointer",
                   transition:   "opacity 0.2s",
@@ -643,13 +650,13 @@ export default function Home() {
                 <span style={{
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                   fontSize: "clamp(0.88rem, 2vw, 1.05rem)",
-                  fontWeight: 500, color: "#fff", letterSpacing: "-0.01em",
+                  fontWeight: 500, color: "#ffa31a", letterSpacing: "-0.01em",
                 }}>
                   {tag}
                 </span>
                 <span style={{
                   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-                  fontSize: "0.68rem", color: "rgba(255,255,255,0.3)",
+                  fontSize: "0.68rem", color: "rgba(255,163,26,0.3)",
                   letterSpacing: "0.05em", flexShrink: 0, marginLeft: "2rem",
                 }}>
                   {count} poem{count === 1 ? "" : "s"}
@@ -662,32 +669,36 @@ export default function Home() {
 
       {/* ── nav — always visible, visually distinct from tags ── */}
       <nav
+        ref={navRef}
         style={{
           position:       "absolute",
-          bottom:         "calc(2rem + env(safe-area-inset-bottom))",
+          // raised so the knife man's arm and body have room under the row
+          bottom:         "calc(84px + env(safe-area-inset-bottom))",
           left:           0,
           right:          0,
           display:        "flex",
           justifyContent: "center",
-          gap:            "clamp(1.2rem, 4vw, 2.5rem)",
+          flexWrap:       "nowrap",
+          gap:            "0 var(--navgap, calc(var(--navfs, 17px) * 1.3))",
           zIndex:         10,
         }}
       >
         {NAV.map(({ label, href }) => (
           <Link key={href} href={href}
             style={{
-              fontSize:       "0.72rem",
-              fontWeight:     500,
-              fontVariant:    "small-caps",
-              letterSpacing:  "0.18em",
-              // Nav: clearly muted — reads as UI chrome, not content
-              color:          "rgba(10,10,10,0.52)",
+              // Nav: held inside the knife man's arm — bold and full colour so it's never missed
+              fontSize:       "var(--navfs, 17px)",
+              fontWeight:     700,
+              letterSpacing:  "var(--navls, 0.06em)",
+              whiteSpace:     "nowrap",
+              color:          "#ff5f00",
+              textShadow:     "0 0 2px #2a0a4a, 0 0 5px #2a0a4a, 0 0 10px #2a0a4a",
               textDecoration: "none",
               fontFamily:     '"Helvetica Neue", Helvetica, Arial, sans-serif',
               transition:     "color 0.2s",
             }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.88)")}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(10,10,10,0.52)")}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#ffa31a")}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#ff5f00")}
           >
             {label}
           </Link>

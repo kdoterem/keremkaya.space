@@ -7,9 +7,11 @@ import {
   titleWeightStyle,
   aliveScaleFor,
   seededPhase,
-  ALIVE_REST_COLOR,
   weightedTintFor,
 } from '@/lib/tagProvenance';
+
+// plain text in the exported image is the warm orange body colour; tagged words get weightedTintFor
+const BODY_COLOR = '#ffa31a';
 import {
   Output as MbOutput,
   Mp4OutputFormat,
@@ -47,7 +49,7 @@ const GAP            = 80;   // gap between title block and content
 const TAG_FONT_SIZE        = 24;
 const TAG_LINE_H           = 32;
 const TAG_GAP_ABOVE_FOOTER = 20; // gap between the tag row and the footer text above it (page reads top-to-bottom, footer/tags anchor from the bottom up)
-const TAG_COLOR            = 'rgba(10,10,10,0.6)';
+const TAG_COLOR            = 'rgba(255,163,26,0.6)';
 
 const TITLE_SIZE   = 80;
 const TITLE_LINE_H = 98;
@@ -286,9 +288,9 @@ function measureTextCached(ctx: CanvasRenderingContext2D, text: string): number 
 // the direct canvas equivalent of CryptoScramble/WeightedText's styled runs.
 //
 // tint (default off) applies weightedTintFor per weighted word instead of
-// flat ALIVE_REST_COLOR everywhere — only ever turned on for body content.
+// flat BODY_COLOR everywhere — only ever turned on for body content.
 // This function also draws the title (with titleWeightStyle), which stays
-// on flat ALIVE_REST_COLOR always — the title's own weight-only emphasis
+// on flat BODY_COLOR always — the title's own weight-only emphasis
 // is a deliberately different, untinted register from the body's.
 function drawWeightedLineCentered(
   ctx: CanvasRenderingContext2D,
@@ -320,7 +322,7 @@ function drawWeightedLineCentered(
   let x = (W - totalWidth) / 2;
   words.forEach((w, i) => {
     ctx.font = wordFonts[i];
-    ctx.fillStyle = tint && levels[i] > 0 ? weightedTintFor(levels[i]) : ALIVE_REST_COLOR;
+    ctx.fillStyle = tint && levels[i] > 0 ? weightedTintFor(levels[i]) : BODY_COLOR;
     ctx.fillText(w.word, x, y);
     x += measureTextCached(ctx, w.word) + (i < words.length - 1 ? spaceWidth : 0);
   });
@@ -374,7 +376,7 @@ function drawWeightedLineCenteredAnimated(
     const level = levels[i];
 
     if (level === 0) {
-      ctx.fillStyle = ALIVE_REST_COLOR;
+      ctx.fillStyle = BODY_COLOR;
       ctx.fillText(w.word, x, y);
     } else {
       const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(level);
@@ -420,7 +422,7 @@ function tagBlockHeight(tagLines: string[]): number {
 }
 
 function drawRule(ctx: CanvasRenderingContext2D, y: number) {
-  ctx.strokeStyle = 'rgba(10,10,10,0.31)';
+  ctx.strokeStyle = 'rgba(255,163,26,0.31)';
   ctx.lineWidth   = 1;
   const rw = Math.min(320, CW * 0.35);
   ctx.beginPath();
@@ -562,7 +564,7 @@ function renderPage(
     ctx.textBaseline = 'top';
 
     // Background
-    ctx.fillStyle = '#A49B9C';
+    ctx.fillStyle = '#2a0a4a';
     ctx.fillRect(0, 0, W, H);
 
     const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
@@ -579,7 +581,7 @@ function renderPage(
         if (Array.isArray(line)) {
           drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
         } else {
-          drawCentered(ctx, line, y, '#0a0a0a');
+          drawCentered(ctx, line, y, '#ffa31a');
         }
         y += TITLE_LINE_H;
       }
@@ -593,7 +595,7 @@ function renderPage(
       while (ctx.measureText(display).width > CW && display.length > 1)
         display = display.slice(0, -1);
       if (display !== title) display = display.trimEnd() + '…';
-      drawCentered(ctx, display, y, 'rgba(10,10,10,0.5)');
+      drawCentered(ctx, display, y, 'rgba(255,163,26,0.5)');
       y += CONT_TITLE_LINE_H;
     }
 
@@ -618,7 +620,7 @@ function renderPage(
       if (Array.isArray(line)) {
         drawWeightedLineCentered(ctx, line, bodyWeights!, y, fontSize, '400', () => ({}));
       } else {
-        drawCentered(ctx, line, y, '#0a0a0a');
+        drawCentered(ctx, line, y, '#ffa31a');
       }
       y += lineH;
     }
@@ -637,12 +639,12 @@ function renderPage(
     // Footer
     const footerY = H - 130;
     ctx.font      = `26px ${FONT}`;
-    ctx.fillStyle = 'rgba(10,10,10,0.53)';
-    drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.53)');
+    ctx.fillStyle = 'rgba(255,163,26,0.53)';
+    drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(255,163,26,0.53)');
 
     if (totalPages > 1) {
       ctx.font = `22px ${FONT}`;
-      drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.43)');
+      drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(255,163,26,0.43)');
     }
 
     const filename = totalPages > 1
@@ -681,7 +683,7 @@ function paintAnimatedFrame(
   tagLines: string[],
 ) {
   ctx.textBaseline = 'top';
-  ctx.fillStyle = '#A49B9C';
+  ctx.fillStyle = '#2a0a4a';
   ctx.fillRect(0, 0, W, H);
 
   const contentBlockH = contentLines.reduce((h, l) => h + (l === null ? gapH : lineH), 0);
@@ -698,7 +700,7 @@ function paintAnimatedFrame(
       if (Array.isArray(line)) {
         drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
       } else {
-        drawCentered(ctx, line, y, '#0a0a0a');
+        drawCentered(ctx, line, y, '#ffa31a');
       }
       y += TITLE_LINE_H;
     }
@@ -711,7 +713,7 @@ function paintAnimatedFrame(
     while (ctx.measureText(display).width > CW && display.length > 1)
       display = display.slice(0, -1);
     if (display !== title) display = display.trimEnd() + '…';
-    drawCentered(ctx, display, y, 'rgba(10,10,10,0.5)');
+    drawCentered(ctx, display, y, 'rgba(255,163,26,0.5)');
     y += CONT_TITLE_LINE_H;
   }
 
@@ -724,7 +726,7 @@ function paintAnimatedFrame(
     if (Array.isArray(line)) {
       drawWeightedLineCenteredAnimated(ctx, line, bodyWeights!, y, fontSize, '400', loopT);
     } else {
-      drawCentered(ctx, line, y, '#0a0a0a');
+      drawCentered(ctx, line, y, '#ffa31a');
     }
     y += lineH;
   }
@@ -740,10 +742,10 @@ function paintAnimatedFrame(
 
   const footerY = H - 130;
   ctx.font = `26px ${FONT}`;
-  drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(10,10,10,0.53)');
+  drawCentered(ctx, 'keremkaya.space', footerY, 'rgba(255,163,26,0.53)');
   if (totalPages > 1) {
     ctx.font = `22px ${FONT}`;
-    drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(10,10,10,0.43)');
+    drawCentered(ctx, `${pageNum} / ${totalPages}`, footerY + 36, 'rgba(255,163,26,0.43)');
   }
 }
 
@@ -1245,7 +1247,7 @@ export default function SaveImageButton({ title, content, slug, tags }: Props) {
           fontSize:      '0.72rem',
           lineHeight:    1.5,
           letterSpacing: '0.01em',
-          color:         'rgba(10,10,10,0.68)',
+          color:         'rgba(255,163,26,0.68)',
           fontFamily:    FONT,
         }}
       >

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { aliveScaleFor, seededPhase } from "@/lib/tagProvenance";
+import { aliveScaleFor, seededPhase, ALIVE_REST_COLOR } from "@/lib/tagProvenance";
 
 // ── A single word of real provenance — always legible, gets the same
 // drift+breathe "alive" motion every other weighted-text surface on the
@@ -26,7 +26,8 @@ export default function ObscurableToken({
   seed: number;
 }) {
   const reduceMotion = useReducedMotion();
-  if (weight <= 0 || reduceMotion) return <span>{text}</span>;
+  if (weight <= 0) return <span>{text}</span>;
+  if (reduceMotion) return <span style={{ color: ALIVE_REST_COLOR }}>{text}</span>;
 
   const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(weight);
   const phase1 = seededPhase(seed);
@@ -36,7 +37,7 @@ export default function ObscurableToken({
 
   return (
     <motion.span
-      style={{ display: "inline-block" }}
+      style={{ display: "inline-block", color: ALIVE_REST_COLOR }}
       animate={{
         x:     [0, driftAmpX, 0, -driftAmpX, 0],
         y:     [0, -driftAmpY, 0, driftAmpY, 0],

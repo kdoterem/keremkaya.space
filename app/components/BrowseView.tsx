@@ -46,16 +46,16 @@ function PoemBlock({ post }: { post: SearchDoc }) {
           fontWeight:    700,
           letterSpacing: "-0.02em",
           lineHeight:    1.15,
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           marginBottom:  "0.35rem",
         }}
       >
         <WeightedText text={post.title} weights={titleWeights} weightStyle={titleWeightStyle} />
       </h2>
-      <p style={{ fontFamily: PROSE, fontSize: "0.72rem", color: "rgba(10,10,10,0.6)", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
+      <p style={{ fontFamily: PROSE, fontSize: "0.72rem", color: "rgba(255,163,26,0.6)", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
         {post.date}
       </p>
-      <div style={{ fontFamily: PROSE, fontSize: "1rem", lineHeight: 1.75, color: "#0a0a0a", whiteSpace: "pre-wrap" }}>
+      <div style={{ fontFamily: PROSE, fontSize: "1rem", lineHeight: 1.75, color: "#ffa31a", whiteSpace: "pre-wrap" }}>
         <WeightedText text={post.body} weights={bodyWeights} weightStyle={bodyWeightStyle} />
       </div>
     </div>
@@ -98,7 +98,7 @@ export default function BrowseView({ months, postsByMonth, month, onNavigate, on
         background:     "none",
         border:         "none",
         padding:        0,
-        color:          "#0a0a0a",
+        color:          "#ffa31a",
         opacity:        target ? 0.55 : 0.2,
         cursor:         target ? "pointer" : "default",
       }}
@@ -118,7 +118,7 @@ export default function BrowseView({ months, postsByMonth, month, onNavigate, on
             fontWeight:     600,
             letterSpacing:  "0.14em",
             textTransform:  "uppercase",
-            color:          "#0a0a0a",
+            color:          "#ffa31a",
             background:     "none",
             border:         "none",
             padding:        0,
@@ -140,7 +140,7 @@ export default function BrowseView({ months, postsByMonth, month, onNavigate, on
           fontSize:      "clamp(1.6rem, 4vw, 2.2rem)",
           fontWeight:    700,
           letterSpacing: "-0.02em",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           margin:        "2rem 0 2.5rem",
         }}
       >
@@ -148,7 +148,7 @@ export default function BrowseView({ months, postsByMonth, month, onNavigate, on
       </h1>
 
       {posts.length === 0 ? (
-        <p style={{ fontFamily: PROSE, fontSize: "0.85rem", color: "rgba(10,10,10,0.6)" }}>
+        <p style={{ fontFamily: PROSE, fontSize: "0.85rem", color: "rgba(255,163,26,0.6)" }}>
           nothing here
         </p>
       ) : (

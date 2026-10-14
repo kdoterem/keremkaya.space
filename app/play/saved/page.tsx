@@ -123,8 +123,8 @@ export default function SavedWritingsPage() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#A49B9C",
-        color: "#0a0a0a",
+        backgroundColor: "#2a0a4a",
+        color: "#ffa31a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",
       }}
@@ -133,7 +133,7 @@ export default function SavedWritingsPage() {
         href="/play"
         style={{
           fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.15em",
-          fontVariant: "small-caps", color: "#0a0a0a", textDecoration: "none", opacity: 0.68,
+          fontVariant: "small-caps", color: "#ffa31a", textDecoration: "none", opacity: 0.68,
         }}
       >
         RETURN
@@ -145,7 +145,7 @@ export default function SavedWritingsPage() {
         </h1>
 
         {loaded && entries.length === 0 && (
-          <p style={{ fontSize: "0.9rem", color: "rgba(10,10,10,0.68)" }}>
+          <p style={{ fontSize: "0.9rem", color: "rgba(255,163,26,0.68)" }}>
             nothing saved yet — anything you finish in PLAY shows up here.
           </p>
         )}
@@ -160,20 +160,20 @@ export default function SavedWritingsPage() {
                 textAlign: "left",
                 width: "100%",
                 background: "none",
-                border: "1px solid rgba(10,10,10,0.7)",
+                border: "1px solid rgba(255,163,26,0.7)",
                 padding: "1.25rem 1.5rem",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                color: "#0a0a0a",
+                color: "#ffa31a",
               }}
             >
               <p style={{ fontSize: "0.95rem", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "0.3rem" }}>
                 {labelFor(e.slug)}
               </p>
-              <p style={{ fontSize: "0.68rem", color: "rgba(10,10,10,0.6)", marginBottom: "0.6rem" }}>
+              <p style={{ fontSize: "0.68rem", color: "rgba(255,163,26,0.6)", marginBottom: "0.6rem" }}>
                 {fmtDateTime(e.savedAt)}
               </p>
-              <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(10,10,10,0.79)" }}>
+              <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,163,26,0.79)" }}>
                 {preview(e.text)}
               </p>
             </button>
@@ -189,7 +189,7 @@ export default function SavedWritingsPage() {
           {!openEntry.browseHref && (() => {
             const passage = getPassage(openEntry.slug);
             return passage ? (
-              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.72)", marginBottom: "1rem" }}>
+              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(255,163,26,0.72)", marginBottom: "1rem" }}>
                 {passage.lines.join("\n")}
               </p>
             ) : null;
@@ -200,7 +200,7 @@ export default function SavedWritingsPage() {
             {openEntry.browseHref && (
               <Link
                 href={openEntry.browseHref}
-                style={{ fontSize: "0.8rem", fontStyle: "italic", color: "rgba(10,10,10,0.72)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+                style={{ fontSize: "0.8rem", fontStyle: "italic", color: "rgba(255,163,26,0.72)", textDecoration: "underline", textUnderlineOffset: "3px" }}
               >
                 open this passage →
               </Link>

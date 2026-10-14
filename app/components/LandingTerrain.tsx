@@ -191,7 +191,7 @@ function ProfileLines({ months }: { months: TerrainMonth[] }) {
           <bufferGeometry>
             <bufferAttribute attach="attributes-position" args={[l.positions, 3]} />
           </bufferGeometry>
-          <lineBasicMaterial color="#0a0a0a" transparent opacity={l.opacity} />
+          <lineBasicMaterial color="#ffa31a" transparent opacity={l.opacity} />
         </line>
       ))}
     </>
@@ -218,7 +218,7 @@ function BackgroundField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial color="#0a0a0a" size={0.03} sizeAttenuation transparent opacity={0.12} depthWrite={false} />
+      <pointsMaterial color="#ffa31a" size={0.03} sizeAttenuation transparent opacity={0.12} depthWrite={false} />
     </points>
   );
 }
@@ -260,7 +260,7 @@ function CarpetField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial color="#0a0a0a" size={0.026} sizeAttenuation transparent opacity={0.15} depthWrite={false} />
+      <pointsMaterial color="#ffa31a" size={0.026} sizeAttenuation transparent opacity={0.15} depthWrite={false} />
     </points>
   );
 }
@@ -285,7 +285,7 @@ function TurntableRing() {
       {items.map((t, i) => (
         <mesh key={i} position={[t.x, CARPET_Y + 0.015, t.z]}>
           <cylinderGeometry args={[t.primary ? 0.038 : 0.02, t.primary ? 0.038 : 0.02, 0.018, 8]} />
-          <meshBasicMaterial color="#0a0a0a" transparent opacity={t.primary ? 0.38 : 0.2} />
+          <meshBasicMaterial color="#ffa31a" transparent opacity={t.primary ? 0.38 : 0.2} />
         </mesh>
       ))}
     </>
@@ -302,7 +302,7 @@ function SeamMarker({ x }: { x: number }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <lineBasicMaterial color="#0a0a0a" transparent opacity={0.3} />
+      <lineBasicMaterial color="#ffa31a" transparent opacity={0.3} />
     </line>
   );
 }

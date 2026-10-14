@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePaint } from "../components/usePaint";
+import PaintDrops from "../components/PaintDrops";
 import Link from "next/link";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -53,6 +55,8 @@ function useScrambleReveal(text: string, startDelay: number, duration = 600) {
 function ContactLine({ text, type, delay }: { text: string; type: string; delay: number }) {
   const displayed = useScrambleReveal(text, delay);
   const [visible, setVisible] = useState(false);
+  const paintRef = useRef<HTMLElement>(null);
+  usePaint(paintRef, { size: 0.7, spill: true, key: text });
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), delay);
@@ -65,31 +69,31 @@ function ContactLine({ text, type, delay }: { text: string; type: string; delay:
     lineHeight:    1.4,
     letterSpacing: "0.02em",
     fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-    color:         "#0a0a0a",
+    color:         "#ffa31a",
     display:       "block",
     marginBottom:  "1.2rem",
     opacity:       visible ? 1 : 0,
     transition:    "opacity 0.15s",
     textDecoration:      "underline",
-    textDecorationColor: "rgba(10,10,10,0.47)",
+    textDecorationColor: "rgba(255,163,26,0.47)",
     textUnderlineOffset: "3px",
     cursor:        "pointer",
   };
 
   if (type === "email") {
-    return <a href="mailto:kdoterem@gmail.com" style={style}>{displayed || "\u00A0"}</a>;
+    return <a ref={paintRef as React.RefObject<HTMLAnchorElement>} href="mailto:kdoterem@gmail.com" style={style}>{displayed || "\u00A0"}</a>;
   }
 
   if (type === "instagram") {
     return (
-      <a href="https://instagram.com/kdoterem" target="_blank" rel="noopener noreferrer" style={style}>
+      <a ref={paintRef as React.RefObject<HTMLAnchorElement>} href="https://instagram.com/kdoterem" target="_blank" rel="noopener noreferrer" style={style}>
         {displayed || "\u00A0"}
       </a>
     );
   }
 
   return (
-    <span style={{ ...style, textDecoration: "none", cursor: "default", fontWeight: 400 }}>
+    <span ref={paintRef as React.RefObject<HTMLSpanElement>} style={{ ...style, textDecoration: "none", cursor: "default", fontWeight: 400 }}>
       {displayed || "\u00A0"}
     </span>
   );
@@ -99,6 +103,8 @@ function RssLine() {
   const rssText  = useScrambleReveal("quiet follow — rss", 1100);
   const hintText = useScrambleReveal("(paste in a feed reader)", 1500);
   const [rssVisible,  setRssVisible]  = useState(false);
+  const rssRef = useRef<HTMLAnchorElement>(null);
+  usePaint(rssRef, { size: 0.7, spill: true, key: "rss" });
   const [hintVisible, setHintVisible] = useState(false);
 
   useEffect(() => {
@@ -110,6 +116,7 @@ function RssLine() {
   return (
     <>
       <a
+        ref={rssRef}
         href="/feed.xml"
         style={{
           fontSize:            "clamp(1.1rem, 3vw, 1.8rem)",
@@ -117,11 +124,11 @@ function RssLine() {
           lineHeight:          1.4,
           letterSpacing:       "0.02em",
           fontFamily:          '"Helvetica Neue", Helvetica, Arial, sans-serif',
-          color:               "#0a0a0a",
+          color:               "#ffa31a",
           display:             "block",
           marginBottom:        "0.4rem",
           textDecoration:      "underline",
-          textDecorationColor: "rgba(10,10,10,0.47)",
+          textDecorationColor: "rgba(255,163,26,0.47)",
           textUnderlineOffset: "3px",
           opacity:             rssVisible ? 1 : 0,
           transition:          "opacity 0.15s",
@@ -132,7 +139,7 @@ function RssLine() {
       <span style={{
         fontSize:      "0.85rem",
         fontWeight:    400,
-        color:         "#0a0a0a",
+        color:         "#ffa31a",
         opacity:       hintVisible ? 0.45 : 0,
         transition:    "opacity 0.15s",
         display:       "block",
@@ -145,6 +152,14 @@ function RssLine() {
 }
 
 export default function FindMePage() {
+  // FIND ME is the one page on electric purple — it's the final one
+  useEffect(() => {
+    const html = document.documentElement, body = document.body;
+    const prev = [html.style.backgroundColor, body.style.backgroundColor];
+    html.style.backgroundColor = body.style.backgroundColor = "#8f00ff";
+    return () => { html.style.backgroundColor = prev[0]; body.style.backgroundColor = prev[1]; };
+  }, []);
+
   return (
     <main
       style={{
@@ -166,7 +181,7 @@ export default function FindMePage() {
           fontWeight:    500,
           letterSpacing: "0.15em",
           fontVariant:   "small-caps",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           textDecoration: "none",
           opacity:       0.68,
         }}
@@ -174,13 +189,15 @@ export default function FindMePage() {
         RETURN
       </Link>
 
-      <div style={{ maxWidth: "640px" }}>
+      <PaintDrops />
+
+      <div style={{ maxWidth: "640px", position: "relative", zIndex: 1 }}>
         {LINES.map((line, i) => (
           <ContactLine key={i} text={line.text} type={line.type} delay={line.delay} />
         ))}
       </div>
 
-      <div style={{ marginTop: "3.6rem", textAlign: "right" }}>
+      <div style={{ marginTop: "3.6rem", textAlign: "right", position: "relative", zIndex: 1 }}>
         <RssLine />
       </div>
     </main>

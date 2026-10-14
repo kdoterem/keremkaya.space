@@ -103,7 +103,7 @@ export default function PlayFakeEvalModal({
             position: "fixed",
             inset: 0,
             zIndex: 300,
-            background: "#A49B9C",
+            background: "#2a0a4a",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -119,7 +119,7 @@ export default function PlayFakeEvalModal({
                 fontSize: "clamp(1.1rem, 3.5vw, 1.6rem)",
                 fontWeight: 500,
                 letterSpacing: "0.02em",
-                color: "#0a0a0a",
+                color: "#ffa31a",
               }}
             />
           )}
@@ -138,11 +138,11 @@ export default function PlayFakeEvalModal({
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <circle cx="24" cy="24" r="22" fill="none" stroke="#0a0a0a" strokeWidth="2" />
+                <circle cx="24" cy="24" r="22" fill="none" stroke="#ffa31a" strokeWidth="2" />
                 <motion.path
                   d="M14 24.5 L20.5 31 L34 16"
                   fill="none"
-                  stroke="#0a0a0a"
+                  stroke="#ffa31a"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"

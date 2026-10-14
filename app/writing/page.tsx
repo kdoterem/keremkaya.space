@@ -294,7 +294,7 @@ export default function WritingPage() {
             fontWeight:     500,
             letterSpacing:  "0.15em",
             fontVariant:    "small-caps",
-            color:          "#0a0a0a",
+            color:          "#ffa31a",
             textDecoration: "none",
             opacity:        0.68,
           }}
@@ -312,7 +312,7 @@ export default function WritingPage() {
             letterSpacing: "0.15em",
             fontVariant:   "small-caps",
             fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            color:         "#0a0a0a",
+            color:         "#ffa31a",
             opacity:       searchOpen ? 1 : 0.5,
             padding:       0,
             transition:    "opacity 0.15s",
@@ -330,7 +330,7 @@ export default function WritingPage() {
           fontSize:      "clamp(2rem, 5vw, 3.5rem)",
           fontWeight:    700,
           letterSpacing: "-0.02em",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           marginTop:     "2.5rem",
           marginBottom:  searchOpen ? "1.5rem" : "3rem",
         }}
@@ -355,12 +355,12 @@ export default function WritingPage() {
             width:         "100%",
             background:    "none",
             border:        "none",
-            borderBottom:  "1px solid rgba(10,10,10,0.6)",
+            borderBottom:  "1px solid rgba(255,163,26,0.6)",
             outline:       "none",
             fontFamily:    '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
             fontWeight:    400,
-            color:         "#0a0a0a",
+            color:         "#ffa31a",
             padding:       "0.5rem 0",
             letterSpacing: "-0.01em",
           }}
@@ -395,7 +395,7 @@ export default function WritingPage() {
               >
                 <motion.div
                   animate={{
-                    backgroundColor: isActive ? "#0a0a0a" : "rgba(0,0,0,0)",
+                    backgroundColor: isActive ? "#ffa31a" : "rgba(0,0,0,0)",
                   }}
                   transition={{ duration: isHighlighted && !isHovered ? 0.4 : 0.15 }}
                   style={{
@@ -411,7 +411,7 @@ export default function WritingPage() {
                       style={{
                         fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
                         fontWeight:    isHighlighted && !isHovered ? 700 : 500,
-                        color:         isActive ? "#A49B9C" : "#0a0a0a",
+                        color:         isActive ? "#2a0a4a" : "#ffa31a",
                         transition:    "color 0.15s, font-weight 0.15s",
                         letterSpacing: "-0.01em",
                       }}
@@ -425,7 +425,7 @@ export default function WritingPage() {
                           fontWeight:    400,
                           fontStyle:     "italic",
                           lineHeight:    1.4,
-                          color:         isActive ? "rgba(164,155,156,0.65)" : "rgba(10,10,10,0.68)",
+                          color:         isActive ? "rgba(164,155,156,0.65)" : "rgba(255,163,26,0.68)",
                           transition:    "color 0.15s",
                           letterSpacing: "-0.005em",
                         }}
@@ -438,7 +438,7 @@ export default function WritingPage() {
                     style={{
                       fontSize:      "0.75rem",
                       fontWeight:    400,
-                      color:         isActive ? "rgba(164,155,156,0.6)" : "rgba(10,10,10,0.6)",
+                      color:         isActive ? "rgba(164,155,156,0.6)" : "rgba(255,163,26,0.6)",
                       transition:    "color 0.15s",
                       letterSpacing: "0.05em",
                       flexShrink:    0,
@@ -464,7 +464,7 @@ export default function WritingPage() {
             fontSize:      "0.75rem",
             fontWeight:    400,
             letterSpacing: "0.05em",
-            color:         "rgba(10,10,10,0.6)",
+            color:         "rgba(255,163,26,0.6)",
             paddingTop:    "1.1rem",
             paddingLeft:   "calc(1rem + clamp(1.5em, 5vw, 2.5em))",
             paddingRight:  "1rem",
@@ -484,7 +484,7 @@ export default function WritingPage() {
           left:           0,
           right:          0,
           height:         "calc(8rem + env(safe-area-inset-bottom))",
-          background:     "linear-gradient(to top, #A49B9C 55%, transparent)",
+          background:     "linear-gradient(to top, #2a0a4a 55%, transparent)",
           zIndex:         49,
           pointerEvents:  "none",
         }}
@@ -496,7 +496,7 @@ export default function WritingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: posts.length > 0 ? 1 : 0, pointerEvents: posts.length > 0 ? "auto" : "none" }}
         transition={{ duration: 0.3 }}
-        whileHover={firing ? {} : { backgroundColor: "#0a0a0a", color: "#A49B9C", opacity: 1, transition: { duration: 0.15 } }}
+        whileHover={firing ? {} : { backgroundColor: "#14052a", color: "#ff5f00", opacity: 1, transition: { duration: 0.15 } }}
         style={{
           position:        "fixed",
           bottom:          "calc(2rem + env(safe-area-inset-bottom))",
@@ -509,7 +509,7 @@ export default function WritingPage() {
           fontSize:        "0.88rem",
           fontWeight:      500,
           letterSpacing:   "0.06em",
-          color:           "#0a0a0a",
+          color:           "#ffa31a",
           opacity:         1,
           padding:         "0.45rem 1rem",
           zIndex:          9999,
@@ -537,7 +537,7 @@ export default function WritingPage() {
           fontSize:      "0.88rem",
           fontWeight:    500,
           letterSpacing: "0.06em",
-          color:         "#0a0a0a",
+          color:         "#ffa31a",
           padding:     0,
           zIndex:      50,
         }}

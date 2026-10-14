@@ -289,7 +289,7 @@ export default function ArtPage() {
             fontWeight:     500,
             letterSpacing:  "0.15em",
             fontVariant:    "small-caps",
-            color:          "#0a0a0a",
+            color:          "#ffa31a",
             textDecoration: "none",
             opacity:        0.68,
           }}
@@ -406,7 +406,7 @@ export default function ArtPage() {
             <p
               style={{
                 fontSize:      "0.75rem",
-                color:         "rgba(10,10,10,0.6)",
+                color:         "rgba(255,163,26,0.6)",
                 letterSpacing: "0.05em",
               }}
             >

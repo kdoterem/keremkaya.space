@@ -7,7 +7,7 @@ import AliveWeightedText from "./AliveWeightedText";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-// Panel is the site's own warm gray (#A49B9C), not black — a stark black
+// Panel is the site's own ground (deep purple #2a0a4a), not black — a stark black
 // box read as a separate thing dropped onto the page rather than part of
 // it. The backdrop behind it stays a dark scrim (dims the page, gives the
 // panel something to pop against); the panel itself and all its text now
@@ -29,7 +29,7 @@ function ReadingModeModal({
         position: "fixed",
         inset: 0,
         zIndex: 200,
-        background: "rgba(10,10,10,0.76)",
+        background: "rgba(12,2,26,0.76)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -43,8 +43,8 @@ function ReadingModeModal({
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "relative",
-          background: "#A49B9C",
-          color: "#0a0a0a",
+          background: "#2a0a4a",
+          color: "#ffa31a",
           maxWidth: "26rem",
           width: "100%",
           padding: "2rem 1.75rem",
@@ -58,17 +58,17 @@ function ReadingModeModal({
             style={{
               position: "absolute", top: "0.9rem", right: "0.9rem",
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(10,10,10,0.6)", fontSize: "0.9rem", padding: "0.25rem",
+              color: "rgba(255,163,26,0.6)", fontSize: "0.9rem", padding: "0.25rem",
             }}
           >
             ×
           </button>
         )}
 
-        <h2 id="reading-mode-heading" style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", color: "#0a0a0a", letterSpacing: "-0.01em" }}>
+        <h2 id="reading-mode-heading" style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", color: "#ffa31a", letterSpacing: "-0.01em" }}>
           how do you want to read?
         </h2>
-        <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(10,10,10,0.76)", marginBottom: "1.5rem" }}>
+        <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,163,26,0.76)", marginBottom: "1.5rem" }}>
           poems can unravel themselves as you read, line by line, at a considered pace —
           or just sit there, fully visible, like normal.
         </p>
@@ -77,8 +77,8 @@ function ReadingModeModal({
           <button
             onClick={() => onChoose({ mode: "unraveling", multiplier: SUGGESTED_MULTIPLIER })}
             style={optionButtonStyle}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.65)"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#ffa31a"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,163,26,0.65)"; }}
           >
             <span style={{ display: "block", fontWeight: 500 }}>if you're floaty</span>
             <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>unravels line by line, one at a time — tap anywhere to move things along</span>
@@ -86,15 +86,15 @@ function ReadingModeModal({
           <button
             onClick={() => onChoose({ mode: "normal" })}
             style={optionButtonStyle}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#0a0a0a"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.65)"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#ffa31a"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,163,26,0.65)"; }}
           >
             <span style={{ display: "block", fontWeight: 500 }}>read the usual way</span>
             <span style={{ display: "block", fontSize: "0.68rem", opacity: 0.6, marginTop: "0.15rem" }}>fully visible, like normal</span>
           </button>
         </div>
 
-        <p style={{ fontSize: "0.66rem", color: "rgba(10,10,10,0.64)", lineHeight: 1.5 }}>
+        <p style={{ fontSize: "0.66rem", color: "rgba(255,163,26,0.64)", lineHeight: 1.5 }}>
           change this anytime — look for &ldquo;reading: &hellip;&rdquo; near the top of any poem.
         </p>
       </div>
@@ -105,8 +105,8 @@ function ReadingModeModal({
 const optionButtonStyle: React.CSSProperties = {
   textAlign: "left",
   background: "transparent",
-  border: "1px solid rgba(10,10,10,0.65)",
-  color: "#0a0a0a",
+  border: "1px solid rgba(255,163,26,0.65)",
+  color: "#ffa31a",
   padding: "0.65rem 0.85rem",
   fontFamily: FONT,
   fontSize: "0.82rem",
@@ -128,7 +128,7 @@ function ReadingModeControl({ pref, onOpen }: { pref: ReadingPreference; onOpen:
         fontWeight: 500,
         letterSpacing: "0.08em",
         fontVariant: "small-caps",
-        color: "rgba(10,10,10,0.6)",
+        color: "rgba(255,163,26,0.6)",
         background: "none",
         border: "none",
         cursor: "pointer",

@@ -212,8 +212,8 @@ export default function PlayScreen({
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#A49B9C",
-        color: "#0a0a0a",
+        backgroundColor: "#2a0a4a",
+        color: "#ffa31a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",
       }}
@@ -225,7 +225,7 @@ export default function PlayScreen({
           fontWeight: 500,
           letterSpacing: "0.15em",
           fontVariant: "small-caps",
-          color: "#0a0a0a",
+          color: "#ffa31a",
           textDecoration: "none",
           opacity: 0.68,
         }}
@@ -240,7 +240,7 @@ export default function PlayScreen({
             fontWeight: 500,
             letterSpacing: "0.14em",
             fontVariant: "small-caps",
-            color: "rgba(10,10,10,0.64)",
+            color: "rgba(255,163,26,0.64)",
             marginBottom: "0.6rem",
           }}
         >
@@ -266,7 +266,7 @@ export default function PlayScreen({
           style={{
             fontSize: "0.8rem",
             fontStyle: "italic",
-            color: "rgba(10,10,10,0.72)",
+            color: "rgba(255,163,26,0.72)",
             marginBottom: "2.5rem",
             maxWidth: "36em",
             lineHeight: 1.6,
@@ -298,7 +298,7 @@ export default function PlayScreen({
               onClick={() => setPopup("mine")}
               style={{
                 background: "none", border: "none", padding: 0, cursor: "pointer",
-                fontSize: "0.8rem", fontStyle: "italic", color: "rgba(10,10,10,0.72)",
+                fontSize: "0.8rem", fontStyle: "italic", color: "rgba(255,163,26,0.72)",
                 textDecoration: "underline", textUnderlineOffset: "3px",
               }}
             >
@@ -314,7 +314,7 @@ export default function PlayScreen({
               cursor: "pointer",
               fontSize: "0.8rem",
               fontStyle: "italic",
-              color: "rgba(10,10,10,0.72)",
+              color: "rgba(255,163,26,0.72)",
               textDecoration: "underline",
               textUnderlineOffset: "3px",
             }}
@@ -336,7 +336,7 @@ export default function PlayScreen({
                 fontWeight: 500,
                 letterSpacing: "0.14em",
                 fontVariant: "small-caps",
-                color: "rgba(10,10,10,0.64)",
+                color: "rgba(255,163,26,0.64)",
               }}
             >
               {savedListOpen ? "hide" : "show"} your {saved.length} saved writing{saved.length === 1 ? "" : "s"} here
@@ -345,7 +345,7 @@ export default function PlayScreen({
               <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 {[...saved].reverse().map((a) => (
                   <div key={a.id}>
-                    <p style={{ fontSize: "0.7rem", color: "rgba(10,10,10,0.6)", marginBottom: "0.3rem" }}>
+                    <p style={{ fontSize: "0.7rem", color: "rgba(255,163,26,0.6)", marginBottom: "0.3rem" }}>
                       {fmtDateTime(a.savedAt)}
                     </p>
                     <p style={{ whiteSpace: "pre-wrap", fontSize: "0.95rem", lineHeight: 1.7 }}>
@@ -363,14 +363,14 @@ export default function PlayScreen({
         <PiecePopup label={`your writing · ${tag}`} onClose={() => setPopup(null)}>
           {myBlocks.map((b, i) => (
             <div key={i} style={{ marginBottom: "1.6rem" }}>
-              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(10,10,10,0.72)", marginBottom: "0.35rem" }}>
+              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", fontStyle: "italic", color: "rgba(255,163,26,0.72)", marginBottom: "0.35rem" }}>
                 {b.provenance}
               </p>
               {b.mine && <p style={{ whiteSpace: "pre-wrap" }}>{b.mine}</p>}
             </div>
           ))}
           {anywhereText && (
-            <div style={{ marginTop: "1.6rem", paddingTop: "1.6rem", borderTop: "1px solid rgba(10,10,10,0.55)" }}>
+            <div style={{ marginTop: "1.6rem", paddingTop: "1.6rem", borderTop: "1px solid rgba(255,163,26,0.55)" }}>
               <p style={{ whiteSpace: "pre-wrap" }}>{anywhereText}</p>
             </div>
           )}

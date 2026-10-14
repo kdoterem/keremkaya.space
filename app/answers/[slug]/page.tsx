@@ -49,8 +49,8 @@ export default async function AnswerPage({
     <main
       style={{
         minHeight:       "100vh",
-        backgroundColor: "#A49B9C",
-        color:           "#0a0a0a",
+        backgroundColor: "#2a0a4a",
+        color:           "#ffa31a",
         fontFamily:      '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding:         "4rem 5vw 6rem",
       }}
@@ -62,7 +62,7 @@ export default async function AnswerPage({
           fontWeight:     500,
           letterSpacing:  "0.15em",
           fontVariant:    "small-caps",
-          color:          "#0a0a0a",
+          color:          "#ffa31a",
           textDecoration: "none",
           opacity:        0.68,
         }}
@@ -83,7 +83,7 @@ export default async function AnswerPage({
                   letterSpacing: "0.1em",
                   fontWeight:    500,
                   fontVariant:   "small-caps",
-                  color:         "rgba(10,10,10,0.6)",
+                  color:         "rgba(255,163,26,0.6)",
                 }}
               >
                 {tag}
@@ -100,7 +100,7 @@ export default async function AnswerPage({
             letterSpacing: "-0.02em",
             lineHeight:    1.15,
             marginBottom:  "2.5rem",
-            color:         "#0a0a0a",
+            color:         "#ffa31a",
           }}
         >
           {a.question}
@@ -112,7 +112,7 @@ export default async function AnswerPage({
             fontSize:   "clamp(1.1rem, 2.5vw, 1.4rem)",
             lineHeight: 1.6,
             fontWeight: 400,
-            color:      "#0a0a0a",
+            color:      "#ffa31a",
           }}
         >
           {a.answer}
@@ -122,7 +122,7 @@ export default async function AnswerPage({
         <p
           style={{
             fontSize:      "0.7rem",
-            color:         "rgba(10,10,10,0.56)",
+            color:         "rgba(255,163,26,0.56)",
             letterSpacing: "0.05em",
             marginTop:     "2.5rem",
           }}
@@ -139,16 +139,16 @@ export default async function AnswerPage({
               alignItems:     "flex-start",
               marginTop:      "4rem",
               paddingTop:     "2rem",
-              borderTop:      "1px solid rgba(10,10,10,0.52)",
+              borderTop:      "1px solid rgba(255,163,26,0.52)",
               gap:            "2rem",
             }}
           >
             {prev ? (
               <Link href={`/answers/${prev.slug}`} style={{ textDecoration: "none", flex: 1 }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(255,163,26,0.59)", marginBottom: "0.35rem" }}>
                   ← previous
                 </span>
-                <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#0a0a0a" }}>
+                <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#ffa31a" }}>
                   {prev.question}
                 </span>
               </Link>
@@ -156,10 +156,10 @@ export default async function AnswerPage({
 
             {next ? (
               <Link href={`/answers/${next.slug}`} style={{ textDecoration: "none", flex: 1, textAlign: "right" }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(255,163,26,0.59)", marginBottom: "0.35rem" }}>
                   next →
                 </span>
-                <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#0a0a0a" }}>
+                <span style={{ fontSize: "0.88rem", fontWeight: 500, color: "#ffa31a" }}>
                   {next.question}
                 </span>
               </Link>

@@ -1,4 +1,5 @@
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
+import Painted from "@/app/components/Painted";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkBreaks from "remark-breaks";
 import Link from "next/link";
@@ -178,8 +179,8 @@ export default async function PostPage({
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#A49B9C",
-        color: "#0a0a0a",
+        backgroundColor: "#2a0a4a",
+        color: "#ffa31a",
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         padding: "4rem 5vw 6rem",
       }}
@@ -196,7 +197,7 @@ export default async function PostPage({
           fontWeight: 500,
           letterSpacing: "0.15em",
           fontVariant: "small-caps",
-          color: "#0a0a0a",
+          color: "#ffa31a",
           textDecoration: "none",
           opacity: 0.68,
         }}
@@ -241,14 +242,16 @@ export default async function PostPage({
         )}
 
         {/* Title */}
-        <h1
+        <Painted
+          as="h1"
+          size={0.9}
           style={{
             fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
             fontWeight: 700,
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
             marginBottom: "0.5rem",
-            color: "#0a0a0a",
+            color: "#ffa31a",
           }}
         >
           {showProvenance ? (
@@ -256,13 +259,13 @@ export default async function PostPage({
           ) : (
             post.title
           )}
-        </h1>
+        </Painted>
 
         {/* Date */}
         <p
           style={{
             fontSize: "0.75rem",
-            color: "rgba(10,10,10,0.6)",
+            color: "rgba(255,163,26,0.6)",
             letterSpacing: "0.05em",
             marginBottom: "3rem",
           }}
@@ -275,7 +278,7 @@ export default async function PostPage({
           style={{
             fontSize: "1.05rem",
             lineHeight: 1.8,
-            color: "#0a0a0a",
+            color: "#ffa31a",
           }}
           className="prose-content"
         >
@@ -304,14 +307,14 @@ export default async function PostPage({
               alignItems:    "flex-start",
               marginTop:     "4rem",
               paddingTop:    "2rem",
-              borderTop:     "1px solid rgba(10,10,10,0.52)",
+              borderTop:     "1px solid rgba(255,163,26,0.52)",
               gap:           "2rem",
             }}
           >
             {/* Previous = older post */}
             {prev ? (
               <Link href={`/writing/${prev.slug}`} style={{ textDecoration: "none", flex: 1 }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(255,163,26,0.59)", marginBottom: "0.35rem" }}>
                   ← previous
                 </span>
                 <span className="post-nav-title">{prev.title}</span>
@@ -320,7 +323,7 @@ export default async function PostPage({
 
             {next ? (
               <Link href={`/writing/${next.slug}`} style={{ textDecoration: "none", flex: 1, textAlign: "right" }}>
-                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(10,10,10,0.59)", marginBottom: "0.35rem" }}>
+                <span style={{ display: "block", fontSize: "0.6rem", letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(255,163,26,0.59)", marginBottom: "0.35rem" }}>
                   next →
                 </span>
                 <span className="post-nav-title">{next.title}</span>

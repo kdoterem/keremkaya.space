@@ -96,7 +96,7 @@ export default function ConfettiCanvas({ durationMs = 4200 }: { durationMs?: num
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
         ctx.globalAlpha = p.opacity;
-        ctx.fillStyle = "#0a0a0a";
+        ctx.fillStyle = "#ffa31a";
         // Long and narrow — a real paper streamer, not a stubby rect.
         ctx.fillRect(-p.size / 2, -p.size / 9, p.size, p.size / 4.5);
         ctx.restore();

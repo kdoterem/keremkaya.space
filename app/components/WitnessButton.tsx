@@ -50,14 +50,14 @@ export default function WitnessButton() {
           zIndex: 50,
           width: "11px",
           height: "11px",
-          border: "1px solid rgba(10,10,10,0.55)",
+          border: "1px solid rgba(255,163,26,0.55)",
           background: "transparent",
           cursor: "pointer",
           padding: 0,
           transition: "border-color 0.3s",
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.6)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.55)"; }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,163,26,0.6)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,163,26,0.55)"; }}
       />
 
       <AnimatePresence>
@@ -73,7 +73,7 @@ export default function WitnessButton() {
               position: "fixed",
               inset: 0,
               zIndex: 300,
-              background: "#A49B9C",
+              background: "#2a0a4a",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -90,7 +90,7 @@ export default function WitnessButton() {
                 fontSize: "clamp(1.6rem, 5vw, 2.6rem)",
                 fontWeight: 700,
                 letterSpacing: "-0.02em",
-                color: "#0a0a0a",
+                color: "#ffa31a",
                 textAlign: "center",
                 padding: "0 1.5rem",
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
