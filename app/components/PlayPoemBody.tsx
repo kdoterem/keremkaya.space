@@ -9,10 +9,10 @@ import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID }
 // ── The poem body, rendered as one continuous read — legible passages
 // (grouped runs of consecutive tag-weighted lines, not one zone per
 // individual line: see groupLegiblePassages) stay unbroken text, exactly
-// as written. Nothing to write in is visible by default; a quiet prompt
-// (its label set by the gateway this screen was reached through — see
-// PlayScreen's promptLabel) appears once, after each passage and once
-// more at the very end ("anywhere") — reading isn't interrupted by
+// as written. Nothing to write in is visible by default; a bare "+"
+// (no wording — nothing here tells anyone what to do with a passage)
+// appears once, after each passage and once more at the very end
+// ("anywhere") — reading isn't interrupted by
 // boxes, and writing only appears once actually chosen. Opening one and
 // leaving it empty collapses back to the prompt on the next visit;
 // anything actually written stays open.
@@ -48,7 +48,7 @@ function PlayZone({
   value,
   onChange,
   autoFocus,
-  placeholder = "write here…",
+  placeholder = "…",
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -100,10 +100,11 @@ function PlayZone({
   );
 }
 
-function WritePrompt({ label, onClick }: { label: string; onClick: () => void }) {
+function WritePrompt({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
+      aria-label="write"
       style={{
         display: "block",
         background: "none",
@@ -111,12 +112,11 @@ function WritePrompt({ label, onClick }: { label: string; onClick: () => void })
         padding: 0,
         margin: "0.3rem 0 1.3rem",
         cursor: "pointer",
-        fontSize: "0.78rem",
-        fontStyle: "italic",
+        fontSize: "1rem",
         color: "rgba(255,163,26,0.6)",
       }}
     >
-      + {label}
+      +
     </button>
   );
 }
@@ -198,7 +198,6 @@ function LineContent({
 export default function PlayPoemBody({
   text,
   weights,
-  promptLabel,
   zoneValues,
   onZoneChange,
   peeked,
@@ -206,7 +205,6 @@ export default function PlayPoemBody({
 }: {
   text: string;
   weights: number[] | undefined;
-  promptLabel: string;
   zoneValues: Record<string, string>;
   onZoneChange: (id: string, value: string) => void;
   peeked: Set<number>;
@@ -249,10 +247,9 @@ export default function PlayPoemBody({
                   value={zoneValues[zoneId] ?? ""}
                   onChange={(v) => onZoneChange(zoneId, v)}
                   autoFocus={openZones.has(zoneId) && !(zoneValues[zoneId] ?? "").trim()}
-                  placeholder={`${promptLabel}…`}
                 />
               ) : (
-                <WritePrompt label={promptLabel} onClick={() => openZone(zoneId)} />
+                <WritePrompt onClick={() => openZone(zoneId)} />
               )
             )}
           </div>
@@ -281,7 +278,7 @@ export default function PlayPoemBody({
             />
           </>
         ) : (
-          <WritePrompt label="write anything else, anywhere" onClick={() => openZone(ANYWHERE_ZONE_ID)} />
+          <WritePrompt onClick={() => openZone(ANYWHERE_ZONE_ID)} />
         )}
       </div>
     </div>

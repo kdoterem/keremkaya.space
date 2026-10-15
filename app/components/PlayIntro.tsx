@@ -115,7 +115,7 @@ export default function PlayIntro() {
           </h1>
           <div style={{ fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(255,163,26,0.85)", display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2.5rem" }}>
             <p>you'll be given one passage at a time — a real stretch of something I wrote, quoted exactly, stopped somewhere it's still moving.</p>
-            <p>write onward from it, however you want. continue it, answer it, argue, drift — there's no wrong way in.</p>
+            <p>write onward from it, however you want.</p>
             <p>there's a minimum before you can submit. no maximum — say as much as you need to.</p>
             <p>passages get harder to answer as you go — four tiers, each unlocking once you've cleared enough of the last.</p>
             <p>everything you write autosaves to this browser as you go. you can also send what you write straight to me, if you want. never required.</p>

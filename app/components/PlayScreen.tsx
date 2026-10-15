@@ -11,10 +11,9 @@ import { splitPoemLines, groupLegiblePassages, passageZoneId, ANYWHERE_ZONE_ID }
 // of the two gateways at /play. Only the chosen tag's provenanced lines
 // are legible on load, each followed immediately by its own write-in
 // zone (PlayPoemBody) — writing happens right where the thought was, not
-// disconnected in a box at the end. The gateway already decided the
-// prompt language for the whole screen (promptLabel — "write here" or
-// "push back"), so there's exactly one zone per passage here, not a
-// choice to make on every one. Repeatable by design (see the
+// disconnected in a box at the end. No prompt wording at all (the old
+// "write here" / "push back" labels told the reader what to do); there's
+// exactly one zone per passage here, opened by a bare "+". Repeatable by design (see the
 // saved-writings list below): this is meant to be returned to, not a
 // once-per-poem quiz — which is also why there's no "start over"
 // control: nothing here is being graded, so editing a zone directly IS
@@ -86,7 +85,6 @@ export default function PlayScreen({
   titleWeights,
   body,
   bodyWeights,
-  promptLabel,
   backHref,
 }: {
   slug: string;
@@ -96,7 +94,6 @@ export default function PlayScreen({
   titleWeights: number[] | undefined;
   body: string;
   bodyWeights: number[] | undefined;
-  promptLabel: string;
   backHref: string;
 }) {
   const [zoneValues, setZoneValues] = useState<Record<string, string>>({});
@@ -272,16 +269,14 @@ export default function PlayScreen({
             lineHeight: 1.6,
           }}
         >
-          kerem's marked lines stay legible, as written. "+ {promptLabel}" after any passage
-          you want to answer, or use the open space at the end for anything else. stuck on
-          a glimmer? tap it to peek — tap it again to hide it back.
+          kerem's marked lines stay legible, as written. stuck on a glimmer? tap it to
+          peek — tap it again to hide it back.
         </p>
 
         <div style={{ fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "1.5rem" }}>
           <PlayPoemBody
             text={body}
             weights={bodyWeights}
-            promptLabel={promptLabel}
             zoneValues={zoneValues}
             onZoneChange={handleZoneChange}
             peeked={peeked}

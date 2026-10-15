@@ -5,10 +5,6 @@ import { findCategoryForTag } from "@/lib/playData";
 import { splitPoemLines, groupLegiblePassages } from "@/lib/playLines";
 import PlayScreen from "@/app/components/PlayScreen";
 
-// Neutral prompt language everywhere now — the "push back" / "write here"
-// split was gateway-derived, and the gateway is gone. One register for
-// the whole site: an invitation, not an instruction.
-const PROMPT_LABEL = "write here";
 
 export default async function PlayBrowseSlugPage({
   params,
@@ -65,7 +61,6 @@ export default async function PlayBrowseSlugPage({
       titleWeights={titleWeights}
       body={bodyText}
       bodyWeights={bodyWeights}
-      promptLabel={PROMPT_LABEL}
       backHref={`/play/browse/${encodeURIComponent(tag)}`}
     />
   );
