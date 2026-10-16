@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { ScanCollection } from "@/lib/scans";
 import ScanExpanded from "@/app/components/ScanExpanded";
 import useIsNarrow from "@/lib/useIsNarrow";
+import { usePaint } from "@/app/components/usePaint";
 
 // ── SCANS — the ground this page was designed around (once warm gray) is now
 // the whole site's ground color (see globals.css), so this page just
@@ -32,6 +33,8 @@ export default function ScansPage() {
   // restoration is switched off while here for the same reason — on back it
   // applies the saved position to the short expanded page before the grid
   // exists, and can land after ours on a swipe-back.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  usePaint(headingRef, { size: 0.9 });
   const savedScrollY = useRef(0);
   const pendingRestore = useRef(false);
   const restoreScroll = () => {
@@ -150,6 +153,7 @@ export default function ScansPage() {
       )}
 
       <motion.h2
+        ref={headingRef}
         onClick={expanded ? closeCollection : undefined}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
