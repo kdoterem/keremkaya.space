@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import AliveSpan from "./AliveSpan";
 import { weightedTintFor, seededPhase, aliveScaleFor, bodyWeightStyle } from "@/lib/tagProvenance";
 
 // ── Invisible-ink reveal, line by line — the whole poem sits in its real
@@ -215,29 +216,10 @@ function LineContent({
           return <span key={i} style={{ color: tint, ...(bodyWeightStyle(level) ?? {}) }}>{tok}</span>;
         }
 
-        const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(level);
-        const phase1 = seededPhase(start);
-        const phase2 = seededPhase(start * 7 + 3);
-        const driftDurS = 4 + phase1 * 4;
-        const scaleDurS = 3 + phase2 * 3;
-
         return (
-          <motion.span
-            key={i}
-            style={{ display: "inline-block", color: tint }}
-            animate={{
-              x:     [0, driftAmpX, 0, -driftAmpX, 0],
-              y:     [0, -driftAmpY, 0, driftAmpY, 0],
-              scale: [1, 1 + scaleAmp, 1],
-            }}
-            transition={{
-              x:     { duration: driftDurS,      repeat: Infinity, ease: "easeInOut", delay: phase2 * driftDurS },
-              y:     { duration: driftDurS * 1.3, repeat: Infinity, ease: "easeInOut", delay: phase1 * driftDurS },
-              scale: { duration: scaleDurS,       repeat: Infinity, ease: "easeInOut", delay: phase1 * scaleDurS },
-            }}
-          >
+          <AliveSpan key={i} weight={level} seed={start} style={{ color: tint }}>
             {tok}
-          </motion.span>
+          </AliveSpan>
         );
       })}
     </>

@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { buildRuns, aliveScaleFor, seededPhase, bodyWeightStyle, weightedTintFor } from "@/lib/tagProvenance";
+import { useReducedMotion } from "framer-motion";
+import AliveSpan from "./AliveSpan";
+import { buildRuns, bodyWeightStyle, weightedTintFor } from "@/lib/tagProvenance";
 
 // ── The living body text — every tag-carrying run drifts and breathes
 // (scale), continuously and out of phase with its neighbours, so glancing
@@ -95,29 +96,10 @@ export default function AliveWeightedText({
       return <span key={key} style={{ color: tint, ...(bodyWeightStyle(p.weight) ?? {}) }}>{p.text}</span>;
     }
 
-    const { driftAmpX, driftAmpY, scaleAmp } = aliveScaleFor(p.weight);
-    const phase1 = seededPhase(p.runStart);
-    const phase2 = seededPhase(p.runStart * 7 + 3);
-    const driftDurS = 4 + phase1 * 4;
-    const scaleDurS = 3 + phase2 * 3;
-
     return (
-      <motion.span
-        key={key}
-        style={{ display: "inline-block", whiteSpace: "pre-wrap", color: tint }}
-        animate={{
-          x:     [0, driftAmpX, 0, -driftAmpX, 0],
-          y:     [0, -driftAmpY, 0, driftAmpY, 0],
-          scale: [1, 1 + scaleAmp, 1],
-        }}
-        transition={{
-          x:     { duration: driftDurS,      repeat: Infinity, ease: "easeInOut", delay: phase2 * driftDurS },
-          y:     { duration: driftDurS * 1.3, repeat: Infinity, ease: "easeInOut", delay: phase1 * driftDurS },
-          scale: { duration: scaleDurS,       repeat: Infinity, ease: "easeInOut", delay: phase1 * scaleDurS },
-        }}
-      >
+      <AliveSpan key={key} weight={p.weight} seed={p.runStart} style={{ whiteSpace: "pre-wrap", color: tint }}>
         {p.text}
-      </motion.span>
+      </AliveSpan>
     );
   };
 
