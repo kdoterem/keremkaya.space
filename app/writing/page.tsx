@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { usePaint } from "@/app/components/usePaint";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 
 interface PostMeta {
@@ -153,6 +154,8 @@ export default function WritingPage() {
   const [bodies,       setBodies]       = useState<Record<string, string>>(_bodiesCache ?? {});
   const rafRef         = useRef<number | null>(null);
   const firingRef      = useRef(false);
+  const headingRef     = useRef<HTMLHeadingElement>(null);
+  usePaint(headingRef, { size: 0.9 });
   const rowRefs        = useRef<Map<string, HTMLDivElement>>(new Map());
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -323,6 +326,7 @@ export default function WritingPage() {
       </div>
 
       <motion.h2
+        ref={headingRef}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
