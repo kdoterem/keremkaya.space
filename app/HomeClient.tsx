@@ -87,9 +87,6 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
   const result: TagLayout[] = [];
   const placed: Array<{ x: number; y: number; hw: number; hh: number }> = [];
 
-  // the whole cloud is in within about half a second, however many tags
-  const stagger = Math.min(0.018, 0.5 / selected.length);
-
   selected.forEach(({ tag, count }, i) => {
     const weight   = (Math.sqrt(count) - sqrtMin) / sqrtSpan;  // 0..1, frequency-normalised
     const fontSize = FONT_MIN + weight * (FONT_MAX - FONT_MIN);
@@ -126,7 +123,7 @@ function buildLayout(tagCounts: TagCount[], vw: number, vh: number): TagLayout[]
       driftY:     (Math.random() - 0.5) * (isMobile ? 5 : 10),
       duration:   4 + Math.random() * 6,
       driftDelay: -Math.random() * 9,
-      entryDelay: i * stagger,
+      entryDelay: i * 0.018,
     });
   });
 
