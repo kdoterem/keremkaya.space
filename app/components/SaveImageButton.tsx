@@ -9,6 +9,7 @@ import {
   seededPhase,
   weightedTintFor,
 } from '@/lib/tagProvenance';
+import { LIME, rng, throwPaint } from '@/lib/paint';
 
 // plain text in the exported image is the warm orange body colour; tagged words get weightedTintFor
 const BODY_COLOR = '#ffa31a';
@@ -539,6 +540,51 @@ function buildPages(
   return { titleWrapped, pages, fontSize, lineH, gapH, tagLines };
 }
 
+// ── the title's lime paint — the same throw the live page's <Painted> title
+// gets, landing only on the letters. The title is drawn on its own canvas,
+// paint is laid over it source-atop, and that's stamped onto the page. Cached
+// per title so a video's frames all show the same throw (one throw per export,
+// like one throw per visit on the site).
+const SITE_TITLE_PX = 45; // the live h1 at full size — paint is sized in site units, then scaled up
+const titlePaintCache = new WeakMap<TitleLine[], HTMLCanvasElement>();
+const titlePaintSeed = new WeakMap<TitleLine[], number>(); // same throw at any resolution
+
+function drawPaintedTitle(
+  ctx: CanvasRenderingContext2D,
+  titleWrapped: TitleLine[],
+  titleWeights: number[] | undefined,
+  y: number,
+  scale: number,
+) {
+  const blockH = titleWrapped.length * TITLE_LINE_H;
+  let off = titlePaintCache.get(titleWrapped);
+  if (!off || off.width !== Math.round(W * scale)) {
+    off = document.createElement('canvas');
+    off.width = Math.round(W * scale); off.height = Math.round(blockH * scale);
+    const c = off.getContext('2d')!;
+    c.scale(scale, scale);
+    c.textBaseline = 'top';
+    c.font = `bold ${TITLE_SIZE}px ${FONT}`;
+    let x0 = W, x1 = 0, ty = 0;
+    for (const line of titleWrapped) {
+      c.font = `bold ${TITLE_SIZE}px ${FONT}`;
+      const lw = c.measureText(Array.isArray(line) ? line.map(w => w.word).join(' ') : line).width;
+      x0 = Math.min(x0, (W - lw) / 2); x1 = Math.max(x1, (W + lw) / 2);
+      if (Array.isArray(line)) drawWeightedLineCentered(c, line, titleWeights!, ty, TITLE_SIZE, '700', titleWeightStyle);
+      else drawCentered(c, line, ty, BODY_COLOR);
+      ty += TITLE_LINE_H;
+    }
+    const k = TITLE_SIZE / SITE_TITLE_PX;
+    c.globalCompositeOperation = 'source-atop';
+    c.fillStyle = LIME;
+    c.scale(k, k);
+    if (!titlePaintSeed.has(titleWrapped)) titlePaintSeed.set(titleWrapped, (Math.random() * 1e9) | 0);
+    throwPaint(c, W / k, blockH / k, rng(titlePaintSeed.get(titleWrapped)!), 0.9, x0 / k, x1 / k);
+    titlePaintCache.set(titleWrapped, off);
+  }
+  ctx.drawImage(off, 0, y, W, blockH);
+}
+
 // ── render one page ──────────────────────────────────────────────────────────
 
 function renderPage(
@@ -576,15 +622,8 @@ function renderPage(
       const totalBlock  = titleBlockH + GAP + contentBlockH;
       y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
 
-      ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
-      for (const line of titleWrapped) {
-        if (Array.isArray(line)) {
-          drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
-        } else {
-          drawCentered(ctx, line, y, '#ffa31a');
-        }
-        y += TITLE_LINE_H;
-      }
+      drawPaintedTitle(ctx, titleWrapped, titleWeights, y, SCALE);
+      y += titleBlockH;
     } else {
       const totalBlock = CONT_TITLE_LINE_H + GAP + contentBlockH;
       y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
@@ -695,15 +734,8 @@ function paintAnimatedFrame(
     const totalBlock  = titleBlockH + GAP + contentBlockH;
     y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));
 
-    ctx.font = `bold ${TITLE_SIZE}px ${FONT}`;
-    for (const line of titleWrapped) {
-      if (Array.isArray(line)) {
-        drawWeightedLineCentered(ctx, line, titleWeights!, y, TITLE_SIZE, '700', titleWeightStyle);
-      } else {
-        drawCentered(ctx, line, y, '#ffa31a');
-      }
-      y += TITLE_LINE_H;
-    }
+    drawPaintedTitle(ctx, titleWrapped, titleWeights, y, ctx.getTransform().a);
+    y += titleBlockH;
   } else {
     const totalBlock = CONT_TITLE_LINE_H + GAP + contentBlockH;
     y = TOP_RESERVE + Math.max(0, Math.round((available - totalBlock) / 2));

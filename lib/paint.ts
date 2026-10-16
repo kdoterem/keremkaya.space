@@ -79,15 +79,8 @@ export function splash(c: CanvasRenderingContext2D, rnd: Rnd, cx: number, cy: nu
 // x0..x1 is where the letters actually are inside the element's box (a block
 // link is as wide as its column, its words aren't), so no throw is wasted on
 // empty space; a single line still gets a splash big enough to read as paint.
-export function paintTexture(w: number, h: number, seed: number, sizeFactor: number, x0 = 0, x1 = w) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const cv = document.createElement("canvas");
-  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-  const c = cv.getContext("2d")!;
-  c.scale(dpr, dpr);
-  c.fillStyle = BODY_ORANGE; c.fillRect(0, 0, w, h);
-  c.fillStyle = LIME;
-  const rnd = rng(seed);
+// Draws in whatever fillStyle / composite mode the caller has set.
+export function throwPaint(c: CanvasRenderingContext2D, w: number, h: number, rnd: Rnd, sizeFactor: number, x0 = 0, x1 = w): Drop[] {
   const tw = Math.max(1, x1 - x0);
   let n = ((tw * Math.max(h, 60)) / (360 * 220)) * 2 * 0.9;
   n = Math.max(1, Math.floor(n) + (rnd() < n % 1 ? 1 : 0));
@@ -96,5 +89,17 @@ export function paintTexture(w: number, h: number, seed: number, sizeFactor: num
     const r = Math.min(Math.max(h, 110), 240) * sizeFactor * (0.16 + rnd() * 0.16);
     drops.push(...splash(c, rnd, x0 + rnd() * tw, h * (0.08 + rnd() * 0.84), Math.max(r, 7)));
   }
+  return drops;
+}
+
+export function paintTexture(w: number, h: number, seed: number, sizeFactor: number, x0 = 0, x1 = w) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cv = document.createElement("canvas");
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const c = cv.getContext("2d")!;
+  c.scale(dpr, dpr);
+  c.fillStyle = BODY_ORANGE; c.fillRect(0, 0, w, h);
+  c.fillStyle = LIME;
+  const drops = throwPaint(c, w, h, rng(seed), sizeFactor, x0, x1);
   return { url: cv.toDataURL(), drops };
 }

@@ -3,6 +3,7 @@
 import { useState, useLayoutEffect, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MechButton from "./MechButton";
+import Painted from "./Painted";
 
 // ── The contract — shown once per browser session before /play, and
 // again each new session after that (deliberately — see below). States
@@ -110,9 +111,9 @@ export default function PlayIntro() {
           <p style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.14em", fontVariant: "small-caps", color: "rgba(255,163,26,0.64)", marginBottom: "1rem" }}>
             PLAY — before you begin
           </p>
-          <h1 style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "1.5rem", color: "#ffa31a" }}>
+          <Painted as="h1" size={0.9} style={{ fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "1.5rem", color: "#ffa31a" }}>
             the terms are simple
-          </h1>
+          </Painted>
           <div style={{ fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(255,163,26,0.85)", display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2.5rem" }}>
             <p>you'll be given one passage at a time — a real stretch of something I wrote, quoted exactly, stopped somewhere it's still moving.</p>
             <p>write onward from it, however you want.</p>
