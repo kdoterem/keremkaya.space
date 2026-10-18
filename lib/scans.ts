@@ -24,6 +24,9 @@ export interface ScanCollection {
   title: string;
   date:  string; // ISO date, for sorting — newest first
   cover: string;
+  // Aspect ratio of the cover — its own when a separate cover image was
+  // set (see new-scan.js), otherwise the first page's.
+  coverRatio: number;
   pages: ScanPage[];
 }
 
@@ -31,6 +34,7 @@ interface ScanMeta {
   title: string;
   date:  string;
   cover?: string;
+  coverRatio?: number;
   pages: { file: string; ratio: number; caption?: string }[];
 }
 
@@ -54,6 +58,7 @@ export function getAllScanCollections(): ScanCollection[] {
         title: meta.title,
         date:  meta.date,
         cover: `/scans/${slug}/${coverFile}`,
+        coverRatio: meta.coverRatio ?? meta.pages[0]?.ratio,
         pages: meta.pages.map((p) => ({ src: `/scans/${slug}/${p.file}`, ratio: p.ratio, caption: p.caption })),
       };
     })

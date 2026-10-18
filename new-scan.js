@@ -9,10 +9,13 @@
 //
 // Usage:
 //   ./new-scan.js                              prompts for everything, including paths
-//   ./new-scan.js ~/Desktop/page1.tiff page2.jpg   paths given up front, only title/date prompted
+//   ./new-scan.js ~/Desktop/page1.tiff page2.jpg   paths given up front, only title/date/cover prompted
+//   ./new-scan.js --cover <slug> ~/Desktop/cover.jpg   swap the cover of an existing collection
 //
 // Pages are saved in the order given — that's also reading order in the
-// SCANS viewer, and the first page becomes the grid cover. Any image format
+// SCANS viewer. The grid cover is the first page unless a separate cover
+// image is given: that one shows only on the grid, never as a page in the
+// viewer, and the grid tile takes its shape from it. Any image format
 // sips can read works (TIFF, PNG, JPEG, HEIC, ...); output is always JPEG.
 // A file that's actually several scans in one — a multi-page PDF, or a
 // multi-page TIFF (some scanner software saves a whole multi-sheet batch
@@ -196,6 +199,42 @@ function expandMultiPageFiles(paths, tmpDir) {
   return out;
 }
 
+// Writes cover-thumb.jpg from `src` and returns its aspect ratio. A
+// multi-page PDF/TIFF given as a cover uses its first page.
+function writeCover(src, collectionDir) {
+  const first = expandMultiPageFiles([src], tmpDir)[0];
+  const { width, height } = sipsGetDims(first);
+  sipsConvert(first, path.join(collectionDir, "cover-thumb.jpg"), THUMB_SIZE);
+  return width / height;
+}
+
+// ./new-scan.js --cover <slug> <image> — replaces an existing collection's
+// cover without touching its pages. "--cover <slug> first" goes back to
+// using the first page.
+function setCoverOnly(slug, src) {
+  const collectionDir = path.join(SCANS_DIR, slug);
+  const metaPath = path.join(collectionDir, "meta.json");
+  if (!fs.existsSync(metaPath)) {
+    console.log(`\nNo collection "${slug}" (public/scans/${slug}/meta.json). Nothing changed.`);
+    finish(1);
+  }
+  const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+  if (src === "first") {
+    const firstPage = path.join(collectionDir, meta.pages[0].file);
+    sipsConvert(firstPage, path.join(collectionDir, "cover-thumb.jpg"), THUMB_SIZE);
+    meta.cover = "cover-thumb.jpg";
+    delete meta.coverRatio;
+  } else {
+    if (!fs.existsSync(src)) { console.log(`\nCan't find: ${src}\nNothing changed.`); finish(1); }
+    meta.cover = "cover-thumb.jpg";
+    meta.coverRatio = writeCover(src, collectionDir);
+  }
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2) + "\n");
+  console.log(`\nCover updated → public/scans/${slug}/cover-thumb.jpg${src === "first" ? " (first page)" : ""}`);
+  console.log("Commit public/scans/ when you're happy with it.\n");
+  finish(0);
+}
+
 let tmpDir = null;
 function finish(code) {
   if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -207,6 +246,14 @@ function finish(code) {
   console.log("\n── New Scan ───────────────────────────");
 
   let paths = process.argv.slice(2);
+  if (paths[0] === "--cover") {
+    if (paths.length !== 3) {
+      console.log("\nUsage: ./new-scan.js --cover <slug> <image>   (or <slug> first, to go back to page 1)");
+      finish(1);
+    }
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "new-scan-"));
+    setCoverOnly(paths[1], paths[2]);
+  }
   if (paths.length === 0) paths = await promptPaths();
 
   if (paths.length === 0) { console.log("\nNo pages given."); finish(1); }
@@ -237,12 +284,22 @@ function finish(code) {
 
   const date = await prompt("Date", today());
 
+  let coverPath = "";
+  while (true) {
+    const line = await prompt("Cover image — drag one in, or blank to use the first page");
+    if (!line) break;
+    const tok = parsePathTokens(line)[0];
+    if (fs.existsSync(tok)) { coverPath = tok; break; }
+    console.log(`  Can't find: ${tok}`);
+  }
+
   console.log("\n────────────────────────────────────────");
   console.log(`  title:  ${title}`);
   console.log(`  slug:   ${slug}`);
   console.log(`  date:   ${date}`);
+  console.log(`  cover:  ${coverPath ? path.basename(coverPath) : "first page"}`);
   console.log(`  pages:  ${paths.length}`);
-  paths.forEach((p, i) => console.log(`    ${String(i + 1).padStart(2, "0")}. ${path.basename(p)}${i === 0 ? "  (cover)" : ""}`));
+  paths.forEach((p, i) => console.log(`    ${String(i + 1).padStart(2, "0")}. ${path.basename(p)}${i === 0 && !coverPath ? "  (cover)" : ""}`));
   console.log("────────────────────────────────────────");
 
   const confirm = await prompt("Save? (y/n)", "y");
@@ -260,13 +317,14 @@ function finish(code) {
 
     const { width, height } = sipsGetDims(src);
     sipsConvert(src, path.join(collectionDir, file), FULL_SIZE);
-    if (i === 0) sipsConvert(src, path.join(collectionDir, "cover-thumb.jpg"), THUMB_SIZE);
+    if (i === 0 && !coverPath) sipsConvert(src, path.join(collectionDir, "cover-thumb.jpg"), THUMB_SIZE);
 
     pages.push({ file, ratio: width / height });
     console.log(" done");
   }
 
   const meta = { title, date, cover: "cover-thumb.jpg", pages };
+  if (coverPath) meta.coverRatio = writeCover(coverPath, collectionDir);
   fs.writeFileSync(path.join(collectionDir, "meta.json"), JSON.stringify(meta, null, 2) + "\n");
 
   console.log(`\nSaved → public/scans/${slug}/ (${pages.length} page${pages.length === 1 ? "" : "s"})`);

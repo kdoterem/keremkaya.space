@@ -222,7 +222,7 @@ function ScanTile({
   onOpen: () => void;
 }) {
   const cover = collection.cover;
-  const ratio = collection.pages[0].ratio;
+  const ratio = collection.coverRatio;
 
   return (
     <motion.button
