@@ -57,8 +57,15 @@ function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
 }
 
+// Local time, not toISOString() (UTC) — that would date a late-night scan
+// to the previous day.
+function localStamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return localStamp().slice(0, 10);
 }
 
 // Finder's "drag file(s) into Terminal" produces one or more backslash-
@@ -282,7 +289,10 @@ function finish(code) {
     finish(1);
   }
 
-  const date = await prompt("Date", today());
+  // A plain day for today gets the current time added, so two collections
+  // made the same day still sort newest-first instead of alphabetically.
+  let date = await prompt("Date", today());
+  if (date === today()) date = localStamp();
 
   let coverPath = "";
   while (true) {
