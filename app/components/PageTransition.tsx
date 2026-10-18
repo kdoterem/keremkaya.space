@@ -11,12 +11,16 @@ import { useEffect, useRef, useState } from "react";
 const DURATION = 0.25; // seconds
 const EASE: [number, number, number, number] = [0.76, 0, 0.24, 1]; // cubic-bezier, no bounce
 
+// Paths that are one page as far as the transition is concerned — opening
+// a scan collection pushes /scans/<slug> without leaving SCANS.
+const routeKey = (p: string) => (p.startsWith("/scans/") ? "/scans" : p);
+
 export default function PageTransition({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = routeKey(usePathname());
   const [displayChildren, setDisplayChildren] = useState(children);
   const [transitionStage, setTransitionStage] = useState<
     "idle" | "flash" | "reveal"

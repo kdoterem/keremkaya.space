@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/posts";
 import { getAllAnswers } from "@/lib/answers";
+import { getAllScanCollections } from "@/lib/scans";
 
 const BASE = "https://keremkaya.space";
 
@@ -30,5 +31,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority:        0.8,
   }));
 
-  return [...staticRoutes, ...postRoutes, ...answerRoutes];
+  const scanRoutes: MetadataRoute.Sitemap = getAllScanCollections().map((c) => ({
+    url:             `${BASE}/scans/${c.slug}`,
+    lastModified:    c.date ? new Date(c.date) : new Date(),
+    changeFrequency: "monthly",
+    priority:        0.8,
+  }));
+
+  return [...staticRoutes, ...postRoutes, ...answerRoutes, ...scanRoutes];
 }
