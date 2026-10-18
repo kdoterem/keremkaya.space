@@ -58,23 +58,29 @@ export default function ScansClient({ initialSlug = null }: { initialSlug?: stri
 
   // An open collection gets its own history entry at /scans/<slug>, so the
   // address bar is a link to it and the phone's back gesture/button closes
-  // it instead of leaving SCANS altogether. The entry spreads Next's own
-  // history state (__NA etc.) — without it the app router treats the entry
-  // as foreign and reloads the page on back. `scanPushed` marks entries we
-  // pushed ourselves: landing on /scans/<slug> from outside has no grid
-  // entry behind it to go back to, so closing that one swaps the URL to
-  // /scans in place instead. popstate is the single place that actually
-  // opens/closes from history, so RETURN, the heading, Escape and the back
-  // button all end up there.
+  // it instead of leaving SCANS altogether. Entries are passed to
+  // pushState/replaceState WITHOUT Next's own keys (__NA etc.): Next patches
+  // both, adds those keys itself and syncs its router to the new URL. Copying
+  // __NA in by hand makes Next skip that sync, so it still thinks the URL is
+  // /scans and overwrites the entry on its next update.
+  // The URL itself is what says which collection is open — Next can still
+  // replace an entry's custom state (a hot reload does), but never its URL.
+  // `scanPushed` (plus `pushedHere`, for when Next has wiped that) marks a
+  // collection we opened from the grid: landing on /scans/<slug> from
+  // outside has no grid entry behind it to go back to, so closing that one
+  // swaps the URL to /scans in place instead. popstate is the single place
+  // that actually opens/closes from history, so RETURN, the heading, Escape
+  // and the back button all end up there.
+  const pushedHere = useRef(false);
+  const slugFromUrl = () => {
+    const m = window.location.pathname.match(/^\/scans\/([^/]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  };
   useEffect(() => {
     // The URL, not initialSlug, is the truth on mount: back/forward from
     // another page restores whichever route tree the entry was pushed from,
     // so /scans can come back rendered by [slug] and vice versa.
-    const slug = window.location.pathname.match(/^\/scans\/([^/]+)/)?.[1] ?? null;
-    setOpenSlug(slug ? decodeURIComponent(slug) : null);
-    if (slug) {
-      window.history.replaceState({ ...window.history.state, scan: decodeURIComponent(slug) }, "");
-    }
+    setOpenSlug(slugFromUrl());
     fetch("/api/scans").then(r => r.json()).then((cs: ScanCollection[]) => {
       setCollections(cs);
     });
@@ -82,7 +88,7 @@ export default function ScansClient({ initialSlug = null }: { initialSlug?: stri
 
   useEffect(() => {
     const onPop = () => {
-      const slug: string | null = window.history.state?.scan ?? null;
+      const slug = slugFromUrl();
       if (openSlugRef.current && !slug) pendingRestore.current = true;
       setOpenSlug(slug);
     };
@@ -92,20 +98,27 @@ export default function ScansClient({ initialSlug = null }: { initialSlug?: stri
 
   const openCollectionAt = (slug: string) => {
     savedScrollY.current = window.scrollY;
-    window.history.pushState({ ...window.history.state, scan: slug, scanPushed: true }, "", `/scans/${slug}`);
+    pushedHere.current = true;
+    window.history.pushState({ scanPushed: true }, "", `/scans/${slug}`);
     setOpenSlug(slug);
   };
   const closeCollection = () => {
-    if (window.history.state?.scanPushed) {
+    if (window.history.state?.scanPushed || pushedHere.current) {
       window.history.back();
       return;
     }
-    window.history.replaceState({ ...window.history.state, scan: null }, "", "/scans");
+    window.history.replaceState(null, "", "/scans");
     setOpenSlug(null);
     pendingRestore.current = true;
   };
 
   const openCollection = collections?.find(c => c.slug === openSlug) ?? null;
+  // The tab title follows what's showing. Next sets it per route on load,
+  // but opening/closing here never changes route, so a page loaded at
+  // /scans/<slug> would otherwise keep that collection's title on the grid.
+  useEffect(() => {
+    document.title = openCollection ? openCollection.title : "Believable Belief";
+  }, [openCollection]);
   const expanded = openCollection !== null;
   const narrow = useIsNarrow();
   // The fixed-height, no-scroll "fits one screen" treatment was a desktop

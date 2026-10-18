@@ -108,6 +108,47 @@ export default function ScanExpanded({
     if (i !== indexRef.current) setHeroIndex(i);
   };
 
+  // DOWNLOAD IMAGE hands over the full-size file of the page being shown
+  // (not "SAVE" — that's the writing popup's word for keeping a piece). On touch
+  // devices that's the share sheet (Save Image to Photos, or straight into
+  // an Instagram story); on a computer, a plain download. Safari only lets
+  // share() open inside the tap's own gesture window, so the file starts
+  // fetching on pointerdown and the click just awaits that same request.
+  const fileRequests = useRef(new Map<string, Promise<File>>());
+  const pageFile = (i: number) => {
+    const page = collection.pages[i];
+    let req = fileRequests.current.get(page.src);
+    if (!req) {
+      const ext = page.src.split(".").pop() ?? "jpg";
+      const name = `${collection.slug}-${String(i + 1).padStart(2, "0")}.${ext}`;
+      req = fetch(page.src)
+        .then((r) => r.blob())
+        .then((b) => new File([b], name, { type: b.type || "image/jpeg" }));
+      // A failed fetch shouldn't stick — the next tap tries again.
+      req.catch(() => fileRequests.current.delete(page.src));
+      fileRequests.current.set(page.src, req);
+    }
+    return req;
+  };
+  const savePage = async () => {
+    const file = await pageFile(heroIndex);
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    if (touch && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch (e) {
+        if ((e as Error).name === "AbortError") return; // closed the sheet
+      }
+    }
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   // Opening from far down the grid would otherwise leave the phone scrolled
   // past the top of a much shorter page.
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -291,9 +332,26 @@ export default function ScanExpanded({
         )}
       </div>
 
-      <p style={{ ...LABEL_STYLE, opacity: 0.45, marginTop: "0.85rem", flexShrink: 0 }}>
-        {collection.title} · {heroIndex + 1}/{count}
-      </p>
+      {/* The download sits at the far right, apart from the title/count —
+          smaller and dimmer than the labels, brightening on hover, so it's
+          there when wanted without competing with the page above it. */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "2rem", marginTop: "0.85rem", flexShrink: 0 }}>
+        <p style={{ ...LABEL_STYLE, opacity: 0.45, margin: 0 }}>
+          {collection.title} · {heroIndex + 1}/{count}
+        </p>
+        <motion.button
+          onPointerDown={() => { pageFile(heroIndex); }}
+          onClick={savePage}
+          aria-label={`Download image ${heroIndex + 1} of ${count}`}
+          initial={{ opacity: 0.5 }}
+          whileHover={{ opacity: 0.9 }}
+          whileTap={{ opacity: 0.9 }}
+          transition={{ duration: 0.2 }}
+          style={{ ...LABEL_STYLE, fontSize: "0.6rem", letterSpacing: "0.2em", background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0 }}
+        >
+          DOWNLOAD IMAGE
+        </motion.button>
+      </div>
       {/* One line, same quiet gray as the counter above it — on desktop
           every extra line comes out of the hero's height, so captions are
           kept to a sentence rather than allowed to grow into a paragraph. */}
