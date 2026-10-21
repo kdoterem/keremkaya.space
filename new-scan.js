@@ -11,6 +11,7 @@
 //   ./new-scan.js                              prompts for everything, including paths
 //   ./new-scan.js ~/Desktop/page1.tiff page2.jpg   paths given up front, only title/date/cover prompted
 //   ./new-scan.js --cover <slug> ~/Desktop/cover.jpg   swap the cover of an existing collection
+//   ./new-scan.js --captions <slug>                    add or edit an existing collection's captions
 //
 // Pages are saved in the order given — that's also reading order in the
 // SCANS viewer. The grid cover is the first page unless a separate cover
@@ -179,15 +180,24 @@ function expandTiff(tiffPath, tmpDir, count) {
 // Replaces any multi-page .pdf or .tiff entry in `paths` with its expanded
 // pages, in place — a multi-page file counts as however many pages it
 // actually has, not as one.
+// What to call a page when asking for its caption: an expanded page's temp
+// file name means nothing, so it's "scan.pdf, page 3" instead.
+const pageLabel = new Map();
+const labelFor = (p) => pageLabel.get(p) ?? path.basename(p);
+
 function expandMultiPageFiles(paths, tmpDir) {
   const out = [];
+  const addExpanded = (src, expanded) => {
+    expanded.forEach((e, k) => pageLabel.set(e, `${path.basename(src)}, page ${k + 1}`));
+    out.push(...expanded);
+  };
   for (const p of paths) {
     const ext = path.extname(p).toLowerCase();
 
     if (ext === ".pdf") {
       const expanded = expandPdf(p, tmpDir);
       console.log(`  ${path.basename(p)} → ${expanded.length} page${expanded.length === 1 ? "" : "s"}`);
-      out.push(...expanded);
+      addExpanded(p, expanded);
       continue;
     }
 
@@ -196,12 +206,29 @@ function expandMultiPageFiles(paths, tmpDir) {
       if (count > 1) {
         const expanded = expandTiff(p, tmpDir, count);
         console.log(`  ${path.basename(p)} → ${expanded.length} pages`);
-        out.push(...expanded);
+        addExpanded(p, expanded);
         continue;
       }
     }
 
     out.push(p);
+  }
+  return out;
+}
+
+// One caption per page, shown under it in the viewer (a translation, or
+// what the thing was — a sentence, not a paragraph). Enter alone leaves a
+// page without one; there's deliberately no "add captions? y/n" gate in
+// front of this, since a caption typed or pasted as the first thing would
+// answer the gate instead (see new-post.js's history).
+async function promptCaptions(labels, current = []) {
+  console.log("\nCaptions — one line per page, Enter alone to leave a page without one.");
+  if (current.some(Boolean)) console.log("Enter keeps what's there; type - to remove it.");
+  const out = [];
+  for (let i = 0; i < labels.length; i++) {
+    const had = current[i] || "";
+    const val = await prompt(`  ${String(i + 1).padStart(2, "0")}/${String(labels.length).padStart(2, "0")}  ${labels[i]}`, had);
+    out.push(val === "-" ? "" : val);
   }
   return out;
 }
@@ -242,6 +269,27 @@ function setCoverOnly(slug, src) {
   finish(0);
 }
 
+// ./new-scan.js --captions <slug> — goes through an existing collection's
+// pages, offering each current caption as the default.
+async function editCaptionsOnly(slug) {
+  const metaPath = path.join(SCANS_DIR, slug, "meta.json");
+  if (!fs.existsSync(metaPath)) {
+    console.log(`\nNo collection "${slug}" (public/scans/${slug}/meta.json). Nothing changed.`);
+    finish(1);
+  }
+  const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+  const captions = await promptCaptions(meta.pages.map((p) => p.file), meta.pages.map((p) => p.caption));
+  meta.pages.forEach((p, i) => {
+    if (captions[i]) p.caption = captions[i];
+    else delete p.caption;
+  });
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2) + "\n");
+  const n = captions.filter(Boolean).length;
+  console.log(`\nSaved → public/scans/${slug}/meta.json (${n} of ${meta.pages.length} pages captioned)`);
+  console.log("Commit public/scans/ when you're happy with it.\n");
+  finish(0);
+}
+
 let tmpDir = null;
 function finish(code) {
   if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -253,6 +301,10 @@ function finish(code) {
   console.log("\n── New Scan ───────────────────────────");
 
   let paths = process.argv.slice(2);
+  if (paths[0] === "--captions") {
+    if (paths.length !== 2) { console.log("\nUsage: ./new-scan.js --captions <slug>"); finish(1); }
+    return editCaptionsOnly(paths[1]);
+  }
   if (paths[0] === "--cover") {
     if (paths.length !== 3) {
       console.log("\nUsage: ./new-scan.js --cover <slug> <image>   (or <slug> first, to go back to page 1)");
@@ -302,6 +354,8 @@ function finish(code) {
     if (fs.existsSync(tok)) { coverPath = tok; break; }
     console.log(`  Can't find: ${tok}`);
   }
+  const captions = await promptCaptions(paths.map(labelFor));
+
 
   console.log("\n────────────────────────────────────────");
   console.log(`  title:  ${title}`);
@@ -309,7 +363,10 @@ function finish(code) {
   console.log(`  date:   ${date}`);
   console.log(`  cover:  ${coverPath ? path.basename(coverPath) : "first page"}`);
   console.log(`  pages:  ${paths.length}`);
-  paths.forEach((p, i) => console.log(`    ${String(i + 1).padStart(2, "0")}. ${path.basename(p)}${i === 0 && !coverPath ? "  (cover)" : ""}`));
+  paths.forEach((p, i) => {
+    console.log(`    ${String(i + 1).padStart(2, "0")}. ${labelFor(p)}${i === 0 && !coverPath ? "  (cover)" : ""}`);
+    if (captions[i]) console.log(`        “${captions[i]}”`);
+  });
   console.log("────────────────────────────────────────");
 
   const confirm = await prompt("Save? (y/n)", "y");
@@ -329,7 +386,7 @@ function finish(code) {
     sipsConvert(src, path.join(collectionDir, file), FULL_SIZE);
     if (i === 0 && !coverPath) sipsConvert(src, path.join(collectionDir, "cover-thumb.jpg"), THUMB_SIZE);
 
-    pages.push({ file, ratio: width / height });
+    pages.push({ file, ratio: width / height, ...(captions[i] ? { caption: captions[i] } : {}) });
     console.log(" done");
   }
 
