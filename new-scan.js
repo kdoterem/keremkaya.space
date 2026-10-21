@@ -140,7 +140,10 @@ function expandPdf(pdfPath, tmpDir) {
     );
   }
   const prefix = `pdf-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  const r = spawnSync("pdftoppm", ["-jpeg", "-r", String(PDF_DPI), pdfPath, path.join(tmpDir, prefix)], { encoding: "utf8" });
+  // -cropbox: honour a crop made in Preview. Preview's crop doesn't cut the
+  // page, it only marks the part to show — without this flag pdftoppm
+  // renders the whole uncropped page and the crop is silently lost.
+  const r = spawnSync("pdftoppm", ["-jpeg", "-cropbox", "-r", String(PDF_DPI), pdfPath, path.join(tmpDir, prefix)], { encoding: "utf8" });
   if (r.status !== 0) throw new Error(`pdftoppm couldn't read "${pdfPath}":\n${r.stderr}`);
 
   const pageRe = new RegExp(`^${prefix}-(\\d+)\\.jpg$`);
