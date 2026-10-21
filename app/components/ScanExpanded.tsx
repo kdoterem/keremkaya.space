@@ -42,6 +42,16 @@ const SLIDE_GAP_VW = 3;
 // under a height cap, so ordinary sheets render exactly as before.
 const SLIDE_MAX_H = "72svh";
 const slideWidth = (ratio: number) => `min(${SLIDE_VW}vw, calc(${SLIDE_MAX_H} * ${ratio}))`;
+// Tap/click-to-zoom. Nothing on the page signals it beyond the cursor on
+// desktop — the page just answers where it's touched. ZOOM is how far in;
+// pages are saved at 2400px on the long edge, so 3x stays sharp.
+const ZOOM = 3;
+// x/y: the tapped point, as fractions of the page. low: the resized copy
+// already on screen, shown zoomed at once while the full-size original
+// downloads, so a zoom never opens onto a blank (white) box.
+type Zoom = { x: number; y: number; low?: string };
+const shownSrc = (el: HTMLElement) => el.querySelector("img")?.currentSrc || undefined;
+
 const LABEL_STYLE: React.CSSProperties = {
   fontSize:      "0.7rem",
   fontWeight:    500,
@@ -61,6 +71,23 @@ export default function ScanExpanded({
 }) {
   const [heroIndex, setHeroIndex] = useState(0);
   const hero = collection.pages[heroIndex];
+  // Zoom always belongs to the page being shown; moving to another page
+  // (thumbnail, arrow key, or a swipe once zoom is off) drops it.
+  const [zoom, setZoom] = useState<Zoom | null>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  useEffect(() => { setZoom(null); }, [heroIndex]);
+  const pointIn = (e: React.MouseEvent, el: HTMLElement): Zoom => {
+    const r = el.getBoundingClientRect();
+    return {
+      x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+      y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)),
+      low: shownSrc(el),
+    };
+  };
+  // The zoomed layer uses the original file rather than Next's resized one;
+  // starting the download on hover means it's usually there by the click.
+  const warm = (src: string) => { const img = new window.Image(); img.src = src; };
   const count = collection.pages.length;
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -153,9 +180,68 @@ export default function ScanExpanded({
   // past the top of a much shorter page.
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
+  // Pinch is the phone's own instinct for "let me see that closer", so it
+  // opens the same zoom a tap does — centred between the fingers — and
+  // pinching back in closes it. Native listeners rather than React's,
+  // because stopping the browser's page zoom needs preventDefault, which
+  // React's passive touch handlers can't call. Safari also sends its own
+  // gesture* events for pinches; those are cancelled too.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!narrow || !track) return;
+    let pinch: { d0: number } | null = null;
+    const dist = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    const onStart = (e: TouchEvent) => {
+      if (e.touches.length !== 2) return;
+      e.preventDefault();
+      pinch = { d0: dist(e.touches) };
+      warm(collection.pages[indexRef.current].src);
+    };
+    const onMove = (e: TouchEvent) => {
+      if (!pinch || e.touches.length !== 2) return;
+      e.preventDefault();
+      const ratio = dist(e.touches) / pinch.d0;
+      if (!zoomRef.current && ratio > 1.15) {
+        const slide = track.children[indexRef.current] as HTMLElement | undefined;
+        if (!slide) return;
+        const r = slide.getBoundingClientRect();
+        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        setZoom({
+          x: Math.min(1, Math.max(0, (mx - r.left) / r.width)),
+          y: Math.min(1, Math.max(0, (my - r.top) / r.height)),
+          low: shownSrc(slide),
+        });
+        pinch = null;
+      } else if (zoomRef.current && ratio < 0.85) {
+        setZoom(null);
+        pinch = null;
+      }
+    };
+    const onEnd = () => { pinch = null; };
+    const stopGesture = (e: Event) => e.preventDefault();
+    track.addEventListener("touchstart", onStart, { passive: false });
+    track.addEventListener("touchmove", onMove, { passive: false });
+    track.addEventListener("touchend", onEnd);
+    track.addEventListener("touchcancel", onEnd);
+    track.addEventListener("gesturestart", stopGesture);
+    track.addEventListener("gesturechange", stopGesture);
+    return () => {
+      track.removeEventListener("touchstart", onStart);
+      track.removeEventListener("touchmove", onMove);
+      track.removeEventListener("touchend", onEnd);
+      track.removeEventListener("touchcancel", onEnd);
+      track.removeEventListener("gesturestart", stopGesture);
+      track.removeEventListener("gesturechange", stopGesture);
+    };
+  }, [narrow]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (zoomRef.current) setZoom(null);
+        else onClose();
+      }
       if (e.key === "ArrowRight") goTo(indexRef.current + 1);
       if (e.key === "ArrowLeft")  goTo(indexRef.current - 1);
     };
@@ -201,7 +287,8 @@ export default function ScanExpanded({
               display:                 "flex",
               alignItems:              "center",
               gap:                     `${SLIDE_GAP_VW}vw`,
-              overflowX:               "auto",
+              // Zoomed in, a drag pans the page instead of swiping away.
+              overflowX:               zoom ? "hidden" : "auto",
               scrollSnapType:          "x mandatory",
               overscrollBehaviorX:     "contain",
               scrollbarWidth:          "none",
@@ -221,8 +308,21 @@ export default function ScanExpanded({
             {collection.pages.map((page, i) => (
               <div
                 key={page.src}
+                // A tap only counts once the finger lifts — starting the
+                // full-size download on touch-down wins that time back.
+                onPointerDown={() => { if (i === heroIndex) warm(page.src); }}
+                onClick={(e) => {
+                  if (i !== heroIndex) { goTo(i); return; } // a peeking neighbour
+                  if (!zoom) setZoom(pointIn(e, e.currentTarget));
+                }}
                 style={{
                   position:        "relative",
+                  overflow:        "hidden",
+                  // Swipes and page scrolling stay native; the browser's own
+                  // pinch and double-tap page zoom are switched off here, so a
+                  // pinch reaches the page zoom below instead of enlarging the
+                  // whole site, and two quick taps mean zoom in, zoom out.
+                  touchAction:     "pan-x pan-y",
                   flex:            `0 0 ${slideWidth(page.ratio)}`,
                   aspectRatio:     String(page.ratio),
                   scrollSnapAlign: "center",
@@ -239,8 +339,13 @@ export default function ScanExpanded({
                   priority={i === 0}
                   // The pages either side are fetched up front so a swipe
                   // never lands on a blank slide.
-                  loading={Math.abs(i - heroIndex) <= 1 ? "eager" : "lazy"}
+                  // (Page 1 is `priority`, which already loads it eagerly —
+                  // Next refuses priority together with loading="lazy".)
+                  loading={i === 0 ? undefined : Math.abs(i - heroIndex) <= 1 ? "eager" : "lazy"}
                 />
+                {zoom && i === heroIndex && (
+                  <PhoneZoom src={page.src} ratio={page.ratio} at={zoom} onDone={() => setZoom(null)} />
+                )}
               </div>
             ))}
           </div>
@@ -252,6 +357,11 @@ export default function ScanExpanded({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            onPointerEnter={() => warm(hero.src)}
+            onClick={(e) => setZoom(zoom ? null : pointIn(e, e.currentTarget))}
+            // While zoomed the view follows the mouse: the point under the
+            // cursor stays under it, so reading is just moving the hand.
+            onMouseMove={(e) => { if (zoom) setZoom(pointIn(e, e.currentTarget)); }}
             style={
               narrow
                 ? {
@@ -262,6 +372,8 @@ export default function ScanExpanded({
                   }
                 : {
                     position:    "relative",
+                    overflow:    "hidden",
+                    cursor:      zoom ? "zoom-out" : "zoom-in",
                     // A very wide strip at full row height would be wider than
                     // the space beside the filmstrip and get clamped by
                     // maxWidth into a box of the wrong shape (cropping the
@@ -283,6 +395,25 @@ export default function ScanExpanded({
               style={{ objectFit: "cover" }}
               priority
             />
+            <AnimatePresence>
+              {zoom && (
+                <motion.div
+                  key="zoom"
+                  initial={{ scale: 1 }}
+                  animate={{ scale: ZOOM }}
+                  exit={{ scale: 1 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  style={{
+                    position:        "absolute",
+                    inset:           0,
+                    transformOrigin: `${zoom.x * 100}% ${zoom.y * 100}%`,
+                    pointerEvents:   "none",
+                  }}
+                >
+                  <ZoomImage src={hero.src} low={zoom.low} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </AnimatePresence>
         )}
@@ -372,5 +503,65 @@ export default function ScanExpanded({
         </p>
       )}
     </motion.div>
+  );
+}
+
+// Phone zoom: the slide's own box becomes a scroll window onto the page at
+// ZOOM x, opened centred on the tapped point. Panning is the phone's native
+// scroll (momentum and all); a tap that doesn't pan closes it. The swipe
+// track behind it is locked while this is open, so a drag can't change page.
+function PhoneZoom({ src, ratio, at, onDone }: { src: string; ratio: number; at: Zoom; onDone: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+      ref={(el) => {
+        if (!el || el.dataset.placed) return;
+        el.dataset.placed = "1";
+        const w = el.clientWidth * ZOOM;
+        const h = w / ratio;
+        el.scrollLeft = at.x * w - el.clientWidth / 2;
+        el.scrollTop  = at.y * h - el.clientHeight / 2;
+      }}
+      onClick={(e) => { e.stopPropagation(); onDone(); }}
+      style={{
+        position:                "absolute",
+        inset:                   0,
+        overflow:                "auto",
+        overscrollBehavior:      "contain",
+        touchAction:             "pan-x pan-y",
+        scrollbarWidth:          "none",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
+      <div style={{ width: `${ZOOM * 100}%`, aspectRatio: String(ratio) }}>
+        <ZoomImage src={src} low={at.low} />
+      </div>
+    </motion.div>
+  );
+}
+
+// The resized copy already on screen, enlarged straight away, with the
+// full-size original fading in over it once it has arrived — so zooming
+// in is instant and only gets sharper, never blank.
+function ZoomImage({ src, low }: { src: string; low?: string }) {
+  const [sharp, setSharp] = useState(false);
+  const fill: React.CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" };
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* eslint-disable @next/next/no-img-element -- plain imgs: one reuses the already-loaded resized copy, one is the full-size original */}
+      {low && <img src={low} alt="" draggable={false} style={fill} />}
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        // Already cached (warmed on hover / touch-down): no fade needed.
+        ref={(el) => { if (el?.complete && el.naturalWidth && !sharp) setSharp(true); }}
+        onLoad={() => setSharp(true)}
+        style={{ ...fill, opacity: sharp ? 1 : 0, transition: "opacity 0.3s" }}
+      />
+      {/* eslint-enable @next/next/no-img-element */}
+    </div>
   );
 }
