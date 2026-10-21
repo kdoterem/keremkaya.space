@@ -8,6 +8,7 @@ import {
   titleWeightStyle,
   WeightedText,
 } from "@/lib/tagProvenance";
+import { stamp } from "@/lib/postStamp";
 
 // ── BROWSE — "just let me read." No permit, no waiver, no PROCEED/PUSS OUT
 // ceremony, no stretch cards, no scramble-reveal. Landing on a month shows
@@ -30,7 +31,7 @@ function formatMonth(m: string): string {
 }
 
 interface TerrainMonth { month: string; count: number; words: number }
-interface SearchDoc { slug: string; title: string; date: string; tags: string[]; body: string }
+interface SearchDoc { slug: string; title: string; date: string; time?: string; tags: string[]; body: string }
 
 function PoemBlock({ post }: { post: SearchDoc }) {
   const tags = getProvenanceTags(post.slug);
@@ -53,7 +54,7 @@ function PoemBlock({ post }: { post: SearchDoc }) {
         <WeightedText text={post.title} weights={titleWeights} weightStyle={titleWeightStyle} />
       </h2>
       <p style={{ fontFamily: PROSE, fontSize: "0.72rem", color: "rgba(255,163,26,0.6)", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
-        {post.date}
+        {stamp(post)}
       </p>
       <div style={{ fontFamily: PROSE, fontSize: "1rem", lineHeight: 1.75, color: "#ffa31a", whiteSpace: "pre-wrap" }}>
         <WeightedText text={post.body} weights={bodyWeights} weightStyle={bodyWeightStyle} />

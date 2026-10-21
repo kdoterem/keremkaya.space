@@ -5,11 +5,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { TagCount } from "@/lib/posts";
 import HomeArt from "./components/HomeArt";
+import { stamp } from "@/lib/postStamp";
 
 export interface PostMeta {
   slug:  string;
   title: string;
   date:  string;
+  time?: string;
   tags:  string[];
 }
 
@@ -538,7 +540,7 @@ export default function HomeClient({
                   fontSize: "0.68rem", color: "rgba(255,163,26,0.3)",
                   letterSpacing: "0.05em", flexShrink: 0, marginLeft: "2rem",
                 }}>
-                  {post.date}
+                  {stamp(post)}
                 </span>
               </Link>
             ))}

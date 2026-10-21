@@ -69,8 +69,18 @@ function slugify(str) {
 }
 
 function today() {
-  // Full datetime so same-day posts sort by creation time (lib/posts.ts displays only the date portion)
-  return new Date().toISOString().replace(/\.\d{3}Z$/, "");
+  // Full local datetime with its UTC offset ("2026-10-21T23:42:58+03:00"):
+  // same-day posts sort by creation time, and the site shows the hour the
+  // poem was written as written (lib/posts.ts timeOf). This used to be
+  // toISOString(), i.e. UTC — 3 hours behind in Turkey, and a poem written
+  // after midnight got the previous day's date.
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const off = -d.getTimezoneOffset();
+  const sign = off >= 0 ? "+" : "-";
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
+    `T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` +
+    `${sign}${p(Math.floor(Math.abs(off) / 60))}:${p(Math.abs(off) % 60)}`;
 }
 
 // Read all existing tags from post frontmatter, sorted by frequency

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SaveImageButton from "@/app/components/SaveImageButton";
+import { stamp } from "@/lib/postStamp";
 import ReadingExperience from "@/app/components/ReadingExperience";
 // WitnessButton (the unlabeled confetti/"thank you for witnessing" button)
 // is shelved, not deleted — the component still lives in
@@ -270,7 +271,7 @@ export default async function PostPage({
             marginBottom: "3rem",
           }}
         >
-          {post.date}
+          {stamp(post)}
         </p>
 
         {/* Content */}

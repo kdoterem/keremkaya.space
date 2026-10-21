@@ -4,11 +4,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePaint } from "@/app/components/usePaint";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { stamp } from "@/lib/postStamp";
 
 interface PostMeta {
   slug:  string;
   title: string;
   date:  string;
+  time?: string;
   tags:  string[];
 }
 
@@ -449,7 +451,7 @@ export default function WritingPage() {
                       marginLeft:    "2rem",
                     }}
                   >
-                    {post.date}
+                    {stamp(post)}
                   </span>
                 </motion.div>
               </Link>

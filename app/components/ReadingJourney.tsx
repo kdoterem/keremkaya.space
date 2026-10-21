@@ -20,6 +20,7 @@ import {
   computeConfidences,
   type Pt,
 } from "@/app/components/TerrainScan";
+import { stamp } from "@/lib/postStamp";
 
 // ── PLAY — a reader traverses backward through time, present → Feb 2025,
 // one poem per position. No progress bar, no counter — the terrain itself
@@ -44,6 +45,7 @@ interface SearchDoc {
   slug:  string;
   title: string;
   date:  string;
+  time?: string;
   tags:  string[];
   body:  string;
 }
@@ -506,7 +508,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
           access_key: WEB3FORMS_ACCESS_KEY,
           from_name:  "range",
           subject:    "range — a note",
-          message:    `${currentPoem.title}\n${currentPoem.date}\n\n${note}`,
+          message:    `${currentPoem.title}\n${stamp(currentPoem)}\n\n${note}`,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -733,7 +735,7 @@ export default function ReadingJourney({ onExit }: { onExit: () => void }) {
           <p style={{ fontFamily: PROSE, fontSize: "0.75rem", color: "rgba(255,163,26,0.6)", letterSpacing: "0.05em", marginBottom: "2.5rem", minHeight: "1em" }}>
             {revealStage >= 2 && (
               <CryptoScramble
-                text={currentPoem.date} duration={SCRAMBLE_MS} tickMs={TICK_MS}
+                text={stamp(currentPoem)} duration={SCRAMBLE_MS} tickMs={TICK_MS}
                 chars={SCRAMBLE_CHARS} scrambleSpaces
               />
             )}

@@ -38,6 +38,7 @@ export interface PlayablePoem {
   slug:  string;
   title: string;
   date:  string;
+  time?: string;
 }
 
 // Every poem playable for a given tag, newest first (matches
@@ -48,5 +49,5 @@ export function getPlayablePoemsForTag(tag: string, mode?: "outpour" | "argue"):
   if (slugs.size === 0) return [];
   return getAllPosts()
     .filter((p) => slugs.has(p.slug))
-    .map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
+    .map((p) => ({ slug: p.slug, title: p.title, date: p.date, time: p.time }));
 }

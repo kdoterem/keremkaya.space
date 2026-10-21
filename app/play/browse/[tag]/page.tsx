@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { findCategoryForTag, getPlayablePoemsForTag } from "@/lib/playData";
+import { stamp } from "@/lib/postStamp";
 
 export default async function PlayBrowseTagPage({
   params,
@@ -60,7 +61,7 @@ export default async function PlayBrowseTagPage({
             >
               <span style={{ fontSize: "1.05rem", fontWeight: 500 }}>{poem.title}</span>
               <span style={{ display: "block", fontSize: "0.75rem", color: "rgba(255,163,26,0.6)", marginTop: "0.2rem" }}>
-                {poem.date}
+                {stamp(poem)}
               </span>
             </Link>
           ))}

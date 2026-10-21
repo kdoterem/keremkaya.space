@@ -6,6 +6,7 @@ export interface PostMeta {
   slug: string;
   title: string;
   date: string;
+  time?: string; // "HH:MM", the writer's local time — see timeOf()
   tags: string[];
   excerpt?: string;
 }
@@ -15,6 +16,16 @@ export interface Post extends PostMeta {
 }
 
 const POSTS_DIR = path.join(process.cwd(), "content", "posts");
+
+// "HH:MM" when the frontmatter date carries a real time of day. Only a
+// quoted string can: an unquoted YAML date parses to a Date at midnight
+// UTC, which isn't an hour anyone wrote at. Stored times are the writer's
+// local time plus its offset (see new-post.js), so the digits are read as
+// written — converting them would shift them to the server's zone (UTC).
+function timeOf(rawDate: unknown): string | undefined {
+  if (typeof rawDate !== "string") return undefined;
+  return rawDate.match(/T(\d{2}:\d{2})/)?.[1];
+}
 
 export function getAllPosts(): PostMeta[] {
   if (!fs.existsSync(POSTS_DIR)) return [];
@@ -37,6 +48,7 @@ export function getAllPosts(): PostMeta[] {
       slug,
       title: data.title ?? slug,
       date,
+      time: timeOf(rawDate),
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? "",
       sortKey,
@@ -71,6 +83,7 @@ export function getPostBySlug(slug: string): Post | null {
         slug,
         title: data.title ?? slug,
         date,
+        time: timeOf(rawDate),
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
         content,
@@ -84,6 +97,7 @@ export interface SearchDoc {
   slug: string;
   title: string;
   date: string;
+  time?: string;
   tags: string[];
   body: string;
 }
@@ -109,6 +123,7 @@ export function getSearchIndex(): SearchDoc[] {
       slug,
       title: data.title ?? slug,
       date,
+      time: timeOf(rawDate),
       tags: data.tags ?? [],
       body: content.trim(),
     };
