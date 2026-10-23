@@ -1,0 +1,51 @@
+{
+  "title": "something missing",
+  "date": "2026-10-23T15:54",
+  "cover": "cover-thumb.jpg",
+  "pages": [
+    {
+      "file": "01.jpg",
+      "ratio": 0.7143263217737351
+    },
+    {
+      "file": "02.jpg",
+      "ratio": 0.7143263217737351,
+      "caption": "this one already gone"
+    },
+    {
+      "file": "03.jpg",
+      "ratio": 0.7152658662092625
+    },
+    {
+      "file": "04.jpg",
+      "ratio": 0.7141223556317896
+    },
+    {
+      "file": "05.jpg",
+      "ratio": 1.4216281895504252,
+      "caption": "very slow burning"
+    },
+    {
+      "file": "06.jpg",
+      "ratio": 0.7031339031339031,
+      "caption": "u too?"
+    },
+    {
+      "file": "07.jpg",
+      "ratio": 1.4096385542168675
+    },
+    {
+      "file": "08.jpg",
+      "ratio": 1.4136125654450262
+    },
+    {
+      "file": "09.jpg",
+      "ratio": 1.4042383046781288,
+      "caption": "how many vices to change a lightbulb"
+    },
+    {
+      "file": "10.jpg",
+      "ratio": 1.4053621448579432
+    }
+  ]
+}

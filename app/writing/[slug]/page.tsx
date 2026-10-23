@@ -246,6 +246,7 @@ export default async function PostPage({
         <Painted
           as="h1"
           size={0.9}
+          paintKey={slug}
           style={{
             fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
             fontWeight: 700,

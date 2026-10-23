@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePaint } from "@/app/components/usePaint";
+import { usePaintAnchored } from "@/app/components/usePaintAnchored";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { stamp } from "@/lib/postStamp";
 
@@ -225,9 +226,14 @@ export default function WritingPage() {
   useEffect(() => { _searchQuery = searchQuery; }, [searchQuery]);
   useEffect(() => { _searchOpen  = searchOpen;  }, [searchOpen]);
 
+  // Coming back from a poem restores the search — selected, so a single
+  // delete (or just typing) clears the old words instead of backspacing
+  // through them one by one.
   useEffect(() => {
-    if (searchOpen) searchInputRef.current?.focus();
-    else setSearchQuery("");
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    } else setSearchQuery("");
   }, [searchOpen]);
 
   useEffect(() => {
@@ -413,7 +419,8 @@ export default function WritingPage() {
                   }}
                 >
                   <span style={{ display: "flex", flexDirection: "column", gap: "0.3rem", minWidth: 0 }}>
-                    <span
+                    <PaintedTitle
+                      slug={post.slug}
                       style={{
                         fontSize:      "clamp(1rem, 2.5vw, 1.25rem)",
                         fontWeight:    isHighlighted && !isHovered ? 700 : 500,
@@ -423,7 +430,7 @@ export default function WritingPage() {
                       }}
                     >
                       {post.title}
-                    </span>
+                    </PaintedTitle>
                     {post.snippet && (
                       <span
                         style={{
@@ -552,4 +559,12 @@ export default function WritingPage() {
       </motion.button>
     </main>
   );
+}
+
+// A poem title in the list, painted exactly as it is on the poem's own page
+// (same slug → same splashes on the same letters; see usePaintAnchored).
+function PaintedTitle({ slug, style, children }: { slug: string; style: React.CSSProperties; children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  usePaintAnchored(ref, slug, { size: 0.9, lazy: true });
+  return <span ref={ref} style={style}>{children}</span>;
 }

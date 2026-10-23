@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { TagCount } from "@/lib/posts";
 import HomeArt from "./components/HomeArt";
 import { stamp } from "@/lib/postStamp";
+import { usePaintAnchored } from "@/app/components/usePaintAnchored";
 
 export interface PostMeta {
   slug:  string;
@@ -35,7 +36,7 @@ interface TagLayout {
 // remainder filling out the rest of each breakpoint's cap.
 const MOBILE_TOP_GUARANTEED  = 30, MOBILE_ROTATING  = 15;  // 45 total
 const TABLET_TOP_GUARANTEED  = 35, TABLET_ROTATING  = 35;  // 70 total
-const DESKTOP_TOP_GUARANTEED = 40, DESKTOP_ROTATING = 41;  // 81 total
+const DESKTOP_TOP_GUARANTEED = 30, DESKTOP_ROTATING = 18;  // 48 total — 81 crowded KILL and left no open ground
 
 // Keeps tags clear of the fixed nav row (which sits 2rem from the viewport
 // bottom, plus its own text height) — shared by initial placement and by
@@ -693,26 +694,42 @@ export default function HomeClient({
         }}
       >
         {NAV.map(({ label, href }) => (
-          <Link key={href} href={href}
-            style={{
-              // Nav: held inside the knife man's arm — bold and full colour so it's never missed
-              fontSize:       "var(--navfs, 17px)",
-              fontWeight:     700,
-              letterSpacing:  "var(--navls, 0.06em)",
-              whiteSpace:     "nowrap",
-              color:          "#ff5f00",
-              textShadow:     "0 0 2px #2a0a4a, 0 0 5px #2a0a4a, 0 0 10px #2a0a4a",
-              textDecoration: "none",
-              fontFamily:     '"Helvetica Neue", Helvetica, Arial, sans-serif',
-              transition:     "color 0.2s",
-            }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#ffa31a")}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#ff5f00")}
-          >
-            {label}
-          </Link>
+          <NavLink key={href} label={label} href={href} />
         ))}
       </nav>
     </main>
+  );
+}
+
+// A fresh throw on every landing, same as the headings elsewhere; set once
+// per page load so moving around the site and back doesn't re-splash.
+const NAV_PAINT_SEED = String(Math.random());
+
+function NavLink({ label, href }: { label: string; href: string }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  // A sparkle, not a heading's splash — the words have to stay readable at
+  // nav size, and they share their orange with the tags around them.
+  usePaintAnchored(ref, label + NAV_PAINT_SEED, { size: 1.1 });
+  return (
+    <Link ref={ref} href={href}
+      style={{
+        // Nav: held inside the knife man's arm — bold and full colour so it's never missed
+        fontSize:       "var(--navfs, 17px)",
+        fontWeight:     700,
+        letterSpacing:  "var(--navls, 0.06em)",
+        whiteSpace:     "nowrap",
+        color:          "#ff5f00",
+        // The halo that lifts the words off the drawing. A filter, not
+        // text-shadow: text-shadow would paint over the clipped paint.
+        filter:         "drop-shadow(0 0 1px #2a0a4a) drop-shadow(0 0 3px #2a0a4a) drop-shadow(0 0 6px #2a0a4a)",
+        textDecoration: "none",
+        fontFamily:     '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        transition:     "color 0.2s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = "#ffa31a")}
+      onMouseLeave={(e) => (e.currentTarget.style.color = "#ff5f00")}
+    >
+      {label}
+    </Link>
   );
 }

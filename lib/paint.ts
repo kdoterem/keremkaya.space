@@ -103,3 +103,84 @@ export function paintTexture(w: number, h: number, seed: number, sizeFactor: num
   const drops = throwPaint(c, w, h, rng(seed), sizeFactor, x0, x1);
   return { url: cv.toDataURL(), drops };
 }
+
+// ── Paint pinned to letters, not to a box ─────────────────────────────────
+// A poem's title carries the same splash wherever it appears — small in the
+// /writing list, large on the poem's own page — so the throw comes from the
+// poem's slug rather than chance, each splash is tied to a letter (by its
+// index in the title), and every size is in em. At any font size or line
+// wrap, the same letters get the same paint.
+
+export function hashSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+// at: the letter's index in the text; dx/dy/r in em of the text's font size
+export type Anchor = { at: number; dx: number; dy: number; r: number; seed: number };
+
+export function anchorsFor(text: string, key: string, amount = 1): Anchor[] {
+  const rnd = rng(hashSeed(key));
+  const letters: number[] = [];
+  for (let i = 0; i < text.length; i++) if (/\S/.test(text[i])) letters.push(i);
+  if (!letters.length) return [];
+  const n = Math.min(3, Math.max(1, Math.round((letters.length / 13) * amount)));
+  const out: Anchor[] = [];
+  for (let k = 0; k < n; k++) {
+    // one splash per stretch of the title, somewhere inside it
+    const f = (k + 0.15 + rnd() * 0.7) / n;
+    out.push({
+      at:   letters[Math.min(letters.length - 1, Math.floor(f * letters.length))],
+      dx:   (rnd() - 0.5) * 0.5,
+      dy:   (rnd() - 0.5) * 0.35,
+      // the solid core covers part of a letter; the spray speckles its
+      // neighbours — bigger and it just reads as recoloured letters
+      r:    0.2 + rnd() * 0.18,
+      seed: (rnd() * 1e9) | 0,
+    });
+  }
+  return out;
+}
+
+// Lime splashes only (transparent elsewhere), positioned on the anchored
+// letters as they're currently laid out inside `el`. Returns null until the
+// text is measurable.
+export function anchoredTexture(el: HTMLElement, anchors: Anchor[], size = 1): string | null {
+  const w = el.offsetWidth, h = el.offsetHeight;
+  if (!w || !h || !anchors.length) return null;
+  const fs = parseFloat(getComputedStyle(el).fontSize) || 16;
+  const box = el.getBoundingClientRect();
+
+  // letter index → its rect, walking the text nodes (titles can be split
+  // across spans, e.g. the provenance weighting on a poem's page)
+  const wanted = new Map(anchors.map((a) => [a.at, null as DOMRect | null]));
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let base = 0;
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const len = node.textContent?.length ?? 0;
+    for (const at of wanted.keys()) {
+      if (at >= base && at < base + len) {
+        const r = document.createRange();
+        r.setStart(node, at - base); r.setEnd(node, at - base + 1);
+        wanted.set(at, r.getBoundingClientRect());
+      }
+    }
+    base += len;
+  }
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cv = document.createElement("canvas");
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const c = cv.getContext("2d")!;
+  c.scale(dpr, dpr);
+  c.fillStyle = LIME;
+  for (const a of anchors) {
+    const lr = wanted.get(a.at);
+    if (!lr || !lr.width) continue;
+    const cx = lr.left - box.left + lr.width / 2 + a.dx * fs;
+    const cy = lr.top - box.top + lr.height / 2 + a.dy * fs;
+    splash(c, rng(a.seed), cx, cy, Math.max(a.r * fs * size, 3));
+  }
+  return cv.toDataURL();
+}
